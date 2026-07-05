@@ -2,7 +2,6 @@ baseURL = ''
 languageCode = 'en-us'
 title = 'PyjamaCode — Embedded Systems Coding Platform'
 theme = 'pyjamacode'
-relativeURLs = true
 
 [params]
   author = 'Embedded Systems Instructor'

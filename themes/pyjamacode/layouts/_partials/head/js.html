@@ -5,10 +5,10 @@
   }}
   {{- with . | js.Build $opts }}
     {{- if hugo.IsDevelopment }}
-      <script src="{{ .RelPermalink }}" defer></script>
+      <script src="{{ .Permalink }}" defer></script>
     {{- else }}
       {{- with . | fingerprint }}
-        <script src="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}" defer></script>
+        <script src="{{ .Permalink }}" integrity="{{ .Data.Integrity }}" defer></script>
       {{- end }}
     {{- end }}
   {{- end }}

@@ -5,10 +5,10 @@
   }}
   {{- with . | css.Build $opts }}
     {{- if hugo.IsDevelopment }}
-      <link rel="stylesheet" href="{{ .RelPermalink }}">
+      <link rel="stylesheet" href="{{ .Permalink }}">
     {{- else }}
       {{- with . | fingerprint }}
-        <link rel="stylesheet" href="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}">
+        <link rel="stylesheet" href="{{ .Permalink }}" integrity="{{ .Data.Integrity }}">
       {{- end }}
     {{- end }}
   {{- end }}
