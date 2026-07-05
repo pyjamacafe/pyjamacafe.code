@@ -14,7 +14,7 @@ A Hugo-based coding platform for embedded systems software and firmware developm
 
 ## Prerequisites
 
-- [Hugo](https://gohugo.io/installation/) (extended version recommended, v0.146.0+)
+- [Hugo](https://gohugo.io/installation/) (extended version recommended, v0.158.0+)
 - A modern web browser
 - Internet connection (CodeMirror and fonts are loaded from CDNs)
 
