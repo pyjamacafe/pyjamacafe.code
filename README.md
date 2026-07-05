@@ -113,7 +113,18 @@ The theme lives in `themes/pyjamacode/`:
 - `assets/js/main.js` — platform logic, CodeMirror setup, resizers
 - `layouts/_partials/platform.html` — three-pane layout
 
-## Deployment
+## Deploy to GitHub Pages
+
+A GitHub Actions workflow is included at `.github/workflows/deploy.yml`. To use it:
+
+1. Push this repository to GitHub.
+2. Go to **Settings → Pages** in your repository.
+3. Under **Build and deployment**, select **GitHub Actions** as the source.
+4. On the next push to `main`, the workflow will build and deploy the site automatically.
+
+The workflow uses `actions/configure-pages` to set the correct `baseURL` at build time, so the site works for both `https://<username>.github.io/<repo>/` and custom domains.
+
+## Manual deployment
 
 Build the production site:
 
