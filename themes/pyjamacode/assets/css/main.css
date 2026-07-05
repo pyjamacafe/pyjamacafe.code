@@ -1,0 +1,495 @@
+:root {
+  --font-mono: 'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
+
+  /* GitHub light palette */
+  --gh-light-canvas-default: #ffffff;
+  --gh-light-canvas-subtle: #f6f8fa;
+  --gh-light-canvas-inset: #f6f8fa;
+  --gh-light-fg-default: #1f2328;
+  --gh-light-fg-muted: #656d76;
+  --gh-light-fg-subtle: #6e7781;
+  --gh-light-border-default: #d0d7de;
+  --gh-light-border-muted: #d8dee4;
+  --gh-light-accent: #0969da;
+  --gh-light-accent-hover: #0550ae;
+  --gh-light-success: #1a7f37;
+  --gh-light-success-hover: #136c2e;
+  --gh-light-warning: #9a6700;
+  --gh-light-danger: #cf222e;
+  --gh-light-info: #0969da;
+  --gh-light-code-bg: #f6f8fa;
+  --gh-light-btn-default-bg: #f6f8fa;
+  --gh-light-btn-default-border: rgba(31, 35, 40, 0.15);
+  --gh-light-btn-default-hover: #f3f4f6;
+
+  /* GitHub dark palette */
+  --gh-dark-canvas-default: #0d1117;
+  --gh-dark-canvas-subtle: #161b22;
+  --gh-dark-canvas-inset: #010409;
+  --gh-dark-fg-default: #c9d1d9;
+  --gh-dark-fg-muted: #8b949e;
+  --gh-dark-fg-subtle: #6e7681;
+  --gh-dark-border-default: #30363d;
+  --gh-dark-border-muted: #21262d;
+  --gh-dark-accent: #58a6ff;
+  --gh-dark-accent-hover: #79c0ff;
+  --gh-dark-success: #238636;
+  --gh-dark-success-hover: #2ea043;
+  --gh-dark-warning: #d29922;
+  --gh-dark-danger: #da3633;
+  --gh-dark-info: #58a6ff;
+  --gh-dark-code-bg: #161b22;
+  --gh-dark-btn-default-bg: #21262d;
+  --gh-dark-btn-default-border: rgba(240, 246, 252, 0.1);
+  --gh-dark-btn-default-hover: #30363d;
+}
+
+/* Light mode: GitHub light */
+html[data-bs-theme="light"] {
+  --bs-body-bg: var(--gh-light-canvas-default);
+  --bs-body-color: var(--gh-light-fg-default);
+  --bs-secondary-bg: var(--gh-light-canvas-subtle);
+  --bs-secondary-color: var(--gh-light-fg-muted);
+  --bs-border-color: var(--gh-light-border-default);
+  --bs-primary: var(--gh-light-accent);
+  --bs-success: var(--gh-light-success);
+  --bs-warning: var(--gh-light-warning);
+  --bs-danger: var(--gh-light-danger);
+  --bs-info: var(--gh-light-info);
+
+  --editor-bg: var(--gh-light-code-bg);
+  --editor-fg: var(--gh-light-fg-default);
+  --console-bg: var(--gh-light-canvas-subtle);
+  --console-header-bg: var(--gh-light-canvas-subtle);
+  --border-color: var(--gh-light-border-default);
+  --active-item-bg: rgba(9, 105, 218, 0.1);
+  --code-bg: var(--gh-light-code-bg);
+  --accent-color: var(--gh-light-accent);
+  --accent-hover: var(--gh-light-accent-hover);
+  --success-color: var(--gh-light-success);
+  --success-hover: var(--gh-light-success-hover);
+  --warning-color: var(--gh-light-warning);
+  --danger-color: var(--gh-light-danger);
+  --btn-default-bg: var(--gh-light-btn-default-bg);
+  --btn-default-border: var(--gh-light-btn-default-border);
+  --btn-default-hover: var(--gh-light-btn-default-hover);
+}
+
+/* Dark mode: GitHub dark */
+html[data-bs-theme="dark"] {
+  --bs-body-bg: var(--gh-dark-canvas-default);
+  --bs-body-color: var(--gh-dark-fg-default);
+  --bs-secondary-bg: var(--gh-dark-canvas-subtle);
+  --bs-secondary-color: var(--gh-dark-fg-muted);
+  --bs-border-color: var(--gh-dark-border-default);
+  --bs-primary: var(--gh-dark-accent);
+  --bs-success: var(--gh-dark-success);
+  --bs-warning: var(--gh-dark-warning);
+  --bs-danger: var(--gh-dark-danger);
+  --bs-info: var(--gh-dark-info);
+
+  --editor-bg: var(--gh-dark-code-bg);
+  --editor-fg: var(--gh-dark-fg-default);
+  --console-bg: var(--gh-dark-canvas-subtle);
+  --console-header-bg: var(--gh-dark-canvas-subtle);
+  --border-color: var(--gh-dark-border-default);
+  --active-item-bg: rgba(88, 166, 255, 0.12);
+  --code-bg: var(--gh-dark-code-bg);
+  --accent-color: var(--gh-dark-accent);
+  --accent-hover: var(--gh-dark-accent-hover);
+  --success-color: var(--gh-dark-success);
+  --success-hover: var(--gh-dark-success-hover);
+  --warning-color: var(--gh-dark-warning);
+  --danger-color: var(--gh-dark-danger);
+  --btn-default-bg: var(--gh-dark-btn-default-bg);
+  --btn-default-border: var(--gh-dark-btn-default-border);
+  --btn-default-hover: var(--gh-dark-btn-default-hover);
+}
+
+body {
+  font-family: var(--font-mono);
+}
+
+/* Resizable platform layout */
+.platform-layout {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  overflow: hidden;
+}
+
+.platform-pane {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bs-body-bg);
+  overflow: hidden;
+  min-width: 180px;
+}
+
+#sidebarPane {
+  width: 20%;
+}
+
+#editorPane {
+  flex: 1 1 auto;
+  width: 55%;
+}
+
+#questionPane {
+  width: 25%;
+}
+
+.pane-header {
+  flex: 0 0 auto;
+}
+
+.pane-body {
+  flex: 1 1 auto;
+}
+
+.pane-resizer {
+  flex: 0 0 auto;
+  width: 6px;
+  cursor: col-resize;
+  background: linear-gradient(
+    to right,
+    transparent 40%,
+    var(--border-color) 40%,
+    var(--border-color) 60%,
+    transparent 60%
+  );
+  transition: background 0.15s ease;
+  z-index: 10;
+}
+
+.pane-resizer:hover,
+.pane-resizer.resizing {
+  background: linear-gradient(
+    to right,
+    transparent 35%,
+    var(--accent-color) 35%,
+    var(--accent-color) 65%,
+    transparent 65%
+  );
+}
+
+/* Editor pane vertical layout */
+.editor-area {
+  flex: 1 1 auto;
+  position: relative;
+  min-height: 120px;
+  overflow: hidden;
+}
+
+.console-resizer {
+  flex: 0 0 auto;
+  height: 6px;
+  cursor: row-resize;
+  background: linear-gradient(
+    to bottom,
+    transparent 40%,
+    var(--border-color) 40%,
+    var(--border-color) 60%,
+    transparent 60%
+  );
+  transition: background 0.15s ease;
+  z-index: 10;
+}
+
+.console-resizer:hover,
+.console-resizer.resizing {
+  background: linear-gradient(
+    to bottom,
+    transparent 35%,
+    var(--accent-color) 35%,
+    var(--accent-color) 65%,
+    transparent 65%
+  );
+}
+
+.console-area {
+  flex: 0 0 auto;
+  height: 200px;
+  background-color: var(--console-bg);
+  display: flex;
+  flex-direction: column;
+  min-height: 80px;
+}
+
+.sidebar-pane,
+.editor-pane,
+.question-pane {
+  background-color: var(--bs-body-bg);
+}
+
+/* Navbar */
+.navbar {
+  background-color: var(--bs-secondary-bg) !important;
+}
+
+.navbar-brand,
+.navbar {
+  color: var(--bs-body-color);
+}
+
+.border-bottom,
+.border-end,
+.border-start,
+.border-top {
+  border-color: var(--border-color) !important;
+}
+
+/* Form controls */
+.form-control,
+.form-select {
+  background-color: var(--editor-bg);
+  color: var(--editor-fg);
+  border-color: var(--border-color);
+  border-radius: 0;
+}
+
+.form-control:focus,
+.form-select:focus {
+  background-color: var(--editor-bg);
+  color: var(--editor-fg);
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--accent-color) 25%, transparent);
+}
+
+/* Question list */
+.list-group-item {
+  cursor: pointer;
+  border: none;
+  border-left: 3px solid transparent;
+  border-radius: 0;
+  margin-bottom: 0.25rem;
+  padding: 0.75rem 1rem;
+  transition: background-color 0.15s ease;
+  background-color: transparent;
+  color: var(--bs-body-color);
+}
+
+.list-group-item:hover {
+  background-color: var(--bs-secondary-bg);
+}
+
+.list-group-item.active {
+  background-color: var(--active-item-bg);
+  color: var(--bs-body-color);
+  border-left-color: var(--accent-color);
+}
+
+.list-group-item.solved {
+  border-left-color: var(--success-color);
+}
+
+.question-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.question-meta {
+  font-size: 0.8rem;
+  color: var(--bs-secondary-color);
+}
+
+/* Code editor */
+.code-editor-wrapper {
+  position: absolute;
+  inset: 0;
+}
+
+.code-editor-wrapper .CodeMirror {
+  height: 100%;
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  border: none;
+}
+
+.cm-s-eclipse.CodeMirror {
+  background-color: var(--gh-light-code-bg);
+}
+
+.cm-s-monokai.CodeMirror {
+  background-color: var(--gh-dark-code-bg);
+}
+
+.code-editor {
+  display: none;
+  background-color: var(--editor-bg);
+  color: var(--editor-fg);
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  border: none;
+  outline: none;
+  resize: none;
+  tab-size: 4;
+}
+
+.code-editor::selection,
+.code-editor ::selection {
+  background-color: var(--bs-secondary-bg);
+}
+
+/* Console */
+.console-area {
+  height: 200px;
+  background-color: var(--console-bg);
+  display: flex;
+  flex-direction: column;
+}
+
+.console-header {
+  background-color: var(--console-header-bg);
+  border-color: var(--border-color) !important;
+}
+
+.console-output {
+  flex: 1;
+  overflow-y: auto;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--editor-fg);
+  white-space: pre-wrap;
+  background-color: transparent;
+}
+
+/* Question content */
+.question-content h3 {
+  margin-top: 0;
+  color: var(--bs-body-color);
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.question-content p {
+  line-height: 1.6;
+}
+
+.question-content code {
+  background-color: var(--code-bg);
+  color: var(--editor-fg);
+  padding: 0.15rem 0.4rem;
+  border-radius: 0;
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
+/* Boxy GitHub-style buttons */
+.btn {
+  border-radius: 0 !important;
+  font-weight: 500;
+}
+
+.btn-info {
+  background-color: var(--accent-color);
+  border: 1px solid var(--accent-color);
+  color: #ffffff !important;
+}
+
+.btn-info:hover,
+.btn-info:focus {
+  background-color: var(--accent-hover);
+  border-color: var(--accent-hover);
+  color: #ffffff !important;
+}
+
+.btn-success {
+  background-color: var(--success-color);
+  border: 1px solid var(--success-color);
+  color: #ffffff !important;
+}
+
+.btn-success:hover,
+.btn-success:focus {
+  background-color: var(--success-hover);
+  border-color: var(--success-hover);
+  color: #ffffff !important;
+}
+
+.btn-outline-secondary {
+  background-color: var(--btn-default-bg);
+  border: 1px solid var(--btn-default-border);
+  color: var(--bs-body-color);
+}
+
+.btn-outline-secondary:hover,
+.btn-outline-secondary:focus {
+  background-color: var(--btn-default-hover);
+  border-color: var(--btn-default-border);
+  color: var(--bs-body-color);
+}
+
+.btn-link {
+  color: var(--accent-color) !important;
+}
+
+/* Badges */
+.text-bg-success {
+  background-color: var(--success-color) !important;
+  color: #ffffff !important;
+}
+
+.text-bg-warning {
+  background-color: var(--warning-color) !important;
+  color: #ffffff !important;
+}
+
+.text-bg-danger {
+  background-color: var(--danger-color) !important;
+  color: #ffffff !important;
+}
+
+.text-bg-info {
+  background-color: var(--accent-color) !important;
+  color: #ffffff !important;
+}
+
+.text-bg-secondary {
+  background-color: var(--bs-secondary-color) !important;
+  color: var(--bs-body-bg) !important;
+}
+
+#statusText {
+  font-size: 0.85rem;
+}
+
+/* Footer */
+footer {
+  background-color: var(--bs-secondary-bg);
+  color: var(--bs-secondary-color);
+}
+
+@media (max-width: 767px) {
+  .platform-layout {
+    flex-direction: column;
+    overflow: auto;
+  }
+
+  .platform-pane {
+    width: 100% !important;
+    min-width: auto;
+    height: auto;
+  }
+
+  #editorPane {
+    width: 100%;
+    min-height: 400px;
+  }
+
+  .pane-resizer,
+  .console-resizer {
+    display: none;
+  }
+
+  .editor-area {
+    min-height: 200px;
+  }
+
+  .console-area {
+    height: 160px;
+  }
+}

@@ -1,0 +1,24 @@
+baseURL = ''
+languageCode = 'en-us'
+title = 'PyjamaCode — Embedded Systems Coding Platform'
+theme = 'pyjamacode'
+relativeURLs = true
+
+[params]
+  author = 'Embedded Systems Instructor'
+  description = 'A three-pane coding platform for embedded systems software and firmware development.'
+
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
+
+disableKinds = ['taxonomy', 'term']
+
+[taxonomies]
+
+[outputs]
+  home = ['HTML']
+  section = ['HTML']
+  page = ['HTML']
+

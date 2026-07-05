@@ -1,0 +1,82 @@
+{{ $problems := where site.RegularPages "Section" "problems" }}
+{{ $active := .activeProblem | default (index $problems 0) }}
+{{ $activeId := "" }}
+{{ with $active }}{{ $activeId = .File.ContentBaseName }}{{ end }}
+
+<script id="problem-data" type="application/json">
+{{ $data := slice }}
+{{ range $problems }}
+  {{ $item := dict
+    "id" .File.ContentBaseName
+    "title" .Title
+    "difficulty" .Params.difficulty
+    "permalink" .RelPermalink
+    "content" .Content
+    "initial_code" .Params.initial_code
+    "test_cases" .Params.test_cases
+  }}
+  {{ $data = $data | append $item }}
+{{ end }}
+{{ $data | jsonify | safeJS }}
+</script>
+<input type="hidden" id="active-problem-id" value="{{ $activeId }}">
+
+<div class="platform-layout" id="platformLayout">
+  <!-- Sidebar: Questions -->
+  <aside class="platform-pane sidebar-pane" id="sidebarPane">
+    <div class="pane-header p-3 border-bottom">
+      <h5 class="mb-3">Questions</h5>
+      <input type="text" id="questionSearch" class="form-control form-control-sm" placeholder="Search questions...">
+    </div>
+    <div class="pane-body overflow-auto p-2">
+      <ul class="list-group list-group-flush" id="questionList"></ul>
+    </div>
+  </aside>
+
+  <div class="pane-resizer" id="resizerSidebarEditor" aria-label="Resize sidebar"></div>
+
+  <!-- Middle: Editor & Console -->
+  <section class="platform-pane editor-pane" id="editorPane">
+    <div class="pane-header p-3 border-bottom d-flex align-items-center justify-content-between flex-wrap gap-2">
+      <h5 class="mb-0">Coding Workspace</h5>
+      <div class="d-flex gap-2">
+        <select id="languageSelect" class="form-select form-control-sm w-auto">
+          <option value="c">C</option>
+          <option value="cpp">C++</option>
+          <option value="python">Python</option>
+          <option value="assembly">Assembly</option>
+        </select>
+        <button id="runBtn" class="btn btn-sm btn-info text-white">Run</button>
+        <button id="submitBtn" class="btn btn-sm btn-success">Submit</button>
+      </div>
+    </div>
+
+    <div class="editor-area" id="editorArea">
+      <div id="codeEditorWrapper" class="code-editor-wrapper"></div>
+      <textarea id="codeEditor" class="code-editor w-100 h-100 p-3" spellcheck="false"></textarea>
+    </div>
+
+    <div class="console-resizer" id="resizerEditorConsole" aria-label="Resize console"></div>
+
+    <div class="console-area" id="consoleArea">
+      <div class="console-header px-3 py-2 border-bottom d-flex justify-content-between align-items-center">
+        <span class="fw-semibold small">Output / Console</span>
+        <button id="clearConsole" class="btn btn-link btn-sm p-0 text-decoration-none">Clear</button>
+      </div>
+      <pre id="consoleOutput" class="console-output m-0 p-3">Select a question and start coding...</pre>
+    </div>
+  </section>
+
+  <div class="pane-resizer" id="resizerEditorQuestion" aria-label="Resize question pane"></div>
+
+  <!-- Right: Question Details -->
+  <aside class="platform-pane question-pane" id="questionPane">
+    <div class="pane-header p-3 border-bottom d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">Question</h5>
+      <span id="difficultyBadge" class="badge text-bg-success">Easy</span>
+    </div>
+    <div class="pane-body question-content overflow-auto p-3" id="questionContent">
+      <p class="text-muted">Select a question from the left sidebar to begin.</p>
+    </div>
+  </aside>
+</div>
