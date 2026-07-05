@@ -43,7 +43,7 @@ coding-platform/
 1. Clone or navigate to the project directory:
 
    ```bash
-   cd /Users/piyush/workspace/coding-platform
+   cd <path-to-repo>
    ```
 
 2. Verify Hugo is installed:
