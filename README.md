@@ -125,4 +125,4 @@ Then deploy the contents of the `public/` directory to your hosting provider.
 
 ## License
 
-MIT
+All rights reserved.
