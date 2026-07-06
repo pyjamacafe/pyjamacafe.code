@@ -1,11 +1,11 @@
 baseURL = ''
 languageCode = 'en-us'
-title = 'PyjamaCode — Embedded Systems Coding Platform'
+title = 'Code @ Pyjama Cafe'
 theme = 'pyjamacode'
 
 [params]
-  author = 'Embedded Systems Instructor'
-  description = 'A three-pane coding platform for embedded systems software and firmware development.'
+  author = 'Team Pyjama Cafe'
+  description = 'A coding platform for embedded systems software and firmware development.'
 
 [markup]
   [markup.goldmark]
