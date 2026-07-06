@@ -4,8 +4,8 @@ draft = false
 title = 'UART Send String'
 difficulty = 'medium'
 language = 'c'
-topic_weight = 1
-subtopic_weight = 1
+topic_weight = 2
+subtopic_weight = 2
 weight = 2
 initial_code = '''void uart_putc(char c);
 

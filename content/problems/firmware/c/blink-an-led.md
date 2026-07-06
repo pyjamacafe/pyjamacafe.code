@@ -4,8 +4,8 @@ draft = false
 title = 'Blink an LED'
 difficulty = 'easy'
 language = 'c'
-topic_weight = 1
-subtopic_weight = 1
+topic_weight = 2
+subtopic_weight = 2
 weight = 1
 initial_code = '''#include <stdint.h>
 
