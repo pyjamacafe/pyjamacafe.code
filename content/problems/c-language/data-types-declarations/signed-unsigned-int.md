@@ -39,3 +39,18 @@ Write a program that declares and prints signed and unsigned integer variables. 
 ## Real World Application
 
 Choosing between signed and unsigned integers is critical in systems programming — array indices, sizes, and counts are usually unsigned; temperatures, deltas, and error codes are often signed. Mismatches can cause subtle bugs (e.g., infinite loops when comparing signed with unsigned).
+
+===EXPLANATION===
+
+When you assign a negative value to an unsigned variable, the value is converted using modulo arithmetic. For a 32-bit `unsigned int`, the range is 0 to 2³²−1. Assigning −1 wraps around to 2³²−1 (4,294,967,295).
+
+In two's complement representation, −1 is stored as `0xFFFFFFFF` — all bits set. When interpreted as unsigned, this is the maximum unsigned value.
+
+### Example
+
+```c
+unsigned int x = -1;
+printf("%u\n", x);  // Prints 4294967295
+```
+
+This behaviour is defined by the C standard and is not undefined. However, mixing signed and unsigned integers in comparisons can lead to subtle bugs because the signed value is implicitly converted to unsigned before the comparison.

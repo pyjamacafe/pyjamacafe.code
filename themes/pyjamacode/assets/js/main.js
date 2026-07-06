@@ -27,8 +27,10 @@ const activeProblemInput = document.getElementById('active-problem-id');
 const questionListEl = document.getElementById('questionList');
 const questionSearchEl = document.getElementById('questionSearch');
 const questionContentEl = document.getElementById('questionContent');
+const articleContentEl = document.getElementById('articleContent');
+const tabChallenge = document.getElementById('tabChallenge');
+const tabArticle = document.getElementById('tabArticle');
 const difficultyBadgeEl = document.getElementById('difficultyBadge');
-const caseTitleEl = document.getElementById('caseTitle');
 const codeEditorEl = document.getElementById('codeEditor');
 const codeEditorWrapper = document.getElementById('codeEditorWrapper');
 const languageLabelEl = document.getElementById('languageLabel');
@@ -133,6 +135,7 @@ function init() {
   initResizers();
   initNotesResizer();
   initTooltips();
+  initTabs();
 }
 
 function handleKeyboardShortcuts(e) {
@@ -748,12 +751,38 @@ function selectQuestion(id) {
   const question = questions.find((q) => q.id === id);
   if (!question) return;
 
-  questionContentEl.innerHTML = question.content;
-  if (caseTitleEl) {
-    caseTitleEl.textContent = question.title;
+  // Set up tabs
+  const hasArticle = question.article && question.article.trim().length > 0;
+  if (tabArticle) {
+    tabArticle.classList.toggle('d-none', !hasArticle);
   }
-  difficultyBadgeEl.textContent = question.difficulty;
-  difficultyBadgeEl.className = 'badge ' + (difficultyClasses[question.difficulty] || 'text-bg-secondary');
+  // Reset to challenge tab
+  setActiveTab('challenge');
+
+  questionContentEl.innerHTML = question.content;
+  enhanceCodeBlocks(questionContentEl);
+  if (articleContentEl) {
+    articleContentEl.innerHTML = hasArticle ? question.article : '';
+    enhanceCodeBlocks(articleContentEl);
+  }
+
+  // Inject difficulty badge into the first h2 (Problem Statement)
+  const firstH2 = questionContentEl.querySelector('h2:first-of-type');
+  if (firstH2) {
+    // Remove existing badge margin-right span if any
+    const existing = firstH2.querySelector('.diff-badge');
+    if (existing) existing.remove();
+    const badge = document.createElement('span');
+    badge.className = 'diff-badge badge ' + (difficultyClasses[question.difficulty] || 'text-bg-secondary');
+    badge.textContent = question.difficulty;
+    firstH2.appendChild(badge);
+  }
+
+  // Set difficulty class on content for background styling
+  questionContentEl.classList.remove('diff-easy', 'diff-medium', 'diff-hard');
+  if (question.difficulty) {
+    questionContentEl.classList.add('diff-' + question.difficulty);
+  }
   if (languageLabelEl) {
     languageLabelEl.textContent = (question.language || 'c').toUpperCase();
   }
@@ -787,10 +816,42 @@ function selectQuestion(id) {
   }
   renderQuestionList(questionSearchEl ? questionSearchEl.value : '');
   try {
-    history.replaceState(null, '', question.permalink);
+    // Preserve tab and hash when updating URL
+    let url = question.permalink;
+    const tabParam = new URL(window.location).searchParams.get('tab');
+    if (tabParam && tabParam !== 'challenge') {
+      url += (url.includes('?') ? '&' : '?') + 'tab=' + encodeURIComponent(tabParam);
+    }
+    url += window.location.hash;
+    history.replaceState(null, '', url);
   } catch (e) {
     // History API may be restricted on file:// origins.
   }
+
+  // Restore tab from URL
+  const urlObj = new URL(window.location);
+  const tabFromUrl = urlObj.searchParams.get('tab');
+  if (tabFromUrl && tabFromUrl !== 'challenge' && tabArticle && !tabArticle.classList.contains('d-none')) {
+    setActiveTab(tabFromUrl);
+  }
+
+  // Scroll to hash if present (e.g. #listing-1)
+  setTimeout(() => {
+    const hash = window.location.hash;
+    if (hash) {
+      const id = hash.slice(1);
+      const target = document.getElementById(id);
+      if (target) {
+        // Switch to the tab that contains the target
+        if (articleContentEl && articleContentEl.contains(target) && tabArticle) {
+          setActiveTab('explanation');
+        } else if (questionContentEl && questionContentEl.contains(target) && tabChallenge) {
+          setActiveTab('challenge');
+        }
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  }, 100);
 }
 
 function updateStatus(status) {
@@ -964,6 +1025,41 @@ function colorizeOutput(output) {
     .replace(/(Runtime Error\.?)/gi, '<span class="text-fail">$1</span>');
 }
 
+function initTabs() {
+  if (tabChallenge) {
+    tabChallenge.addEventListener('click', () => setActiveTab('challenge'));
+  }
+  if (tabArticle) {
+    tabArticle.addEventListener('click', () => setActiveTab('explanation'));
+  }
+}
+
+function setActiveTab(tab) {
+  if (questionContentEl) questionContentEl.classList.toggle('d-none', tab !== 'challenge');
+  if (articleContentEl) articleContentEl.classList.toggle('d-none', tab !== 'explanation');
+  if (tabChallenge) tabChallenge.classList.toggle('active', tab === 'challenge');
+  if (tabArticle) tabArticle.classList.toggle('active', tab === 'explanation');
+
+  // Update URL with tab parameter
+  const url = new URL(window.location);
+  if (tab === 'challenge') {
+    url.searchParams.delete('tab');
+  } else {
+    url.searchParams.set('tab', tab);
+  }
+  try {
+    history.replaceState(null, '', url.toString());
+  } catch (e) {}
+
+  // Scroll to hash after tab switch
+  setTimeout(() => {
+    if (window.location.hash) {
+      const target = document.getElementById(window.location.hash.slice(1));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, 50);
+}
+
 function initTypedTitle() {
   const typedEl = document.getElementById('typedTitle');
   if (!typedEl || typeof Typed === 'undefined') return;
@@ -976,6 +1072,113 @@ function initTypedTitle() {
     showCursor: true,
     cursorChar: '_',
   });
+}
+
+function enhanceCodeBlocks(root) {
+  if (!root) return;
+  let listingCounter = 0;
+  const blocks = root.querySelectorAll('pre > code');
+  blocks.forEach((codeEl) => {
+    const pre = codeEl.parentElement;
+    if (pre.classList.contains('cm-wrapper')) return;
+
+    listingCounter++;
+    const lang = extractLanguage(codeEl);
+    const title = codeEl.getAttribute('data-title') || lang;
+    const note = codeEl.getAttribute('data-note') || '';
+    const rawCode = codeEl.textContent || '';
+
+    // Preserve syntax-highlighted HTML, split by newlines
+    const html = codeEl.innerHTML;
+    const lineHtmls = html.split(/\n/);
+    const lineCount = lineHtmls.length;
+
+    // Build line-numbered HTML preserving syntax spans
+    let numberedHtml = '';
+    for (let i = 0; i < lineCount; i++) {
+      const lineNum = i + 1;
+      numberedHtml += `<div class="cb-line" data-line="${lineNum}">`;
+      numberedHtml += `<span class="cb-ln">${lineNum}</span>`;
+      numberedHtml += `<span class="cb-code">${lineHtmls[i] || ' '}</span>`;
+      numberedHtml += `</div>`;
+    }
+    codeEl.innerHTML = numberedHtml;
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'cb-wrapper';
+    const listingId = 'listing-' + listingCounter;
+
+    // Title bar
+    const titleBar = document.createElement('div');
+    titleBar.className = 'cb-titlebar';
+    const titleSpan = document.createElement('span');
+    titleSpan.className = 'cb-title';
+    titleSpan.textContent = title;
+    titleBar.appendChild(titleSpan);
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'cb-copy';
+    copyBtn.textContent = 'Copy';
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(rawCode).then(() => {
+        copyBtn.textContent = 'Copied!';
+        setTimeout(() => { copyBtn.textContent = 'Copy'; }, 2000);
+      });
+    });
+    titleBar.appendChild(copyBtn);
+    wrapper.appendChild(titleBar);
+
+    // Code area
+    const codeArea = document.createElement('div');
+    codeArea.className = 'cb-code-area';
+    codeArea.appendChild(codeEl);
+    wrapper.appendChild(codeArea);
+
+    // Caption with anchor (outside wrapper)
+    const caption = 'Listing ' + listingCounter + (note ? '. ' + note : '.');
+    pre.parentElement.replaceChild(wrapper, pre);
+    if (caption) {
+      const captionEl = document.createElement('div');
+      captionEl.className = 'cb-note';
+      const anchor = document.createElement('a');
+      anchor.className = 'cb-listing-link';
+      anchor.id = listingId;
+      anchor.href = '#' + listingId;
+      anchor.textContent = caption;
+      captionEl.appendChild(anchor);
+      wrapper.after(captionEl);
+    }
+  });
+
+  // Click-to-highlight lines (skip if user is selecting text)
+  root.querySelectorAll('.cb-line').forEach((line) => {
+    line.addEventListener('click', (e) => {
+      if (e.target.closest('.cb-ln')) return;
+      if (window.getSelection().toString().length > 0) return;
+      const wasActive = line.classList.contains('active');
+      const parent = line.closest('.cb-code-area');
+      if (parent) {
+        parent.querySelectorAll('.cb-line.active').forEach((l) => l.classList.remove('active'));
+      }
+      if (!wasActive) {
+        line.classList.add('active');
+      }
+    });
+  });
+}
+
+function extractLanguage(codeEl) {
+  for (const cls of codeEl.classList) {
+    if (cls.startsWith('language-')) {
+      let lang = cls.slice(9);
+      const map = { c: 'C', cpp: 'C++', cs: 'C#', js: 'JavaScript', ts: 'TypeScript',
+        py: 'Python', rb: 'Ruby', go: 'Go', rs: 'Rust', asm: 'Assembly', gas: 'Assembly',
+        bash: 'Bash', sh: 'Shell', makefile: 'Makefile', text: 'Text', plaintext: 'Text',
+        html: 'HTML', css: 'CSS', json: 'JSON', xml: 'XML', yaml: 'YAML', toml: 'TOML',
+        md: 'Markdown', markdown: 'Markdown', sql: 'SQL', diff: 'Diff' };
+      return map[lang] || lang.toUpperCase();
+    }
+  }
+  return '';
 }
 
 function escapeHtml(text) {

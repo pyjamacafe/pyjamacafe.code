@@ -9,13 +9,21 @@
   {{ $parts := split (strings.TrimSuffix "/" .File.Dir) "/" }}
   {{ $topic := index $parts 1 }}
   {{ $subtopic := index $parts 2 }}
+  {{ $challengeMarkdown := .RawContent }}
+  {{ $explanationMarkdown := "" }}
+  {{ if in .RawContent "===EXPLANATION===" }}
+    {{ $parts := split .RawContent "===EXPLANATION===" }}
+    {{ $challengeMarkdown = index $parts 0 }}
+    {{ $explanationMarkdown = index $parts 1 }}
+  {{ end }}
   {{ $item := dict
     "id" .File.ContentBaseName
     "title" .Title
     "difficulty" .Params.difficulty
     "language" .Params.language
     "permalink" .RelPermalink
-    "content" .Content
+    "content" ($challengeMarkdown | .RenderString)
+    "article" ($explanationMarkdown | .RenderString)
     "initial_code" .Params.initial_code
     "test_cases" .Params.test_cases
     "topic" $topic
@@ -45,13 +53,18 @@
 
   <!-- Middle: Case Details -->
   <aside class="platform-pane question-pane" id="questionPane">
-    <div class="pane-header border-bottom d-flex justify-content-between align-items-center">
-      <h5 class="mb-0" id="caseTitle">Case</h5>
-      <span id="difficultyBadge" class="badge text-bg-success">Easy</span>
+    <div class="pane-header border-bottom d-flex align-items-center">
+      <div class="tab-bar d-flex gap-1" id="tabBar">
+        <button class="tab active" id="tabChallenge">Challenge</button>
+        <button class="tab d-none" id="tabArticle">Lecture &amp; Notes</button>
+      </div>
     </div>
     <div class="question-pane-body" id="questionPaneBody">
-      <div class="pane-body question-content overflow-auto p-3" id="questionContent">
-        <p class="text-muted">Select a case from the left sidebar to begin.</p>
+      <div id="questionContentWrapper">
+        <div class="pane-body question-content overflow-auto p-3" id="questionContent">
+          <p class="text-muted">Select a case from the left sidebar to begin.</p>
+        </div>
+        <div class="pane-body article-content overflow-auto p-3 d-none" id="articleContent"></div>
       </div>
 
       <div class="notes-resizer" id="resizerQuestionNotes" aria-label="Resize notes"></div>

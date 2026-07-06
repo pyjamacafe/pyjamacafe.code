@@ -27,3 +27,8 @@ Explain the background concepts the learner should understand before attempting 
 ## Real World Application
 
 Describe where this concept is used in real-world software or embedded systems.
+
+===EXPLANATION===
+
+Optional explanation / article content goes here. This section appears in a separate "Article" tab.
+All markdown syntax is supported.
