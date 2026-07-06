@@ -16,4 +16,14 @@ input = ''
 expected = 'Expected output description'
 +++
 
-Describe the problem here. Markdown is supported.
+## Problem Statement
+
+Describe the problem clearly here. What should the code do?
+
+## Theory and Concepts
+
+Explain the background concepts the learner should understand before attempting this problem.
+
+## Real World Application
+
+Describe where this concept is used in real-world software or embedded systems.

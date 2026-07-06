@@ -28,8 +28,16 @@ input = ''
 expected = 'LED toggling detected'
 +++
 
-Write a program to blink an LED connected to GPIO pin 13 once every second.
+## Problem Statement
 
-Assume a function `void gpio_set(int pin, int value)` is available, where `value` is `0` (LOW) or `1` (HIGH), and a `delay_ms(int ms)` function is provided.
+Write a program to blink an LED connected to GPIO pin 13 once every second. Use the provided helper functions `gpio_set(int pin, int value)` (where `value` is `0` for LOW or `1` for HIGH) and `delay_ms(int ms)`. The LED should be turned on for 500 ms, then off for 500 ms, repeating indefinitely.
 
-Your code should toggle the LED in an infinite loop.
+## Theory and Concepts
+
+- **GPIO control**: General Purpose Input/Output pins can be set HIGH or LOW to control external devices like LEDs.
+- **Infinite loops**: Embedded firmware often runs in a continuous loop with no exit condition.
+- **Blocking delays**: `delay_ms` pauses execution for a given number of milliseconds. While simple, blocking delays tie up the CPU — real systems use timers or RTOS scheduling.
+
+## Real World Application
+
+LED blinking is the embedded equivalent of "Hello, World". It is used for status indicators on virtually every electronic device — power lights, network activity LEDs, error codes, and user notifications. The pattern of toggling a GPIO pin in a timed loop extends to controlling relays, buzzers, and other digital actuators.

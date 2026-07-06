@@ -26,4 +26,16 @@ input = ''
 expected = 'Length = 5'
 +++
 
-Implement `my_strlen` that returns the number of characters in a null-terminated string without using the standard library function `strlen`.
+## Problem Statement
+
+Implement `my_strlen` that returns the number of characters in a null-terminated string without using the standard library function `strlen`. The function should count characters from the start of the string up to (but not including) the null terminator `'\0'`.
+
+## Theory and Concepts
+
+- **Null-terminated strings**: In C, a string is an array of `char` ending with a `'\0'` (null) character. The length is the number of characters before the null.
+- **Pointer traversal**: Start at the beginning of the string and advance the pointer until the null terminator is encountered.
+- **`const` correctness**: The input string is read-only, so the parameter is declared `const char *`.
+
+## Real World Application
+
+Manual string length calculation is essential in environments where the standard library is unavailable — embedded systems, bootloaders, OS kernels, and freestanding C implementations. It also deepens understanding of how standard library functions work under the hood.

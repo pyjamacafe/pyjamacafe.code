@@ -606,6 +606,10 @@ body {
   border: none;
 }
 
+.CodeMirror-lines {
+  border-left: 1px solid var(--border-color);
+}
+
 /* GitHub-like CodeMirror themes */
 .cm-s-github-light.CodeMirror {
   background-color: #ffffff;
@@ -644,12 +648,23 @@ body {
 }
 .cm-s-github-light .CodeMirror-linenumber {
   color: #6e7781;
+  padding-right: 0.75rem;
 }
 .cm-s-github-light .CodeMirror-cursor {
   border-left: 1px solid #1f2328;
 }
 .cm-s-github-light .CodeMirror-selected {
   background-color: #b4d7ff;
+}
+.cm-s-github-light .CodeMirror-activeline-background {
+  background: #e8ecf0;
+}
+.cm-s-github-light .CodeMirror-activeline-gutter-background {
+  background: #e8ecf0;
+}
+.cm-s-github-light .CodeMirror-activeline .CodeMirror-linenumber {
+  font-weight: 700;
+  color: #1f2328;
 }
 
 .cm-s-github-dark.CodeMirror {
@@ -689,12 +704,23 @@ body {
 }
 .cm-s-github-dark .CodeMirror-linenumber {
   color: #8b949e;
+  padding-right: 0.75rem;
 }
 .cm-s-github-dark .CodeMirror-cursor {
   border-left: 1px solid #c9d1d9;
 }
 .cm-s-github-dark .CodeMirror-selected {
   background-color: #264f78;
+}
+.cm-s-github-dark .CodeMirror-activeline-background {
+  background: #1c2128;
+}
+.cm-s-github-dark .CodeMirror-activeline-gutter-background {
+  background: #1c2128;
+}
+.cm-s-github-dark .CodeMirror-activeline .CodeMirror-linenumber {
+  font-weight: 700;
+  color: #c9d1d9;
 }
 
 .code-editor {
@@ -745,16 +771,48 @@ body {
 }
 
 /* Question content */
-.question-content h3 {
-  margin-top: 0;
+.question-content {
+  font-size: 0.875rem;
+  color: var(--bs-secondary-color);
+  line-height: 1.6;
+}
+
+.question-content h1 {
+  font-size: 1.25rem;
+  margin: 0 0 0.75rem 0;
   color: var(--bs-body-color);
+  padding-bottom: 0.4rem;
   border-bottom: 1px solid var(--border-color);
-  padding-bottom: 0.5rem;
-  margin-bottom: 1rem;
+}
+
+.question-content h2 {
+  font-size: 1.1rem;
+  margin: 1.5rem 0 0.5rem 0;
+  color: var(--bs-body-color);
+}
+
+.question-content h3 {
+  font-size: 1rem;
+  margin: 1rem 0 0.4rem 0;
+  color: var(--bs-body-color);
+}
+
+.question-content h4 {
+  font-size: 0.95rem;
+  margin: 0.8rem 0 0.3rem 0;
+  color: var(--bs-body-color);
+}
+
+.question-content h5,
+.question-content h6 {
+  font-size: 0.9rem;
+  margin: 0.6rem 0 0.25rem 0;
+  color: var(--bs-secondary-color);
 }
 
 .question-content p {
   line-height: 1.6;
+  margin-bottom: 0.75rem;
 }
 
 .question-content code {
@@ -764,6 +822,19 @@ body {
   border-radius: 0;
   font-family: var(--font-mono);
   font-size: 0.9em;
+}
+
+.question-content h2:first-of-type {
+  background-color: var(--active-item-bg);
+  margin: 0 -0.75rem 0 -0.75rem;
+  padding: 0.75rem;
+  border-radius: 6px 6px 0 0;
+}
+
+.question-content h2:first-of-type + * {
+  background-color: var(--active-item-bg);
+  margin: 0 -0.75rem;
+  padding: 0 0.75rem 0.75rem;
 }
 
 /* Boxy GitHub-style buttons */

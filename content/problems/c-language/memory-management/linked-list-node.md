@@ -33,4 +33,17 @@ input = ''
 expected = 'Node created: data=10 next=NULL'
 +++
 
-Implement `create_node` that dynamically allocates a `struct node`, sets its `data` field to the given `value`, sets `next` to `NULL`, and returns a pointer to it.
+## Problem Statement
+
+Implement `create_node` that dynamically allocates a `struct node` on the heap, sets its `data` field to the given `value`, sets the `next` pointer to `NULL`, and returns a pointer to the newly created node. If allocation fails, return `NULL`.
+
+## Theory and Concepts
+
+- **Self-referential structures**: A struct that contains a pointer to its own type is the basis for linked data structures.
+- **Dynamic allocation of structs**: Use `malloc(sizeof(struct node))` to allocate a node. The `sizeof` operator ensures the correct amount of memory is reserved.
+- **Arrow operator**: `ptr->member` is shorthand for `(*ptr).member`. It accesses a member of a struct through a pointer.
+- **Linked list fundamentals**: Each node stores data and a pointer to the next node. A `NULL` next pointer marks the end of the list.
+
+## Real World Application
+
+Linked lists appear in OS kernel data structures (task queues, free lists), memory allocators (free blocks), file systems (directory entries), and as the building block for more complex structures like stacks, queues, and adjacency lists for graphs. Mastering node creation is the first step toward building any linked data structure.

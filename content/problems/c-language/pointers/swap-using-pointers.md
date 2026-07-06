@@ -26,4 +26,16 @@ input = ''
 expected = 'Swap successful: x=20 y=10'
 +++
 
-Write a function `swap` that takes two integer pointers and swaps the values they point to. The function should modify the original variables passed from `main`.
+## Problem Statement
+
+Write a function `swap` that takes two integer pointers and swaps the values they point to. The function should modify the original variables passed from `main`. After calling `swap(&x, &y)`, the variable `x` should hold the original value of `y` and `y` should hold the original value of `x`.
+
+## Theory and Concepts
+
+- **Pointers**: A pointer stores the memory address of a variable. Passing a pointer to a function allows the function to read and modify the original variable.
+- **Dereferencing**: The `*` operator accesses the value stored at the address held by a pointer.
+- **Call by reference**: In C, all arguments are passed by value. To modify a variable inside a function, you pass its address (a pointer) and dereference it.
+
+## Real World Application
+
+Swapping values is a fundamental building block in sorting algorithms (bubble sort, quick sort), data structure manipulation (reversing arrays, rotating trees), and low-level memory operations. Any time you need to exchange two values in-place, this pattern applies.

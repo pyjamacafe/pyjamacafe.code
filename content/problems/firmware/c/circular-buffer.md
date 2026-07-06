@@ -29,8 +29,16 @@ input = 'put 1, put 2, get, get'
 expected = 'Circular buffer OK'
 +++
 
-Implement a simple circular (ring) buffer for bytes with a fixed size of 16.
+## Problem Statement
 
-Provide `int buffer_put(uint8_t byte)` and `int buffer_get(uint8_t *byte)` functions.
+Implement a circular (ring) buffer for bytes with a fixed size of 16. Provide two functions: `buffer_put(uint8_t byte)` adds a byte to the buffer and returns `0` on success or `-1` if the buffer is full; `buffer_get(uint8_t *byte)` reads the next byte into the provided pointer and returns `0` on success or `-1` if the buffer is empty. Use the `head` and `tail` indices provided in the starter code.
 
-Return `0` on success and `-1` when the buffer is full or empty respectively.
+## Theory and Concepts
+
+- **Circular buffer**: A fixed-size buffer that wraps around when the end is reached, reusing memory at the start. It is implemented with two pointers (or indices): `head` for writing and `tail` for reading.
+- **Empty vs full distinction**: A circular buffer is empty when `head == tail` and full when `(head + 1) % size == tail` (sacrificing one slot) or by tracking a count separately.
+- **Static buffers**: The buffer and indices are declared `static` to persist across function calls while keeping them local to the translation unit.
+
+## Real World Application
+
+Circular buffers are used in UART/SPI/I2C receive and transmit drivers, audio processing pipelines, keyboard and touch input queues, logging systems, and any producer-consumer scenario where data arrives asynchronously and must be processed in order without dynamic memory allocation.
