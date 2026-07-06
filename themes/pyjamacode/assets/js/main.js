@@ -55,6 +55,9 @@ const notesEditorWrapper = document.getElementById('notesEditorWrapper');
 const notesPreviewEl = document.getElementById('notesPreview');
 const notesModeBtn = document.getElementById('notesModeBtn');
 const exportNotesBtn = document.getElementById('exportNotesBtn');
+const notesMinimizeBtn = document.getElementById('notesMinimizeBtn');
+const notesMaximizeBtn = document.getElementById('notesMaximizeBtn');
+const notesRestoreBtn = document.getElementById('notesRestoreBtn');
 const resizerQuestionNotes = document.getElementById('resizerQuestionNotes');
 
 const SUBMISSIONS_STORAGE_KEY = 'pyjamacode-submissions';
@@ -71,6 +74,8 @@ let notesSaveTimeout = null;
 let isSettingValue = false;
 let isSettingNotesValue = false;
 let notesPreviewMode = true;
+let notesSavedHeight = null;
+let notesViewState = 'normal';
 
 function init() {
   if (!problemDataEl || !activeProblemInput) {
@@ -95,6 +100,7 @@ function init() {
   renderQuestionList();
   selectQuestion(activeQuestionId);
   setNotesPreviewMode(true);
+  notesSavedHeight = notesArea ? notesArea.offsetHeight : 200;
 
   if (questionSearchEl) {
     questionSearchEl.addEventListener('input', (e) => renderQuestionList(e.target.value));
@@ -106,6 +112,9 @@ function init() {
   if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
   if (notesModeBtn) notesModeBtn.addEventListener('click', toggleNotesMode);
   if (exportNotesBtn) exportNotesBtn.addEventListener('click', exportNotes);
+  if (notesMinimizeBtn) notesMinimizeBtn.addEventListener('click', minimizeNotes);
+  if (notesMaximizeBtn) notesMaximizeBtn.addEventListener('click', maximizeNotes);
+  if (notesRestoreBtn) notesRestoreBtn.addEventListener('click', restoreNotes);
   if (notesPreviewEl) notesPreviewEl.addEventListener('dblclick', () => setNotesPreviewMode(false));
 
   document.addEventListener('keydown', handleKeyboardShortcuts);
@@ -145,7 +154,17 @@ function initResizers() {
 function initNotesResizer() {
   if (resizerQuestionNotes && notesArea && questionPaneBody) {
     // Leave room for resizer (8px) and question-content min-height (60px).
-    setupVerticalResize(resizerQuestionNotes, notesArea, questionPaneBody, () => questionPaneBody.offsetHeight - 68);
+    setupVerticalResize(
+      resizerQuestionNotes,
+      notesArea,
+      questionPaneBody,
+      () => questionPaneBody.offsetHeight - 68,
+      (height) => {
+        if (notesViewState === 'normal') {
+          notesSavedHeight = height;
+        }
+      }
+    );
   }
 }
 
@@ -206,7 +225,7 @@ function setupHorizontalResize(resizer, pane, side) {
   });
 }
 
-function setupVerticalResize(resizer, pane, container, maxHeightFn = null) {
+function setupVerticalResize(resizer, pane, container, maxHeightFn = null, onResizeEnd = null) {
   if (!resizer || !pane || !container) return;
 
   resizer.addEventListener('mousedown', (e) => {
@@ -250,6 +269,7 @@ function setupVerticalResize(resizer, pane, container, maxHeightFn = null) {
       document.body.style.userSelect = '';
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
+      if (onResizeEnd) onResizeEnd(pane.offsetHeight);
       refreshEditors();
     };
 
@@ -440,6 +460,62 @@ function setNotesPreviewMode(preview) {
 
 function toggleNotesMode() {
   setNotesPreviewMode(!notesPreviewMode);
+}
+
+function minimizeNotes() {
+  hideTooltip(notesMinimizeBtn);
+  if (notesViewState === 'normal') {
+    notesSavedHeight = notesArea ? notesArea.offsetHeight : notesSavedHeight;
+  }
+  notesViewState = 'minimized';
+  if (questionPaneBody) questionPaneBody.classList.remove('notes-maximized');
+  const headerHeight = notesArea ? notesArea.querySelector('.notes-header')?.offsetHeight || 40 : 40;
+  if (notesArea) notesArea.style.height = `${headerHeight}px`;
+  updateNotesViewButtons();
+  refreshEditors();
+}
+
+function maximizeNotes() {
+  hideTooltip(notesMaximizeBtn);
+  if (notesViewState === 'normal') {
+    notesSavedHeight = notesArea ? notesArea.offsetHeight : notesSavedHeight;
+  }
+  notesViewState = 'maximized';
+  if (questionPaneBody) questionPaneBody.classList.add('notes-maximized');
+  updateNotesViewButtons();
+  refreshEditors();
+}
+
+function restoreNotes() {
+  hideTooltip(notesRestoreBtn);
+  notesViewState = 'normal';
+  if (questionPaneBody) questionPaneBody.classList.remove('notes-maximized');
+  if (notesArea) {
+    notesArea.style.height = notesSavedHeight ? `${notesSavedHeight}px` : '';
+  }
+  updateNotesViewButtons();
+  refreshEditors();
+}
+
+function updateNotesViewButtons() {
+  if (notesMinimizeBtn) {
+    notesMinimizeBtn.classList.toggle('d-none', notesViewState === 'minimized');
+    notesMinimizeBtn.style.order = notesViewState === 'minimized' ? '3' : '1';
+  }
+  if (notesMaximizeBtn) {
+    notesMaximizeBtn.classList.toggle('d-none', notesViewState === 'maximized');
+    notesMaximizeBtn.style.order = notesViewState === 'maximized' ? '3' : '2';
+  }
+  if (notesRestoreBtn) {
+    notesRestoreBtn.classList.toggle('d-none', notesViewState === 'normal');
+    notesRestoreBtn.style.order = notesViewState === 'minimized' ? '1' : notesViewState === 'maximized' ? '2' : '3';
+  }
+}
+
+function hideTooltip(element) {
+  if (!element || typeof bootstrap === 'undefined' || !bootstrap.Tooltip) return;
+  const tooltip = bootstrap.Tooltip.getInstance(element);
+  if (tooltip) tooltip.hide();
 }
 
 function renderNotesPreview() {

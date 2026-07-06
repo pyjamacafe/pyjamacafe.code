@@ -292,6 +292,20 @@ body {
   overflow: hidden;
 }
 
+.question-pane-body.notes-maximized {
+  grid-template-rows: 1fr;
+}
+
+.question-pane-body.notes-maximized .question-content,
+.question-pane-body.notes-maximized .notes-resizer {
+  display: none;
+}
+
+.question-pane-body.notes-maximized .notes-area {
+  height: 100% !important;
+  min-height: 0;
+}
+
 .notes-header {
   flex: 0 0 auto;
   background-color: var(--bs-secondary-bg);
