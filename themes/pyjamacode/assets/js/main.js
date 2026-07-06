@@ -100,6 +100,7 @@ function init() {
   renderQuestionList();
   selectQuestion(activeQuestionId);
   setNotesPreviewMode(true);
+  initTypedTitle();
   notesSavedHeight = notesArea ? notesArea.offsetHeight : 200;
 
   if (questionSearchEl) {
@@ -115,7 +116,16 @@ function init() {
   if (notesMinimizeBtn) notesMinimizeBtn.addEventListener('click', minimizeNotes);
   if (notesMaximizeBtn) notesMaximizeBtn.addEventListener('click', maximizeNotes);
   if (notesRestoreBtn) notesRestoreBtn.addEventListener('click', restoreNotes);
-  if (notesPreviewEl) notesPreviewEl.addEventListener('dblclick', () => setNotesPreviewMode(false));
+  if (notesPreviewEl) {
+    notesPreviewEl.addEventListener('dblclick', (e) => {
+      const rect = notesPreviewEl.getBoundingClientRect();
+      const lineHeight = parseFloat(getComputedStyle(notesPreviewEl).lineHeight) || 24;
+      const paddingTop = parseFloat(getComputedStyle(notesPreviewEl).paddingTop) || 0;
+      const relativeY = e.clientY - rect.top - paddingTop;
+      const approximateLine = Math.max(0, Math.floor(relativeY / lineHeight));
+      setNotesPreviewMode(false, approximateLine);
+    });
+  }
 
   document.addEventListener('keydown', handleKeyboardShortcuts);
 
@@ -438,7 +448,7 @@ function debounceSaveCurrentNotes() {
   }, 500);
 }
 
-function setNotesPreviewMode(preview) {
+function setNotesPreviewMode(preview, approximateLine = null) {
   notesPreviewMode = preview;
   if (notesPreviewMode) {
     saveCurrentNotes();
@@ -454,7 +464,17 @@ function setNotesPreviewMode(preview) {
     if (notesPreviewEl) notesPreviewEl.classList.add('d-none');
     if (notesModeBtn) notesModeBtn.innerHTML = '<i class="bi bi-eye"></i>';
     updateTooltip(notesModeBtn, 'Preview rendered notes');
-    if (notesCodeMirror) requestAnimationFrame(() => notesCodeMirror.refresh());
+    if (notesCodeMirror) {
+      requestAnimationFrame(() => {
+        notesCodeMirror.refresh();
+        if (approximateLine !== null) {
+          const doc = notesCodeMirror.getDoc();
+          const lastLine = doc.lastLine();
+          doc.setCursor(Math.min(approximateLine, lastLine), 0);
+          notesCodeMirror.focus();
+        }
+      });
+    }
   }
 }
 
@@ -801,6 +821,20 @@ function colorizeOutput(output) {
     .replace(/(Build succeeded\.?)/gi, '<span class="text-pass">$1</span>')
     .replace(/(Compilation Error\.?)/gi, '<span class="text-fail">$1</span>')
     .replace(/(Runtime Error\.?)/gi, '<span class="text-fail">$1</span>');
+}
+
+function initTypedTitle() {
+  const typedEl = document.getElementById('typedTitle');
+  if (!typedEl || typeof Typed === 'undefined') return;
+  const title = typedEl.textContent || '';
+  typedEl.textContent = '';
+  new Typed('#typedTitle', {
+    strings: [title],
+    typeSpeed: 60,
+    loop: false,
+    showCursor: true,
+    cursorChar: '_',
+  });
 }
 
 function escapeHtml(text) {

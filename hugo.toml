@@ -1,10 +1,10 @@
 baseURL = ''
 languageCode = 'en-us'
-title = 'Code @ Pyjama Cafe'
+title = 'PyjamaCafe.Code'
 theme = 'pyjamacode'
 
 [params]
-  author = 'Team Pyjama Cafe'
+  author = 'Typobrahe Education LLP'
   description = 'A coding platform for embedded systems software and firmware development.'
 
 [markup]

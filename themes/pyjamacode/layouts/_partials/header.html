@@ -1,5 +1,11 @@
 <nav class="navbar navbar-expand border-bottom px-3 py-2">
-  <div class="container-fluid justify-content-center">
-    <a class="navbar-brand fw-bold" href="{{ site.BaseURL }}">{{ site.Title }}</a>
+  <div class="container-fluid d-flex justify-content-between">
+    <a class="navbar-brand fw-bold d-flex align-items-center" href="{{ site.BaseURL }}">
+      <img src="{{ "pc.png" | relURL }}" alt="Logo" height="28" class="me-2">
+      <span id="typedTitle">{{ site.Title }}</span>
+    </a>
+    <button id="themeToggle" class="btn btn-sm py-0 btn-outline-secondary" data-bs-toggle="tooltip" title="Toggle light/dark theme" aria-label="Toggle theme">
+      <i id="themeIcon" class="bi bi-sun-fill"></i>
+    </button>
   </div>
 </nav>
