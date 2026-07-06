@@ -490,6 +490,108 @@ body {
   color: var(--bs-secondary-color);
 }
 
+/* Topic colors */
+:root {
+  --topic-color-0: #4FC3F7;
+  --topic-color-1: #81C784;
+  --topic-color-2: #FFB74D;
+  --topic-color-3: #BA68C8;
+  --topic-color-4: #E57373;
+  --topic-color-5: #4DB6AC;
+}
+
+/* Tree sidebar */
+.tree-container {
+  padding: 0.25rem 0;
+}
+
+.tree-topic {
+  padding: 0.4rem 0.75rem 0.4rem 0.5rem;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--bs-body-color);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  user-select: none;
+  border-left: 3px solid transparent;
+}
+
+.tree-topic:hover {
+  background-color: var(--bs-secondary-bg);
+}
+
+.tree-subtopic {
+  padding: 0.3rem 0.75rem 0.3rem 1.25rem;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--bs-body-color);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  user-select: none;
+  border-left: 3px solid var(--topic-color);
+  opacity: 0.7;
+}
+
+.tree-subtopic:hover {
+  background-color: var(--bs-secondary-bg);
+}
+
+.tree-leaf {
+  padding: 0.4rem 0.75rem 0.4rem 2rem;
+  cursor: pointer;
+  border-left: 3px solid var(--topic-color);
+  transition: background-color 0.15s ease;
+  background-color: transparent;
+  color: var(--bs-body-color);
+  opacity: 0.5;
+}
+
+.tree-leaf:hover {
+  background-color: var(--bs-secondary-bg);
+  opacity: 0.7;
+}
+
+.tree-leaf.active {
+  background-color: var(--active-item-bg);
+  color: var(--bs-body-color);
+  border-left-color: var(--topic-color);
+  opacity: 1;
+  font-weight: 700;
+}
+
+.tree-leaf.solved {
+  border-left-color: var(--success-color);
+  opacity: 1;
+}
+
+.tree-toggle {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.7rem;
+  flex-shrink: 0;
+  width: 0.85rem;
+}
+
+.tree-label {
+  flex: 1;
+}
+
+/* Topic color attribute selectors */
+[data-topic-index="0"] { --topic-color: var(--topic-color-0); }
+[data-topic-index="1"] { --topic-color: var(--topic-color-1); }
+[data-topic-index="2"] { --topic-color: var(--topic-color-2); }
+[data-topic-index="3"] { --topic-color: var(--topic-color-3); }
+[data-topic-index="4"] { --topic-color: var(--topic-color-4); }
+[data-topic-index="5"] { --topic-color: var(--topic-color-5); }
+
+.tree-topic[data-topic-index] {
+  border-left-color: var(--topic-color);
+}
+
 /* Code editor */
 .code-editor-wrapper {
   position: absolute;

@@ -76,6 +76,7 @@ let isSettingNotesValue = false;
 let notesPreviewMode = true;
 let notesSavedHeight = null;
 let notesViewState = 'normal';
+let treeExpanded = {};
 
 function init() {
   if (!problemDataEl || !activeProblemInput) {
@@ -586,26 +587,157 @@ function setEditorValue(value) {
   isSettingValue = false;
 }
 
+function buildQuestionTree() {
+  const tree = {};
+  questions.forEach((q) => {
+    const topic = q.topic || '';
+    const subtopic = q.subtopic || '';
+    if (!tree[topic]) tree[topic] = {};
+    if (!tree[topic][subtopic]) tree[topic][subtopic] = [];
+    tree[topic][subtopic].push(q);
+  });
+  return tree;
+}
+
+function toggleTopic(topic) {
+  treeExpanded[topic] = !treeExpanded[topic];
+  renderQuestionList(questionSearchEl ? questionSearchEl.value : '');
+}
+
+function toggleSubtopic(topic, subtopic) {
+  const key = topic + '/' + subtopic;
+  treeExpanded[key] = !treeExpanded[key];
+  renderQuestionList(questionSearchEl ? questionSearchEl.value : '');
+}
+
+function getWeight(q, key, fallback) {
+  const v = q[key];
+  return (v !== null && v !== undefined && v !== '') ? Number(v) : fallback;
+}
+
 function renderQuestionList(filter = '') {
   questionListEl.innerHTML = '';
 
-  const filtered = questions.filter((q) =>
-    q.title.toLowerCase().includes(filter.toLowerCase())
+  const tree = buildQuestionTree();
+  const filterLower = filter.toLowerCase();
+
+  // Compute min weight for each topic and subtopic
+  const topicWeight = {};
+  const subtopicWeight = {};
+  questions.forEach((q) => {
+    const t = q.topic || '';
+    const st = q.subtopic || '';
+    const tw = getWeight(q, 'topic_weight', 99);
+    const sw = getWeight(q, 'subtopic_weight', 99);
+    if (topicWeight[t] === undefined || tw < topicWeight[t]) topicWeight[t] = tw;
+    const sk = t + '/' + st;
+    if (subtopicWeight[sk] === undefined || sw < subtopicWeight[sk]) subtopicWeight[sk] = sw;
+  });
+
+  const sortedTopics = Object.keys(tree).sort(
+    (a, b) => (topicWeight[a] ?? 99) - (topicWeight[b] ?? 99)
   );
 
-  filtered.forEach((q) => {
-    const li = document.createElement('li');
-    li.className = 'list-group-item';
-    if (q.id === activeQuestionId) li.classList.add('active');
-    if (submissions[q.id]?.status === 'Accepted') li.classList.add('solved');
+  sortedTopics.forEach((topic, topicIndex) => {
+    const subtopics = tree[topic];
+    const isTopicExpanded = treeExpanded[topic] || filter.length > 0;
 
-    li.innerHTML = `
-      <div class="question-title">${escapeHtml(q.title)}</div>
-      <div class="question-meta">${q.difficulty} · ${submissions[q.id]?.status || 'Unattempted'}</div>
+    let hasVisibleChildren = false;
+    Object.keys(subtopics).forEach((subtopic) => {
+      const questions = subtopics[subtopic];
+      const visibleQ = filter.length > 0
+        ? questions.filter((q) => q.title.toLowerCase().includes(filterLower))
+        : questions;
+      if (visibleQ.length > 0 || (isTopicExpanded && questions.length > 0)) {
+        hasVisibleChildren = true;
+      }
+    });
+
+    if (!hasVisibleChildren) return;
+
+    // Topic header
+    const topicDiv = document.createElement('div');
+    topicDiv.className = 'tree-topic';
+    topicDiv.dataset.topicIndex = topicIndex;
+    if (filter.length > 0) topicDiv.classList.add('expanded');
+    else topicDiv.classList.toggle('expanded', !!treeExpanded[topic]);
+    topicDiv.innerHTML = `
+      <span class="tree-toggle">
+        <i class="bi ${treeExpanded[topic] || filter.length > 0 ? 'bi-chevron-down' : 'bi-chevron-right'}"></i>
+      </span>
+      <span class="tree-label">${escapeHtml(topic)}</span>
     `;
+    topicDiv.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleTopic(topic);
+    });
+    questionListEl.appendChild(topicDiv);
 
-    li.addEventListener('click', () => selectQuestion(q.id));
-    questionListEl.appendChild(li);
+    // Subtopic containers
+    if (!treeExpanded[topic] && filter.length === 0) return;
+
+    const sortedSubtopics = Object.keys(subtopics).sort((a, b) => {
+      const skA = topic + '/' + a;
+      const skB = topic + '/' + b;
+      return (subtopicWeight[skA] ?? 99) - (subtopicWeight[skB] ?? 99);
+    });
+
+    sortedSubtopics.forEach((subtopic) => {
+      const questions = subtopics[subtopic];
+      const visibleQ = filter.length > 0
+        ? questions.filter((q) => q.title.toLowerCase().includes(filterLower))
+        : questions;
+      if (visibleQ.length === 0 && !(isTopicExpanded && questions.length > 0)) return;
+
+      const subKey = topic + '/' + subtopic;
+      const isSubExpanded = treeExpanded[subKey] || filter.length > 0;
+
+      // Subtopic header
+      const subDiv = document.createElement('div');
+      subDiv.className = 'tree-subtopic';
+      subDiv.dataset.topicIndex = topicIndex;
+      if (filter.length > 0) subDiv.classList.add('expanded');
+      else subDiv.classList.toggle('expanded', !!treeExpanded[subKey]);
+      subDiv.innerHTML = `
+        <span class="tree-toggle">
+          <i class="bi ${treeExpanded[subKey] || filter.length > 0 ? 'bi-chevron-down' : 'bi-chevron-right'}"></i>
+        </span>
+        <span class="tree-label">${escapeHtml(subtopic)}</span>
+      `;
+      subDiv.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleSubtopic(topic, subtopic);
+      });
+      questionListEl.appendChild(subDiv);
+
+      // Questions
+      if (!isSubExpanded) return;
+
+      const sortedQuestions = [...questions].sort(
+        (a, b) => (getWeight(a, 'weight', 99) - getWeight(b, 'weight', 99))
+      );
+
+      sortedQuestions.forEach((q) => {
+        if (filter.length > 0 && !q.title.toLowerCase().includes(filterLower)) return;
+
+        const item = document.createElement('div');
+        item.className = 'tree-leaf';
+        item.dataset.topicIndex = topicIndex;
+        if (q.id === activeQuestionId) item.classList.add('active');
+        if (submissions[q.id]?.status === 'Accepted') item.classList.add('solved');
+
+        item.innerHTML = `
+          <div class="question-title">${escapeHtml(q.title)}</div>
+          <div class="question-meta">${q.difficulty} · ${submissions[q.id]?.status || 'Unattempted'}</div>
+        `;
+
+        item.addEventListener('click', (e) => {
+          e.stopPropagation();
+          selectQuestion(q.id);
+        });
+        questionListEl.appendChild(item);
+      });
+    });
   });
 }
 
@@ -644,6 +776,13 @@ function selectQuestion(id) {
     updateStatus('Unattempted');
   }
 
+  // Expand the tree to show the active problem
+  if (question.topic) {
+    treeExpanded[question.topic] = true;
+    if (question.subtopic) {
+      treeExpanded[question.topic + '/' + question.subtopic] = true;
+    }
+  }
   renderQuestionList(questionSearchEl ? questionSearchEl.value : '');
   try {
     history.replaceState(null, '', question.permalink);

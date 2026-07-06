@@ -6,6 +6,9 @@
 <script id="problem-data" type="application/json">
 {{ $data := slice }}
 {{ range $problems }}
+  {{ $parts := split (strings.TrimSuffix "/" .File.Dir) "/" }}
+  {{ $topic := index $parts 1 }}
+  {{ $subtopic := index $parts 2 }}
   {{ $item := dict
     "id" .File.ContentBaseName
     "title" .Title
@@ -15,6 +18,11 @@
     "content" .Content
     "initial_code" .Params.initial_code
     "test_cases" .Params.test_cases
+    "topic" $topic
+    "subtopic" $subtopic
+    "topic_weight" (cond (isset .Params "topic_weight") (.Params.topic_weight | int) 99)
+    "subtopic_weight" (cond (isset .Params "subtopic_weight") (.Params.subtopic_weight | int) 99)
+    "weight" (cond (isset .Params "weight") (.Params.weight | int) 99)
   }}
   {{ $data = $data | append $item }}
 {{ end }}
@@ -29,7 +37,7 @@
       <input type="text" id="questionSearch" class="form-control form-control-sm" placeholder="Search cases...">
     </div>
     <div class="pane-body overflow-auto p-2">
-      <ul class="list-group list-group-flush" id="questionList"></ul>
+      <div class="tree-container" id="questionList"></div>
     </div>
   </aside>
 

@@ -4,6 +4,9 @@ draft = false
 title = 'Read an ADC Value'
 difficulty = 'easy'
 language = 'c'
+topic_weight = 1
+subtopic_weight = 3
+weight = 1
 initial_code = '''#include <stdint.h>
 
 uint16_t adc_read(int channel);

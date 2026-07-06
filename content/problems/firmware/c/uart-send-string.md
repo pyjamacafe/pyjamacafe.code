@@ -4,6 +4,9 @@ draft = false
 title = 'UART Send String'
 difficulty = 'medium'
 language = 'c'
+topic_weight = 1
+subtopic_weight = 1
+weight = 2
 initial_code = '''void uart_putc(char c);
 
 void uart_send_string(const char *str) {

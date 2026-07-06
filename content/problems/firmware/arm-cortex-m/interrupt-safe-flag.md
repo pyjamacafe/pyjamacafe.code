@@ -4,6 +4,9 @@ draft = false
 title = 'Interrupt-safe Flag'
 difficulty = 'hard'
 language = 'c'
+topic_weight = 1
+subtopic_weight = 2
+weight = 1
 initial_code = '''volatile int event_flag = 0;
 
 void irq_disable(void);

@@ -4,6 +4,9 @@ draft = false
 title = 'Blink an LED'
 difficulty = 'easy'
 language = 'c'
+topic_weight = 1
+subtopic_weight = 1
+weight = 1
 initial_code = '''#include <stdint.h>
 
 void gpio_set(int pin, int value);
