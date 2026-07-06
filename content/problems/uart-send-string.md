@@ -3,6 +3,7 @@ date = '2026-07-05T22:00:00+05:30'
 draft = false
 title = 'UART Send String'
 difficulty = 'medium'
+language = 'c'
 initial_code = '''void uart_putc(char c);
 
 void uart_send_string(const char *str) {

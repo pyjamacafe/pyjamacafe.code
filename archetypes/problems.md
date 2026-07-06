@@ -3,6 +3,7 @@ date = '{{ .Date }}'
 draft = false
 title = '{{ replace .File.ContentBaseName "-" " " | title }}'
 difficulty = 'easy'
+language = 'c'
 initial_code = '''// Starter code for {{ .File.ContentBaseName }}
 
 '''

@@ -3,6 +3,7 @@ date = '2026-07-05T22:00:00+05:30'
 draft = false
 title = 'Interrupt-safe Flag'
 difficulty = 'hard'
+language = 'c'
 initial_code = '''volatile int event_flag = 0;
 
 void irq_disable(void);

@@ -3,6 +3,7 @@ date = '2026-07-05T22:00:00+05:30'
 draft = false
 title = 'Blink an LED'
 difficulty = 'easy'
+language = 'c'
 initial_code = '''#include <stdint.h>
 
 void gpio_set(int pin, int value);

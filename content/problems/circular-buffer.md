@@ -3,6 +3,7 @@ date = '2026-07-05T22:00:00+05:30'
 draft = false
 title = 'Circular Buffer'
 difficulty = 'medium'
+language = 'c'
 initial_code = '''#include <stdint.h>
 
 #define BUFFER_SIZE 16

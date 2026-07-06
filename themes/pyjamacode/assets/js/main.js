@@ -5,12 +5,13 @@ const difficultyClasses = {
 };
 
 const statusClasses = {
-  Ready: 'text-bg-secondary',
+  Unattempted: 'text-bg-secondary',
+  'In Progress': 'text-bg-warning',
   Compiled: 'text-bg-info',
   Accepted: 'text-bg-success',
-  'Wrong Answer': 'text-bg-danger',
+  Wrong: 'text-bg-danger',
   'Compilation Error': 'text-bg-danger',
-  'In progress': 'text-bg-warning',
+  'Runtime Error': 'text-bg-danger',
 };
 
 const languageModes = {
@@ -27,13 +28,16 @@ const questionListEl = document.getElementById('questionList');
 const questionSearchEl = document.getElementById('questionSearch');
 const questionContentEl = document.getElementById('questionContent');
 const difficultyBadgeEl = document.getElementById('difficultyBadge');
+const caseTitleEl = document.getElementById('caseTitle');
 const codeEditorEl = document.getElementById('codeEditor');
 const codeEditorWrapper = document.getElementById('codeEditorWrapper');
-const languageSelectEl = document.getElementById('languageSelect');
+const languageLabelEl = document.getElementById('languageLabel');
 const consoleOutputEl = document.getElementById('consoleOutput');
 const statusTextEl = document.getElementById('statusText');
+const workspaceTitleEl = document.getElementById('workspaceTitle');
 const runBtn = document.getElementById('runBtn');
 const submitBtn = document.getElementById('submitBtn');
+const resetBtn = document.getElementById('resetBtn');
 const clearConsoleBtn = document.getElementById('clearConsole');
 const themeToggle = document.getElementById('themeToggle');
 const themeIcon = document.getElementById('themeIcon');
@@ -41,14 +45,18 @@ const sidebarPane = document.getElementById('sidebarPane');
 const editorPane = document.getElementById('editorPane');
 const questionPane = document.getElementById('questionPane');
 const consoleArea = document.getElementById('consoleArea');
-const resizerSidebarEditor = document.getElementById('resizerSidebarEditor');
-const resizerEditorQuestion = document.getElementById('resizerEditorQuestion');
+const resizerCasesCase = document.getElementById('resizerCasesCase');
+const resizerCaseWorkspace = document.getElementById('resizerCaseWorkspace');
 const resizerEditorConsole = document.getElementById('resizerEditorConsole');
+
+const SUBMISSIONS_STORAGE_KEY = 'pyjamacode-submissions';
 
 let questions = [];
 let activeQuestionId = null;
 let submissions = {};
 let codeMirror = null;
+let saveTimeout = null;
+let isSettingValue = false;
 
 function init() {
   if (!problemDataEl || !activeProblemInput) {
@@ -66,6 +74,7 @@ function init() {
   activeQuestionId = activeProblemInput.value || (questions[0] && questions[0].id);
 
   loadTheme();
+  loadSubmissions();
   initCodeMirror();
   renderQuestionList();
   selectQuestion(activeQuestionId);
@@ -73,23 +82,32 @@ function init() {
   if (questionSearchEl) {
     questionSearchEl.addEventListener('input', (e) => renderQuestionList(e.target.value));
   }
-  if (languageSelectEl) {
-    languageSelectEl.addEventListener('change', updateCodeMirrorMode);
-  }
   if (runBtn) runBtn.addEventListener('click', runCode);
   if (submitBtn) submitBtn.addEventListener('click', submitCode);
+  if (resetBtn) resetBtn.addEventListener('click', resetCase);
   if (clearConsoleBtn) clearConsoleBtn.addEventListener('click', () => (consoleOutputEl.textContent = ''));
   if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
+
+  document.addEventListener('keydown', handleKeyboardShortcuts);
 
   initResizers();
 }
 
-function initResizers() {
-  if (resizerSidebarEditor && sidebarPane) {
-    setupHorizontalResize(resizerSidebarEditor, sidebarPane, 'left');
+function handleKeyboardShortcuts(e) {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+    e.preventDefault();
+    if (activeQuestionId) {
+      saveCurrentCode();
+    }
   }
-  if (resizerEditorQuestion && questionPane) {
-    setupHorizontalResize(resizerEditorQuestion, questionPane, 'right');
+}
+
+function initResizers() {
+  if (resizerCasesCase && sidebarPane) {
+    setupHorizontalResize(resizerCasesCase, sidebarPane, 'left');
+  }
+  if (resizerCaseWorkspace && questionPane) {
+    setupHorizontalResize(resizerCaseWorkspace, questionPane, 'left');
   }
   if (resizerEditorConsole && consoleArea && editorPane) {
     setupVerticalResize(resizerEditorConsole, consoleArea, editorPane);
@@ -177,9 +195,12 @@ function initCodeMirror() {
     return;
   }
 
+  const activeQuestion = questions.find((q) => q.id === activeQuestionId);
+  const language = activeQuestion?.language || 'c';
+
   codeMirror = CodeMirror(codeEditorWrapper, {
     value: codeEditorEl ? codeEditorEl.value : '',
-    mode: languageModes[languageSelectEl ? languageSelectEl.value : 'c'] || 'text/plain',
+    mode: languageModes[language] || 'text/plain',
     theme: getCodeMirrorTheme(),
     lineNumbers: true,
     tabSize: 4,
@@ -192,17 +213,20 @@ function initCodeMirror() {
     if (codeEditorEl) {
       codeEditorEl.value = codeMirror.getValue();
     }
+    if (!isSettingValue) {
+      debounceSaveCurrentCode();
+    }
   });
 }
 
 function getCodeMirrorTheme() {
   const theme = htmlEl.getAttribute('data-bs-theme');
-  return theme === 'dark' ? 'monokai' : 'eclipse';
+  return theme === 'dark' ? 'github-dark' : 'github-light';
 }
 
-function updateCodeMirrorMode() {
-  if (!codeMirror || !languageSelectEl) return;
-  const mode = languageModes[languageSelectEl.value] || 'text/plain';
+function updateCodeMirrorMode(language) {
+  if (!codeMirror) return;
+  const mode = languageModes[language] || 'text/plain';
   codeMirror.setOption('mode', mode);
 }
 
@@ -216,12 +240,14 @@ function getEditorValue() {
 }
 
 function setEditorValue(value) {
+  isSettingValue = true;
   if (codeMirror) {
     codeMirror.setValue(value);
   }
   if (codeEditorEl) {
     codeEditorEl.value = value;
   }
+  isSettingValue = false;
 }
 
 function renderQuestionList(filter = '') {
@@ -239,7 +265,7 @@ function renderQuestionList(filter = '') {
 
     li.innerHTML = `
       <div class="question-title">${escapeHtml(q.title)}</div>
-      <div class="question-meta">${q.difficulty} · ${submissions[q.id]?.status || 'Not attempted'}</div>
+      <div class="question-meta">${q.difficulty} · ${submissions[q.id]?.status || 'Unattempted'}</div>
     `;
 
     li.addEventListener('click', () => selectQuestion(q.id));
@@ -253,8 +279,15 @@ function selectQuestion(id) {
   if (!question) return;
 
   questionContentEl.innerHTML = question.content;
+  if (caseTitleEl) {
+    caseTitleEl.textContent = question.title;
+  }
   difficultyBadgeEl.textContent = question.difficulty;
   difficultyBadgeEl.className = 'badge ' + (difficultyClasses[question.difficulty] || 'text-bg-secondary');
+  if (languageLabelEl) {
+    languageLabelEl.textContent = (question.language || 'c').toUpperCase();
+  }
+  updateCodeMirrorMode(question.language || 'c');
 
   const savedCode = submissions[id]?.code;
   const starterCode = question.initial_code || '';
@@ -262,11 +295,11 @@ function selectQuestion(id) {
 
   const sub = submissions[id];
   if (sub) {
-    consoleOutputEl.textContent = sub.output;
+    consoleOutputEl.innerHTML = colorizeOutput(sub.output);
     updateStatus(sub.status);
   } else {
-    consoleOutputEl.textContent = 'Ready to code. Click Run to compile or Submit to check your solution.';
-    updateStatus('Ready');
+    consoleOutputEl.textContent = 'Ready to code. Click Run to compile or Submit to check this case.';
+    updateStatus('Unattempted');
   }
 
   renderQuestionList(questionSearchEl ? questionSearchEl.value : '');
@@ -278,36 +311,102 @@ function selectQuestion(id) {
 }
 
 function updateStatus(status) {
-  statusTextEl.textContent = status;
-  statusTextEl.className = 'badge ' + (statusClasses[status] || 'text-bg-secondary');
+  const displayStatus = status || 'Unattempted';
+  if (statusTextEl) {
+    statusTextEl.textContent = displayStatus;
+  }
+  if (workspaceTitleEl) {
+    workspaceTitleEl.textContent = 'Status: ' + displayStatus;
+    workspaceTitleEl.className = 'mb-0 ' + (
+      displayStatus === 'Accepted' ? 'text-pass' :
+      displayStatus === 'Wrong Answer' || displayStatus === 'Runtime Error' || displayStatus === 'Compilation Error' ? 'text-fail' :
+      ''
+    );
+  }
+}
+
+function loadSubmissions() {
+  try {
+    const saved = localStorage.getItem(SUBMISSIONS_STORAGE_KEY);
+    if (saved) {
+      submissions = JSON.parse(saved) || {};
+    }
+  } catch (e) {
+    console.warn('Failed to load saved submissions:', e);
+    submissions = {};
+  }
+}
+
+function persistSubmissions() {
+  try {
+    localStorage.setItem(SUBMISSIONS_STORAGE_KEY, JSON.stringify(submissions));
+  } catch (e) {
+    console.warn('Failed to save submissions:', e);
+  }
+}
+
+function resetCase() {
+  if (!activeQuestionId) return;
+  const question = questions.find((q) => q.id === activeQuestionId);
+  if (!question) return;
+
+  delete submissions[activeQuestionId];
+  persistSubmissions();
+
+  setEditorValue(question.initial_code || '');
+  consoleOutputEl.textContent = 'Code reset to initial state.';
+  updateStatus('Unattempted');
+  renderQuestionList(questionSearchEl ? questionSearchEl.value : '');
 }
 
 function saveCurrentCode() {
   if (!activeQuestionId) return;
   if (!submissions[activeQuestionId]) {
-    submissions[activeQuestionId] = { status: 'In progress', output: '', code: '' };
+    submissions[activeQuestionId] = { status: 'In Progress', output: '', code: '' };
   }
   submissions[activeQuestionId].code = getEditorValue();
+  if (submissions[activeQuestionId].status === 'Unattempted') {
+    submissions[activeQuestionId].status = 'In Progress';
+    updateStatus('In Progress');
+    renderQuestionList(questionSearchEl ? questionSearchEl.value : '');
+  }
+  persistSubmissions();
+}
+
+function debounceSaveCurrentCode() {
+  if (saveTimeout) {
+    clearTimeout(saveTimeout);
+  }
+  saveTimeout = setTimeout(() => {
+    saveCurrentCode();
+  }, 500);
 }
 
 function runCode() {
   if (!activeQuestionId) {
-    consoleOutputEl.textContent = 'Please select a question first.';
+    consoleOutputEl.textContent = 'Please select a case first.';
     return;
   }
 
   saveCurrentCode();
-  consoleOutputEl.textContent = 'Compiling...\n';
+  consoleOutputEl.innerHTML = 'Compiling...\n';
 
   setTimeout(() => {
-    consoleOutputEl.textContent += 'Build succeeded. (Simulation mode)\n';
+    const output = 'Build succeeded. (Simulation mode)\n';
+    consoleOutputEl.innerHTML += output;
     updateStatus('Compiled');
+    if (submissions[activeQuestionId]) {
+      submissions[activeQuestionId].status = 'Compiled';
+      submissions[activeQuestionId].output = output;
+      persistSubmissions();
+      renderQuestionList(questionSearchEl ? questionSearchEl.value : '');
+    }
   }, 600);
 }
 
 function submitCode() {
   if (!activeQuestionId) {
-    consoleOutputEl.textContent = 'Please select a question first.';
+    consoleOutputEl.textContent = 'Please select a case first.';
     return;
   }
 
@@ -322,18 +421,19 @@ function submitCode() {
     const testCases = question.test_cases || [];
     const expected = testCases[0]?.expected || 'All tests passed';
 
-    let status, output;
+    let status, outputHtml;
     if (hasContent && Math.random() > 0.3) {
       status = 'Accepted';
-      output = `All test cases passed.\n${expected}\nExecution time: 12 ms`;
+      outputHtml = `<span class="text-pass">All test cases passed.</span>\n${escapeHtml(expected)}\nExecution time: 12 ms`;
     } else {
-      status = 'Wrong Answer';
-      output = `Test case 2 failed.\nExpected: ${expected}\nGot: incomplete implementation`;
+      status = 'Wrong';
+      outputHtml = `<span class="text-fail">Test case 2 failed.</span>\nExpected: ${escapeHtml(expected)}\nGot: incomplete implementation`;
     }
 
-    submissions[activeQuestionId] = { status, output, code };
+    submissions[activeQuestionId] = { status, output: outputHtml, code };
+    persistSubmissions();
 
-    consoleOutputEl.textContent = output;
+    consoleOutputEl.innerHTML = outputHtml;
     updateStatus(status);
     renderQuestionList(questionSearchEl ? questionSearchEl.value : '');
   }, 1000);
@@ -343,13 +443,18 @@ function toggleTheme() {
   const currentTheme = htmlEl.getAttribute('data-bs-theme');
   const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
   htmlEl.setAttribute('data-bs-theme', newTheme);
-  themeIcon.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+  updateThemeIcon(newTheme);
   updateCodeMirrorTheme();
   try {
     localStorage.setItem('pyjamacode-theme', newTheme);
   } catch (e) {
     // localStorage may be unavailable (e.g. file:// origins).
   }
+}
+
+function updateThemeIcon(theme) {
+  if (!themeIcon) return;
+  themeIcon.className = theme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
 }
 
 function loadTheme() {
@@ -360,7 +465,20 @@ function loadTheme() {
     // localStorage may be unavailable (e.g. file:// origins).
   }
   htmlEl.setAttribute('data-bs-theme', savedTheme);
-  themeIcon.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+  updateThemeIcon(savedTheme);
+}
+
+function colorizeOutput(output) {
+  if (!output) return '';
+  // If already HTML, return as-is.
+  if (output.includes('<span')) return output;
+
+  return output
+    .replace(/(All test cases passed\.?)/gi, '<span class="text-pass">$1</span>')
+    .replace(/(Test case \d+ failed\.?)/gi, '<span class="text-fail">$1</span>')
+    .replace(/(Build succeeded\.?)/gi, '<span class="text-pass">$1</span>')
+    .replace(/(Compilation Error\.?)/gi, '<span class="text-fail">$1</span>')
+    .replace(/(Runtime Error\.?)/gi, '<span class="text-fail">$1</span>');
 }
 
 function escapeHtml(text) {

@@ -3,6 +3,7 @@ date = '2026-07-05T22:00:00+05:30'
 draft = false
 title = 'Read an ADC Value'
 difficulty = 'easy'
+language = 'c'
 initial_code = '''#include <stdint.h>
 
 uint16_t adc_read(int channel);

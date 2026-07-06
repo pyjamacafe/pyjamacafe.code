@@ -130,17 +130,27 @@ body {
   width: 20%;
 }
 
-#editorPane {
+#questionPane {
   flex: 1 1 auto;
-  width: 55%;
+  width: 40%;
 }
 
-#questionPane {
-  width: 25%;
+#editorPane {
+  width: 40%;
 }
 
 .pane-header {
   flex: 0 0 auto;
+  height: 56px;
+  min-height: 56px;
+  padding: 0 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.pane-header h5 {
+  margin: 0;
+  line-height: 1.2;
 }
 
 .pane-body {
@@ -205,6 +215,16 @@ body {
     var(--accent-color) 65%,
     transparent 65%
   );
+}
+
+.text-pass {
+  color: var(--success-color);
+  font-weight: 600;
+}
+
+.text-fail {
+  color: var(--danger-color);
+  font-weight: 600;
 }
 
 .console-area {
@@ -307,12 +327,83 @@ body {
   border: none;
 }
 
-.cm-s-eclipse.CodeMirror {
-  background-color: var(--gh-light-code-bg);
+/* GitHub-like CodeMirror themes */
+.cm-s-github-light.CodeMirror {
+  background-color: #ffffff;
+  color: #1f2328;
 }
 
-.cm-s-monokai.CodeMirror {
-  background-color: var(--gh-dark-code-bg);
+.cm-s-github-light .cm-comment { color: #6e7781; font-style: italic; }
+.cm-s-github-light .cm-keyword { color: #cf222e; }
+.cm-s-github-light .cm-string { color: #0a3069; }
+.cm-s-github-light .cm-string-2 { color: #0a3069; }
+.cm-s-github-light .cm-number { color: #0550ae; }
+.cm-s-github-light .cm-atom { color: #0550ae; }
+.cm-s-github-light .cm-operator { color: #1f2328; }
+.cm-s-github-light .cm-variable { color: #953800; }
+.cm-s-github-light .cm-variable-2 { color: #953800; }
+.cm-s-github-light .cm-variable-3 { color: #953800; }
+.cm-s-github-light .cm-property { color: #8250df; }
+.cm-s-github-light .cm-def { color: #8250df; }
+.cm-s-github-light .cm-type { color: #953800; }
+.cm-s-github-light .cm-builtin { color: #8250df; }
+.cm-s-github-light .cm-tag { color: #116329; }
+.cm-s-github-light .cm-attribute { color: #953800; }
+.cm-s-github-light .cm-meta { color: #1f2328; }
+.cm-s-github-light .cm-qualifier { color: #953800; }
+.cm-s-github-light .cm-bracket { color: #1f2328; }
+.cm-s-github-light .cm-error { color: #cf222e; }
+.cm-s-github-light .CodeMirror-gutters {
+  background-color: #ffffff;
+  border-right: 1px solid #d0d7de;
+}
+.cm-s-github-light .CodeMirror-linenumber {
+  color: #6e7781;
+}
+.cm-s-github-light .CodeMirror-cursor {
+  border-left: 1px solid #1f2328;
+}
+.cm-s-github-light .CodeMirror-selected {
+  background-color: #b4d7ff;
+}
+
+.cm-s-github-dark.CodeMirror {
+  background-color: #0d1117;
+  color: #c9d1d9;
+}
+
+.cm-s-github-dark .cm-comment { color: #8b949e; font-style: italic; }
+.cm-s-github-dark .cm-keyword { color: #ff7b72; }
+.cm-s-github-dark .cm-string { color: #a5d6ff; }
+.cm-s-github-dark .cm-string-2 { color: #a5d6ff; }
+.cm-s-github-dark .cm-number { color: #79c0ff; }
+.cm-s-github-dark .cm-atom { color: #79c0ff; }
+.cm-s-github-dark .cm-operator { color: #c9d1d9; }
+.cm-s-github-dark .cm-variable { color: #ffa657; }
+.cm-s-github-dark .cm-variable-2 { color: #ffa657; }
+.cm-s-github-dark .cm-variable-3 { color: #ffa657; }
+.cm-s-github-dark .cm-property { color: #d2a8ff; }
+.cm-s-github-dark .cm-def { color: #d2a8ff; }
+.cm-s-github-dark .cm-type { color: #ffa657; }
+.cm-s-github-dark .cm-builtin { color: #d2a8ff; }
+.cm-s-github-dark .cm-tag { color: #7ee787; }
+.cm-s-github-dark .cm-attribute { color: #ffa657; }
+.cm-s-github-dark .cm-meta { color: #c9d1d9; }
+.cm-s-github-dark .cm-qualifier { color: #ffa657; }
+.cm-s-github-dark .cm-bracket { color: #c9d1d9; }
+.cm-s-github-dark .cm-error { color: #ff7b72; }
+.cm-s-github-dark .CodeMirror-gutters {
+  background-color: #0d1117;
+  border-right: 1px solid #30363d;
+}
+.cm-s-github-dark .CodeMirror-linenumber {
+  color: #8b949e;
+}
+.cm-s-github-dark .CodeMirror-cursor {
+  border-left: 1px solid #c9d1d9;
+}
+.cm-s-github-dark .CodeMirror-selected {
+  background-color: #264f78;
 }
 
 .code-editor {
