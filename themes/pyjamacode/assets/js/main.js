@@ -70,7 +70,7 @@ let saveTimeout = null;
 let notesSaveTimeout = null;
 let isSettingValue = false;
 let isSettingNotesValue = false;
-let notesPreviewMode = false;
+let notesPreviewMode = true;
 
 function init() {
   if (!problemDataEl || !activeProblemInput) {
@@ -94,6 +94,7 @@ function init() {
   initNotesCodeMirror();
   renderQuestionList();
   selectQuestion(activeQuestionId);
+  setNotesPreviewMode(true);
 
   if (questionSearchEl) {
     questionSearchEl.addEventListener('input', (e) => renderQuestionList(e.target.value));
@@ -105,6 +106,7 @@ function init() {
   if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
   if (notesModeBtn) notesModeBtn.addEventListener('click', toggleNotesMode);
   if (exportNotesBtn) exportNotesBtn.addEventListener('click', exportNotes);
+  if (notesPreviewEl) notesPreviewEl.addEventListener('dblclick', () => setNotesPreviewMode(false));
 
   document.addEventListener('keydown', handleKeyboardShortcuts);
 
@@ -120,6 +122,10 @@ function handleKeyboardShortcuts(e) {
       saveCurrentCode();
       saveCurrentNotes();
     }
+  }
+  if (e.key === 'Escape' && !notesPreviewMode) {
+    e.preventDefault();
+    setNotesPreviewMode(true);
   }
 }
 
@@ -412,23 +418,28 @@ function debounceSaveCurrentNotes() {
   }, 500);
 }
 
-function toggleNotesMode() {
-  notesPreviewMode = !notesPreviewMode;
+function setNotesPreviewMode(preview) {
+  notesPreviewMode = preview;
   if (notesPreviewMode) {
+    saveCurrentNotes();
     renderNotesPreview();
     if (notesEditorWrapper) notesEditorWrapper.classList.add('d-none');
     if (notesEditorEl) notesEditorEl.style.display = 'none';
     if (notesPreviewEl) notesPreviewEl.classList.remove('d-none');
-    if (notesModeBtn) notesModeBtn.innerHTML = '<i class="bi bi-pencil-square"></i> Edit';
-    updateTooltip(notesModeBtn, 'Switch to edit mode');
+    if (notesModeBtn) notesModeBtn.innerHTML = '<i class="bi bi-pencil-square"></i>';
+    updateTooltip(notesModeBtn, 'Edit notes');
   } else {
     if (notesEditorWrapper) notesEditorWrapper.classList.remove('d-none');
     if (notesEditorEl) notesEditorEl.style.display = 'none';
     if (notesPreviewEl) notesPreviewEl.classList.add('d-none');
-    if (notesModeBtn) notesModeBtn.innerHTML = '<i class="bi bi-eye"></i> Preview';
+    if (notesModeBtn) notesModeBtn.innerHTML = '<i class="bi bi-eye"></i>';
     updateTooltip(notesModeBtn, 'Preview rendered notes');
     if (notesCodeMirror) requestAnimationFrame(() => notesCodeMirror.refresh());
   }
+}
+
+function toggleNotesMode() {
+  setNotesPreviewMode(!notesPreviewMode);
 }
 
 function renderNotesPreview() {
