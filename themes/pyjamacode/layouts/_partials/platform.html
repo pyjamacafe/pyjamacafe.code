@@ -41,8 +41,27 @@
       <h5 class="mb-0" id="caseTitle">Case</h5>
       <span id="difficultyBadge" class="badge text-bg-success">Easy</span>
     </div>
-    <div class="pane-body question-content overflow-auto p-3" id="questionContent">
-      <p class="text-muted">Select a case from the left sidebar to begin.</p>
+    <div class="question-pane-body" id="questionPaneBody">
+      <div class="pane-body question-content overflow-auto p-3" id="questionContent">
+        <p class="text-muted">Select a case from the left sidebar to begin.</p>
+      </div>
+
+      <div class="notes-resizer" id="resizerQuestionNotes" aria-label="Resize notes"></div>
+
+      <div class="notes-area" id="notesArea">
+        <div class="notes-header px-3 py-2 border-bottom d-flex justify-content-between align-items-center">
+          <span class="fw-semibold small">Notes</span>
+          <div class="d-flex gap-2 align-items-center">
+            <button id="notesModeBtn" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="Preview rendered notes"><i class="bi bi-eye"></i> Preview</button>
+            <button id="exportNotesBtn" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="Export notes as .md file"><i class="bi bi-download"></i> Export</button>
+          </div>
+        </div>
+        <div class="notes-body" id="notesBody">
+          <div id="notesEditorWrapper" class="notes-editor-wrapper"></div>
+          <textarea id="notesEditor" class="notes-editor w-100 h-100 p-3" spellcheck="false" placeholder="Take notes here..."></textarea>
+          <div id="notesPreview" class="notes-preview overflow-auto p-3 d-none"></div>
+        </div>
+      </div>
     </div>
   </aside>
 
@@ -54,9 +73,9 @@
       <h5 class="mb-0" id="workspaceTitle">Status: Unattempted</h5>
       <div class="d-flex gap-2 align-items-center">
         <span id="languageLabel" class="badge text-bg-secondary text-uppercase">C</span>
-        <button id="runBtn" class="btn btn-sm btn-info text-white"><i class="bi bi-play-fill"></i> Run</button>
-        <button id="submitBtn" class="btn btn-sm btn-success"><i class="bi bi-check-lg"></i> Submit</button>
-        <button id="resetBtn" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
+        <button id="runBtn" class="btn btn-sm btn-info text-white" data-bs-toggle="tooltip" title="Compile and run (Ctrl/Cmd + S)"><i class="bi bi-play-fill"></i> Run</button>
+        <button id="submitBtn" class="btn btn-sm btn-success" data-bs-toggle="tooltip" title="Submit solution"><i class="bi bi-check-lg"></i> Submit</button>
+        <button id="resetBtn" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="Reset code to starter"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
       </div>
     </div>
 
@@ -68,9 +87,9 @@
     <div class="console-resizer" id="resizerEditorConsole" aria-label="Resize console"></div>
 
     <div class="console-area" id="consoleArea">
-      <div class="console-header px-3 py-2 border-bottom d-flex justify-content-between align-items-center">
+        <div class="console-header px-3 py-2 border-bottom d-flex justify-content-between align-items-center">
         <span class="fw-semibold small">Output / Console</span>
-        <button id="clearConsole" class="btn btn-link btn-sm p-0 text-decoration-none">Clear</button>
+        <button id="clearConsole" class="btn btn-link btn-sm p-0 text-decoration-none" data-bs-toggle="tooltip" title="Clear console output"><i class="bi bi-eraser"></i> Clear</button>
       </div>
       <pre id="consoleOutput" class="console-output m-0 p-3">Select a case and start coding...</pre>
     </div>

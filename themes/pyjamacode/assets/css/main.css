@@ -187,20 +187,22 @@ body {
 .editor-area {
   flex: 1 1 auto;
   position: relative;
-  min-height: 120px;
+  min-height: 80px;
   overflow: hidden;
 }
 
 .console-resizer {
   flex: 0 0 auto;
-  height: 6px;
+  height: 8px;
+  position: relative;
   cursor: row-resize;
+  touch-action: none;
   background: linear-gradient(
     to bottom,
-    transparent 40%,
-    var(--border-color) 40%,
-    var(--border-color) 60%,
-    transparent 60%
+    transparent 30%,
+    var(--border-color) 30%,
+    var(--border-color) 70%,
+    transparent 70%
   );
   transition: background 0.15s ease;
   z-index: 10;
@@ -210,10 +212,10 @@ body {
 .console-resizer.resizing {
   background: linear-gradient(
     to bottom,
-    transparent 35%,
-    var(--accent-color) 35%,
-    var(--accent-color) 65%,
-    transparent 65%
+    transparent 25%,
+    var(--accent-color) 25%,
+    var(--accent-color) 75%,
+    transparent 75%
   );
 }
 
@@ -240,6 +242,146 @@ body {
 .editor-pane,
 .question-pane {
   background-color: var(--bs-body-bg);
+}
+
+/* Question pane vertical split: case content + notes */
+.question-pane-body {
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-rows: 1fr 8px auto;
+  overflow: hidden;
+}
+
+.question-content {
+  min-height: 60px;
+  overflow: auto;
+}
+
+.notes-resizer {
+  position: relative;
+  cursor: row-resize;
+  touch-action: none;
+  background: linear-gradient(
+    to bottom,
+    transparent 30%,
+    var(--border-color) 30%,
+    var(--border-color) 70%,
+    transparent 70%
+  );
+  transition: background 0.15s ease;
+  z-index: 10;
+}
+
+.notes-resizer:hover,
+.notes-resizer.resizing {
+  background: linear-gradient(
+    to bottom,
+    transparent 25%,
+    var(--accent-color) 25%,
+    var(--accent-color) 75%,
+    transparent 75%
+  );
+}
+
+.notes-area {
+  height: 200px;
+  min-height: 80px;
+  background-color: var(--bs-body-bg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.notes-header {
+  flex: 0 0 auto;
+  background-color: var(--bs-secondary-bg);
+  border-color: var(--border-color) !important;
+}
+
+.notes-body {
+  flex: 1 1 auto;
+  position: relative;
+  overflow: hidden;
+}
+
+.notes-editor-wrapper {
+  position: absolute;
+  inset: 0;
+}
+
+.notes-editor-wrapper .CodeMirror {
+  height: 100%;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  border: none;
+}
+
+.notes-editor {
+  display: none;
+  background-color: var(--editor-bg);
+  color: var(--editor-fg);
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  border: none;
+  outline: none;
+  resize: none;
+  tab-size: 4;
+}
+
+.notes-preview {
+  position: absolute;
+  inset: 0;
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.notes-preview h1,
+.notes-preview h2,
+.notes-preview h3,
+.notes-preview h4,
+.notes-preview h5,
+.notes-preview h6 {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+
+.notes-preview p {
+  margin-bottom: 0.75rem;
+}
+
+.notes-preview pre {
+  background-color: var(--editor-bg);
+  padding: 0.75rem;
+  border-radius: 0.375rem;
+  overflow-x: auto;
+}
+
+.notes-preview code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+}
+
+.notes-preview pre code {
+  background-color: transparent;
+  padding: 0;
+}
+
+.notes-preview ul,
+.notes-preview ol {
+  padding-left: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.notes-preview blockquote {
+  border-left: 4px solid var(--border-color);
+  padding-left: 1rem;
+  margin-left: 0;
+  color: var(--bs-secondary-color);
 }
 
 /* Navbar */
@@ -353,6 +495,12 @@ body {
 .cm-s-github-light .cm-qualifier { color: #953800; }
 .cm-s-github-light .cm-bracket { color: #1f2328; }
 .cm-s-github-light .cm-error { color: #cf222e; }
+.cm-s-github-light .cm-header { color: #953800; font-weight: 600; }
+.cm-s-github-light .cm-quote { color: #6e7781; font-style: italic; }
+.cm-s-github-light .cm-link { color: #0969da; text-decoration: underline; }
+.cm-s-github-light .cm-url { color: #0969da; }
+.cm-s-github-light .cm-strong { font-weight: 600; }
+.cm-s-github-light .cm-em { font-style: italic; }
 .cm-s-github-light .CodeMirror-gutters {
   background-color: #ffffff;
   border-right: 1px solid #d0d7de;
@@ -392,6 +540,12 @@ body {
 .cm-s-github-dark .cm-qualifier { color: #ffa657; }
 .cm-s-github-dark .cm-bracket { color: #c9d1d9; }
 .cm-s-github-dark .cm-error { color: #ff7b72; }
+.cm-s-github-dark .cm-header { color: #ffa657; font-weight: 600; }
+.cm-s-github-dark .cm-quote { color: #8b949e; font-style: italic; }
+.cm-s-github-dark .cm-link { color: #58a6ff; text-decoration: underline; }
+.cm-s-github-dark .cm-url { color: #58a6ff; }
+.cm-s-github-dark .cm-strong { font-weight: 600; }
+.cm-s-github-dark .cm-em { font-style: italic; }
 .cm-s-github-dark .CodeMirror-gutters {
   background-color: #0d1117;
   border-right: 1px solid #30363d;

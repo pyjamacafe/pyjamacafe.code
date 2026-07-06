@@ -48,15 +48,29 @@ const consoleArea = document.getElementById('consoleArea');
 const resizerCasesCase = document.getElementById('resizerCasesCase');
 const resizerCaseWorkspace = document.getElementById('resizerCaseWorkspace');
 const resizerEditorConsole = document.getElementById('resizerEditorConsole');
+const questionPaneBody = document.getElementById('questionPaneBody');
+const notesArea = document.getElementById('notesArea');
+const notesEditorEl = document.getElementById('notesEditor');
+const notesEditorWrapper = document.getElementById('notesEditorWrapper');
+const notesPreviewEl = document.getElementById('notesPreview');
+const notesModeBtn = document.getElementById('notesModeBtn');
+const exportNotesBtn = document.getElementById('exportNotesBtn');
+const resizerQuestionNotes = document.getElementById('resizerQuestionNotes');
 
 const SUBMISSIONS_STORAGE_KEY = 'pyjamacode-submissions';
+const NOTES_STORAGE_KEY = 'pyjamacode-notes';
 
 let questions = [];
 let activeQuestionId = null;
 let submissions = {};
+let notes = {};
 let codeMirror = null;
+let notesCodeMirror = null;
 let saveTimeout = null;
+let notesSaveTimeout = null;
 let isSettingValue = false;
+let isSettingNotesValue = false;
+let notesPreviewMode = false;
 
 function init() {
   if (!problemDataEl || !activeProblemInput) {
@@ -75,7 +89,9 @@ function init() {
 
   loadTheme();
   loadSubmissions();
+  loadNotes();
   initCodeMirror();
+  initNotesCodeMirror();
   renderQuestionList();
   selectQuestion(activeQuestionId);
 
@@ -87,10 +103,14 @@ function init() {
   if (resetBtn) resetBtn.addEventListener('click', resetCase);
   if (clearConsoleBtn) clearConsoleBtn.addEventListener('click', () => (consoleOutputEl.textContent = ''));
   if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
+  if (notesModeBtn) notesModeBtn.addEventListener('click', toggleNotesMode);
+  if (exportNotesBtn) exportNotesBtn.addEventListener('click', exportNotes);
 
   document.addEventListener('keydown', handleKeyboardShortcuts);
 
   initResizers();
+  initNotesResizer();
+  initTooltips();
 }
 
 function handleKeyboardShortcuts(e) {
@@ -98,6 +118,7 @@ function handleKeyboardShortcuts(e) {
     e.preventDefault();
     if (activeQuestionId) {
       saveCurrentCode();
+      saveCurrentNotes();
     }
   }
 }
@@ -110,36 +131,68 @@ function initResizers() {
     setupHorizontalResize(resizerCaseWorkspace, questionPane, 'left');
   }
   if (resizerEditorConsole && consoleArea && editorPane) {
-    setupVerticalResize(resizerEditorConsole, consoleArea, editorPane);
+    // Leave room for header (56px), resizer (8px), and editor-area min-height (80px).
+    setupVerticalResize(resizerEditorConsole, consoleArea, editorPane, () => editorPane.offsetHeight - 144);
   }
 }
 
+function initNotesResizer() {
+  if (resizerQuestionNotes && notesArea && questionPaneBody) {
+    // Leave room for resizer (8px) and question-content min-height (60px).
+    setupVerticalResize(resizerQuestionNotes, notesArea, questionPaneBody, () => questionPaneBody.offsetHeight - 68);
+  }
+}
+
+function createDragOverlay(cursor) {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = `position:fixed;inset:0;z-index:9999;cursor:${cursor};`;
+  document.body.appendChild(overlay);
+  return overlay;
+}
+
 function setupHorizontalResize(resizer, pane, side) {
-  let startX = 0;
-  let startWidth = 0;
+  if (!resizer || !pane) return;
 
   resizer.addEventListener('mousedown', (e) => {
     e.preventDefault();
-    startX = e.clientX;
-    startWidth = pane.offsetWidth;
+    e.stopPropagation();
+
+    const startX = e.clientX;
+    const startWidth = pane.getBoundingClientRect().width;
+    const minWidth = 180;
+    const maxWidth = Math.max(minWidth, Math.floor(window.innerWidth * 0.45));
+    const multiplier = side === 'left' ? 1 : -1;
+
     resizer.classList.add('resizing');
     document.body.style.userSelect = 'none';
+    const overlay = createDragOverlay('col-resize');
 
-    const onMouseMove = (e) => {
-      const deltaX = e.clientX - startX;
-      const multiplier = side === 'left' ? 1 : -1;
+    let refreshScheduled = false;
+    const scheduleRefresh = () => {
+      if (!refreshScheduled) {
+        refreshScheduled = true;
+        requestAnimationFrame(() => {
+          refreshEditors();
+          refreshScheduled = false;
+        });
+      }
+    };
+
+    const onMouseMove = (ev) => {
+      const deltaX = ev.clientX - startX;
       const newWidth = startWidth + deltaX * multiplier;
-      const clampedWidth = clamp(newWidth, 180, window.innerWidth * 0.45);
+      const clampedWidth = Math.min(Math.max(newWidth, minWidth), maxWidth);
       pane.style.width = `${clampedWidth}px`;
-      if (codeMirror) requestAnimationFrame(() => codeMirror.refresh());
+      scheduleRefresh();
     };
 
     const onMouseUp = () => {
+      overlay.remove();
       resizer.classList.remove('resizing');
       document.body.style.userSelect = '';
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
-      if (codeMirror) codeMirror.refresh();
+      refreshEditors();
     };
 
     document.addEventListener('mousemove', onMouseMove);
@@ -147,33 +200,51 @@ function setupHorizontalResize(resizer, pane, side) {
   });
 }
 
-function setupVerticalResize(resizer, pane, container) {
-  let startY = 0;
-  let startHeight = 0;
+function setupVerticalResize(resizer, pane, container, maxHeightFn = null) {
+  if (!resizer || !pane || !container) return;
 
   resizer.addEventListener('mousedown', (e) => {
     e.preventDefault();
-    startY = e.clientY;
-    startHeight = pane.offsetHeight;
+    e.stopPropagation();
+
+    const startY = e.clientY;
+    const startHeight = pane.getBoundingClientRect().height;
+    const minHeight = 80;
+    const rawMaxHeight = maxHeightFn
+      ? maxHeightFn()
+      : container.getBoundingClientRect().height * 0.7;
+    const maxHeight = Math.max(minHeight, Math.floor(rawMaxHeight));
+
     resizer.classList.add('resizing');
     document.body.style.userSelect = 'none';
+    const overlay = createDragOverlay('row-resize');
 
-    const onMouseMove = (e) => {
-      const deltaY = e.clientY - startY;
+    let refreshScheduled = false;
+    const scheduleRefresh = () => {
+      if (!refreshScheduled) {
+        refreshScheduled = true;
+        requestAnimationFrame(() => {
+          refreshEditors();
+          refreshScheduled = false;
+        });
+      }
+    };
+
+    const onMouseMove = (ev) => {
+      const deltaY = ev.clientY - startY;
       const newHeight = startHeight - deltaY;
-      const minHeight = 80;
-      const maxHeight = container.offsetHeight * 0.7;
-      const clampedHeight = clamp(newHeight, minHeight, maxHeight);
+      const clampedHeight = Math.min(Math.max(newHeight, minHeight), maxHeight);
       pane.style.height = `${clampedHeight}px`;
-      if (codeMirror) requestAnimationFrame(() => codeMirror.refresh());
+      scheduleRefresh();
     };
 
     const onMouseUp = () => {
+      overlay.remove();
       resizer.classList.remove('resizing');
       document.body.style.userSelect = '';
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
-      if (codeMirror) codeMirror.refresh();
+      refreshEditors();
     };
 
     document.addEventListener('mousemove', onMouseMove);
@@ -181,8 +252,28 @@ function setupVerticalResize(resizer, pane, container) {
   });
 }
 
-function clamp(value, min, max) {
-  return Math.min(Math.max(value, min), max);
+function refreshEditors() {
+  if (codeMirror) requestAnimationFrame(() => codeMirror.refresh());
+  if (notesCodeMirror) requestAnimationFrame(() => notesCodeMirror.refresh());
+}
+
+function initTooltips() {
+  if (typeof bootstrap === 'undefined' || !bootstrap.Tooltip) return;
+  const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+  tooltipTriggerList.forEach((el) => {
+    new bootstrap.Tooltip(el, { trigger: 'hover' });
+  });
+}
+
+function updateTooltip(element, title) {
+  if (!element) return;
+  element.setAttribute('title', title);
+  element.setAttribute('data-bs-original-title', title);
+  if (typeof bootstrap === 'undefined' || !bootstrap.Tooltip) return;
+  const tooltip = bootstrap.Tooltip.getInstance(element);
+  if (tooltip) {
+    tooltip.setContent({ '.tooltip-inner': title });
+  }
 }
 
 function initCodeMirror() {
@@ -233,6 +324,144 @@ function updateCodeMirrorMode(language) {
 function updateCodeMirrorTheme() {
   if (!codeMirror) return;
   codeMirror.setOption('theme', getCodeMirrorTheme());
+  if (notesCodeMirror) {
+    notesCodeMirror.setOption('theme', getCodeMirrorTheme());
+  }
+}
+
+function initNotesCodeMirror() {
+  if (!notesEditorWrapper) return;
+
+  if (typeof CodeMirror === 'undefined') {
+    notesEditorWrapper.style.display = 'none';
+    if (notesEditorEl) notesEditorEl.style.display = 'block';
+    return;
+  }
+
+  notesCodeMirror = CodeMirror(notesEditorWrapper, {
+    value: notesEditorEl ? notesEditorEl.value : '',
+    mode: 'markdown',
+    theme: getCodeMirrorTheme(),
+    lineNumbers: true,
+    tabSize: 4,
+    indentUnit: 4,
+    lineWrapping: true,
+    autofocus: false,
+  });
+
+  notesCodeMirror.on('change', () => {
+    if (notesEditorEl) {
+      notesEditorEl.value = notesCodeMirror.getValue();
+    }
+    if (!isSettingNotesValue) {
+      debounceSaveCurrentNotes();
+      if (notesPreviewMode) {
+        renderNotesPreview();
+      }
+    }
+  });
+}
+
+function getNotesEditorValue() {
+  return notesCodeMirror ? notesCodeMirror.getValue() : (notesEditorEl ? notesEditorEl.value : '');
+}
+
+function setNotesEditorValue(value) {
+  isSettingNotesValue = true;
+  if (notesCodeMirror) {
+    notesCodeMirror.setValue(value);
+  }
+  if (notesEditorEl) {
+    notesEditorEl.value = value;
+  }
+  isSettingNotesValue = false;
+}
+
+function loadNotes() {
+  try {
+    const saved = localStorage.getItem(NOTES_STORAGE_KEY);
+    if (saved) {
+      notes = JSON.parse(saved) || {};
+    }
+  } catch (e) {
+    console.warn('Failed to load saved notes:', e);
+    notes = {};
+  }
+}
+
+function persistNotes() {
+  try {
+    localStorage.setItem(NOTES_STORAGE_KEY, JSON.stringify(notes));
+  } catch (e) {
+    console.warn('Failed to save notes:', e);
+  }
+}
+
+function saveCurrentNotes() {
+  if (!activeQuestionId) return;
+  notes[activeQuestionId] = getNotesEditorValue();
+  persistNotes();
+}
+
+function debounceSaveCurrentNotes() {
+  if (notesSaveTimeout) {
+    clearTimeout(notesSaveTimeout);
+  }
+  notesSaveTimeout = setTimeout(() => {
+    saveCurrentNotes();
+  }, 500);
+}
+
+function toggleNotesMode() {
+  notesPreviewMode = !notesPreviewMode;
+  if (notesPreviewMode) {
+    renderNotesPreview();
+    if (notesEditorWrapper) notesEditorWrapper.classList.add('d-none');
+    if (notesEditorEl) notesEditorEl.style.display = 'none';
+    if (notesPreviewEl) notesPreviewEl.classList.remove('d-none');
+    if (notesModeBtn) notesModeBtn.innerHTML = '<i class="bi bi-pencil-square"></i> Edit';
+    updateTooltip(notesModeBtn, 'Switch to edit mode');
+  } else {
+    if (notesEditorWrapper) notesEditorWrapper.classList.remove('d-none');
+    if (notesEditorEl) notesEditorEl.style.display = 'none';
+    if (notesPreviewEl) notesPreviewEl.classList.add('d-none');
+    if (notesModeBtn) notesModeBtn.innerHTML = '<i class="bi bi-eye"></i> Preview';
+    updateTooltip(notesModeBtn, 'Preview rendered notes');
+    if (notesCodeMirror) requestAnimationFrame(() => notesCodeMirror.refresh());
+  }
+}
+
+function renderNotesPreview() {
+  if (!notesPreviewEl) return;
+  const markdown = getNotesEditorValue() || '*No notes yet.*';
+  let html = '';
+  if (typeof marked !== 'undefined') {
+    try {
+      html = marked.parse(markdown, { breaks: true, gfm: true });
+    } catch (e) {
+      html = escapeHtml(markdown);
+    }
+  } else {
+    html = escapeHtml(markdown);
+  }
+  notesPreviewEl.innerHTML = html;
+}
+
+function exportNotes() {
+  if (!activeQuestionId) return;
+  const question = questions.find((q) => q.id === activeQuestionId);
+  const title = question ? question.title : activeQuestionId;
+  const content = getNotesEditorValue() || '';
+  const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const safeTitle = title.replace(/[^a-z0-9\u00C0-\u024F\u1E00-\u1EFF]/gi, '-').replace(/-+/g, '-').replace(/^-+|-+$/g, '').toLowerCase() || 'notes';
+  a.download = `${safeTitle}-notes.md`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 function getEditorValue() {
@@ -292,6 +521,12 @@ function selectQuestion(id) {
   const savedCode = submissions[id]?.code;
   const starterCode = question.initial_code || '';
   setEditorValue(savedCode || starterCode);
+
+  const savedNotes = notes[id] || '';
+  setNotesEditorValue(savedNotes);
+  if (notesPreviewMode) {
+    renderNotesPreview();
+  }
 
   const sub = submissions[id];
   if (sub) {
