@@ -43,6 +43,8 @@ Work with `char` and `_Bool` types. Initialize a `char` variable with a letter, 
 
 ===EXPLANATION===
 
+{{< vimeo id="1207826110" title="Test Video" >}}
+
 The `char` type traces back to the earliest days of C. Dennis Ritchie designed `char` as the smallest addressable unit of memory — typically one byte — to match the PDP-11's byte-addressable architecture (1972). The name "char" reflects its primary use: storing characters encoded in ASCII, the American Standard Code for Information Interchange standardized in 1963. The `_Bool` type came much later; C99 (1999) introduced `_Bool` as a proper boolean type, along with `<stdbool.h>` that provides the `bool` macro, `true`, and `false`. Before C99, C programmers used `int` for booleans, with zero meaning false and non-zero meaning true — a convention that still holds because `_Bool` is essentially an integer that stores only 0 or 1.
 
 The intuition: `char` is just a small integer. When you write `char ch = 'A';`, the compiler stores the value 65 (ASCII code for 'A'). The difference between `char` and `int` is solely the range and the standard's guarantee that `sizeof(char) == 1`. Whether `char` is signed or unsigned is implementation-defined — on ARM it is unsigned by default, on x86 it is signed. This subtlety has caused real portability bugs. For `_Bool`, any non-zero value assigned to a `_Bool` variable is converted to 1 — a `_Bool` can only store 0 or 1.

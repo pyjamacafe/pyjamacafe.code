@@ -758,7 +758,8 @@ function selectQuestion(id) {
   if (tabArticle) {
     tabArticle.classList.toggle('d-none', !hasArticle);
   }
-  // Reset to challenge tab
+  // Remember tab before resetting URL
+  const prevTab = new URL(window.location).searchParams.get('tab') || 'challenge';
   setActiveTab('challenge');
 
   questionContentEl.innerHTML = question.content;
@@ -820,9 +821,8 @@ function selectQuestion(id) {
   try {
     // Preserve tab and hash when updating URL
     let url = question.permalink;
-    const tabParam = new URL(window.location).searchParams.get('tab');
-    if (tabParam && tabParam !== 'challenge') {
-      url += (url.includes('?') ? '&' : '?') + 'tab=' + encodeURIComponent(tabParam);
+    if (prevTab && prevTab !== 'challenge') {
+      url += (url.includes('?') ? '&' : '?') + 'tab=' + encodeURIComponent(prevTab);
     }
     url += window.location.hash;
     history.replaceState(null, '', url);
@@ -830,11 +830,9 @@ function selectQuestion(id) {
     // History API may be restricted on file:// origins.
   }
 
-  // Restore tab from URL
-  const urlObj = new URL(window.location);
-  const tabFromUrl = urlObj.searchParams.get('tab');
-  if (tabFromUrl && tabFromUrl !== 'challenge' && tabArticle && !tabArticle.classList.contains('d-none')) {
-    setActiveTab(tabFromUrl);
+  // Restore tab
+  if (prevTab && prevTab !== 'challenge' && tabArticle && !tabArticle.classList.contains('d-none')) {
+    setActiveTab(prevTab);
   }
 
   // Scroll to hash if present (e.g. #listing-1)
@@ -1229,10 +1227,11 @@ const themeToggleDropdown = document.getElementById('themeToggleDropdown');
 const authGoogleBtn = document.getElementById('authGoogleBtn');
 
 function updateAuthBlur() {
-  const isAuthed = isAuthenticated();
+  const authed = isAuthenticated();
+  const ready = typeof isAuthReady === 'undefined' ? true : isAuthReady();
   const onLectureTab = articleContentEl && !articleContentEl.classList.contains('d-none');
   if (articleContentEl && authOverlay) {
-    if (isAuthed || !onLectureTab) {
+    if (authed || !onLectureTab || !ready) {
       articleContentEl.classList.remove('article-content-blurred');
       authOverlay.classList.remove('show');
     } else {

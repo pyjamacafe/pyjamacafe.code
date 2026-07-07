@@ -2,6 +2,7 @@ let firebaseApp = null;
 let authInstance = null;
 let currentUser = null;
 let authListeners = [];
+let authReady = false;
 
 function initFirebase() {
   if (firebaseApp || typeof firebase === 'undefined') return;
@@ -11,8 +12,13 @@ function initFirebase() {
 
   authInstance.onAuthStateChanged((user) => {
     currentUser = user;
+    authReady = true;
     authListeners.forEach((fn) => fn(user));
   });
+}
+
+function isAuthReady() {
+  return authReady;
 }
 
 function onAuthChange(fn) {
