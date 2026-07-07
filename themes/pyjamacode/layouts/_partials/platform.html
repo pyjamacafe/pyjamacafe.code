@@ -64,12 +64,12 @@
         <div class="pane-body question-content overflow-auto p-3" id="questionContent">
           <p class="text-muted">Select a case from the left sidebar to begin.</p>
         </div>
-        <div style="position:relative;flex:1;min-height:0;overflow-y:auto">
+        <div style="position:relative;flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column">
           <div class="pane-body article-content overflow-auto p-3 d-none" id="articleContent"></div>
           <!-- Auth overlay prompt (shown over article content when not logged in) -->
           <div id="authOverlay" class="auth-overlay">
             <p>Sign in to view Lecture &amp; Notes</p>
-            <button id="authShowBtn" class="btn btn-sm btn-primary">Sign In / Sign Up</button>
+            <button id="authShowBtn" class="btn btn-sm btn-primary">Sign in</button>
           </div>
         </div>
       </div>
