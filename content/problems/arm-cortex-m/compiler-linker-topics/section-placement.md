@@ -49,3 +49,19 @@ Use `__attribute__((section("name")))` to place variables and functions in custo
 ## Real World Application
 
 Custom sections are essential in embedded systems — placing critical functions in RAM for fast execution (flash prefetch disabled), defining no-init data regions for system state that survives warm resets, and creating custom linker sections for memory-mapped I/O buffers.
+
+===EXPLANATION===
+
+The `__attribute__((section("name")))` extension lets the programmer override the default section assignment for any variable or function. By default, GCC places code in `.text`, initialised data in `.data`, and uninitialised data in `.bss`. Custom sections break out of this mould for specific use cases that embedded systems demand.
+
+The `.noinit` section is perhaps the most common custom section. Variables placed here survive a software reset (warm boot) because the startup code skips both the .data copy and .bss zero‑init for this section. Use cases include: reset counters that increment on each reboot, fault status registers that must be preserved for post‑mortem analysis, and calibration data loaded by a bootloader. The linker script must define `.noinit` (usually in RAM with `(NOLOAD)` in GNU ld), and the startup code must skip it.
+
+The `.ram_func` section is used to execute critical functions from RAM instead of flash. On high‑speed Cortex‑M7 parts with flash prefetch enabled, flash reads may stall the pipeline; placing time‑sensitive ISRs in RAM eliminates this penalty. The startup code must copy `.ram_func` from flash LMA to RAM VMA, just like `.data`. This is commonly done alongside the `.data` copy in the Reset_Handler.
+
+The `.isr_vector` section ensures the vector table lands at the correct flash origin. The `KEEP()` linker directive prevents garbage collection from removing unused vector entries (which would shift the table and break exception handling). The `used` attribute on the C declaration similarly prevents the compiler from discarding the symbol.
+
+Visualise custom sections as specialty rooms in a house. `.text` is the living room (everyday code). `.data` is the kitchen (cookware — initialised data). `.bss` is the storage closet (unused space). `.noinit` is a whiteboard in the garage (survives cleaning). `.ram_func` is a fast‑charging station installed in the living room for devices that need immediate power.
+
+Key points: (1) Custom sections require corresponding linker script output sections — otherwise they map to default regions. (2) `.noinit` must use `(NOLOAD)` in GNU ld to prevent zero‑fill. (3) Functions in `.ram_func` must be copied from LMA to VMA in the startup code. (4) Use `__attribute__((section(".name"), used))` for vector tables. (5) The `KEEP()` linker command prevents section garbage collection.
+
+GNU ld documentation, "Output Section Description", explains how to define custom output sections. ARM Compiler's armlink User Guide describes equivalent `AREA` directives for scatter‑loading. CMSIS startup files and MCU vendor linker scripts provide real‑world custom‑section examples.

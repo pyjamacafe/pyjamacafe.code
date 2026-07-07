@@ -92,3 +92,17 @@ Implement the startup reset sequence for a Cortex-M processor. Write Reset_Handl
 
 Every Cortex-M C/C++ project uses this startup sequence, either from CMSIS startup files, the vendor SDK, or custom startup code. Understanding the sequence is essential for debugging startup crashes and porting code to new MCUs.
 
+===EXPLANATION===
+
+When the Cortex-M processor exits reset, it does two hardware actions: it loads the Main Stack Pointer from vector table entry 0, then loads the Program Counter from entry 1 (Reset_Handler). From that moment, everything that happens before main() is a carefully orchestrated dance to prepare the C runtime environment. Think of it like a stage crew setting up before a play: the curtain (reset) rises, the crew must arrange the props (initialize .data), clear the stage (zero .bss), and light the set (configure clocks and PLL) before the actors (application code) can perform.
+
+The ARM tradition of a startup sequence dates back to the ARM7 era, where the reset handler was typically a short assembly routine that did little more than set up the stack and jump to main(). As embedded systems grew more complex — larger memories, multiple clock domains, floating-point units, cache controllers — the startup sequence became more elaborate. Cortex-M standardized this through CMSIS, providing a consistent template across vendors.
+
+The professional startup sequence follows a strict order: (1) SystemInit() configures the system clock, PLL, flash wait states, FPU, and any vendor-specific hardware. (2) The .data section is copied from its load memory address (LMA) in flash to its virtual memory address (VMA) in SRAM using linker symbols like _sidata, _sdata, _edata. (3) The .bss section is zeroed from _sbss to _ebss. (4) __libc_init_array calls all C++ static constructors and C init functions designated with __attribute__((constructor)). (5) Finally, main() is invoked.
+
+A common failure mode: the application crashes on reset because SystemInit() was not called before .data initialization. On some MCUs, the flash controller needs configured wait states before any flash access — if the .data copy happens before SystemInit sets the correct wait states, the copy reads garbage and the system hard-faults. Another subtle issue: the linker symbols _sidata, _sdata, etc. are defined in the linker script, and their addresses must match the actual section layout. A mismatch causes .data to copy from the wrong source address, silently corrupting initialized variables.
+
+Visualize the memory at reset: flash contains the vector table, all code, read-only data, and the initial values of .data. SRAM is uninitialized. The startup sequence copies the .data initial values from flash into SRAM, zeros the .bss area in SRAM, then hands control to the C++ runtime and finally to main(). Without this sequence, global variables would have garbage values, and the program would behave unpredictably.
+
+Key points: (1) Reset_Handler is the first C code executed (not main()). (2) SystemInit runs first — do not access flash-dependent features before it. (3) .data copy source is LMA (flash), destination is VMA (SRAM). (4) .bss must be zeroed before any code relies on zero-initialized globals. (5) Static constructors run after data/bss init but before main(). Reference: CMSIS-Core startup template files and the ARM Compiler guide on runtime initialization.
+

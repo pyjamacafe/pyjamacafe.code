@@ -115,3 +115,23 @@ Write a program that analyzes lockup conditions in the Cortex-M processor. Locku
 
 Lockup is a critical concern in safety-critical systems. To meet ISO 26262 (automotive) or IEC 61508 (industrial) standards, systems must detect lockup and perform a safe state transition (reset, shut down actuators) using an external watchdog timer.
 
+===EXPLANATION===
+
+Lockup is the Cortex-M's unrecoverable error state — the processor equivalent of a cardiac arrest. When a fault handler (HardFault, NMI) triggers another fault for which there is no handler, the processor enters a state where it stops executing instructions. Only a reset can restore normal operation.
+
+The historical design of lockup reflects the ARM architecture's fail-safe philosophy. Rather than allowing the processor to execute arbitrary corrupted code in an undefined state, ARM chose to halt execution entirely. This is analogous to a safety relay that trips and cuts power when a fault is detected — better to stop completely than to risk unpredictable behavior.
+
+The three primary lockup triggers form a hierarchy of desperation. First: HardFault_Handler causes a fault. HardFault is the last-resort handler — if it fails, there is nowhere else to escalate. This could happen if the HardFault handler itself accesses invalid memory, or if its stack overflows. Second: a BusFault occurs during vector table fetch — the processor cannot even read the HardFault handler address from the vector table. Third: the NMI handler causes a fault — NMI is the highest priority exception, so there is no handler above it to catch the error.
+
+The intuition behind lockup prevention is straightforward: fault handlers must be absolutely bulletproof. They should not use complex C code, not call printf (which might access UART hardware that is broken), not use malloc (which might have corrupted heap structures), and not rely on any peripheral that might have caused the fault. The ideal fault handler does three things: saves the processor state (stack frame, fault status registers), sets a flag for the watchdog to detect, and waits for the watchdog reset.
+
+In professional safety-critical systems, lockup is addressed at the system level rather than the processor level. An external watchdog timer (WDT), typically a separate IC or an internal peripheral that cannot be disabled, monitors a heartbeat signal from the processor. If the processor locks up, the heartbeat stops, the WDT expires, and the WDT asserts the RESET pin or disables safety-critical outputs (like motor drivers or fuel injectors).
+
+The DFSR (Debug Fault Status Register) provides post-mortem analysis. Bit 1 (VCATCH) indicates whether the processor entered debug state due to a vector catch. Bit 0 (HALTED) indicates the core was halted by the debugger. During lockup, the processor continues to service debug requests — meaning a JTAG/SWD debugger can attach and inspect the state even while the processor is locked.
+
+Visualize lockup as an airplane engine that has failed catastrophically. The engine cannot be restarted in flight — the only option is to deploy the auxiliary power unit (watchdog reset) and prepare for an emergency landing (safe state transition).
+
+Key points: lockup stops instruction fetch; only reset recovers; NMI can still execute if it didn't cause the lockup; debug accesses still work during lockup; preventing lockup requires fault handler simplicity, adequate stack, and external watchdog; WFE/WFI during lockup has no effect; HFSR bit 30 (FORCED) + bit 1 (VECTBL) identifies vector table causes.
+
+References: ARM Architecture Reference Manual ARMv7-M (section B1.5.14 — Lockup), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 10.6), ARM Infocenter DDI0403E.
+

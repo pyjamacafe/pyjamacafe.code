@@ -93,3 +93,19 @@ Write a program that models and analyzes the Cortex-M exception entry and exit s
 
 Debugging embedded systems often requires analyzing the exception stack frame to determine the state of the processor when a fault occurred. Debuggers and crash analyzers decode the stacked registers to reconstruct the call stack and identify the fault location.
 
+===EXPLANATION===
+
+The Cortex-M exception entry sequence is arguably the most elegant hardware feature of the entire architecture. Before its invention, ARM processors required assembly-language trampoline code in every interrupt handler: save registers, determine the interrupt source, call the handler, and restore registers. The Cortex-M automates all of this in hardware, pushing eight registers (R0–R3, R12, LR, PC, xPSR) onto the stack in a single microcoded sequence.
+
+The intuition behind the stack frame is driven by the principle of transparent preemption. When an interrupt fires, the processor must save enough state so that the interrupted code resumes exactly as if nothing happened. R0–R3 are the caller-saved working registers; R12 is the intra-procedure-call scratch register; LR holds the return address of the interrupted function; PC is the actual instruction pointer; and xPSR captures the condition flags, interrupt mask, and saturation state. These eight words constitute the minimum context needed for transparent resumption.
+
+Professional debugging tools reconstruct entire call stacks from these eight registers. When a HardFault occurs, the stacked PC tells you exactly which instruction caused the fault. The stacked LR reveals the call site. Debuggers like SEGGER J-Link, OpenOCD, and ARM Keil use this data to unwind the call stack, showing the full chain of function calls leading to the crash. In production firmware, crash reporters save this stack frame to flash or transmit it over a serial link for post-mortem analysis.
+
+The EXC_RETURN value stored in LR during exception entry is a clever encoding trick. Rather than using a dedicated register to track the return mode and stack pointer, the processor repurposes LR as an EXC_RETURN code. Values 0xFFFFFFF1, 0xFFFFFFF9, and 0xFFFFFFFD encode thread vs handler mode, MSP vs PSP, and whether the floating-point state was saved. The high 0xFFFFFF prefix ensures these values never collide with valid code addresses.
+
+Visualize the stack frame as a time capsule. When an exception interrupts normal execution, the processor takes a snapshot of eight critical registers and seals them onto the stack. On return, it opens the capsule, restores each register to its exact value, and jumps back to the interrupted instruction. The whole mechanism is symmetric—push on entry, pop on exit—and the hardware guarantees perfect balance.
+
+Key points: eight registers are pushed in a fixed order; the stack pointer selection (MSP/PSP) depends on the exception and current mode; EXC_RETURN bits encode the return behavior; the xPSR preserves ALU flags across the exception; on ARMv7-M with FPU, an additional 16 words may be pushed for floating-point state.
+
+References: ARM Architecture Reference Manual ARMv7-M (section B1.5.6 — Stack frame), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 8.4 — Exception Entry and Exit), ARM Infocenter document DDI0403E.
+

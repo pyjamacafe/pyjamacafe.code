@@ -97,3 +97,21 @@ Write a complete set of functions to manage the pending state of NVIC interrupts
 
 Managing pending state correctly is critical for reliable interrupt handling. Clearing pending state is used to abort unwanted interrupts, de-bounce noisy lines, and implement interrupt-driven state machines.
 
+===EXPLANATION===
+
+The NVIC's pending mechanism is the gatekeeper of interrupt delivery. Every external interrupt has three state bits: enabled/disabled, pending/not-pending, and active/inactive. The pending state is the latch that remembers an interrupt request between the moment the hardware asserts the IRQ line and the moment the processor starts executing the handler.
+
+The intuition behind pending state is that interrupts are transient. A peripheral might assert its IRQ line for a single clock cycle — if the processor cannot respond instantly (perhaps it is already in a higher-priority handler), the pending bit captures that request. Without the pending latch, the interrupt would be lost forever. This is the classic edge-triggered vs level-triggered distinction: edge-sensitive interrupts rely entirely on the pending latch to capture the event.
+
+In professional systems, the pending-clear mechanism (ICPR — Interrupt Clear-Pending Register) is used for several critical patterns. One is debouncing: a noisy GPIO line might generate multiple edges within milliseconds. The handler sets a software timer and clears the pending bit. If the line settles, only one interrupt fires. Another is aborting stale interrupts: before putting a peripheral into a low-power state, the driver clears any pending interrupts that might otherwise cause spurious wake-ups.
+
+The active state (IABR — Interrupt Active Bit Register) is read-only and indicates that the processor is currently executing the handler. This is essential for diagnosing nested interrupt behavior. If IRQ 5 is active and IRQ 5 becomes pending again (because the peripheral re-asserted the line), the NVIC remembers it and will re-enter the handler after the current invocation completes.
+
+The distinction between pending and active creates the three fundamental interrupt lifecycle states: pending (requested but not served), active (being served), and pending+active (requested while being served — a second occurrence waiting). Level-sensitive interrupts add a fourth dimension: if the peripheral line stays asserted after the handler clears the pending bit, the interrupt immediately re-pends, creating the classic "while loop until line de-asserts" pattern.
+
+Visualize the pending bit as a post-it note on a manager's door. The IRQ is the request. The manager sticks the note when the request arrives. When the manager enters the office (handler starts), the active light turns on. If another request comes while the manager is busy, a second note goes up. The ICPR is the ability to crumple up the note and throw it away.
+
+Key points: ISPR (Set Pending) and ICPR (Clear Pending) use write-1-to-write semantics; IABR is read-only; level-triggered interrupts re-pend if the peripheral line is still asserted; active + pending state indicates nested occurrences; always clear the correct register bank based on interrupt number.
+
+References: ARM Architecture Reference Manual ARMv7-M (section B3.4.4–B3.4.7), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 8.8), ARM Infocenter DDI0403E.
+

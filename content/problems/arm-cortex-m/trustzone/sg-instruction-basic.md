@@ -67,3 +67,17 @@ Implement secure gateway entry points using the SG (Secure Gateway) instruction.
 
 TrustZone secure services (cryptographic operations, secure storage, attestation) expose entry points via NSC functions. The SG instruction ensures that non-secure code can only enter secure code at approved entry points, preventing ROP/JOP attacks across the security boundary.
 
+===EXPLANATION===
+
+The SG (Secure Gateway) instruction is a 32-bit Thumb encoding (`0xE97FE97F`) introduced in ARMv8-M. It is the only instruction that can transition the processor from Non-Secure state to Secure state. When executed from an address within an NSC (Non-Secure Callable) region, the processor: (1) clears the NS bit in the security state, (2) restores the securable registers that were saved on the secure-to-non-secure transition, and (3) continues execution in Secure state at the instruction following SG. If SG is executed outside an NSC region, a SecureFault or HardFault is raised — this prevents non-secure code from jumping into secure memory at arbitrary locations.
+
+The intuition: SG is the "secret handshake." Imagine a speakeasy with a hidden door. The door is in a public alley (NSC region), but the handshake (SG instruction) is required to enter. Anyone who knows the handshake can enter the secure area. If someone tries to open the door without the handshake, the bouncer (HardFault) throws them out. The speakeasy's interior (secure code) is completely hidden from the alley — the handshake is the only way in. And the handshake must be the very first gesture — entering the alley and doing anything else before the handshake also gets you thrown out.
+
+In professional TrustZone firmware, SG instructions are placed at the very beginning of every secure function that should be callable from non-secure code. Zephyr's `arm_trustzone_configure.c` marks functions with `__attribute__((naked))` and places SG as the first instruction, followed by a branch to the actual function body. FreeRTOS uses SG in `SecureContext_Load` and `SecureContext_Init`. The mbed OS TZ bootloader's entry points (`NSC_Entry_1`, `NSC_Entry_2`) each start with SG. CMSIS-Core's example TrustZone projects show NSC functions guarded by `__TZ_GATE_INIT(entry_name)` which emits SG.
+
+Visualize the assembly: at the NSC entry address (e.g., `0x00200000`), the first word is `0xE97FE97F` (SG instruction). The next instruction is often a branch (`B` or `BL`) to the secure function body. The SG must be the first instruction at the entry point — even a NOP before SG causes a fault. The linker ensures the NSC section is 32-byte aligned so the SG falls at a proper NSC region boundary.
+
+Key points: (1) SG is a single 32-bit instruction — it does not take any operands or registers. (2) It must be the first instruction at the NSC entry point. (3) SG is only available on ARMv8-M and later with TrustZone. (4) Executing SG outside an NSC region or in Non-Secure state without a prior BLXNS causes a SecureFault. (5) The compiler must not reorder instructions before SG — use `__attribute__((naked))` and inline assembly to guarantee placement.
+
+References: ARMv8-M ARM (DDI0553) section B4.5, Zephyr `arm_trustzone.c`, FreeRTOS `secure_port.c`, CMSIS-Core TrustZone examples, ARM AN326 "TrustZone for Cortex-M", PSA Firmware Framework for M specification.
+

@@ -81,3 +81,19 @@ Write functions to set and get the priority of any exception on a Cortex-M proce
 
 Correct priority assignment prevents priority inversion and ensures hard real-time deadlines are met. For example, a motor control loop must have higher priority than a communication stack to ensure precise timing.
 
+===EXPLANATION===
+
+Priority-based preemption is the foundation of real-time interrupt handling, and its history traces back to the earliest priority interrupt systems on mainframes. The Cortex-M NVIC implements a full, configurable priority scheme where every interrupt and system exception has a programmable priority level. The core rule is simple but non-intuitive: lower numeric value means higher priority. A priority-zero interrupt will preempt any other.
+
+The intuition behind programmable priority is that not all interrupts are equally urgent. A brushless DC motor controller needs to update PWM duty cycles every 20 microseconds — missing that deadline means a jittery motor or even a stalled rotor. A UART receive interrupt, by contrast, can typically wait hundreds of microseconds before the hardware buffer overflows. By assigning priority 0 to the motor timer and priority 128 to the UART, the motor control ISR always preempts the UART ISR, ensuring hard real-time guarantees.
+
+Priority grouping (the PRIGROUP field in SCB_AIRCR) adds a subtle but powerful dimension. It splits the 8-bit priority value into two logical fields: a preemption priority group and a sub-priority within that group. Interrupts with different preemption priorities can nest (higher preempts lower). Interrupts with the same preemption priority but different sub-priorities do not nest — they simply pend, and the NVIC selects the one with the lower sub-priority to run next. This grouping allows systems to define interrupt "classes" where only certain groups can preempt each other.
+
+In professional RTOS design, priority assignment follows specific patterns. The RTOS tick timer (SysTick) typically gets a low priority so that real-time interrupts can preempt it. PendSV gets the lowest priority of all — it is the "background" interrupt that runs after all other interrupts are done, used for context switching. Device drivers are assigned priorities based on their latency tolerance: timer and ADC interrupts at the top, communication and DMA at the bottom.
+
+Visualize priorities as floors in a building. An interrupt at floor 0 (highest priority) occupies the penthouse: nothing can touch it. An interrupt at floor 7 occupies the basement. When a floor-3 ISR is running and a floor-1 interrupt fires, the floor-3 ISR is instantly suspended — the NVIC enforces the floor hierarchy. Priority grouping adds elevator banks: only certain groups of floors can access certain elevators.
+
+Key points: 0x00 is highest priority, 0xE0 is lowest (or 0xFF depending on implemented bits); NVIC_IPR encodes four IRQs per register; system handlers use SCB_SHPR1–3; PRIGROUP controls preemption nesting depth; lower priority interrupts can starve if higher priority ones fire too frequently.
+
+References: ARM Architecture Reference Manual ARMv7-M (section B3.4 — NVIC priority registers), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 8.2 — Priority), ARM Infocenter DDI0403E.
+

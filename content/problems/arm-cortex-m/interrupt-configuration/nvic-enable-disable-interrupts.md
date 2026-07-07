@@ -100,3 +100,21 @@ Write functions to enable, disable, set pending, and check active status for ext
 
 Every interrupt-driven firmware application uses NVIC enable/disable registers to control peripheral interrupts. Device drivers enable their interrupt after initializing the peripheral and disable it during critical operations.
 
+===EXPLANATION===
+
+The NVIC enable and disable registers — ISER (Interrupt Set-Enable Register) and ICER (Interrupt Clear-Enable Register) — are the most frequently accessed NVIC registers in any interrupt-driven firmware. They implement a simple but elegant write-1-to-set and write-1-to-clear protocol that avoids the read-modify-write problem.
+
+The historical design choice of write-1-to-set semantics is deliberate. In a traditional GPIO-style register, enabling a single interrupt requires reading the register, OR-ing a bitmask, and writing back — a read-modify-write sequence that itself must be protected. The NVIC's approach means a single store instruction enables or disables an interrupt atomically. Writing 0 has no effect, so there is no risk of accidentally clearing other bits.
+
+The intuition behind separate set and clear registers is that they eliminate the need for critical sections around interrupt configuration. If ISER and ICER were a single register, enabling interrupt A while another core or interrupt context disables interrupt B would require synchronization. With separate registers, the two operations are inherently independent — they write to different addresses.
+
+In professional driver code, the pattern is always the same: during initialization, the driver configures the peripheral, sets the priority via NVIC_IPR, then enables the interrupt via ISER. During shutdown or error recovery, the driver disables the interrupt via ICER before touching shared data. The interrupt handler itself never touches the enable bits — it merely services the peripheral and clears the interrupt flag in the peripheral's own register.
+
+The ISER/ICER registers are organized as one bit per interrupt, with each register covering 32 interrupts. ISER0 covers IRQs 0–31, ISER1 covers IRQs 32–63, and so on up to ISER14 (covering up to IRQ 479, depending on the implementation). The bit position within the register corresponds to the interrupt number modulo 32.
+
+Visualize each interrupt as a light switch on a large panel. ISER is the panel of "turn on" buttons — press one, the light turns on. ICER is the panel of "turn off" buttons — press one, the light turns off. Both panels show the current state (reading ISER returns which interrupts are enabled). But writing to one never affects the other.
+
+Key points: ISER at 0xE000E100, ICER at 0xE000E180; each register covers 32 interrupts; write 1 to enable/disable, write 0 has no effect; reading ISER returns the current enable state; enabling an interrupt does not automatically pend it; always configure priority before enabling.
+
+References: ARM Architecture Reference Manual ARMv7-M (section B3.4.1–B3.4.3), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 8.7), ARM Infocenter DDI0403E.
+

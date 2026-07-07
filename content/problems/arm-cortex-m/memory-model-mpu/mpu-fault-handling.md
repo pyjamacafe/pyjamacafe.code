@@ -82,3 +82,17 @@ Write a fault handler that captures and decodes MPU (MemManage) fault informatio
 
 MPU fault handlers are essential for safety-critical systems to detect memory access violations, log diagnostic information, and safely recover or shut down. Automotive ISO 26262 and medical IEC 62304 standards require memory protection and fault analysis.
 
+===EXPLANATION===
+
+MPU fault handling was introduced with the Cortex-M3 (ARMv7-M) alongside the MPU itself. The architecture provides the MemManage fault handler — one of the three configurable fault exceptions (together with BusFault and UsageFault) that escalate to HardFault if unhandled. The Configurable Fault Status Register (CFSR) at `0xE000ED28` contains three 8-bit sub-registers: MFSR (MemManage) at bytes [7:0], BFSR (BusFault) at bytes [15:8], and UFSR (UsageFault) at bytes [31:16]. The MemManage Address Register (MMAR) at `0xE000ED34` captures the faulting address if MMARVALID is set. This diagnostic information is invaluable for debugging memory corruption.
+
+The intuition: a MemManage fault is the MPU saying "you shall not pass." It occurs in three situations: (1) IACCVIOL — the CPU tried to fetch an instruction from a non-executable region; (2) DACCVIOL — a data load/store to a region without permission; (3) MSTKERR/MUNSTKERR — the automatic exception stacking/unstacking tried to access a forbidden region. Case (3) is particularly insidious because the fault handler itself cannot stack — the processor escalates directly to HardFault. This is why many production systems implement a "double fault" handler.
+
+In professional firmware, MPU fault analysis is critical for ISO 26262 (automotive) and IEC 62304 (medical). Zephyr's `fault.c` in `arch/arm/core/cortex_m/` decodes the CFSR and prints a human-readable diagnosis, including the fault address and the exact instruction that caused it. FreeRTOS's `vApplicationMPUFaultHandler` is a weak callback that users override to log and reset. The Linux kernel's `armv7m_fault_handler` in `arch/arm/mm/fault.c` reads MFSR to distinguish MPU faults from bus faults and delivers SIGSEGV to the offending task. CMSIS-Core provides `SCB->CFSR` and `SCB->MMFAR` fields in the `SCB_Type` struct for portable access.
+
+Visualize the fault analysis flow: read CFSR → isolate MFSR (low byte) → check MMARVALID → read MMAR → decode IACCVIOL/DACCVIOL/MSTKERR → clear sticky bits by writing 1 to them → return. The sticky bits persist until explicitly cleared — a handler that returns without clearing will immediately re-enter on the next instruction.
+
+Key points: (1) MemManage faults are precise (synchronous) — the PC in the stacked frame points to the faulting instruction. (2) Stacking/unstacking faults (MSTKERR/MUNSTKERR) escalate to HardFault — the MMAR may not be valid. (3) CFSR bits are "write-1-to-clear" — always clear them before returning from the handler. (4) If MemManage handler is not enabled (SHCSR[16] = 0), faults escalate to HardFault. (5) The fault address in MMAR is valid only when MMARVALID = 1 — check before using it.
+
+References: ARMv7-M ARM (DDI0403) B5.2, ARMv8-M ARM (DDI0553) B5.2, Zephyr `arch/arm/core/cortex_m/fault.c`, FreeRTOS `port.c` MPU fault handling, CMSIS-Core `core_cm.h` SCB struct.
+

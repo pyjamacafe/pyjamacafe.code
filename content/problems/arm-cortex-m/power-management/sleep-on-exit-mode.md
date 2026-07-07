@@ -89,3 +89,19 @@ Write a program that configures the Sleep-on-Exit mode for an interrupt-driven a
 
 Bare-metal sensor nodes: the device sleeps, wakes on a timer interrupt, reads sensors, processes data, transmits, then sleeps again. Sleep-on-exit eliminates unnecessary thread-mode execution, reducing power consumption.
 
+===EXPLANATION===
+
+Sleep-on-Exit is a Cortex-M processor mode that automatically puts the CPU to sleep when returning from an exception handler, without ever executing the main thread between interrupts. It is one of the simplest and most effective power-saving features in the Cortex-M architecture, ideal for purely interrupt-driven designs where the main loop does nothing but wait.
+
+The feature was introduced with the ARMv7-M architecture (Cortex-M3) as counterpart to the standard WFI-based sleep pattern. In a traditional interrupt-driven system, the main loop typically looks like this: `while(1) { __WFI(); }`. The CPU wakes on interrupt, runs the handler, returns to main, immediately executes WFI, and sleeps again. Sleep-on-Exit eliminates the middle step: after the handler completes, the processor goes directly back to sleep without returning to thread mode. This saves the few hundred cycles of WFI execution and reduces the switch from handler mode to thread mode and back.
+
+The intuition is about minimizing unnecessary work. If the main thread has nothing to do between interrupts—no background processing, no idle computation, no polling—then why waste energy running it at all? Sleep-on-Exit treats the processor as a pure interrupt engine: it sleeps until an event occurs, handles it, and sleeps again. The main function effectively becomes a configuration routine that sets up interrupts and enables Sleep-on-Exit, then never runs again.
+
+In professional use, Sleep-on-Exit is a common pattern in bare-metal sensor firmware. A temperature sensor node might: configure an RTC alarm to fire every 60 seconds, enable Sleep-on-Exit, then go to sleep. On each alarm, the RTC handler reads the sensor, stores the value in a buffer, and increments a counter. After several samples, a UART interrupt handler transmits the batch. The main thread never executes between these events. Some RTOS tickless idle implementations also leverage Sleep-on-Exit internally to minimize the overhead of returning to the idle task.
+
+Visualize a timeline: without Sleep-on-Exit, the sequence is: SLEEP -> WAKE (interrupt) -> HANDLER -> RETURN TO MAIN -> WFI -> SLEEP. With Sleep-on-Exit: SLEEP -> WAKE -> HANDLER -> SLEEP. The handler's exception return (BX LR with EXC_RETURN) checks bit 1 of SCB_SCR; if SLEEPONEXIT is set, the processor enters sleep immediately after the unstacking completes—before fetching the next instruction from the thread.
+
+Key points: (1) SLEEPONEXIT is a single bit in SCB_SCR (bit 1). Set it before entering the main loop or after initialization. (2) This mode is only useful when the main thread has no work to do; if any polling or background processing is needed, do not enable it. (3) The processor enters sleep (not deep sleep) by default; combine with SLEEPDEEP for additional power savings. (4) An interrupt that occurs while the CPU is already handling an exception will keep the CPU awake—sleep only happens when the nested return completes. (5) Any interrupt can wake the CPU, including SysTick, GPIO EXTI, UART RX, etc. Sleep-on-Exit does not restrict wakeup sources.
+
+References: ARM Cortex-M3/M4/M7 Technical Reference Manual (SCB section), "Definitive Guide to ARM Cortex-M3 and Cortex-M4" Chapter 13, STM32 Reference Manual (Power Control section), and ARM AN321 (Power Management for Cortex-M).
+

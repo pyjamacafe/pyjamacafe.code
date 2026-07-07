@@ -58,3 +58,17 @@ Configure the PendSV exception as the context-switch mechanism for an RTOS. Writ
 ## Real World Application
 
 PendSV is the foundation of every ARM Cortex-M RTOS — FreeRTOS, RTX, ThreadX, Mbed OS, and Zephyr all use PendSV for context switching. Understanding PendSV is essential for RTOS porting, device driver development, and low-level systems programming.
+
+===EXPLANATION===
+
+PendSV (Pendable Service Call) was introduced with the Cortex‑M3 specifically to solve a problem that plagued earlier ARM designs: how to perform a context switch cleanly without interfering with higher‑priority interrupt handlers. Before PendSV, developers had to either disable all interrupts during the switch (increasing latency) or use complex state machines to defer the switch.
+
+The intuition is simple: PendSV is an exception that stays pending until the CPU has no higher‑priority exceptions to service. By programming it to the lowest priority, you guarantee the context switch runs only after all interrupts — including SysTick — have completed. This elegantly solves the problem of a SysTick interrupt firing while a high‑priority ISR is still running: the context switch is deferred until that ISR finishes.
+
+In FreeRTOS, the assembly routine `xPortPendSVHandler` (or `vPortSVCHandler` for the initial switch) saves R4‑R11 and the PSP to the current task's stack, loads the next task's PSP, restores R4‑R11, and returns with an EXC_RETURN value that loads the new PSP. The hardware automatically saves and restores R0‑R3, R12, LR, PC, and xPSR on exception entry and return — PendSV only handles the callee‑saved registers.
+
+Visualise two actors on a stage sharing one costume rack. When actor A finishes their scene (is interrupted), they hang their costume (registers) on the rack (stack). Actor B walks on, takes the next costume, and performs. PendSV is the stage manager who ensures the change happens only after the applause (interrupts) dies down.
+
+Key points: (1) PendSV priority must be the lowest of all programmable exceptions. (2) Trigger by writing 1 to ICSR bit 28 (PENDSVSET). (3) The handler uses the current stack pointer — it must run on MSP. (4) Only callee‑saved registers (R4‑R11) need manual save/restore; the hardware stack frame handles the rest. (5) EXC_RETURN in LR determines whether execution resumes on MSP or PSP.
+
+The ARM Architecture Reference Manual, section on exception entry and exit, defines the PendSV behaviour. FreeRTOS port layers for Cortex‑M and the CMSIS‑RTOS2 reference implementation provide concrete, field‑tested PendSV handlers.

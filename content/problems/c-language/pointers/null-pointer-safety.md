@@ -48,3 +48,17 @@ Write a function that safely dereferences a pointer by first checking for `NULL`
 ## Real World Application
 
 NULL pointer checks are critical in production code — any pointer from `malloc`, fopen, or function parameters that can be null must be validated. NULL safety is a common theme in code reviews and security audits.
+
+===EXPLANATION===
+
+A NULL pointer is guaranteed to compare unequal to any valid pointer. The C standard defines `NULL` as `((void *)0)` or simply `0` — it never points to an object or function. Dereferencing NULL is undefined behavior; on most systems it causes a segmentation fault because address 0 is unmapped by the operating system's MMU. The zero page is deliberately left unmapped to catch null pointer dereferences. In embedded systems without an MMU, a null pointer dereference can silently corrupt memory, making NULL checks even more critical.
+
+The intuition: a `NULL` pointer is like a torn business card — it does not lead anywhere useful. The check `if (p == NULL)` asks "is this a live lead?" before following it. In boolean context, `if (!p)` is equivalent — NULL is zero, and zero is false. Every pointer that could possibly be null must be checked before dereference, especially pointers from `malloc`, `fopen`, or function parameters.
+
+A professional example: in 2009, a null pointer dereference in the Linux kernel's `tcp_collapse()` function allowed a remote denial of service — a specially crafted TCP packet could trigger the null dereference and crash the system. The Azure cloud platform suffered a null pointer-related DNS outage in 2018. The CERT C coding standard rule EXP34-C requires validating pointers returned from allocation functions: `int *p = malloc(n * sizeof(int)); if (!p) return ERROR;`. The Linux kernel's `checkpatch.pl` script actively warns against dereferencing pointers without prior NULL checks.
+
+Visualize NULL as a locked door with a sign that says "NO ADDRESS HERE." Trying to walk through it (dereferencing) slams you into the door. The check `if (p)` is checking whether the door is open before trying to pass. A non-NULL pointer is not guaranteed valid — it might point to freed memory (dangling pointer) — but NULL is guaranteed invalid.
+
+Key points: (1) `free(NULL)` is safe and does nothing. (2) `malloc(0)` may return NULL or a unique non-NULL pointer (implementation-defined). (3) Static and global pointers are initialized to NULL automatically; automatic (local) pointers are not. (4) After `free(p)`, set `p = NULL` to prevent double-free and use-after-free. (5) `if (!p)` is equivalent to `if (p == NULL)`.
+
+Kernighan & Ritchie §5.2 discusses null pointers. The C11 standard §6.3.2.3 covers null pointer conversion. CERT rules EXP34-C and MEM30-C provide guidelines for null-safe allocation. "The Development of the C Language" (Ritchie, 1993) describes how NULL was introduced.

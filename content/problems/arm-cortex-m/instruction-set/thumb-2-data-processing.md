@@ -85,3 +85,23 @@ Write a program that demonstrates Thumb-2 data processing instructions using inl
 
 Bit field instructions are heavily used in device driver code to extract and modify register fields. For example, reading the priority bits from an interrupt priority register, or modifying a specific field in a control register without affecting adjacent fields.
 
+===EXPLANATION===
+
+Thumb-2 data processing instructions represent ARM's answer to the bit-manipulation demands of modern embedded software. Before Thumb-2, extracting a bit field from a register required a shift-and-mask sequence — typically two or three instructions. UBFX (Unsigned Bit Field Extract) and BFI (Bit Field Insert) collapse these sequences into a single instruction.
+
+The historical trajectory is one of growing hardware sophistication. Early ARM processors focused on general-purpose register operations. As embedded systems grew more complex, the need for efficient bit field manipulation became critical — device control registers pack multiple fields into single 32-bit words, and every peripheral driver must extract and modify these fields. ARM responded by adding bit field instructions in the ARMv6 architecture and expanding them in ARMv7-M Thumb-2.
+
+The intuition behind UBFX is that reading a register field is always the same operation: shift right by the bit position, then mask with (2^width - 1). UBFX does this in one cycle. Similarly, BFI does: clear the target field in the destination register, shift the source field into position, and OR it in — all in one instruction.
+
+In professional firmware, these instructions appear in every device driver. Consider reading the ADC conversion result from a register where the 12-bit result occupies bits [15:4]. Without UBFX: `result = (ADC_DR >> 4) & 0xFFF;` — two instructions. With UBFX: `UBFX result, ADC_DR, #4, #12` — one instruction. The savings compound across thousands of register accesses in a typical firmware image.
+
+CLZ (Count Leading Zeros) is another workhorse instruction. It counts the number of zero bits from the MSB down to the first set bit. This is the fundamental primitive for normalization (finding the highest set bit), priority encoding (finding the highest-priority active interrupt in a bitmask), and square-root algorithms.
+
+RBIT (Reverse Bits) reverses the entire 32-bit word. It is used in CRC calculations, FFT bit-reversed addressing, and certain cryptographic operations. Without RBIT, bit reversal requires a loop; with RBIT, it takes a single cycle.
+
+Visualize bit field operations as surgeries on a 32-bit register. UBFX is a precise extraction — the surgeon removes bits 8–15 and places them on a tray. BFI is a transplant — bits from one register are grafted into a specific position in another. CLZ is a height measurement — how many floors (zero bits) before the first occupied floor (set bit). RBIT is a mirror — the entire register reflected left-to-right.
+
+Key points: UBFX and SBFX extract and zero/sign-extend bit fields in one cycle; BFI inserts a bit field without affecting other bits; CLZ is essential for normalization and priority encoding; RBIT is useful for CRC and cryptographic operations; all are single-cycle on most Cortex-M implementations; SBFX sign-extends the extracted field, UBFX zero-extends.
+
+References: ARM Architecture Reference Manual ARMv7-M (section A6.7 — Data processing), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 4.10), ARM Infocenter DDI0403E.
+

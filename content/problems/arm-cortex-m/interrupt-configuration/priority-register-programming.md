@@ -86,3 +86,21 @@ Write a function to program interrupt priority values using the NVIC IPR registe
 
 Priority grouping allows nested interrupt scenarios where a group of interrupts can preempt another group, while within a group, only sub-priority determines pending order (no preemption). This is used in complex systems with multiple interrupt classes.
 
+===EXPLANATION===
+
+Priority register programming is where the theory of interrupt priority meets the physical reality of the NVIC's register layout. Each external interrupt has an 8-bit priority field stored in the NVIC_IPR (Interrupt Priority Register) array. However, not all 8 bits are necessarily implemented — a Cortex-M0+ might implement only 2 bits (giving 4 priority levels), while a Cortex-M4 might implement 4 or 5 bits.
+
+The historical reason for variable bit-width is silicon cost. Each implemented priority bit requires additional comparator logic in the NVIC. For low-cost microcontrollers targeting simple applications, 2–3 priority bits (4–8 levels) is sufficient. High-end real-time controllers implement 8 bits (256 levels). The unused upper bits are always read as zero — writing to them has no effect.
+
+The IPR register layout is a classic example of bit packing. Each 32-bit IPR register packs priority bytes for four consecutive interrupts: IPR[0] contains priorities for IRQs 0–3, IPR[1] for IRQs 4–7, and so on. Within each register, IRQ 0 occupies bits [7:0], IRQ 1 occupies bits [15:8], IRQ 2 bits [23:16], and IRQ 3 bits [31:24].
+
+Priority grouping via PRIGROUP adds the ability to split each priority field into two logical parts: preemption priority and sub-priority. When PRIGROUP = 0, all bits are preemption priority — every distinct priority level can preempt every lower one. When PRIGROUP = 3, the top 5 bits encode preemption priority and the bottom 3 bits encode sub-priority. Interrupts with the same preemption priority but different sub-priorities do not preempt each other — they pend, and the NVIC picks the one with the lower sub-priority.
+
+Professional firmware designers use priority groups to prevent priority inversion scenarios. A classic pattern is to assign all high-speed data acquisition interrupts to group A (preempt priority 0–3) and all lower-speed processing interrupts to group B (preempt priority 4–7). Interrupts within group A can preempt each other; interrupts within group B cannot preempt group A.
+
+Visualize the IPR registers as a multi-drawer filing cabinet. Each drawer holds four folders, one per interrupt. PRIGROUP tells you how to label each folder — whether the label is a single number or a compound "floor.room" designation.
+
+Key points: NVIC_IPR_BASE is 0xE000E400; address = base + (irq_num / 4) * 4; byte offset = irq_num % 4; PRIGROUP is in SCB_AIRCR[10:8]; always use DSB after changing priorities; lower numeric value = higher priority.
+
+References: ARM Architecture Reference Manual ARMv7-M (section B3.4.8 — IPR registers), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 8.2.4), ARM Infocenter DDI0403E.
+

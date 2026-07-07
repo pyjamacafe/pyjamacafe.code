@@ -89,3 +89,25 @@ Write a program that configures key System Control Block registers. Read and dis
 
 Bootloaders use VTOR to relocate the vector table to the application address. Safety-critical firmware enables all fault handlers via SHCSR. Power management uses SCR bits. Understanding SCB is fundamental to Cortex-M system programming.
 
+===EXPLANATION===
+
+The System Control Block (SCB) is the configuration hub of the Cortex-M processor. Located in the System Control Space at 0xE000ED00, it provides software control over exception handling, vector table location, sleep modes, endianness, and fault configuration. It is the one-stop shop for system-level processor control.
+
+The historical design of the SCB consolidates features that were scattered across multiple co-processor registers in earlier ARM architectures. The ARM7TDMI used CP15 for system control; the Cortex-M unified everything into a single memory-mapped block accessible without co-processor instructions. This makes the SCB accessible from C code via pointer dereference, no inline assembly required.
+
+The CPUID register (0xE000ED00) is the simplest and most useful: it identifies the processor core and its revision. Reading it tells you whether you are running on a Cortex-M0 (0x410CC200), Cortex-M3 (0x412FC230), Cortex-M4 (0x410FC240), or Cortex-M33 (0x410FD213). This is essential for runtime feature detection in firmware that runs across multiple chip variants.
+
+VTOR is arguably the most important register in the SCB for system software. It relocates the vector table to any 128-byte-aligned address. Bootloaders use it to hand off to applications. Dual-bank OTA systems use it to switch between bank A and bank B firmware images. On ARMv8-M with TrustZone, there are separate Secure VTOR and Non-Secure VTOR registers.
+
+SHCSR controls which fault handlers are active. By default, only HardFault is enabled. Safety-critical applications must explicitly enable MemManage (bit 16), BusFault (bit 17), and UsageFault (bit 18) via SHCSR. Without this, any configurable fault escalates directly to HardFault, losing diagnostic information.
+
+The AIRCR register is the system control nexus. It contains the PRIGROUP field for priority grouping, the SYSRESETREQ bit for software reset, and the ENDIANNESS indicator. Writing to AIRCR requires the VECTKEY value 0x05FA in the upper 16 bits to prevent accidental writes.
+
+In professional firmware, the SCB is configured in the first few lines of the Reset handler. The startup code sets up VTOR, enables fault handlers via SHCSR, configures priority grouping via AIRCR, and optionally sets up the SysTick timer. Any system that does not configure these registers relies on reset defaults — which is fine for simple applications but inadequate for safety-critical or complex systems.
+
+Visualize the SCB as the cockpit of an aircraft. CPUID shows the aircraft type. VTOR sets the navigation database location. AIRCR is the master control panel with reset and priority settings. SCR controls the autopilot sleep modes. CCR configures exception handling behavior. SHCSR arms the fault warning systems.
+
+Key points: SCB base is 0xE000ED00; VTOR must be 128-byte aligned; AIRCR requires VECTKEY 0x05FA to write; SHCSR enables configurable fault handlers; reset defaults have only HardFault and NMI enabled; ICSR provides current and pending exception numbers.
+
+References: ARM Architecture Reference Manual ARMv7-M (section B3.2 — System Control Block), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 7), ARM Infocenter DDI0403E.
+

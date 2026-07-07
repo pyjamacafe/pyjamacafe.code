@@ -111,3 +111,23 @@ Write a CFSR analysis tool that decodes every bit of the Configurable Fault Stat
 
 Fault analysis tools (like the one in this problem) are integrated into debug firmware to automatically decode crash causes and report them over a serial or debug interface, enabling rapid root-cause analysis of system crashes.
 
+===EXPLANATION===
+
+The Configurable Fault Status Register (CFSR) is the master diagnostic register for the Cortex-M fault system. It packs three sub-status registers — MFSR (MemManage Fault), BFSR (BusFault), and UFSR (UsageFault) — into a single 32-bit word at address 0xE000ED28. Decoding the CFSR is the first step in any fault analysis, whether during development debugging or post-mortem crash analysis.
+
+The historical design consolidates what were separate registers in earlier ARM architectures into one readable block. This makes it possible to snapshot all fault status information in a single read operation — critical for fault handlers that need to log the complete state before a watchdog reset occurs.
+
+The three sub-registers occupy non-overlapping bytes: MFSR at bits [7:0], BFSR at bits [15:8], and UFSR at bits [23:16]. Each sub-register has its own set of status bits. MFSR tracks MemManage faults: instruction access violations (IACCVIOL), data access violations (DACCVIOL), and faults during stacking and unstacking (MSTKERR, MUNSTKERR). BFSR tracks BusFaults: instruction bus errors (IBUSERR), precise data bus errors (PRECISERR), imprecise data bus errors (IMPRECISERR), and stacking/unstacking bus errors (STKERR, UNSTKERR). UFSR tracks UsageFaults: undefined instructions, invalid state, invalid PC, and unaligned access.
+
+The precise vs imprecise distinction in BFSR is critical for diagnostic analysis. A precise BusFault means the exact instruction and address are known — BFAR (BusFault Address Register) contains the faulting address, and the stacked PC points to the instruction. An imprecise BusFault means the error occurred asynchronously, typically from a write buffer — the exact instruction is unknown, and BFAR is invalid. Imprecise faults are harder to debug because the PC context may have moved past the actual faulting access.
+
+In professional firmware, the CFSR decoder is integrated into the crash reporter. When a fault occurs, the handler reads CFSR, HFSR, MMAR, BFAR, and the stacked PC, then logs them to flash. On the next boot, the firmware reads the log and outputs the human-readable analysis over a serial port. This system has saved countless hours of debugging in field-returned devices.
+
+The escalation rules encoded in HFSR complement CFSR. When a configurable fault (MemManage, BusFault, UsageFault) occurs but its handler is not enabled, the fault escalates to HardFault, and HFSR bit 30 (FORCED) is set. This tells the debugger that the root cause is in one of the configurable fault sub-registers, not in an actual HardFault condition.
+
+Visualize CFSR as a fault-tree diagram. Each bit is a leaf node that indicates a specific failure mode. The leaves are grouped into three branches (MFSR, BFSR, UFSR) that map to three handler types. The escalation rule is the trunk: if a branch is missing a handler, the trunk (HardFault) catches everything.
+
+Key points: CFSR at 0xE000ED28 combines MFSR, BFSR, UFSR; MMAR/BFAR valid bits (bit 7 in MFSR/BFSR) indicate if address registers hold valid data; stacking/unstacking faults occur during exception entry/exit; precise faults provide exact fault address; write 1 to CFSR to clear status bits; LSPERR/MLSPERR indicate faults during lazy FPU state preservation.
+
+References: ARM Architecture Reference Manual ARMv7-M (section B3.2.16 — CFSR), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 10.4), ARM Infocenter DDI0403E.
+

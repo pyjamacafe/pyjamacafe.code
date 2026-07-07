@@ -54,3 +54,19 @@ Use the SVC (Supervisor Call) instruction to enter handler mode from thread mode
 ## Real World Application
 
 SVC is used in RTOSes for system calls — creating tasks, sending messages, acquiring semaphores, and requesting I/O. FreeRTOS uses SVC for its initial context switch, and many microkernel designs rely on SVC for protected system calls.
+
+===EXPLANATION===
+
+The SVC (Supervisor Call) instruction, formerly SWI in ARM7, is the classic mechanism for user‑mode code to request a privileged service from the kernel. On Cortex‑M, thread mode can be unprivileged (CONTROL bit 0 set), and handler mode is always privileged. SVC triggers an exception that transitions the CPU to handler mode, giving the kernel full access to system resources that the caller does not have.
+
+Encoding the service number directly in the instruction — `SVC #N` where N is 0‑255 — eliminates the need for a dedicated parameter register for the call type. The handler decodes N by reading the stacked PC: the SVC instruction is a 16‑bit Thumb instruction (0xDFxx) located at PC‑2 from the faulting address. Bit 2 of EXC_RETURN (LR) tells the handler whether the caller used MSP or PSP, which is essential for accessing the correct stack frame.
+
+In FreeRTOS, the very first context switch is performed via `SVC #0`. The SVC handler initialises the RTOS tick timer and restores the first task's context. This elegantly sidesteps a chicken‑and‑egg problem: before the scheduler starts, there is no PendSV configuration, but a synchronous exception is always available.
+
+A real‑world microkernel system might define SVC numbers: 0 = yield, 1 = send message, 2 = receive message, 3 = create task. The handler uses a jump table indexed by the immediate value to dispatch to the appropriate kernel function with full privilege.
+
+Visualise a hotel concierge desk. Guests (unprivileged threads) cannot enter the back office (kernel space). They write a request number on a slip of paper (SVC immediate) and slide it under the door. The concierge (SVC handler) reads the number, performs the service using their master key (privileged access), and returns the result.
+
+Key points: (1) SVC is synchronous — it always executes immediately. (2) The SVC number must be extracted from the instruction encoding, not from a register. (3) The handler must correctly determine MSP vs PSP from EXC_RETURN[2]. (4) SVC can be called from both privileged and unprivileged code. (5) Nested SVC calls are not recommended and require careful stack management.
+
+The ARM Architecture Reference Manual, "Supervisor Call" chapter, details the instruction encoding and exception behaviour. Joseph Yiu's *Definitive Guide to ARM Cortex‑M* provides step‑by‑step examples of SVC handler implementation with assembly.

@@ -55,3 +55,17 @@ Implement a `SystemInit` function that performs early hardware configuration bef
 ## Real World Application
 
 Every Cortex-M project needs SystemInit for clock configuration — setting PLLs, configuring flash wait states, and enabling peripherals. Silicon vendors provide SystemInit in their CMSIS pack, customised for their specific device.
+
+===EXPLANATION===
+
+SystemInit occupies a unique position in the startup chain: it runs after the stack pointer and vector table are live but before any C runtime initialisation or main(). This early timing lets it configure the very fabric of the system — clocks, voltage regulators, flash timing, memory protection, and security attribution — before any variable is touched or any function is called.
+
+The historical precedent comes from ARM's reference startup code for the original Cortex‑M3. ARM recognised that most systems need some hardware configuration before they can even run C code reliably. Rather than baking vendor‑specific magic into the toolchain, they defined a weak `SystemInit` symbol in the CMSIS startup file. Silicon vendors override it with device‑specific configuration; if the application provides its own definition, that takes precedence.
+
+Consider an STM32G4 operating at 170 MHz: before SystemInit, the CPU runs from the internal 16 MHz HSI oscillator with zero flash wait states. SystemInit must configure the PLL for the target frequency, set the correct number of flash wait states (typically 4 for 170 MHz), and switch the system clock source to the PLL output. Running code at 170 MHz with only one wait state causes flash read errors and unpredictable crashes — a classic boot failure that sends developers directly to SystemInit.
+
+Visualise the startup as a spacecraft launch sequence: the vector fetch is the ignition, SystemInit is the trajectory correction that ensures the rocket points at the right star, and main() is the scientific mission. Without trajectory correction, the mission fails before it begins.
+
+Key points: (1) SystemInit is called from the Reset_Handler, typically before .data/.bss init. (2) VTOR must be configured here if the vector table is not at the default address. (3) CPACR bits 20‑23 enable the FPU coprocessor. (4) After writing to SCB registers, always execute DSB and ISB. (5) SystemInit should not rely on global variables (they are not yet initialised). (6) On TrustZone devices, SystemInit also configures SAU regions and the secure VTOR.
+
+CMSIS‑Core documentation (ARM.CMSIS.5) specifies the SystemInit contract. MCU vendor reference manuals (e.g., ST RM0440 for STM32G4) detail the clock tree and register configuration needed in SystemInit.

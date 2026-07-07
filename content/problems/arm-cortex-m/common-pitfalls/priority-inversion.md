@@ -68,3 +68,19 @@ Describe and simulate the priority inversion problem in nested interrupt handlin
 ## Real World Application
 
 Priority inversion is a well-known problem in real-time systems — it famously caused the Mars Pathfinder priority inversion bug in 1997. In embedded systems, it occurs when ISRs and tasks share resources protected by mutexes or critical sections without priority inheritance support.
+
+===EXPLANATION===
+
+Priority inversion occurs when a high‑priority task cannot run because a low‑priority task holds a shared resource, and a medium‑priority task (which does not need the resource) preempts the low‑priority task, preventing it from releasing the resource. The high‑priority task starves even though no task with higher priority is running — hence the "inversion".
+
+The classic Mars Pathfinder bug made this problem famous. The spacecraft's `bc_dist` (information bus) mutex was held by a low‑priority task when a medium‑priority communications task preempted it. The high‑priority data bus task, needing the mutex, could not run, causing a total system reset every few days. The fix was to enable priority inheritance in the VxWorks mutex — the low‑priority task temporarily inherited the high‑priority's priority, preventing the medium‑priority task from preempting it.
+
+On Cortex‑M, priority inversion can manifest in interrupt handlers that share resources via spinlocks. A low‑priority ISR acquires a lock. A medium‑priority ISR preempts it and runs for a long time. A high‑priority ISR that needs the same lock spins forever. The NVIC's fixed priority scheme normally prevents this within pure interrupt contexts — a higher‑priority interrupt always takes precedence — but shared resources protected by software locks (spinlocks, mutexes) bypass the NVIC ordering.
+
+Solutions include: priority inheritance (the lock holder runs at the waiter's priority), the priority ceiling protocol (the lock inherits the highest priority of any task that might take it), and lock‑free programming (use atomic operations and avoid blocking in ISRs). The Cortex‑M BASEPRI register enables fast priority boosting in interrupt handlers without disabling all interrupts.
+
+Visualise three checkout lanes at a supermarket. The express lane (high priority) needs a price check that only the customer in the regular lane (low priority) has. A customer with a full cart (medium priority) blocks the regular lane, chatting with the cashier. The express lane can't proceed. The store manager gives the regular‑lane customer "express lane overriding priority" (priority inheritance) so they finish the price check first.
+
+Key points: (1) Pure NVIC nesting prevents inversion among interrupts — inversion requires a software resource. (2) Priority inheritance adds code complexity but bounds the blocking time. (3) The priority ceiling protocol prevents chained blocking. (4) Lock‑free data structures and message passing avoid inversion entirely. (5) The BASEPRI register can boost interrupt priority without disabling exceptions.
+
+The Mars Pathfinder bug analysis (NASA JPL, 1997) is a must‑read case study. Real‑time systems textbooks by Liu and Layland, and by Sha, Rajkumar, and Lehoczky, formalise priority inversion and its solutions. CMSIS‑RTOS2 defines priority inheritance as an optional mutex attribute.

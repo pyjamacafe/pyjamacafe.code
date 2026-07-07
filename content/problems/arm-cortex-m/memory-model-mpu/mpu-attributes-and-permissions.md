@@ -99,3 +99,17 @@ Write code to configure two MPU regions with different memory types and access p
 
 Safety-critical firmware must use correct memory attributes to prevent compiler/hardware optimizations from breaking peripheral access protocols. DMA buffers need proper cache attributes. Shared memory between CPU and peripherals must be configured as non-cacheable or strongly ordered.
 
+===EXPLANATION===
+
+Memory attributes and access permissions have been part of the MPU since ARMv7-M, inheriting concepts from the ARM Architecture Reference Memory Model. The Cortex-M MPU uses a simplified version of the ARMv7-A MMU attribute scheme: TEX[2:0], C, B, and S bits encode the memory type (Normal, Device, Strongly-Ordered) and cache policy. This matters because Cortex-M processors may have caches (M7, M55, M85) or act as bus masters in multi-core systems. Setting the wrong attribute can cause stale data reads, missed peripheral updates, or bus faults.
+
+The intuition: think of memory types as traffic rules for the memory bus. Normal memory (code, data) allows the bus to merge writes, reorder accesses, and speculate reads — like a highway where cars can change lanes and pass. Device memory (peripheral registers) forces every access to reach the peripheral exactly once and in order — like a single-lane road with traffic lights at every intersection. Strongly-Ordered memory is a strict one-lane road where every car waits for the one ahead to finish before moving — no merging, no reordering, no speculation. Cache policies (Write-Through vs Write-Back) determine whether writes go directly to main memory or sit in the cache first.
+
+In professional practice, getting attributes wrong is a common source of bugs. The Zephyr linker script puts `.device` sections with `STRONGLY_ORDERED` attribute for MMIO regions. FreeRTOS+TCP uses `NORMAL_NON_CACHE` for DMA buffers to avoid cache coherency issues. The Linux kernel's `arch/arm/mm/proc-v7m.S` defines `MT_DEVICE` and `MT_NORMAL` page types. CMSIS-Core provides `MPU_ATTRIBUTES` macros: `MPU_CONFIG_NORMAL_WB_WA` for cached memory and `MPU_CONFIG_DEVICE` for peripherals. In Mbed OS, USB and Ethernet buffers use `NON_SHAREABLE` device memory to prevent CPU prefetch from reading stale descriptors.
+
+Visualise the TEX/C/B encoding as a 5-bit field: TEX[2:0] = 000 for Normal, 001 for Device, 010 for Strongly-Ordered; C = cacheable, B = bufferable, S = shareable. Shareable means the region may be accessed by multiple bus masters (DMA, another CPU) and requires cache coherence support.
+
+Key points: (1) Device memory must never be cached — each read must reach the peripheral. (2) Strongly-Ordered memory forces ordering across all masters — use sparingly. (3) AP bits: 000 = no access, 001 = privileged R/W only, 011 = both privileged/unpriv R/W; (4) Sub-regions (8 per MPU region) can disable access to specific 1/8th sections. (5) TEX remap (in ACTLR) can change TEX field interpretation on some cores — check your TRM.
+
+References: ARMv7-M ARM (DDI0403) section B4.3, ARMv8-M ARM (DDI0553) section B4.3, CMSIS-Core `mpu_armv7.h`, Zephyr `include/arch/arm/cortex_m/mpu/arm_mpu.h`, ARM Cortex-M7 TRM cache attributes.
+

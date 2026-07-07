@@ -61,3 +61,19 @@ Read and modify the FPSCR (Floating-Point Status and Control Register). Change t
 ## Real World Application
 
 FPSCR control is essential in safety-critical applications (automotive, aerospace) where floating-point exceptions must be detected and handled. Changing rounding modes is used in numerical algorithms that require specific rounding behaviour (financial calculations, signal processing).
+
+===EXPLANATION===
+
+The Floating‑Point Status and Control Register (FPSCR) is the FPU's central control panel. It sits at a dedicated system register address (accessed via VMRS/VMSR) and governs three categories of behaviour: rounding mode, exception configuration, and cumulative status. Understanding FPSCR is essential for writing numerically reliable embedded software.
+
+Rounding mode selection (bits 23‑22) controls how the FPU resolves results that cannot be exactly represented. The four IEEE 754 modes are: Round to Nearest (RN, 00) — the default, used by most algorithms for best accuracy; Round towards Plus Infinity (RP, 01) — used in interval arithmetic; Round towards Minus Infinity (RM, 10) — the complementary interval bound; and Round towards Zero (RZ, 11) — used in DSP applications where truncation is acceptable. Changing rounding mode is a single FPSCR write, but requires an ISB to take effect.
+
+The flush‑to‑zero (FZ) bit and default NaN (DN) bit provide additional control. FZ (bit 24) replaces denormalised numbers with zero, dramatically improving performance on Cortex‑M FPUs where denormal handling takes up to 30 extra cycles per operation. DN (bit 25) forces all NaN results to a canonical "default NaN", simplifying comparison logic in control systems.
+
+A signal processing pipeline illustrates practical FPSCR use: the decimator uses RN mode for best filter accuracy, while the FFT stage uses RZ mode for consistent bit‑exact results across platforms. The AHP (AHP bit, bit 26) selects alternative half‑precision behaviour. After each processing stage, the application reads FPSCR's cumulative flags to check for numerical anomalies.
+
+Visualise the FPSCR as a mixing board in a recording studio. Each slider (bit field) controls a different aspect of the sound: the rounding knob selects the mastering curve, the FZ switch eliminates background hiss (denormals), the DN switch normalises how distorted sounds (NaNs) are handled, and the status LEDs (cumulative flags) light up when a channel is clipping.
+
+Key points: (1) FPSCR is read via VMRS and written via VMSR — these are coprocessor register transfers. (2) Rounding mode affects all subsequent FPU operations until changed. (3) The cumulative exception flags are sticky across multiple operations. (4) AHP (Alternate Half‑Precision) selects IEEE 754 vs ARM alternative format for 16‑bit floats. (5) FPSCR must be saved and restored during context switches for FPU‑using tasks.
+
+The ARM Architecture Reference Manual, "FPSCR" register description, documents all bit fields. The IEEE 754‑2008 standard specifies the rounding modes and exception semantics. CMSIS‑Core provides `__get_FPSCR()` and `__set_FPSCR()` access functions.

@@ -88,3 +88,17 @@ Create a Cortex-M family selection guide program. Define a data structure for ea
 
 System architects use selection guides to choose the optimal Cortex-M processor for their product requirements, balancing cost, power, performance, and security features. Automotive, industrial, and consumer IoT each have different sweet spots.
 
+===EXPLANATION===
+
+The Cortex-M family began in 2004 with the ARMv6-M Cortex-M0, designed to displace 8/16-bit microcontrollers with a 32-bit core at comparable power. ARMv7-M followed with the Cortex-M3 (2005), M4 (2010) adding DSP+FPU, and M7 (2014) pushing into high-performance real-time control. The ARMv8-M revision (2016) introduced TrustZone security to the microcontroller class, and ARMv8.1-M (2020) added Helium vector extensions for ML at the edge. Each generation addresses a specific market segment while maintaining backward source compatibility.
+
+Your mental model of the Cortex-M lineup should be two axes: architectural generation (v6-M → v7-M → v8-M → v8.1-M) and class (Baseline vs Mainline). Baseline cores (M0, M0+, M23) use a 16-bit-heavy Thumb subset, have no hardware divide, and target ultra-low-power. Mainline cores (M3, M4, M7, M33, M55, M85) implement the full Thumb-2 ISA with hardware divide, MPU, and optional FPU/DSP. TrustZone is available only on v8-M and later — M23 (Baseline) or M33/M55/M85 (Mainline).
+
+Professional firmware projects make selection decisions based on quantifiable criteria. Zephyr RTOS, for instance, defines three tier levels: Tier 1 for widely-used cores (M3, M4, M33), Tier 2 for specialized cores (M7, M55), and Tier 3 for Baseline. FreeRTOS mainline supports M0+ through M7 with conditional compilation for FPU context saving. The CMSIS-Core specification abstracts the differences — your application code can target `__FPU_PRESENT`, `__MPU_PRESENT`, and `__TZ_PRESENT` macros and compile for any core. In production, hardware teams often select a range (e.g., STM32G0 with M0+ for cost-sensitive variants and STM32H7 with M7 for high-end), so firmware must detect features at runtime via the CPUID register.
+
+Visualize the family as a bubble chart: x-axis = performance (DMIPS/MHz), y-axis = feature richness, bubble size = market adoption. M0/M0+ sit low-left (smallest), M3 centers as the sweet spot, M4 shifts right with FPU, M7 goes upper-right. M23 occupies M0+ territory plus TrustZone, M33 sits near M4. This chart explains why M4 dominates audio/DSP, M7 dominates motor control, and M33 dominates secure IoT.
+
+Key points: (1) Part number 0xD2x identifies Mainline, 0xCxx identifies Baseline. (2) M0+ has a vector table relocation feature that M0 lacks. (3) M7 can have up to two FPUs (double-precision and single-precision). (4) M55/M85 add Helium (MVE) for SIMD. (5) ARMv8.1-M introduces branch target identification and pointer authentication for safety.
+
+References: ARM Cortex-M Processor Comparison Table, CMSIS-Core documentation, Zephyr RTOS board ports at `arch/arm/core/cortex_m/`, STM32Cube MCU selection guides, and the ARM Architecture Reference Manual for ARMv8-M (DDI0553).
+

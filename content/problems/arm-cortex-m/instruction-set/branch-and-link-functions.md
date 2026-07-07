@@ -108,3 +108,23 @@ Write a program that demonstrates all Cortex-M branch instructions: B (unconditi
 
 Branch instructions are the foundation of all control flow: function calls (BL), returns (BX LR), conditional execution (Bcc), and efficient switch statements (TBB/TBH). Compilers generate TBB for dense switch cases to avoid long compare-and-branch chains.
 
+===EXPLANATION===
+
+Branch instructions define the control flow of every program, and the Cortex-M offers a rich set of branching primitives inherited from the ARM and Thumb-2 architectures. From the unconditional jump (B) to the table-based switch (TBB), each instruction serves a specific purpose in the compiler's optimization toolkit.
+
+The historical backbone of ARM branch design is the link register (LR) concept. Instead of pushing the return address onto the stack as x86 does, ARM stores it in a dedicated register (R14). This makes leaf function calls — functions that call no other functions — blindingly fast: no stack memory access is needed for the return address. BL saves PC in LR and branches. BX LR returns from the function.
+
+The intuition behind TBB (Table Branch Byte) is that switch statements with consecutive case values are common in C code: `switch (i) { case 0: ... case 1: ... case 2: ...}`. A naive compiler could generate a compare-and-branch chain: `cmp i, #0; beq case0; cmp i, #1; beq case1; ...` — slow for many cases. TBB replaces this with a single instruction that indexes into a byte table of offsets: `TBB [PC, R0]`, where R0 is the case index, and the table at PC gives the relative offset for each case. Execution time is constant regardless of the number of cases.
+
+BX LR is the standard return instruction. It loads the PC from LR and exchanges to Thumb state (bit 0 must be set). The Cortex-M automatically saves LR as EXC_RETURN during exception entry, so returning from an interrupt also uses BX — but with a special EXC_RETURN value instead of a normal function return address.
+
+Conditional branches (Bcc) are the workhorses of loops and if-statements. The condition mnemonics follow a logical pattern: BEQ (equal), BNE (not equal), BCS/BHS (carry set / unsigned higher or same), BCC/BLO (carry clear / unsigned lower), BMI (minus / negative), BPL (plus / positive or zero), BVS (overflow set), BVC (overflow clear), BHI (unsigned higher), BLS (unsigned lower or same), BGE (signed greater or equal), BGT (signed greater than), BLE (signed less or equal), BLT (signed less than).
+
+In professional optimization work, branch instructions are the most impactful targets. A branch that is mispredicted by the pipeline costs several cycles. Compilers use profile-guided optimization to reorder branches for prediction accuracy, use conditional instructions (IT blocks) to eliminate short branches, and use table branches for dense switches.
+
+Visualize branches as a road network. B is a straight highway. BL is a highway with a breadcrumb trail leading back. BX LR is the trail home. Bcc is a conditional exit ramp that opens only when a specific condition is met. TBB is a roundabout with multiple exits indexed by number.
+
+Key points: BL saves PC in LR and branches; BX LR returns; TBB/TBH uses byte/halfword offset table; BLX is used for inter-mode switching (not needed on Cortex-M); conditional branches have ±2KB to ±16MB range; LR bit 0 set indicates Thumb state; TBB table must be within 256 bytes of the instruction.
+
+References: ARM Architecture Reference Manual ARMv7-M (section A6.4 — Branch instructions), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 4.7), ARM Infocenter DDI0403E.
+

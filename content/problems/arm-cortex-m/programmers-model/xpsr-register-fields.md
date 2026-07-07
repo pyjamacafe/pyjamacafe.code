@@ -64,3 +64,17 @@ Read and decode the combined xPSR register (Application PSR, Interrupt PSR, and 
 
 Understanding xPSR is essential for debugging incorrect condition code evaluations, analyzing fault stack frames (which contain the saved xPSR), and implementing context switching where xPSR must be saved and restored.
 
+===EXPLANATION===
+
+The xPSR register dates from ARMv6-M, though its composite structure was formalised in ARMv7-M. It combines three conceptually separate program status registers into one read-accessible register: the Application PSR (APSR — condition flags N,Z,C,V and saturation Q flag), the Interrupt PSR (IPSR — current exception number), and the Execution PSR (EPSR — Thumb state T bit, ICI/IT bits for interrupted load/store multiples and IT block execution). The xPSR is the single most important register for debugging because the hardware pushes it onto the stack on every exception entry — that stacked xPSR tells you exactly which instruction was executing and what the condition flags were when the fault occurred.
+
+The intuition: xPSR is the processor's "state snapshot" at any instant. The condition flags (APSR) tell you the result of the last arithmetic operation — useful when debugging why a comparison branched the wrong way. The exception number (IPSR) tells you which handler is currently running — 0 means thread mode, 2 means NMI, 3 means HardFault, 11 means SVC, 14 means PendSV, 15 means SysTick, 16+ means external IRQ. The EPSR tells you whether the CPU is in the middle of a multi-word load/store (LDM/STM) or inside an IT block — crucial for understanding why the PC points to an unexpected address.
+
+In professional practice, FreeRTOS's `vPortValidateInterruptPriority` reads the IPSR to determine if it's called from an interrupt context, using `(xPSR & 0x1FF)` — if non-zero, it's handler mode. Zephyr's `arch_is_in_isr()` does the same. The Linux kernel's `in_interrupt()` for ARM Cortex-M reads `IPSR` to decide whether to preempt. CMSIS-Core provides `__get_xPSR()`, `__get_APSR()`, `__get_IPSR()`, and `__get_PSP()` for portable access. Debug tools like J-Link's `regs` command dump xPSR and decode flags automatically.
+
+Visualise xPSR as a 32-bit value: bits [31:28] = NZCV flags (set by arithmetic), bit [27] = Q (saturation, DSP), bits [26:25] = GE (SIMD, v7-M only), bits [24] = T (always 1), bits [15:10] = ICI/IT state, bits [8:0] = exception number. On fault, the hardware pushes this entire 32-bit word alongside PC, LR, R12, R0-R3 — the fault handler can decode this word to understand the CPU's exact state.
+
+Key points: (1) NZCV flags are set implicitly by most arithmetic; test them explicitly after operations. (2) The exception number in IPSR is the only reliable way to determine if you're in handler mode. (3) T bit (bit 24) must be 1 — if it's 0, a HardFault occurs immediately. (4) ICI/IT bits are restored from stacked xPSR for correct LDM/STM continuation. (5) Writes to xPSR via MSR only affect APSR — IPSR and EPSR are read-only.
+
+References: ARMv7-M ARM (DDI0403) B1.4, CMSIS-Core `core_cm.h` xPSR macros, FreeRTOS `portmacro.h` IPSR check, Zephyr `include/arch/arm/cortex_m/irq.h`.
+

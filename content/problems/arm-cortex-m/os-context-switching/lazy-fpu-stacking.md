@@ -57,3 +57,17 @@ Configure the lazy stacking feature for the FPU on a Cortex-M33 or M55 processor
 ## Real World Application
 
 Lazy FPU stacking is critical for real-time systems using floating-point — it reduces worst-case interrupt latency when FPU-intensive tasks are interrupted by high-priority events. RTOSes like FreeRTOS and Zephyr configure lazy stacking automatically when an FPU is present.
+
+===EXPLANATION===
+
+When the Cortex‑M4 introduced the single‑precision FPU, ARM faced a dilemma: saving 32 FPU registers (S0‑S31, plus FPSCR, a total of 132 bytes) on every exception entry added 100‑200 cycles of latency even if the handler never touched the FPU. The solution, inherited from the ARM11 architecture, is lazy stacking — a mechanism that delays the actual save until the moment an FPU instruction executes in the handler.
+
+The hardware tracks FPU activity using two bits: FPCCR.LSPEN (lazy stacking enable) and CONTROL.FPCA (floating‑point context active). When lazy stacking is enabled and an exception occurs while FPCA is set, the CPU does NOT push FPU registers to the stack immediately. Instead, it records the location in FPCAR where the save should happen and marks the FPU state as "invalid". The first FPU instruction in the handler triggers a synchronous lazy preservation fault — the CPU saves the FPU context to FPCAR's address and then retries the instruction. If the handler never touches the FPU, the save never happens.
+
+A motor control application on a Cortex‑M4 illustrates the benefit: the high‑priority PWM interrupt runs every 10 µs and never uses floating‑point. A lower‑priority FOC (Field‑Oriented Control) task does heavy FPU computation. Without lazy stacking, every PWM interrupt incurs the full FPU save/restore overhead, consuming 10‑20% of CPU time. With lazy stacking, the PWM handler sees no FPU‑related overhead.
+
+Visualise a backpack you carry "just in case". With eager stacking, you unpack and repack the entire bag at every security checkpoint. With lazy stacking, you only open the bag when security asks to see inside — if they never ask, you keep walking.
+
+Key points: (1) LSPEN must be set once at startup; it affects all subsequent exceptions. (2) The first FPU instruction in a lazy‑stacked handler is slower (save + retry). (3) Lazy stacking works correctly with nested exceptions and multiple FPU‑active contexts. (4) The FPCCR provides status bits (LSPACT, USER, TS) for debugging the lazy state machine.
+
+ARM's *Cortex‑M4 Technical Reference Manual* Section 8.3 describes lazy stacking in detail. The CMSIS‑Core header `core_cm4.h` defines the FPCCR register layout, and FreeRTOS's `port.c` demonstrates production lazy‑stacking configuration.

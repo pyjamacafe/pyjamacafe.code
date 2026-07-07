@@ -104,3 +104,19 @@ Write a program that analyzes stack frames across nested function calls. Impleme
 
 Stack unwinding is fundamental to debugging and exception handling. Debuggers, fault handlers, and crash reporters use frame pointer walking to produce call stacks. RTOS-aware debugging also requires walking through task stacks.
 
+===EXPLANATION===
+
+Stack frame analysis is the process of walking backwards through the call chain to reconstruct which functions led to the current point of execution. When a deeply embedded system crashes, the call stack—often called a stack trace or backtrace—is the single most valuable piece of information for diagnosing the fault. It tells you not just where the program was when it died, but how it got there.
+
+The concept of a structured stack frame dates back to the earliest days of computing, but the ARM Architecture Procedure Call Standard (AAPCS) formalized it for ARM processors. On Cortex-M, the frame pointer is conventionally R7 (or R11 in some ABIs). Each function's stack frame starts with the saved frame pointer value of the caller, forming a linked list. The second word in each frame is the return address (saved LR), which points back into the caller. By walking this chain from the current function all the way back to main (or Reset_Handler), you can reconstruct the full call sequence.
+
+The intuition is simple: each time a function is called, it pushes the current frame pointer onto the stack and sets up a new frame. The frame pointer acts like a breadcrumb trail—each crumb points to the previous one. When an error occurs, you follow the crumbs backwards. At each step, you read the saved LR to discover the return address (which tells you the function that was called), and the saved FP to find the next crumb. The calling convention guarantees this structure is preserved because it's the only reliable way for the callee to restore the caller's state on return.
+
+Professionally, stack frame analysis is used everywhere: debuggers like GDB and IAR Embedded Workbench show call stacks by walking frame pointers. Fault handlers in production firmware (HardFault_Handler, MemManage_Handler) dump the stack trace to a serial port or store it in non-volatile memory for post-mortem analysis. RTOS-aware debuggers extend this technique by knowing the stack pointer boundaries of each task and walking the individual task stacks. The open-source CMSIS-DSP library and Zephyr RTOS both include utilities for dumping stack traces.
+
+Visualize the stack growing downward: main()'s frame at the top (highest address), then func_a, func_b, func_c at the bottom (lowest address). Each frame consists of: [saved FP of caller] [saved LR/return address] [local variables] [saved callee-saved registers]. The FP register (R7) always points to the saved FP slot in the current frame. Dereferencing FP gives the previous FP; FP+4 gives the return address. Walking continues until FP is NULL or the address is outside known memory regions.
+
+Key points to remember: (1) Frame pointer-based unwinding only works with compiler optimizations that preserve the frame pointer (-O0 or -fno-omit-frame-pointer). (2) The Cortex-M exception stack frame (8 words pushed by hardware) is a different structure from the regular function call frame—don't confuse them. (3) LR contains the return address, not the address of the call instruction; the actual caller address is typically one instruction before the LR value. (4) For Thumb-2 code, return addresses may have bit 0 set (Thumb indicator); mask it off when comparing addresses.
+
+References: AAPCS (ARM IHI 0042E), "Definitive Guide to ARM Cortex-M3 and Cortex-M4" by Joseph Yiu (Chapter 10 on debugging), ARM Infocenter documentation on fault handling and stack unwinding, and the open-source libunwind project which provides platform-independent unwinding.
+

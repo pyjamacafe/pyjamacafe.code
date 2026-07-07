@@ -67,3 +67,19 @@ Implement stack overflow detection using a stack canary (guard value) placed at 
 ## Real World Application
 
 Stack overflow detection is critical in safety-critical systems (automotive, medical) where stack corruption can lead to catastrophic failures. Production code typically uses MPU-based protection for zero runtime overhead, while development builds use canaries for easier debugging.
+
+===EXPLANATION===
+
+Stack overflow is the silent killer of embedded systems. The stack grows downward from high addresses; when it exceeds its allocated region, it overwrites adjacent memory — typically global variables, the heap, or another task's stack. The corruption may not cause immediate failure; instead, a function pointer gets overwritten, a control loop computes with bad data, or a flag changes value — leading to a crash that points nowhere near the root cause.
+
+Three detection techniques dominate embedded practice. The stack canary is the simplest: a known pattern (e.g., 0xDEADBEEF) is written at the stack's boundary during initialisation. Periodic checks verify the canary is intact. If corrupted, the system either resets or triggers a diagnostic routine. The overhead is one comparison per check point — negligible for most applications.
+
+MPU‑based protection is the professional choice. The Memory Protection Unit creates a guard region at the stack's boundary with no access permissions. Any stack overflow that touches this region generates an immediate MemManage fault, precisely identifying the culprit instruction. The zero runtime overhead makes MPU protection ideal for production code. The trade‑off is that each stack (MSP, PSP, and each RTOS task's PSP) requires an MPU region — MPU hardware supports only 8‑16 regions.
+
+Stack watermarking fills the entire stack area with a pattern (e.g., 0xAAAAAAAA) at startup. Periodically, the system scans from the stack's low end upward, counting how many bytes of the pattern remain intact. This determines the maximum stack depth (high‑water mark) used so far, helping developers size stacks accurately during development.
+
+Visualise the stack as a water well. The bucket (function calls) lowers the water level (grows the stack) until it reaches the bottom. A canary is a bell at the bottom — if the bucket hits it, a bell rings. An MPU guard is a fence around the well — if the bucket hits the fence, a loud alarm sounds.
+
+Key points: (1) Stack grows downward — the canary is placed at the lowest address. (2) MPU guard regions must be aligned to 32 bytes. (3) Watermarking is non‑destructive and can run alongside production code. (4) RTOS task stacks each need individual overflow protection. (5) The linker script must allocate the stack region and export `_estack`.
+
+ARM's *Cortex‑M3 Technical Reference Manual* "MPU" chapter and Joseph Yiu's *Definitive Guide* cover MPU‑based stack protection. MISRA‑C and CERT C coding standards recommend stack overflow detection for safety‑critical systems.

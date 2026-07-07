@@ -51,3 +51,19 @@ Write an annotated linker script (in a comment-based simulation) that defines th
 ## Real World Application
 
 The linker script is one of the most important files in an embedded project — it determines where code and data reside in memory. Understanding it is essential for bootloader development, implementing firmware update mechanisms (dual-bank), creating custom memory layouts, and debugging hard-to-find memory corruption issues.
+
+===EXPLANATION===
+
+The linker script (`.ld` for GNU ld, `.scf` for ARM Compiler) is the memory map blueprint for the entire firmware image. It defines the available physical memory regions — typically FLASH (read‑execute, starting at 0x08000000 on STM32) and RAM (read‑write, starting at 0x20000000) — and describes how the compiler's output sections should be assigned to those regions.
+
+Every embedded developer encounters the linker script when debugging a HardFault caused by a section placed at the wrong address. The script is deceptively simple but immensely powerful: it can define memory aliases, generate symbols for the startup code, create padding sections for alignment, and enforce cross‑section constraints.
+
+The GNU ld script uses MEMORY and SECTIONS commands. MEMORY defines the physical regions with origin, length, and attributes (rx for flash, rwx for RAM). SECTIONS maps input sections (`.text`, `.data`, `.bss`, etc.) to output sections placed in specific regions. The magic happens with `AT>` (load address) and `ADDR` operators that distinguish between LMA and VMA — this is what enables the .data copy from flash to RAM.
+
+A bootloader project often uses two linker scripts: one for the bootloader and one for the application. The application script uses a higher flash base (e.g., 0x08004000) and a different VTOR. The bootloader script reserves the first flash sector and places its own vector table at 0x08000000.
+
+Visualise the linker script as a city zoning plan. MEMORY defines the districts (residential = flash, commercial = RAM, industrial = peripherals). SECTIONS says which types of buildings go where (houses in residential, shops in commercial). The linker symbols are street signs that label boundaries.
+
+Key points: (1) The `.isr_vector` section must appear first in flash — use `KEEP()` to prevent garbage collection. (2) `_estack` is typically defined as `ORIGIN(RAM) + LENGTH(RAM)`. (3) `PROVIDE()` defines symbols with defaults that applications can override. (4) `NOCROSSREFS` prevents sections from accidentally crossing region boundaries. (5) The `OVERLAY` directive manages overlapping sections for shared memory.
+
+The GNU ld documentation (Section "Linker Scripts") and ARM Compiler armlink User Guide are the definitive references. Joseph Yiu's *Definitive Guide to ARM Cortex‑M3 and Cortex‑M4* includes a tutorial on reading and writing linker scripts.

@@ -100,3 +100,19 @@ Write a program that uses the CLZ (Count Leading Zeros) instruction to implement
 
 CLZ is used in division algorithms (restoring/non-restoring), floating-point normalization, and real-time audio processing for gain control. RTOS kernels use it for bitmap scheduling to find the highest priority ready task.
 
+===EXPLANATION===
+
+CLZ (Count Leading Zeros) is an ARM instruction that returns the number of zero bits before the first one bit in a 32-bit register. It is the arithmetic foundation for bit width calculation, logarithm estimation, round-up to power of two, and normalization. While it seems like a niche bit-counting operation, CLZ is used constantly in operating systems, DSP libraries, and safety-critical firmware for operations ranging from priority encoding to division acceleration.
+
+The CLZ instruction has been part of the ARM architecture since ARMv5TE, making it one of the longest-standing DSP-style instructions. It is available on every Cortex-M processor except some Cortex-M0 implementations (where the compiler must emulate it with a loop). The instruction is essential for efficient software division: by normalizing the divisor (shifting left until the leading bit is 1), the division algorithm reduces the number of iterations from 32 to the number of significant bits in the divisor.
+
+The intuition is that CLZ answers the question: "how many bits do I need to represent this number?" If the value 0x00001234 has CLZ = 19 (bits [31:19] are zero), then the bit width is 32 - 19 = 13 bits. The ceiling of log2 is derived: `ceil(log2(N)) = 32 - CLZ(N - 1)` for N > 1. Rounding up to the next power of two uses the same idea: `next_pow2(N) = 1 << (32 - CLZ(N - 1))`. Finding the highest set bit—useful for finding which priority level in a bitmap has tasks ready—is simply `31 - CLZ(value & -value)`.
+
+In professional RTOS kernels, CLZ is the key to O(1) priority scheduling. FreeRTOS uses a bitmap (`uxTopReadyPriority`) where each bit represents a priority level. When a task becomes ready, the scheduler needs to find the highest priority bit set. Without CLZ, this requires a loop that iterates over each bit (up to 32 iterations). With CLZ, it is one instruction: `31 - CLZ(uxTopReadyPriority)`. The Linux kernel uses a similar approach with `__builtin_clz()` for its bitmap scheduler. CMSIS-DSP uses CLZ for normalization in fixed-point arithmetic and FFT.
+
+Imagine you have a 32-bit integer 0x00001234. Visualize the bits: 0000_0000_0000_0000_0001_0010_0011_0100. CLZ counts the 19 leading zeros (bits 31 down to 13 are zero; the first one is at bit 12). Bit width = 32 - 19 = 13. For normalization, you would left-shift by 19 to get 0x91A0_0000, with the leading bit now at position 31. For priority encoding, if the priority bitmap is 0x00001234, the highest set bit is at position 12, corresponding to priority 12.
+
+Key points: (1) CLZ(0) returns 32 on Cortex-M3/M4/M7/M33/M55 (ARMv7-M and ARMv8-M). In ARMv7-A, CLZ(0) is unpredictable—but Cortex-M implementations define it as 32. (2) Applications: bit width (32 - CLZ), ceiling log2 (32 - CLZ(N - 1)), next power of two (1 << (32 - CLZ(N - 1))), find highest set bit (31 - CLZ(N)), normalization for division and floating-point. (3) Single-cycle on most Cortex-M implementations. (4) Available as `__clz()` intrinsic in ARM Compiler, `__CLZ` in IAR, `__builtin_clz()` in GCC. (5) For Cortex-M0 without CLZ, the compiler generates a loop that is functionally correct but up to 32× slower. (6) CLZ is also used in the iterative division algorithm: normalize divisor, then for each bit from MSB to LSB, subtract (shifted divisor) from remainder.
+
+References: ARM Architecture Reference Manual ARMv7-M (CLZ instruction), "Definitive Guide to ARM Cortex-M3 and Cortex-M4" (Chapter 4), FreeRTOS source code (tasks.c priority scheduling), CMSIS-DSP library (arm_math.h for CLZ intrinsics), and Henry Warren's "Hacker's Delight" (Chapter 5 on counting bits).
+

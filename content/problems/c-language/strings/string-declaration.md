@@ -50,3 +50,17 @@ Declare strings using three different methods: a modifiable array (`char s1[]`),
 ## Real World Application
 
 String handling is fundamental to C programming — parsing configuration files, processing user input, constructing output messages, network protocol parsing, and file I/O. The distinction between modifiable arrays and read-only string literals is critical for avoiding crashes.
+
+===EXPLANATION===
+
+C strings are not a type — they are a convention: a contiguous sequence of characters terminated by a null character (`'\0'`). This convention comes from PDP-11 assembly, where ASCII strings were stored with a zero byte terminator. Thompson and Ritchie adopted it for Unix and C. The name "string" is borrowed from SNOBOL, but C's implementation could not be more different — SNOBOL had rich string operations as primitives; C provides only null-terminated arrays and a handful of library functions. This minimalist design keeps the language small and memory layout predictable.
+
+The intuition: `char s[] = "Hello"` creates an array of exactly 6 bytes (H, e, l, l, o, \0). The size is determined by the initializer. `char s[10] = "Hello"` creates a 10-byte array, with \0 filling the remaining 4 bytes. `const char *s = "Hello"` does not create an array; it creates a pointer variable holding the address of a string literal in read-only memory. The differences in mutability, memory location, and sizeof behavior are a common source of interview questions and real-world bugs.
+
+A professional example: the nginx web server uses length-prefixed strings (`ngx_str_t`) for configuration. When nginx reads a config file, it compares directives as: `if (value->len == sizeof("text/plain") - 1 && memcmp(value->data, "text/plain", value->len) == 0)`. The string literal `"text/plain"` lives in read-only memory. Using a length-prefixed design avoids repeated `strlen` calls and handles strings with embedded nulls. In the Git source code, `struct strbuf` wraps a `char *` with a length and allocator, transitioning from the raw C string convention to a safer bounded interface.
+
+Visualize three ways to create "Hi": (1) `char s1[] = "Hi"` — writing in wet cement; you can later scrape the H into a B to make "Bi". (2) `char s2[10] = "Hi"` — reserving 10 parking spots but only using 2; you have room for a longer car. (3) `const char *s3 = "Hi"` — a sticky note on a refrigerator door; you can move the note to point at different food, but you cannot change the food itself.
+
+Key points: (1) String literals reside in read-only memory on most platforms — modifying via `char *` is undefined behavior. (2) `char arr[] = "str"` includes the null terminator in its size (`sizeof` returns 4). (3) The expression `"string"` has type `char[7]` in C. (4) Two identical string literals may or may not share the same address (implementation-defined). (5) `char s[5] = "Hello"` would omit \0 because there is no room — causing undefined behavior when treated as a string.
+
+Kernighan & Ritchie §1.9 introduces character arrays. "The C Programming Language" §1.9 covers the three forms of string initialization. "Secure Coding in C and C++" (Seacord) discusses null-terminated string pitfalls and buffer overflow prevention.

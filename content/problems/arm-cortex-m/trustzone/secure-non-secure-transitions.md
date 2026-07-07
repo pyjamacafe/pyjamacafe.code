@@ -76,3 +76,17 @@ Implement a secure-to-non-secure function call mechanism. Write a function in se
 
 Secure firmware update, attestation, and secure storage services in IoT devices use BXNS to delegate work to non-secure code (e.g., for UI rendering or network communication) while maintaining security isolation.
 
+===EXPLANATION===
+
+Secure to Non-Secure transitions in ARMv8-M use two new instructions: BXNS (Branch and Exchange to Non-Secure) for direct calls, and BLXNS (Branch with Link and Exchange to Non-Secure) for function calls with return. These instructions were added in ARMv8-M and are not present in any earlier architecture. When secure code executes BXNS, the processor clears the security state (NS bit in CONTROL or EXC_RETURN), clears the securable registers (R0-R3, R12, LR, PC, xPSR are cleared or masked for isolation), and branches to the target address in Non-Secure state. The processor automatically saves the secure context so that when non-secure code returns via the SG instruction, the secure state is restored.
+
+The intuition: calling non-secure code from secure is like a diplomat leaving an embassy. Before stepping out, the diplomat locks all sensitive documents in a safe (clearing securable registers). The host country (non-secure) cannot access the embassy's secrets. When the diplomat returns, they present their passport (the SG instruction at an NSC entry), and the embassy unlocks the safe. The BXNS/BLXNS instructions automate this "clearing" — the hardware guarantees that no secure data leaks into non-secure registers.
+
+In professional firmware, BXNS is used extensively in PSA-compliant systems. Zephyr's `arm_trustzone_do_ns_call` in `arch/arm/core/trustzone.c` uses BLXNS to call non-secure functions for non-critical processing (e.g., network stack, display rendering). FreeRTOS's `SecureInit.c` calls `TZ_InitContextSystem_S` which configures the transition using BLXNS. The ARM Platform Security Architecture (PSA) firmware framework defines a Secure Partition Manager (SPM) that uses BXNS to switch between secure partitions. CMSIS-Core provides `__TZ_set_ns_pointer` and `__TZ_import_func` macros for type-safe NS function calls.
+
+Visualize the transition as a state machine: Secure → BXNS → Non-Secure (all securable registers cleared). Non-Secure → SG at NSC entry → Secure (registers restored). During the Non-Secure execution, the secure stack is preserved but inaccessible to non-secure. The FPU context can be lazy-saved for efficiency if `FPU_FPCCR.LSPEN` is configured.
+
+Key points: (1) BXNS jumps to Non-Secure; BLXNS calls and saves return information on the secure stack. (2) On entry to Non-Secure, R0-R3, R12 are cleared for security isolation. (3) Non-secure returns via `SG` at an NSC entry point. (4) The secure stack must be MSP (not PSP) for the transition to work. (5) The `TT` (Test Target) instruction can check whether an address is Secure or Non-Secure before branching.
+
+References: ARMv8-M ARM (DDI0553) section B1.6, Zephyr `trustzone.c`, FreeRTOS `secure_init.c`, CMSIS-Core `core_cm33.h` TZ functions, PSA Firmware Framework for M (FF-M) specification V1.1, ARM AN326 "TrustZone for Cortex-M".
+

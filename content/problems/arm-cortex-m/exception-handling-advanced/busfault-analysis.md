@@ -115,3 +115,23 @@ Write a BusFault handler that captures and analyzes bus error information. Read 
 
 Memory-mapped I/O accesses to peripherals that are powered down or clock-gated cause BusFaults. Robust drivers use BusFault handlers to detect missing hardware and gracefully degrades functionality rather than crashing.
 
+===EXPLANATION===
+
+BusFault is the Cortex-M's mechanism for reporting memory access errors. When a bus transaction — whether an instruction fetch, a data load, or a data store — returns an error response, the processor records the failure in the BusFault Status Register (BFSR) and, if enabled, invokes the BusFault handler. Understanding the precise vs imprecise distinction is the key to effective BusFault analysis.
+
+The historical origin of BusFault lies in the ARM system bus architecture. The Cortex-M uses the AHB-Lite or AMBA-5 bus protocol, where every transaction includes an error response signal (HRESP or HREADYOUT). Peripheral devices or memory controllers assert this signal when an access is invalid — attempting to read from a non-existent address, accessing a powered-down peripheral, or violating a bus-level protection scheme.
+
+The precise vs imprecise distinction is fundamental. A precise BusFault occurs when the fault is directly associated with the instruction currently executing. The stacked PC points to the faulting instruction, and BFAR (BusFault Address Register) contains the exact address that caused the error. Precise faults are the easy ones to debug — you know exactly which instruction and which address. An imprecise BusFault occurs when the fault is associated with a buffered write. The Cortex-M has a write buffer that holds pending store transactions. If a buffered write later fails, the processor may have moved on to subsequent instructions. The stacked PC points somewhere after the actual faulting store, and BFAR is invalid.
+
+In professional firmware, BusFault handlers implement a capability-detection pattern. Some microcontrollers have multiple silicon revisions where certain peripherals may be absent or memory regions may have varying sizes. The firmware probes memory-mapped registers with a guarded read that traps BusFaults. If the BusFault handler fires, the driver marks that peripheral as absent and degrades gracefully. This allows a single firmware binary to run across multiple chip variants.
+
+The stacking/unstacking BusFault types (STKERR, UNSTKERR) are particularly dangerous because they occur during exception entry or exit. A BusFault during stacking means the processor could not save its state — the stack frame is corrupted. Recovery is typically impossible because the processor state is already partially overwritten. The best the handler can do is log whatever information is available and reset.
+
+BusFault during vector table read (VECTBL bit in HFSR) is a special case: the processor cannot fetch the HardFault handler address from the vector table, typically because the vector table itself resides in inaccessible memory. This causes immediate lockup.
+
+Visualize a BusFault as a package delivery attempt to an invalid address. A precise BusFault is like the courier returning with "address does not exist" — you know exactly which address failed. An imprecise BusFault is like the courier accepting the package, then the sorting facility later discovering the address is invalid — you know a package failed, but not exactly which one.
+
+Key points: BFAR contains the faulting address for precise BusFaults; BFARVALID flag confirms BFAR content validity; imprecise faults originate from buffered writes; STKERR/UNSTKERR occur during exception entry/exit; BusFault during vector table fetch causes lockup; precise BusFaults can potentially be recovered by fixing the address; always clear BFSR before returning from the handler.
+
+References: ARM Architecture Reference Manual ARMv7-M (section B1.5.9 — BusFault), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 10.2), ARM Infocenter DDI0403E.
+

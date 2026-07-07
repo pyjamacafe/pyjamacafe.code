@@ -75,3 +75,17 @@ Write a program that configures an MPU region to cover the first 32 KB of SRAM s
 
 MPU region configuration is essential for safety-critical systems (automotive, medical) that must prevent tasks from accessing memory outside their allocated regions. RTOSes like FreeRTOS and Zephyr use the MPU to isolate tasks and protect the kernel.
 
+===EXPLANATION===
+
+The MPU region configuration registers (MPU_RNR, MPU_RBAR, MPU_RASR) have remained architecturally stable since ARMv7-M, with ARMv8-M adding a second security-banked copy. Each region is programmed by writing the region number to MPU_RNR, the base address to MPU_RBAR, and the attributes to MPU_RASR. Region sizes must be a power of 2 between 32 bytes and 4 GB, encoded as `log2(size) - 1` in bits [5:1] of MPU_RASR. The base address must be aligned to the region size — a 32 KB region must start at a multiple of 32 KB. This alignment requirement is the most common source of configuration errors: if you specify a base of `0x20001000` with size 32 KB, the MPU silently uses `0x20000000` because it truncates unaligned bits.
+
+The intuition: the MPU is a pattern matcher with a fixed number of slots. Each slot has a (base, size, permission) tuple. When the CPU issues a memory access, the MPU checks each region in order (region number 0 has highest priority on v7-M, region number 7 on v8-M) and if no region matches, the access faults (if the MPU is enabled). This is why you must always configure a background region for the entire address space if you enable the MPU — or use the default background permission from MPU_CTRL. The MPU does not merge regions — each access hits exactly one region or faults.
+
+Professional RTOS implementations use the MPU for task isolation. FreeRTOS MPU port (`FreeRTOS/Source/portable/MPU/ARM_CM3/`) configures one region per task stack, one for flash (text), and one for peripherals. When switching tasks, `vPortSwitchContext` reprograms the MPU regions for the new task. Zephyr's userspace support (`CONFIG_USERSPACE`) uses the MPU to create a "domain" for each application thread, with stack, flash, and peripheral regions tailored to that thread. The kernel core and interrupt handlers use a separate privileged MPU configuration. mbed OS uses the MPU to prevent user threads from accessing kernel data structures.
+
+Visualize the MPU configuration flow as a sequence: disable MPU → for each region, set RNR = region number, set RBAR = base, set RASR = size+attr → enable MPU → DSB → ISB. Every write to RBAR or RASR needs the correct RNR first — RNR acts as a pointer into the region register bank.
+
+Key points: (1) Region size must be power of 2; base must be aligned to size. (2) Region numbers are not prioritised the same across v7-M (lower number = higher priority) and v8-M (higher number = higher priority). (3) DSB + ISB required after configuration — without them, the MPU may use stale settings. (4) The MPU can be enabled/disabled via MPU_CTRL[0]; disabling it allows all accesses. (5) Sub-regions (8 per region) can exclude specific 1/8th segments — useful for guard bands near stack boundaries.
+
+References: ARMv7-M ARM (DDI0403) B4.2, ARMv8-M ARM (DDI0553) B4.2, FreeRTOS MPU port, Zephyr `arch/arm/core/cortex_m/mpu/arm_mpu.c`, CMSIS-Core `mpu_armv7.h` example configuration.
+

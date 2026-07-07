@@ -92,3 +92,21 @@ Write conditional execution sequences using the IT (If-Then) block instruction. 
 
 IT blocks replace short if-else chains in performance-critical code without branching. Saturation arithmetic is used in audio processing (preventing clipping), PID controllers (preventing integral windup), and signal processing applications.
 
+===EXPLANATION===
+
+The IT (If-Then) instruction is ARM Thumb-2's solution to the perennial tension between code density and performance. Traditional ARM processors offered conditional execution on almost every instruction via the 4-bit condition field in 32-bit ARM encodings. Thumb instructions, being only 16 bits wide, could not afford the condition field overhead. IT blocks bridge this gap by letting a single IT instruction conditionally execute up to four subsequent instructions.
+
+The historical context is crucial. In the 32-bit ARM instruction set, every instruction could be conditional — you could write `ADDNE R0, R1, R2` to add only if the previous comparison set the not-equal flag. This eliminated many short branches entirely. The Thumb instruction set sacrificed this capability for code density. IT blocks were the compromise introduced in ARMv7-M: a single 16-bit IT instruction adds conditionality to the next 1–4 instructions without requiring the 32-bit encoding overhead on each one.
+
+The intuition behind IT blocks is that most conditional code sequences are short — one or two instructions. A typical pattern is: compare two values, then conditionally move. Without IT, this would require a branch: `CMP R0, #0; BEQ skip; MOV R1, #1; skip:`. With IT, it becomes: `CMP R0, #0; IT EQ; MOVEQ R1, #1`. The branch is eliminated, the pipeline is never flushed, and execution is faster.
+
+The IT block syntax uses a suffix that encodes both the number of instructions and the condition pattern. IT means one conditional instruction. ITT means two conditional instructions with the same condition. ITE means one instruction with the condition, followed by one instruction with the opposite condition ("if-then-else"). ITTEE means four instructions in an if-then-else-else pattern. The full alphabet soup: IT, ITT, ITE, ITTT, ITET, ITTE, ITEE, ITTTT, ITTET, ITETT, ITEET, ITTTE, ITETE, ITTEE, ITEEE.
+
+In professional audio processing, saturation arithmetic (QADD, QSUB, SSAT, USAT) prevents clipping. When adding two signed 32-bit integers, the result can overflow past the maximum positive value (0x7FFFFFFF). An overflow wraps to a large negative value — catastrophic for audio. QADD saturates the result to 0x7FFFFFFF (or 0x80000000 for negative overflow), producing controlled clipping rather than destructive wrap-around.
+
+Visualize an IT block as a handful of dominoes. The first domino (the IT instruction) is marked with a condition. The next 1–4 dominoes are set to fall either in the same direction (T) or the opposite direction (E). If the condition is true, the dominoes fall as planned; if false, they remain standing.
+
+Key points: IT block maximum length is 4 instructions; the last instruction in an IT block cannot be a branch (except BX in some cases); all instructions inside an IT block are marked with the condition suffix; flags are not updated by instructions inside IT blocks unless the instruction ends in S; IT blocks are not nestable.
+
+References: ARM Architecture Reference Manual ARMv7-M (section A6.8 — IT instruction), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 4.12), ARM Infocenter DDI0403E.
+

@@ -62,3 +62,17 @@ Use the TT (Test Target) instruction to query the security attributes and memory
 ## Real World Application
 
 TT is used in the secure side of TrustZone-based firmware to validate addresses passed from non-secure callers — for example, checking that a non-secure caller passes a valid non-secure buffer before copying data into it. This prevents security vulnerabilities from incorrect pointer usage.
+
+===EXPLANATION===
+
+The TT (Test Target) instruction is one of the most elegant additions in ARMv8‑M. It answers a single question at hardware speed: "What are the security and memory attributes of this address?" A secure function can call TT on a pointer before dereferencing it — if the pointer claims to be non‑secure but TT reveals it points to secure memory, the function rejects it. This prevents confused‑deputy attacks where a non‑secure caller tricks secure firmware into reading or writing secure memory.
+
+The instruction returns a 32‑bit result encoding: secure (bit 0), NSC (bit 1), SAU/IDAU region index (bits 4‑7), memory type (bits 8‑9, encoding Normal/Device/Strongly‑Ordered), shareability (bits 10‑11), and whether the read‑only attribute is set. TT also has variants: TTA (Test Target with Attribution) includes the current security state in the lookup, and TTT (Test Target with Tag) queries the tag associated with the address.
+
+Consider a secure service that decrypts data into a buffer provided by a non‑secure caller. Without TT, the secure code must trust the caller's pointer — a malicious caller might pass a pointer to secure SRAM containing cryptographic keys. With TT, the secure code checks: if TT returns secure for the target address, the service returns an error instead of decrypting into secure memory.
+
+Visualise a passport checkpoint. Each address crossing from non‑secure to secure territory must show its "passport" — TT reads the passport, verifies the traveller's identity (security attribute) and destination (memory type). A traveller claiming to be non‑secure but carrying a secure passport is turned away.
+
+Key points: (1) TT is only available in ARMv8‑M with TrustZone. (2) TT is a single‑cycle instruction — negligible overhead for security checks. (3) Always validate pointers from non‑secure callers before dereferencing. (4) TT returns the combined IDAU+SAU attribution, not just SAU. (5) The result also indicates whether the address is executable (bit 18).
+
+ARM's *ARMv8‑M Architecture Reference Manual*, "Test Target Instruction" section, provides the full result encoding. Arm's *TrustZone for Cortex‑M* application notes include examples of TT‑based pointer validation in secure partition managers.

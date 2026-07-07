@@ -103,3 +103,19 @@ Write a simulation of the late arrival optimization in the Cortex-M exception mo
 
 High-frequency interrupts (e.g., ADC sampling at 1 MHz or timer capture) benefit significantly from late arrival because tight interrupt timing requirements can be met even when lower-priority interrupts are being processed.
 
+===EXPLANATION===
+
+Late arrival is the Cortex-M's answer to a specific race condition: what happens when a high-priority interrupt arrives while the processor is still stacking registers for a lower-priority one? Intuitively, you would think the processor finishes the current stacking, runs the low-priority handler, then preempts it for the high-priority one. That wastes an entire stacking cycle. The late arrival optimization cancels the in-progress stacking and redirects it to the higher-priority interrupt instead.
+
+The historical context is illuminating. Early ARM interrupt controllers required the first few instructions of every handler to check whether a higher-priority interrupt was pending, creating variable and often unpredictable latency. The Cortex-M NVIC brought true hardware nesting, but late arrival takes it a step further by optimizing even the entry path. It was introduced with ARMv7-M and refined in ARMv8-M.
+
+The intuition is a matter of timing. Stacking eight registers takes about 12 processor cycles. If a high-priority interrupt arrives on cycle 3 of that 12-cycle stacking window, the processor has two choices: waste the remaining 9 cycles finishing the low-priority stack, or abandon it and start fresh for the high-priority one. The Cortex-M chooses the latter. The partially-built stack frame is simply repurposed — the data already pushed (which was for the low-priority interrupt) is now the start of the high-priority interrupt's stack frame. The low-priority interrupt stays pending and will be serviced after the high-priority one completes, typically via tail-chaining.
+
+A professional example: imagine a motor controller running a current-control loop at 50 kHz (every 20 microseconds) and a lower-priority UART receive interrupt. If the UART interrupt fires and the processor begins stacking, and during those 12 cycles the motor control PWM timer fires its higher-priority interrupt, late arrival ensures the motor control ISR runs first. Without late arrival, the motor control ISR would be delayed by the full UART stacking + execution + unstacking cycle, potentially exceeding the 20 microsecond deadline.
+
+Visualize a checkout line at a grocery store. A customer (low-priority interrupt) starts unloading their cart onto the conveyor belt (stacking registers). Before they finish, a VIP customer (high-priority interrupt) arrives. The cashier stops the first customer mid-unload, serves the VIP immediately, and when the VIP leaves, the first customer resumes unloading. Late arrival is the store manager's signal to redirect service to the VIP while the belt is still filling.
+
+Key points: late arrival only applies during stacking, before the handler executes; it requires the arriving exception to have strictly higher priority; the stack frame is shared, not duplicated; late arrival + tail-chaining together form a powerful latency-reduction pair; the optimization is invisible to software — handlers never know it occurred.
+
+References: ARM Architecture Reference Manual ARMv7-M (section B1.5.7 — Late arrival), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 8.6.2), ARM Application Note AN298.
+

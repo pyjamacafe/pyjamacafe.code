@@ -73,3 +73,19 @@ Write a program that uses the Software Trigger Interrupt Register (STIR) to pend
 
 Software-triggered interrupts are used for inter-processor communication in multi-core systems, deferred procedure calls in RTOS kernels, and for testing interrupt handlers during development without requiring peripheral hardware.
 
+===EXPLANATION===
+
+The Software Trigger Interrupt Register (STIR) is one of those small but details that reveals ARM's design philosophy: provide hardware primitives for common software patterns. Before STIR, software needed to pend an interrupt by computing a bitmask and writing to the Interrupt Set Pending Register (ISPR). STIR accepts the interrupt number directly — a single register, a single write, no bitmask arithmetic.
+
+The historical motivation comes from multicore systems. In a dual-core Cortex-M processor like the nRF5340, core 0 may need to signal core 1. Without STIR, core 0 would need to know which NVIC register and which bit within that register corresponds to the inter-processor interrupt. With STIR, core 0 simply writes the interrupt number to the register, and the hardware handles the register-bank and bitmask mapping automatically. This abstraction becomes critical in virtualized environments where the OS may not know the physical register layout.
+
+The intuition is straightforward: manually computing `register_base + (irq_num / 32) * 4` and `1 << (irq_num % 32)` is error-prone boilerplate. STIR collapses that into a single memory-mapped write. On the programmer's side, it reduces cognitive load; on the performance side, it saves several instructions of bitmask arithmetic.
+
+In professional systems, STIR shines in interrupt-driven state machines. A protocol decoder might run as a low-priority interrupt. When a higher-priority DMA completion interrupt finishes filling a buffer, it triggers the decoder ISR via STIR. The decoder ISR then processes the buffer without blocking the DMA. This deferred procedure call pattern is the interrupt-world equivalent of a bottom-half handler in Linux.
+
+Visualize a telephone switchboard from the 1950s. ISPR is the old manual board where the operator must find the correct jack and plug in the cable. STIR is a modern PBX: you just dial the extension number, and the switchboard routes you automatically.
+
+Key points: STIR is at 0xE000EF00; accepts IRQ numbers 0–479; requires a DSB after writing for ordering; cannot pend system exceptions (SVCall, PendSV, SysTick — use ICSR instead); on ARMv7-M, priority grouping must be configured before STIR is used; on ARMv8-M, STIR is banked for Secure and Non-Secure states.
+
+References: ARM Architecture Reference Manual ARMv7-M (section B3.4.13 — STIR), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 8.9), ARM Infocenter DDI0403E.
+

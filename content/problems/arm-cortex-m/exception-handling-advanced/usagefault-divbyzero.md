@@ -104,3 +104,21 @@ Write a program that enables UsageFault trapping for division by zero and unalig
 
 Safety-critical code often enables division-by-zero and unaligned-access trapping to catch programming errors during development. Production firmware may disable them to avoid unexpected faults in the field.
 
+===EXPLANATION===
+
+The UsageFault is the Cortex-M's diagnostic exception for detecting programming errors. While HardFault catches unrecoverable system failures, UsageFault catches specific, avoidable mistakes — dividing by zero, executing undefined instructions, accessing unaligned addresses, or corrupting the processor state. It is the equivalent of a runtime assertion in hardware.
+
+The historical context is revealing. Early ARM processors silently returned zero on division by zero — a design choice that prioritized performance over safety. As Cortex-M processors entered safety-critical domains (automotive, medical, industrial control), the need for trap-on-error behavior became paramount. ARM responded by adding the DIV_0_TRP bit in SCB_CCR: when set, any SDIV or UDIV instruction with a divisor of zero triggers a UsageFault instead of silently returning zero.
+
+The intuition behind UsageFault is that certain error conditions can be precisely identified and reported. The UFSR (UsageFault Status Register) in CFSR provides a rich set of status bits: UNDEFINSTR (bit 0) for undefined opcodes, INVSTATE (bit 1) for EPSR corruption, INVPC (bit 2) for invalid exception return, NOCP (bit 3) for disabled FPU access, UNALIGNED (bit 8) for unaligned accesses when trapping is enabled, and DIVBYZERO (bit 9) for division by zero when trapping is enabled.
+
+In professional firmware development, enabling all UsageFault traps during development is standard practice. A division by zero during testing catches bugs early. The unaligned access trap catches code that performs unaligned word accesses — which are legal but slow on Cortex-M (they take multiple bus cycles). The NOCP trap catches accidental FPU or coprocessor access when the FPU is disabled, preventing subtle state corruption.
+
+The UNALIGNED trap (SCB_CCR bit 3) is particularly useful. Cortex-M3 and M4 support unaligned word and halfword accesses in hardware, but they execute more slowly than aligned accesses. Enabling the trap catches code that accidentally uses unaligned pointers — a common source of portability bugs between architectures that don't support unaligned access (like Cortex-M0+).
+
+Visualize the UsageFault as a quality-control inspector on an assembly line. When the DIVBYZERO sensor detects a zero divisor, it stops the line. When UNALIGNED detects a misaligned access, it flags the offending instruction. Without these traps, the defective product (silent error) continues down the line and causes a malfunction later — much harder to diagnose.
+
+Key points: UsageFault must be enabled via SHCSR bit 18; DIV_0_TRP and UNALIGN_TRP are in SCB_CCR; UFSR is in CFSR[23:16]; faults are precise — the stacked PC points to the offending instruction; the UsageFault handler must clear the status bits before return; without trapping, division by zero returns 0; unaligned access on Cortex-M3/M4 is legal but slow.
+
+References: ARM Architecture Reference Manual ARMv7-M (section B1.5.10 — UsageFault), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 10.3), ARM Infocenter DDI0403E.
+

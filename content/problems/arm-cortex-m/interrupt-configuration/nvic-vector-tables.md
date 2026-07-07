@@ -103,3 +103,19 @@ Write a program that demonstrates the mapping between NVIC interrupt numbers and
 
 Understanding vector table mapping is essential for writing startup code, configuring the NVIC, and implementing custom interrupt handlers. Bootloaders often relocate the vector table using VTOR to give the application control over interrupts.
 
+===EXPLANATION===
+
+The vector table is the spinal cord of the Cortex-M exception system — every exception, from Reset to the highest-numbered external interrupt, gets its handler address from this table. Its design descends directly from the ARM7TDMI vector table, but the Cortex-M made two crucial innovations: it relocated system exceptions into the lower 16 entries and made the table relocatable via VTOR.
+
+The mapping rule is deceptively simple: external interrupt N lives at vector table index (16 + N). The first 16 entries belong to system exceptions: Reset at index 1, NMI at index 2, HardFault at index 3, MemManage at 4, BusFault at 5, UsageFault at 6, SVCall at 11, PendSV at 14, and SysTick at 15. Entry 0 holds the initial stack pointer value — the processor loads SP from this address on reset, before jumping to the Reset handler.
+
+The intuition behind the offset of 16 is one of numbering hygiene. System exceptions are numbered 1–15 by the processor's internal exception numbering. External interrupts start at exception number 16 (which is IRQ 0). The vector table index equals the exception number. So IRQ 0 → exception 16 → vector table slot 16. This consistency means the NVIC can compute the handler address in a single cycle: `vector_table_base + exception_number * 4`.
+
+In professional firmware, vector table relocation via VTOR is how bootloaders hand control to applications. The bootloader runs at the flash base address (0x00000000) with its own vector table. Before jumping to the application at offset 0x40000, it writes `VTOR = 0x00040000`. The NVIC then reads handler addresses from the application's vector table. This mechanism is essential for over-the-air update systems where the bootloader must remain in place while the application is upgraded.
+
+Visualize the vector table as a hotel directory in a lobby. The first 16 listings (system exceptions) are the hotel staff — manager, security, maintenance. Listings 16 and above are guest rooms (external interrupts). The index tells you exactly which room to call.
+
+Key points: entry 0 holds the initial SP (not a handler); each entry is 4 bytes; addresses must have bit 0 set for Thumb state; VTOR must be 128-byte aligned; on ARMv8-M with TrustZone, there are separate Secure and Non-Secure vector tables; weak aliases are commonly used for unhandled interrupts.
+
+References: ARM Architecture Reference Manual ARMv7-M (section B1.6.2 — Vector Table), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 7 — Vector Table), ARM Infocenter DDI0403E.
+
