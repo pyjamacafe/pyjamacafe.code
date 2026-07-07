@@ -363,12 +363,7 @@ body {
 }
 
 .question-pane-body.notes-maximized {
-  grid-template-rows: 0 0 1fr;
-}
-
-.question-pane-body.notes-maximized #questionContentWrapper,
-.question-pane-body.notes-maximized .question-content {
-  display: none;
+  grid-template-rows: 1fr 8px 4fr;
 }
 
 .question-pane-body.notes-maximized .notes-area {
@@ -1075,6 +1070,7 @@ body {
 /* Question content */
 #questionContentWrapper {
   flex: 1 1 auto;
+  min-height: 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
