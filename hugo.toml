@@ -7,6 +7,14 @@ theme = 'pyjamacode'
   author = 'Typobrahe Education LLP'
   description = 'A coding platform for embedded systems software and firmware development.'
 
+  [params.firebase]
+    apiKey = 'AIzaSyC3rYp82RGSZVJrHwq-WrGX-UUgBneAcDo'
+    authDomain = 'code-pyjamacafe.firebaseapp.com'
+    projectId = 'code-pyjamacafe'
+    storageBucket = 'code-pyjamacafe.firebasestorage.app'
+    messagingSenderId = '135975925947'
+    appId = '1:135975925947:web:dbd0d52a358dfc031c919e'
+
 [markup]
   [markup.goldmark]
     [markup.goldmark.renderer]

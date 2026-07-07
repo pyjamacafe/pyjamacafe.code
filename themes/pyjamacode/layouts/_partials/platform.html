@@ -64,7 +64,14 @@
         <div class="pane-body question-content overflow-auto p-3" id="questionContent">
           <p class="text-muted">Select a case from the left sidebar to begin.</p>
         </div>
-        <div class="pane-body article-content overflow-auto p-3 d-none" id="articleContent"></div>
+        <div style="position:relative;flex:1;min-height:0;overflow-y:auto">
+          <div class="pane-body article-content overflow-auto p-3 d-none" id="articleContent"></div>
+          <!-- Auth overlay prompt (shown over article content when not logged in) -->
+          <div id="authOverlay" class="auth-overlay">
+            <p>Sign in to view Lecture &amp; Notes</p>
+            <button id="authShowBtn" class="btn btn-sm btn-primary">Sign In / Sign Up</button>
+          </div>
+        </div>
       </div>
 
       <div class="notes-resizer" id="resizerQuestionNotes" aria-label="Resize notes"></div>
@@ -120,4 +127,32 @@
       <pre id="consoleOutput" class="console-output m-0 p-3">Select a case and start coding...</pre>
     </div>
   </section>
+
+  <!-- Auth overlay prompt (shown over article content when not logged in) -->
+  <div id="authOverlay" class="auth-overlay">
+    <p>Sign in to view Lecture &amp; Notes</p>
+    <button id="authShowBtn" class="btn btn-sm btn-primary">Sign In / Sign Up</button>
+  </div>
+</div>
+
+<!-- Auth modal -->
+<div id="authModal" class="auth-modal-backdrop">
+  <div class="auth-modal">
+    <h3 id="authModalTitle">Sign In</h3>
+    <div id="authError" class="auth-error"></div>
+    <button id="authGoogleBtn" class="btn btn-outline-secondary w-100" style="margin-bottom:0.75rem">
+      <i class="bi bi-google"></i> Sign in with Google
+    </button>
+    <hr style="margin:0.5rem 0;color:var(--border-color)">
+    <input id="authEmail" type="email" class="form-control" placeholder="Email">
+    <input id="authPassword" type="password" class="form-control" placeholder="Password">
+    <button id="authActionBtn" class="btn btn-primary w-100">Sign In</button>
+    <div class="auth-toggle">
+      <span id="authToggleText">Don't have an account? </span>
+      <a id="authToggleLink">Sign Up</a>
+    </div>
+    <div class="auth-toggle" style="margin-top:0.5rem">
+      <a id="authCloseLink" style="color:var(--bs-secondary-color)">Close</a>
+    </div>
+  </div>
 </div>

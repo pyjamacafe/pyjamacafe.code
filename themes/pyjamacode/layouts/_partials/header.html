@@ -4,8 +4,23 @@
       <img src="{{ "pc.png" | relURL }}" alt="Logo" height="28" class="me-2">
       <span id="typedTitle">{{ site.Title }}</span>
     </a>
-    <button id="themeToggle" class="btn btn-sm py-0 btn-outline-secondary" data-bs-toggle="tooltip" title="Toggle light/dark theme" aria-label="Toggle theme">
-      <i id="themeIcon" class="bi bi-sun-fill"></i>
-    </button>
+    <div class="d-flex gap-2 align-items-center">
+      <button id="authLoginBtn" class="btn btn-sm btn-outline-primary d-none" data-bs-toggle="tooltip" title="Sign in"><i class="bi bi-person"></i> Sign in</button>
+      <div id="authUserMenu" class="dropdown d-none">
+        <button class="btn btn-sm btn-outline-secondary dropdown-toggle d-flex align-items-center gap-1" data-bs-toggle="dropdown" aria-expanded="false" id="authAvatarBtn" style="padding:2px 0.5rem">
+          <span class="small" id="authUserName" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+          <span id="authAvatar" class="auth-avatar"></span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="authAvatarBtn">
+          <li><span class="dropdown-item-text small text-muted" id="authUserEmail" style="cursor:default"></span></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item" href="#" id="themeToggleDropdown">Toggle theme</a></li>
+          <li><a class="dropdown-item" href="#" id="authLogoutLink">Sign out</a></li>
+        </ul>
+      </div>
+      <button id="themeToggle" class="btn btn-sm py-0 btn-outline-secondary" data-bs-toggle="tooltip" title="Toggle light/dark theme" aria-label="Toggle theme">
+        <i id="themeIcon" class="bi bi-sun-fill"></i>
+      </button>
+    </div>
   </div>
 </nav>

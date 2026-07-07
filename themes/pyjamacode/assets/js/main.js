@@ -136,6 +136,8 @@ function init() {
   initNotesResizer();
   initTooltips();
   initTabs();
+  initFirebase();
+  setupAuth();
 }
 
 function handleKeyboardShortcuts(e) {
@@ -1049,6 +1051,9 @@ function setActiveTab(tab) {
   if (tabChallenge) tabChallenge.classList.toggle('active', tab === 'challenge');
   if (tabArticle) tabArticle.classList.toggle('active', tab === 'explanation');
 
+  // Show/hide auth blur based on tab
+  updateAuthBlur();
+
   // Update URL with tab parameter
   const url = new URL(window.location);
   if (tab === 'challenge') {
@@ -1199,6 +1204,152 @@ function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
+}
+
+/* ─── Auth ─── */
+let authMode = 'signin';
+const authOverlay = document.getElementById('authOverlay');
+const authModal = document.getElementById('authModal');
+const authModalTitle = document.getElementById('authModalTitle');
+const authEmail = document.getElementById('authEmail');
+const authPassword = document.getElementById('authPassword');
+const authActionBtn = document.getElementById('authActionBtn');
+const authError = document.getElementById('authError');
+const authToggleLink = document.getElementById('authToggleLink');
+const authToggleText = document.getElementById('authToggleText');
+const authCloseLink = document.getElementById('authCloseLink');
+const authShowBtn = document.getElementById('authShowBtn');
+const authLoginBtn = document.getElementById('authLoginBtn');
+const authUserMenu = document.getElementById('authUserMenu');
+const authAvatar = document.getElementById('authAvatar');
+const authUserName = document.getElementById('authUserName');
+const authUserEmail = document.getElementById('authUserEmail');
+const authLogoutLink = document.getElementById('authLogoutLink');
+const themeToggleDropdown = document.getElementById('themeToggleDropdown');
+const authGoogleBtn = document.getElementById('authGoogleBtn');
+
+function updateAuthBlur() {
+  const isAuthed = isAuthenticated();
+  const onLectureTab = articleContentEl && !articleContentEl.classList.contains('d-none');
+  if (articleContentEl && authOverlay) {
+    if (isAuthed || !onLectureTab) {
+      articleContentEl.classList.remove('article-content-blurred');
+      authOverlay.classList.remove('show');
+    } else {
+      articleContentEl.classList.add('article-content-blurred');
+      authOverlay.classList.add('show');
+    }
+  }
+}
+
+function setupAuth() {
+  if (typeof onAuthChange === 'undefined') return;
+
+  // One-time button listeners
+  if (authLoginBtn) authLoginBtn.addEventListener('click', () => openAuthModal('signin'));
+  if (authLogoutLink) authLogoutLink.addEventListener('click', () => { signOut().catch(() => {}); });
+  if (themeToggleDropdown) themeToggleDropdown.addEventListener('click', () => { toggleTheme(); });
+  if (authGoogleBtn) authGoogleBtn.addEventListener('click', () => {
+    signInWithGoogle().then(() => { closeAuthModal(); }).catch((err) => {
+      showAuthError(err.message || 'Google sign-in failed.');
+    });
+  });
+
+  onAuthChange((user) => {
+    const isAuthed = user !== null;
+
+    if (authLoginBtn) authLoginBtn.classList.toggle('d-none', isAuthed);
+    if (authUserMenu) authUserMenu.classList.toggle('d-none', !isAuthed);
+    if (themeToggle) themeToggle.classList.toggle('d-none', isAuthed);
+    if (user) {
+      const name = user.displayName || user.email || '';
+      const initial = (user.displayName || user.email || '?').charAt(0).toUpperCase();
+      if (authUserName) authUserName.textContent = name;
+      if (authAvatar) {
+        if (user.photoURL) {
+          authAvatar.innerHTML = '<img src="' + user.photoURL + '" alt="">';
+        } else {
+          authAvatar.textContent = initial;
+        }
+      }
+      if (authUserEmail) authUserEmail.textContent = user.email;
+    }
+
+    updateAuthBlur();
+  });
+
+  // Auth overlay button → open modal
+  if (authShowBtn) authShowBtn.addEventListener('click', () => openAuthModal('signin'));
+
+  // Auth modal toggle (Sign In ↔ Sign Up)
+  if (authToggleLink) {
+    authToggleLink.addEventListener('click', () => {
+      if (authMode === 'signin') openAuthModal('signup');
+      else openAuthModal('signin');
+    });
+  }
+
+  // Close modal
+  if (authCloseLink) authCloseLink.addEventListener('click', closeAuthModal);
+  if (authModal) authModal.addEventListener('click', (e) => { if (e.target === authModal) closeAuthModal(); });
+
+  // Action button
+  if (authActionBtn) authActionBtn.addEventListener('click', handleAuthAction);
+
+  // Enter key in password field
+  if (authPassword) authPassword.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleAuthAction(); });
+}
+
+function openAuthModal(mode) {
+  authMode = mode;
+  if (authModalTitle) authModalTitle.textContent = mode === 'signin' ? 'Sign In' : 'Sign Up';
+  if (authActionBtn) authActionBtn.textContent = mode === 'signin' ? 'Sign In' : 'Sign Up';
+  if (authToggleText) authToggleText.textContent = mode === 'signin' ? "Don't have an account? " : 'Already have an account? ';
+  if (authToggleLink) authToggleLink.textContent = mode === 'signin' ? 'Sign Up' : 'Sign In';
+  if (authError) authError.style.display = 'none';
+  if (authEmail) authEmail.value = '';
+  if (authPassword) authPassword.value = '';
+  if (authModal) authModal.classList.add('show');
+  if (authEmail) setTimeout(() => authEmail.focus(), 100);
+}
+
+function closeAuthModal() {
+  if (authModal) authModal.classList.remove('show');
+  if (authError) authError.style.display = 'none';
+}
+
+function handleAuthAction() {
+  const email = authEmail ? authEmail.value.trim() : '';
+  const password = authPassword ? authPassword.value : '';
+
+  if (!email || !password) {
+    showAuthError('Please enter email and password.');
+    return;
+  }
+
+  if (authActionBtn) authActionBtn.disabled = true;
+
+  const promise = authMode === 'signin' ? signIn(email, password) : signUp(email, password);
+
+  promise
+    .then(() => { closeAuthModal(); })
+    .catch((err) => {
+      let msg = err.message || 'An error occurred.';
+      // Simplify common Firebase errors
+      if (msg.includes('email-already-in-use')) msg = 'This email is already registered.';
+      else if (msg.includes('wrong-password') || msg.includes('user-not-found')) msg = 'Invalid email or password.';
+      else if (msg.includes('weak-password')) msg = 'Password should be at least 6 characters.';
+      else if (msg.includes('invalid-email')) msg = 'Please enter a valid email address.';
+      showAuthError(msg);
+    })
+    .finally(() => { if (authActionBtn) authActionBtn.disabled = false; });
+}
+
+function showAuthError(msg) {
+  if (authError) {
+    authError.textContent = msg;
+    authError.style.display = 'block';
+  }
 }
 
 if (document.readyState === 'loading') {
