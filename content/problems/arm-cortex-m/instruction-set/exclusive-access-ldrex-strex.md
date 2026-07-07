@@ -115,5 +115,6 @@ Visualize LDREX/STREX as a reservation system at a restaurant. LDREX puts your n
 
 Key points: LDREX loads and sets the monitor; STREX returns 0 on success, 1 on failure; success requires no intervening write to the address; the loop pattern guarantees eventual progress; CLREX clears the monitor without storing; LDREXB/STREXB and LDREXH/STREXH provide byte and halfword variants; memory must be Shareable or Device type for global monitors to work.
 
-References: ARM Architecture Reference Manual ARMv7-M (section A6.5.3 — LDREX/STREX), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 9.4), ARM Infocenter DDI0403E.
+References:
+1. ARM Architecture Reference Manual ARMv7-M (section A6.5.3 — LDREX/STREX), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 9.4), ARM Infocenter DDI0403E.
 

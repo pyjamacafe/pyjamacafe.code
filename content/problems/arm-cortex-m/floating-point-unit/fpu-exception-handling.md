@@ -69,6 +69,12 @@ A motor control application using FOC (Field‑Oriented Control) exemplifies bot
 
 Visualise a fire alarm system with two modes. In "detect and report" mode (no‑trap), smoke triggers a light on the panel but does not evacuate the building. In "detect and act" mode (trap‑enabled), smoke triggers the sprinklers immediately. The building manager chooses the mode based on the area's risk level.
 
-Key points: (1) Trap‑enabled FPU exceptions generate UsageFault, not HardFault directly. (2) The cumulative flags are sticky — they must be cleared by software after handling. (3) The FPU does not support precise exception recovery on Cortex‑M — the handler cannot reliably fix up and continue. (4) The FZ (flush‑to‑zero) mode suppresses underflow exceptions by flushing denormals to zero. (5) The DN (default NaN) mode simplifies NaN handling.
+Key points:
+1. Trap‑enabled FPU exceptions generate UsageFault, not HardFault directly.
+2. The cumulative flags are sticky — they must be cleared by software after handling.
+3. The FPU does not support precise exception recovery on Cortex‑M — the handler cannot reliably fix up and continue.
+4. The FZ (flush‑to‑zero) mode suppresses underflow exceptions by flushing denormals to zero.
+5. The DN (default NaN) mode simplifies NaN handling.
+
 
 ARM's *ARMv7‑M Architecture Reference Manual*, "Floating‑point exception handling" section, defines the FPU fault model. The IEEE 754‑2008 standard specifies the five exception types. Safety‑critical guidance is available in IEC 61508‑3 and ISO 26262‑6.

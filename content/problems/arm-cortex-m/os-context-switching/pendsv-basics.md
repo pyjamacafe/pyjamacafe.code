@@ -69,6 +69,12 @@ In FreeRTOS, the assembly routine `xPortPendSVHandler` (or `vPortSVCHandler` for
 
 Visualise two actors on a stage sharing one costume rack. When actor A finishes their scene (is interrupted), they hang their costume (registers) on the rack (stack). Actor B walks on, takes the next costume, and performs. PendSV is the stage manager who ensures the change happens only after the applause (interrupts) dies down.
 
-Key points: (1) PendSV priority must be the lowest of all programmable exceptions. (2) Trigger by writing 1 to ICSR bit 28 (PENDSVSET). (3) The handler uses the current stack pointer — it must run on MSP. (4) Only callee‑saved registers (R4‑R11) need manual save/restore; the hardware stack frame handles the rest. (5) EXC_RETURN in LR determines whether execution resumes on MSP or PSP.
+Key points:
+1. PendSV priority must be the lowest of all programmable exceptions.
+2. Trigger by writing 1 to ICSR bit 28 (PENDSVSET).
+3. The handler uses the current stack pointer — it must run on MSP.
+4. Only callee‑saved registers (R4‑R11) need manual save/restore; the hardware stack frame handles the rest.
+5. EXC_RETURN in LR determines whether execution resumes on MSP or PSP.
+
 
 The ARM Architecture Reference Manual, section on exception entry and exit, defines the PendSV behaviour. FreeRTOS port layers for Cortex‑M and the CMSIS‑RTOS2 reference implementation provide concrete, field‑tested PendSV handlers.

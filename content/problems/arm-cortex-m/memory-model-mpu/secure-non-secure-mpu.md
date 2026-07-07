@@ -94,7 +94,13 @@ In professional firmware, the dual-MPU architecture is the backbone of PSA Certi
 
 Visualize as two concentric rectangles: the outer rectangle is the full memory map; the inner rectangle is the secure region (protected by S_MPU). The NS_MPU can only configure regions outside the secure rectangle. The SAU defines which addresses fall in the secure rectangle — the S_MPU further refines access within it.
 
-Key points: (1) S_MPU and NS_MPU have separate register banks at different base addresses. (2) Secure code writes to both; non-secure code only sees NS_MPU. (3) Each MPU has its own enable bit and can be active independently. (4) The SAU's security attribution takes priority over MPU region permissions. (5) NSC regions are non-secure but executable from non-secure — the S_MPU must allow execution from NS_MPU-controlled NSC areas.
+Key points:
+1. S_MPU and NS_MPU have separate register banks at different base addresses.
+2. Secure code writes to both; non-secure code only sees NS_MPU.
+3. Each MPU has its own enable bit and can be active independently.
+4. The SAU's security attribution takes priority over MPU region permissions.
+5. NSC regions are non-secure but executable from non-secure — the S_MPU must allow execution from NS_MPU-controlled NSC areas.
 
-References: ARMv8-M ARM (DDI0553) section B4.3, Zephyr `arm_mpu.c` dual-MPU init, FreeRTOS `port.c` for M33, PSA Certified Level 2 Protection Profile, CMSIS-Pack TrustZone examples.
 
+References:
+1. ARMv8-M ARM (DDI0553) section B4.3, Zephyr `arm_mpu.c` dual-MPU init, FreeRTOS `port.c` for M33, PSA Certified Level 2 Protection Profile, CMSIS-Pack TrustZone examples.

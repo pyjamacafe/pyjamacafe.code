@@ -61,6 +61,12 @@ A professional example: the nginx web server uses length-prefixed strings (`ngx_
 
 Visualize three ways to create "Hi": (1) `char s1[] = "Hi"` — writing in wet cement; you can later scrape the H into a B to make "Bi". (2) `char s2[10] = "Hi"` — reserving 10 parking spots but only using 2; you have room for a longer car. (3) `const char *s3 = "Hi"` — a sticky note on a refrigerator door; you can move the note to point at different food, but you cannot change the food itself.
 
-Key points: (1) String literals reside in read-only memory on most platforms — modifying via `char *` is undefined behavior. (2) `char arr[] = "str"` includes the null terminator in its size (`sizeof` returns 4). (3) The expression `"string"` has type `char[7]` in C. (4) Two identical string literals may or may not share the same address (implementation-defined). (5) `char s[5] = "Hello"` would omit \0 because there is no room — causing undefined behavior when treated as a string.
+Key points:
+1. String literals reside in read-only memory on most platforms — modifying via `char *` is undefined behavior.
+2. `char arr[] = "str"` includes the null terminator in its size (`sizeof` returns 4).
+3. The expression `"string"` has type `char[7]` in C.
+4. Two identical string literals may or may not share the same address (implementation-defined).
+5. `char s[5] = "Hello"` would omit \0 because there is no room — causing undefined behavior when treated as a string.
+
 
 Kernighan & Ritchie §1.9 introduces character arrays. "The C Programming Language" §1.9 covers the three forms of string initialization. "Secure Coding in C and C++" (Seacord) discusses null-terminated string pitfalls and buffer overflow prevention.

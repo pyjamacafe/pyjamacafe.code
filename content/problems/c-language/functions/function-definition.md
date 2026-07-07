@@ -57,6 +57,12 @@ A professional example: a sensor fusion library might expose `struct Position ge
 
 Visualize a function as a vending machine. You insert coins (arguments), press a button (call the function), and a soda comes out (return value). You do not care about the refrigeration coils or the solenoid mechanism inside — only that pressing B3 gives you a cola. The front panel is the function prototype; the internal machinery is the function body. Each vending machine (function) is self-contained and can be tested independently.
 
-Key points: (1) A function definition must appear before its first call, or a prototype must precede it (see function-prototypes). (2) Parameters are local to the function — modifications do not affect the caller's variables (pass-by-value). (3) `return` can appear multiple times in a function, but a single exit point is generally clearer. (4) The function name is a pointer to the function — useful for callback patterns. (5) Functions cannot be nested in standard C (GCC extension allows it).
+Key points:
+1. A function definition must appear before its first call, or a prototype must precede it (see function-prototypes).
+2. Parameters are local to the function — modifications do not affect the caller's variables (pass-by-value).
+3. `return` can appear multiple times in a function, but a single exit point is generally clearer.
+4. The function name is a pointer to the function — useful for callback patterns.
+5. Functions cannot be nested in standard C (GCC extension allows it).
+
 
 Kernighan & Ritchie §1.7–1.9 introduces functions. "The C Programming Language" §4.1–4.11 covers functions in depth. For software architecture patterns using functions, "Large-Scale C++ Software Design" by John Lakos discusses physical and logical design of function interfaces.

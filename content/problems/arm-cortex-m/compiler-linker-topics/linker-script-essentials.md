@@ -64,6 +64,12 @@ A bootloader project often uses two linker scripts: one for the bootloader and o
 
 Visualise the linker script as a city zoning plan. MEMORY defines the districts (residential = flash, commercial = RAM, industrial = peripherals). SECTIONS says which types of buildings go where (houses in residential, shops in commercial). The linker symbols are street signs that label boundaries.
 
-Key points: (1) The `.isr_vector` section must appear first in flash — use `KEEP()` to prevent garbage collection. (2) `_estack` is typically defined as `ORIGIN(RAM) + LENGTH(RAM)`. (3) `PROVIDE()` defines symbols with defaults that applications can override. (4) `NOCROSSREFS` prevents sections from accidentally crossing region boundaries. (5) The `OVERLAY` directive manages overlapping sections for shared memory.
+Key points:
+1. The `.isr_vector` section must appear first in flash — use `KEEP()` to prevent garbage collection.
+2. `_estack` is typically defined as `ORIGIN(RAM) + LENGTH(RAM)`.
+3. `PROVIDE()` defines symbols with defaults that applications can override.
+4. `NOCROSSREFS` prevents sections from accidentally crossing region boundaries.
+5. The `OVERLAY` directive manages overlapping sections for shared memory.
+
 
 The GNU ld documentation (Section "Linker Scripts") and ARM Compiler armlink User Guide are the definitive references. Joseph Yiu's *Definitive Guide to ARM Cortex‑M3 and Cortex‑M4* includes a tutorial on reading and writing linker scripts.

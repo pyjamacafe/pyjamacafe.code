@@ -65,6 +65,12 @@ The critical danger: type safety does not exist for variadic arguments. If you w
 
 Visualize variadic arguments as a bucket of mixed LEGO bricks dumped onto a table. The named parameter tells you how many bricks are in the bucket. `va_start` opens the bucket. Each `va_arg` reaches in and pulls out one brick, but *you must say what shape you expect* — if you say "2×4 brick" but the brick is actually a wheel, you pull out a wheel that you forcefully interpret as a 2×4, and it does not fit where you try to place it.
 
-Key points: (1) At least one named parameter must precede `...` — it provides the anchor for `va_start`. (2) There is no implicit conversion: integer arguments are *not* promoted to `double` — you must pass the exact expected type. (3) Default argument promotions apply: `float` is promoted to `double`, and integer types smaller than `int` are promoted to `int`. (4) Calling `va_arg` with the wrong type is undefined behavior — no error, no warning. (5) `va_copy` (C99) allows saving a snapshot of the argument list for re-scanning.
+Key points:
+1. At least one named parameter must precede `...` — it provides the anchor for `va_start`.
+2. There is no implicit conversion: integer arguments are *not* promoted to `double` — you must pass the exact expected type.
+3. Default argument promotions apply: `float` is promoted to `double`, and integer types smaller than `int` are promoted to `int`.
+4. Calling `va_arg` with the wrong type is undefined behavior — no error, no warning.
+5. `va_copy` (C99) allows saving a snapshot of the argument list for re-scanning.
+
 
 C11 §7.16 defines `<stdarg.h>`. Kernighan & Ritchie §7.3 covers variadic functions. For a deep dive into implementation, "The C Standard" by Derek M. Jones §7.16 details the macro expansions and platform-specific ABI considerations.

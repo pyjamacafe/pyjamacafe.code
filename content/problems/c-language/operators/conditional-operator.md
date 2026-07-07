@@ -60,15 +60,16 @@ size_t getMaxmemoryDefault(void) {
 
 Visualize `?:` as a fork in a road with a signpost. The condition is the signpost — if true, you take the left path (first expression); if false, you take the right path (second expression). The entire fork converges again, and the value you carry out is whichever value was on the path you took. Unlike `if-else` (a detour that must return to the main road via a statement), `?:` is the main road itself.
 
-**Key points to never forget:**
-- `?:` is an expression, not a statement — it produces a value.
-- The two branches must have compatible types.
-- The ternary operator is right-associative: `a ? b : c ? d : e` parses as `a ? b : (c ? d : e)`.
-- For complex conditions or side effects, prefer `if-else` for readability.
-- `?:` cannot replace `if-else` when branches are statements (e.g., multiple lines or no return value).
+Key points:
+1. `?:` is an expression, not a statement — it produces a value.
+2. The two branches must have compatible types.
+3. The ternary operator is right-associative: `a ? b : c ? d : e` parses as `a ? b : (c ? d : e)`.
+4. For complex conditions or side effects, prefer `if-else` for readability.
+5. `?:` cannot replace `if-else` when branches are statements (e.g., multiple lines or no return value).
 
-**References:**
-1. Kernighan, B. & Ritchie, D. *The C Programming Language*, 2nd ed., §2.11 — Conditional Expressions.
+References:
+1. Kernighan, B. & Ritchie, D. *The C Programming Language*, 2nd ed., §2.11 — Conditional Expressions
+
 2. Linux kernel `include/asm-generic/io.h` — conditional expression for endian-aware I/O accessors.
 3. Redis source: `src/server.h` and `src/db.c` — default configuration via ternary.
 4. ISO/IEC 9899:2011 (C11), §6.5.15 — Conditional operator.

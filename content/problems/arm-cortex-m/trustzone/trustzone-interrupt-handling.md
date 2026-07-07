@@ -91,7 +91,13 @@ In professional TrustZone firmware, interrupt partitioning is the first step in 
 
 Visualise the banked NVIC as two stacked register files: the Secure NVIC at `0xE000E100-0xE000E4FF` and the Non-Secure NVIC at `0xE002E100-0xE002E4FF`. The ITNS register acts as a multiplexer — each interrupt's actual control bits are physically in the Secure or Non-Secure bank based on ITNS[n]. Non-Secure accesses to Secure-banked addresses are blocked.
 
-Key points: (1) ITNS registers are only writable from Secure state. (2) The vector table is also banked — Secure and Non-Secure have separate VTORs at `0xE000ED08` (Secure) and `0xE002ED08` (Non-Secure). (3) A Secure interrupt can preempt any Non-Secure code; a Non-Secure interrupt cannot preempt Secure code. (4) The security assignment locks when the interrupt is first pended or enabled — plan assignments at boot. (5) Non-secure interrupts can still trigger while Secure code runs if AIRCR.PRIS or SCR.SEC is configured appropriately.
+Key points:
+1. ITNS registers are only writable from Secure state.
+2. The vector table is also banked — Secure and Non-Secure have separate VTORs at `0xE000ED08` (Secure) and `0xE002ED08` (Non-Secure).
+3. A Secure interrupt can preempt any Non-Secure code; a Non-Secure interrupt cannot preempt Secure code.
+4. The security assignment locks when the interrupt is first pended or enabled — plan assignments at boot.
+5. Non-secure interrupts can still trigger while Secure code runs if AIRCR.PRIS or SCR.SEC is configured appropriately.
 
-References: ARMv8-M ARM (DDI0553) B2.2, Zephyr `trustzone.c`, FreeRTOS `secure_interrupt_port.c`, CMSIS-Core `core_cm33.h` NVIC functions, PSA Firmware Framework for M (FF-M) specification, ARM AN326 "TrustZone for Cortex-M" app note.
 
+References:
+1. ARMv8-M ARM (DDI0553) B2.2, Zephyr `trustzone.c`, FreeRTOS `secure_interrupt_port.c`, CMSIS-Core `core_cm33.h` NVIC functions, PSA Firmware Framework for M (FF-M) specification, ARM AN326 "TrustZone for Cortex-M" app note.

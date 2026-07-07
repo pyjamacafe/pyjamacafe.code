@@ -68,6 +68,11 @@ A motor control application on a Cortex‑M4 illustrates the benefit: the high�
 
 Visualise a backpack you carry "just in case". With eager stacking, you unpack and repack the entire bag at every security checkpoint. With lazy stacking, you only open the bag when security asks to see inside — if they never ask, you keep walking.
 
-Key points: (1) LSPEN must be set once at startup; it affects all subsequent exceptions. (2) The first FPU instruction in a lazy‑stacked handler is slower (save + retry). (3) Lazy stacking works correctly with nested exceptions and multiple FPU‑active contexts. (4) The FPCCR provides status bits (LSPACT, USER, TS) for debugging the lazy state machine.
+Key points:
+1. LSPEN must be set once at startup; it affects all subsequent exceptions.
+2. The first FPU instruction in a lazy‑stacked handler is slower (save + retry).
+3. Lazy stacking works correctly with nested exceptions and multiple FPU‑active contexts.
+4. The FPCCR provides status bits (LSPACT, USER, TS) for debugging the lazy state machine.
+
 
 ARM's *Cortex‑M4 Technical Reference Manual* Section 8.3 describes lazy stacking in detail. The CMSIS‑Core header `core_cm4.h` defines the FPCCR register layout, and FreeRTOS's `port.c` demonstrates production lazy‑stacking configuration.

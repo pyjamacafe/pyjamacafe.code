@@ -55,6 +55,12 @@ A professional example: the SQLite database engine stores its database pages in 
 
 Visualize an array as a row of mail slots, numbered 0 to 4, mounted on a wall. Each slot holds one piece of mail (one integer). The slots are physically adjacent — slot 3 is right next to slot 4. Accessing `arr[3]` means walking to the fourth slot and reading its contents. The base address is where slot 0 starts; every other slot's location is computed as an offset from there.
 
-Key points: (1) Array indices are zero-based: `arr[0]` is the first element, `arr[n-1]` is the last. (2) `sizeof(arr)` gives total bytes — use `sizeof(arr) / sizeof(arr[0])` for the element count (works only at definition scope). (3) Array names decay to pointers in most expressions (exceptions: `sizeof`, `&`, `_Alignof`). (4) Array bounds are not checked — accessing beyond the last element is undefined behavior. (5) Variable-length arrays (VLAs) were added in C99 and made optional in C11.
+Key points:
+1. Array indices are zero-based: `arr[0]` is the first element, `arr[n-1]` is the last.
+2. `sizeof(arr)` gives total bytes — use `sizeof(arr) / sizeof(arr[0])` for the element count (works only at definition scope).
+3. Array names decay to pointers in most expressions (exceptions: `sizeof`, `&`, `_Alignof`).
+4. Array bounds are not checked — accessing beyond the last element is undefined behavior.
+5. Variable-length arrays (VLAs) were added in C99 and made optional in C11.
+
 
 Kernighan & Ritchie §1.6 and §5.3 cover arrays and their relationship to pointers. "The C Programming Language" §5.5 formally defines array subscripting. Ritchie's "The Development of the C Language" discusses the evolution from B to C arrays.

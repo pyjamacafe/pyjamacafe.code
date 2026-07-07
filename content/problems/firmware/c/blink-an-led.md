@@ -54,6 +54,13 @@ In professional firmware, LED blinking is not just educational—it is a critica
 
 Visualize the electrical path: the microcontroller's GPIO pin connects through a 330-ohm resistor to the LED's anode; the LED's cathode connects to ground. When the firmware writes 1 to the GPIO output register, the pin driver connects the pin to VDD (3.3 V). Current flows through the resistor (limiting to about 10 mA) through the LED, and the LED emits light. A delay of 500 ms keeps it on, then the firmware writes 0, the pin connects to ground, no current flows, and the LED turns off. The `gpio_set()` function abstracts all the register writes (clock enable, mode select, output type, pull-up config, ODR write).
 
-Key points: (1) Always use a current-limiting resistor (220–470 ohms for a typical LED at 3.3 V). (2) Active-low vs active-high: some boards wire the LED between VDD and the pin—writing 0 turns it on. Check the schematic. (3) Blocking delays (`delay_ms`) stop the entire CPU—real systems use hardware timers or RTOS delays. (4) GPIO initialization (clock enable, mode, speed, pull-up) must happen before the first toggling. (5) The main loop should never exit in embedded code—there is no OS to return to.
+Key points:
+1. Always use a current-limiting resistor (220–470 ohms for a typical LED at 3.3 V).
+2. Active-low vs active-high: some boards wire the LED between VDD and the pin—writing 0 turns it on. Check the schematic.
+3. Blocking delays (`delay_ms`) stop the entire CPU—real systems use hardware timers or RTOS delays.
+4. GPIO initialization (clock enable, mode, speed, pull-up) must happen before the first toggling.
+5. The main loop should never exit in embedded code—there is no OS to return to.
 
-References: "Embedded Systems: Introduction to ARM Cortex-M Microcontrollers" by Jonathan Valvano (Chapter 4 on GPIO), STM32 Reference Manual (GPIO chapter), "Making Embedded Systems" by Elecia White (Chapter 1), and any vendor's "Getting Started" guide (STM32CubeIDE, MCUXpresso, Arduino).
+
+References:
+1. "Embedded Systems: Introduction to ARM Cortex-M Microcontrollers" by Jonathan Valvano (Chapter 4 on GPIO), STM32 Reference Manual (GPIO chapter), "Making Embedded Systems" by Elecia White (Chapter 1), and any vendor's "Getting Started" guide (STM32CubeIDE, MCUXpresso, Arduino).

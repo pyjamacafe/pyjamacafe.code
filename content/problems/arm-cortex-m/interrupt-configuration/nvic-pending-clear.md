@@ -113,5 +113,6 @@ Visualize the pending bit as a post-it note on a manager's door. The IRQ is the 
 
 Key points: ISPR (Set Pending) and ICPR (Clear Pending) use write-1-to-write semantics; IABR is read-only; level-triggered interrupts re-pend if the peripheral line is still asserted; active + pending state indicates nested occurrences; always clear the correct register bank based on interrupt number.
 
-References: ARM Architecture Reference Manual ARMv7-M (section B3.4.4–B3.4.7), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 8.8), ARM Infocenter DDI0403E.
+References:
+1. ARM Architecture Reference Manual ARMv7-M (section B3.4.4–B3.4.7), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 8.8), ARM Infocenter DDI0403E.
 

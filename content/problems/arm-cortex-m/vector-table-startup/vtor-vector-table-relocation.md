@@ -111,5 +111,9 @@ A professional bootloader typically works in stages. Stage 1 (the ROM bootloader
 
 The trickiest part is ensuring the copied vector table is byte-for-byte identical to the original. A memcpy of all 48 entries (or however many the MCU supports) is usually enough, but the alignment constraint means the destination buffer must be allocated on a 128-byte or 256-byte boundary. Some RTOS kernels use a designated section in the linker script (e.g., .ram_vectors) with the appropriate alignment attribute. On ARMv8-M with TrustZone, VTOR is banked — there is a secure VTOR and a non-secure VTOR — and the security attribution unit must allow the non-secure world to relocate its own table.
 
-Key points: (1) VTOR is at SCB->VTOR (0xE000ED08) and holds the table base in bits [31:7]. (2) Always issue DSB + ISB after writing VTOR. (3) The destination must be aligned to 128 bytes (256 bytes for Cortex-M0/M0+). (4) Copy all entries — including the initial SP and Reset_Handler — before switching. (5) On ARMv8-M, remember that secure and non-secure VTOR are independent. Reference: ARMv7-M Architecture Reference Manual, section B3.2.5 (SCB->VTOR).
-
+Key points:
+1. VTOR is at SCB->VTOR (0xE000ED08) and holds the table base in bits [31:7].
+2. Always issue DSB + ISB after writing VTOR.
+3. The destination must be aligned to 128 bytes (256 bytes for Cortex-M0/M0+).
+4. Copy all entries — including the initial SP and Reset_Handler — before switching.
+5. On ARMv8-M, remember that secure and non-secure VTOR are independent. Reference: ARMv7-M Architecture Reference Manual, section B3.2.5 (SCB->VTOR).

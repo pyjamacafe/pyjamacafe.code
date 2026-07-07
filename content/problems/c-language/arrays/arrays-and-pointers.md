@@ -58,6 +58,12 @@ A professional example: Redis receives network data into an `sds` (simple dynami
 
 Visualize an array as a row of five houses. The array name `arr` is the street name referring to the whole row. But when used in an expression, it acts like a signpost pointing to House #0. You can walk to House #2 (`*(arr + 2)`) or ask what is in House #4 (`arr[4]`). You cannot repaint the street sign to point to a different street, but you can create a new signpost (`p`) that moves freely.
 
-Key points: (1) Array decay happens in every expression except as operand to `sizeof`, `&`, and `_Alignof`. (2) When passed to a function, an array decays to a pointer — the function receives the address but not the size. (3) `&arr` gives a pointer to the entire array (`int (*)[5]`), not just the first element. (4) `arr + 1` skips one element; `&arr + 1` skips the entire array. (5) Character arrays (`char arr[] = "hello"`) follow the same decay rules.
+Key points:
+1. Array decay happens in every expression except as operand to `sizeof`, `&`, and `_Alignof`.
+2. When passed to a function, an array decays to a pointer — the function receives the address but not the size.
+3. `&arr` gives a pointer to the entire array (`int (*)[5]`), not just the first element.
+4. `arr + 1` skips one element; `&arr + 1` skips the entire array.
+5. Character arrays (`char arr[] = "hello"`) follow the same decay rules.
+
 
 Kernighan & Ritchie §5.3–5.5 cover the array-pointer relationship. The C11 standard §6.3.2.1 formally defines array-to-pointer decay. "C Traps and Pitfalls" (Koening) devotes a chapter to array-pointer confusion.

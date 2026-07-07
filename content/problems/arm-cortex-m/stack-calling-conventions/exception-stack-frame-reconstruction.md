@@ -141,7 +141,13 @@ In professional RTOS kernels like FreeRTOS or Zephyr, the exception stack frame 
 
 Picture the stack layout: from low to high address, the hardware frame contains xPSR, PC, LR, R12, R3, R2, R1, R0, followed by the software-saved R4–R11, and finally any local variables the handler uses. A debugger or fault analyzer can walk this structure backwards—starting from the current SP, reading the 8-word frame, examining the stacked PC to see where the code was interrupted, and analyzing xPSR to determine which exception triggered.
 
-Key points: (1) The exception stack frame always contains exactly the same 8 registers, regardless of exception type. (2) EXC_RETURN in the stacked LR determines the return behavior (bit 2 indicates PSP vs MSP, bit 3 indicates thread vs handler mode). (3) R4–R11 must be saved by software if the handler or OS scheduler needs to preserve task state. (4) Double-word alignment (8-byte) of SP is enforced by bit 9 of the stacked xPSR. (5) The frame pointer is not saved automatically—debuggers reconstruct it from the stacked LR/FP chain.
+Key points:
+1. The exception stack frame always contains exactly the same 8 registers, regardless of exception type.
+2. EXC_RETURN in the stacked LR determines the return behavior (bit 2 indicates PSP vs MSP, bit 3 indicates thread vs handler mode).
+3. R4–R11 must be saved by software if the handler or OS scheduler needs to preserve task state.
+4. Double-word alignment (8-byte) of SP is enforced by bit 9 of the stacked xPSR.
+5. The frame pointer is not saved automatically—debuggers reconstruct it from the stacked LR/FP chain.
 
-References: ARM Architecture Reference Manual ARMv7-M (DDI 0403E), ARMv8-M Architecture Reference Manual (DDI 0553), "Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" by Joseph Yiu (Chapters 8–9 on exception handling and context switching). FreeRTOS port source code for Cortex-M shows the exact assembly sequences for PendSV and SVCall context switching.
 
+References:
+1. ARM Architecture Reference Manual ARMv7-M (DDI 0403E), ARMv8-M Architecture Reference Manual (DDI 0553), "Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" by Joseph Yiu (Chapters 8–9 on exception handling and context switching). FreeRTOS port source code for Cortex-M shows the exact assembly sequences for PendSV and SVCall context switching.

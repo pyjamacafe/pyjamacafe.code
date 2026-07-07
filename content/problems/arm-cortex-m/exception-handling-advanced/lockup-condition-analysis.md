@@ -133,5 +133,6 @@ Visualize lockup as an airplane engine that has failed catastrophically. The eng
 
 Key points: lockup stops instruction fetch; only reset recovers; NMI can still execute if it didn't cause the lockup; debug accesses still work during lockup; preventing lockup requires fault handler simplicity, adequate stack, and external watchdog; WFE/WFI during lockup has no effect; HFSR bit 30 (FORCED) + bit 1 (VECTBL) identifies vector table causes.
 
-References: ARM Architecture Reference Manual ARMv7-M (section B1.5.14 — Lockup), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 10.6), ARM Infocenter DDI0403E.
+References:
+1. ARM Architecture Reference Manual ARMv7-M (section B1.5.14 — Lockup), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 10.6), ARM Infocenter DDI0403E.
 

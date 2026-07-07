@@ -120,5 +120,6 @@ Visualize the UsageFault as a quality-control inspector on an assembly line. Whe
 
 Key points: UsageFault must be enabled via SHCSR bit 18; DIV_0_TRP and UNALIGN_TRP are in SCB_CCR; UFSR is in CFSR[23:16]; faults are precise — the stacked PC points to the offending instruction; the UsageFault handler must clear the status bits before return; without trapping, division by zero returns 0; unaligned access on Cortex-M3/M4 is legal but slow.
 
-References: ARM Architecture Reference Manual ARMv7-M (section B1.5.10 — UsageFault), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 10.3), ARM Infocenter DDI0403E.
+References:
+1. ARM Architecture Reference Manual ARMv7-M (section B1.5.10 — UsageFault), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 10.3), ARM Infocenter DDI0403E.
 

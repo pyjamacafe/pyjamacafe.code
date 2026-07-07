@@ -121,7 +121,13 @@ In professional firmware, the WFI + SLEEPONEXIT combination is ubiquitous in Fre
 
 Picture the difference in hardware implementation: WFI gates the CPU clock but leaves the NVIC active and watching for interrupt requests. When an interrupt arrives, the NVIC asserts wakeup, the clock restarts, and the CPU processes the interrupt. WFE also gates the clock, but uses a separate "event register" per CPU. An SEV instruction sets the event register; any interrupt pending (if SEVONPEND is set) also sets it; an external event signal (E event bus) also sets it. WFE clears the event register and wakes immediately. If the event register was already set, WFE returns immediately without sleeping—this avoids race conditions in polling loops.
 
-Key points: (1) Always use DSB before WFI/WFE to ensure all memory transactions complete before sleep. Use ISB after wakeup. (2) WFI guarantees wakeup on any unmasked interrupt; WFE guarantees wakeup on any event (interrupt, SEV, or external event signal). (3) WFE is not suitable for deep sleep on all MCUs—some require WFI to enter deep sleep. (4) The SEVONPEND (Send Event on Pending) feature makes WFE wake on interrupt pending without the interrupt firing—useful for power-efficient event loops that do not want ISR overhead. (5) WFE wakes faster than WFI on many implementations because it bypasses the interrupt entry sequence.
+Key points:
+1. Always use DSB before WFI/WFE to ensure all memory transactions complete before sleep. Use ISB after wakeup.
+2. WFI guarantees wakeup on any unmasked interrupt; WFE guarantees wakeup on any event (interrupt, SEV, or external event signal).
+3. WFE is not suitable for deep sleep on all MCUs—some require WFI to enter deep sleep.
+4. The SEVONPEND (Send Event on Pending) feature makes WFE wake on interrupt pending without the interrupt firing—useful for power-efficient event loops that do not want ISR overhead.
+5. WFE wakes faster than WFI on many implementations because it bypasses the interrupt entry sequence.
 
-References: ARM Architecture Reference Manual ARMv7-M (WFI and WFE sections), "Definitive Guide to ARM Cortex-M3 and Cortex-M4" Chapter 13, ARM AN321 on power management, and FreeRTOS portable/ARM_CM4F/port.c for the idle task implementation using WFI.
 
+References:
+1. ARM Architecture Reference Manual ARMv7-M (WFI and WFE sections), "Definitive Guide to ARM Cortex-M3 and Cortex-M4" Chapter 13, ARM AN321 on power management, and FreeRTOS portable/ARM_CM4F/port.c for the idle task implementation using WFI.

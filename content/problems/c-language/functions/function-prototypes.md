@@ -56,6 +56,12 @@ I once inherited a 50,000-line embedded control system where implicit declaratio
 
 Visualize a prototype as a nameplate and doorbell on an office door. The nameplate says "Dr. Smith, Cardiology — expects patient ID (int), returns diagnosis (struct Diagnosis)". Without the nameplate, you barge in and shout "3.14!" — Dr. Smith has no idea what you want, and the interaction fails unpredictably.
 
-Key points: (1) Prototypes are mandatory in C99 and later — implicit declarations are invalid. (2) A prototype without parameter names is legal: `float convert(float, float)`. (3) Prototypes with `...` (ellipsis) suppress argument type checking for variadic arguments. (4) Always include the prototype header in the `.c` file that defines the function — the compiler cross-checks them. (5) Use `static` for functions that should not be visible outside their translation unit.
+Key points:
+1. Prototypes are mandatory in C99 and later — implicit declarations are invalid.
+2. A prototype without parameter names is legal: `float convert(float, float)`.
+3. Prototypes with `...` (ellipsis) suppress argument type checking for variadic arguments.
+4. Always include the prototype header in the `.c` file that defines the function — the compiler cross-checks them.
+5. Use `static` for functions that should not be visible outside their translation unit.
+
 
 C11 §6.2.5 and §6.7.6.3 specify function declarators. "The C Standard" by Derek M. Jones §6.5.2.2 covers function call semantics. CERT rule DCL07-C warns about omitting prototypes for functions defined with external linkage.

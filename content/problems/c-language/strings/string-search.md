@@ -69,6 +69,12 @@ A professional example: the Git `name-rev` command finds the best symbolic name 
 
 Visualize character search as a line of patrons at airport security. Each patron has a label (character). The agent walks down the line checking each label. Patron "o" vs. target "o" — found at position 4. If the target is "z", the agent reaches the end and reports "not found." For substring search, a detective looking for a three-person team checks persons 0, 1, 2. If no match, slide to persons 1, 2, 3, and repeat.
 
-Key points: (1) `strchr(s, c)` returns a pointer to the first occurrence of `c` in `s`, or `NULL`. (2) `strstr(s, substr)` returns a pointer to the first occurrence of `substr`, or `NULL`. (3) Use `ptr - s` to convert the returned pointer to an index. (4) For case-insensitive search, use `strcasestr` (POSIX) or compare `tolower` values manually. (5) Searching for `'\0'` with `strchr` returns a pointer to the null terminator (not `NULL`).
+Key points:
+1. `strchr(s, c)` returns a pointer to the first occurrence of `c` in `s`, or `NULL`.
+2. `strstr(s, substr)` returns a pointer to the first occurrence of `substr`, or `NULL`.
+3. Use `ptr - s` to convert the returned pointer to an index.
+4. For case-insensitive search, use `strcasestr` (POSIX) or compare `tolower` values manually.
+5. Searching for `'\0'` with `strchr` returns a pointer to the null terminator (not `NULL`).
+
 
 Kernighan & Ritchie §7.7 covers `strchr` and `strstr`. "The C Programming Language" §5.5 implements string search with pointers. For advanced algorithms, "Introduction to Algorithms" (CLRS) §32 covers Boyer-Moore and KMP. The glibc source (`string/strstr.c`) shows the Two-Way algorithm used in production.

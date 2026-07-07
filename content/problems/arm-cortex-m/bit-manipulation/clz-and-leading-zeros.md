@@ -112,7 +112,16 @@ In professional RTOS kernels, CLZ is the key to O(1) priority scheduling. FreeRT
 
 Imagine you have a 32-bit integer 0x00001234. Visualize the bits: 0000_0000_0000_0000_0001_0010_0011_0100. CLZ counts the 19 leading zeros (bits 31 down to 13 are zero; the first one is at bit 12). Bit width = 32 - 19 = 13. For normalization, you would left-shift by 19 to get 0x91A0_0000, with the leading bit now at position 31. For priority encoding, if the priority bitmap is 0x00001234, the highest set bit is at position 12, corresponding to priority 12.
 
-Key points: (1) CLZ(0) returns 32 on Cortex-M3/M4/M7/M33/M55 (ARMv7-M and ARMv8-M). In ARMv7-A, CLZ(0) is unpredictable—but Cortex-M implementations define it as 32. (2) Applications: bit width (32 - CLZ), ceiling log2 (32 - CLZ(N - 1)), next power of two (1 << (32 - CLZ(N - 1))), find highest set bit (31 - CLZ(N)), normalization for division and floating-point. (3) Single-cycle on most Cortex-M implementations. (4) Available as `__clz()` intrinsic in ARM Compiler, `__CLZ` in IAR, `__builtin_clz()` in GCC. (5) For Cortex-M0 without CLZ, the compiler generates a loop that is functionally correct but up to 32× slower. (6) CLZ is also used in the iterative division algorithm: normalize divisor, then for each bit from MSB to LSB, subtract (shifted divisor) from remainder.
+Key points:
+1. CLZ.
+2. returns 32 on Cortex-M3/M4/M7/M33/M55 (ARMv7-M and ARMv8-M). In ARMv7-A, CLZ.
+3. is unpredictable—but Cortex-M implementations define it as 32.
+4. Applications: bit width (32 - CLZ), ceiling log2 (32 - CLZ(N - 1)), next power of two (1 << (32 - CLZ(N - 1))), find highest set bit (31 - CLZ(N)), normalization for division and floating-point.
+5. Single-cycle on most Cortex-M implementations.
+6. Available as `__clz()` intrinsic in ARM Compiler, `__CLZ` in IAR, `__builtin_clz()` in GCC.
+7. For Cortex-M0 without CLZ, the compiler generates a loop that is functionally correct but up to 32× slower.
+8. CLZ is also used in the iterative division algorithm: normalize divisor, then for each bit from MSB to LSB, subtract (shifted divisor) from remainder.
 
-References: ARM Architecture Reference Manual ARMv7-M (CLZ instruction), "Definitive Guide to ARM Cortex-M3 and Cortex-M4" (Chapter 4), FreeRTOS source code (tasks.c priority scheduling), CMSIS-DSP library (arm_math.h for CLZ intrinsics), and Henry Warren's "Hacker's Delight" (Chapter 5 on counting bits).
 
+References:
+1. ARM Architecture Reference Manual ARMv7-M (CLZ instruction), "Definitive Guide to ARM Cortex-M3 and Cortex-M4" (Chapter 4), FreeRTOS source code (tasks.c priority scheduling), CMSIS-DSP library (arm_math.h for CLZ intrinsics), and Henry Warren's "Hacker's Delight" (Chapter 5 on counting bits).

@@ -62,6 +62,13 @@ Open-source firmware handles this split pragmatically. In Zephyr, `arch/arm/core
 
 Visualize the ISA as a Venn diagram: a small circle for Baseline (56 Thumb instructions, mostly 16-bit) fully contained within a larger circle for Mainline (full Thumb-2 with ~150 instructions, including IT blocks, hardware divide, saturating math, and DSP extensions). The gap between the circles represents instructions that trap as undefined on Baseline — if your compiler emits them, you get a HardFault at runtime.
 
-Key points: (1) Detect via `(CPUID >> 16) & 0xF`: 2 = ARMv6-M, 3 = ARMv7-M, 4 = ARMv8-M. (2) Baseline has no MPU, no FPU, no DSP, no bit-banding. (3) Baseline uses only the MSP (no PSP switching in hardware). (4) Mainline can have all optional features — always probe via the System Control Block ID registers. (5) ARMv8-M Baseline (M23) can still have TrustZone, making it the only "secure" Baseline core.
+Key points:
+1. Detect via `(CPUID >> 16) & 0xF`: 2 = ARMv6-M, 3 = ARMv7-M, 4 = ARMv8-M.
+2. Baseline has no MPU, no FPU, no DSP, no bit-banding.
+3. Baseline uses only the MSP (no PSP switching in hardware).
+4. Mainline can have all optional features — always probe via the System Control Block ID registers.
+5. ARMv8-M Baseline (M23) can still have TrustZone, making it the only "secure" Baseline core.
 
-References: ARMv6-M ARM (DDI0419), ARMv7-M ARM (DDI0403), ARMv8-M ARM (DDI0553), CMSIS-Core 5.9.0 `core_cm0.h` vs `core_cm33.h`, Zephyr `soc/arm/` port structure.
+
+References:
+1. ARMv6-M ARM (DDI0419), ARMv7-M ARM (DDI0403), ARMv8-M ARM (DDI0553), CMSIS-Core 5.9.0 `core_cm0.h` vs `core_cm33.h`, Zephyr `soc/arm/` port structure.

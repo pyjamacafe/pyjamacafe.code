@@ -59,6 +59,12 @@ A professional example: the Linux kernel uses function pointers extensively in `
 
 Visualize a function pointer as a remote control button. Each button triggers a different behavior (channel up, volume down), but the remote just holds the mapping. Pressing the button (calling through the pointer) sends a signal. The button does not care what the TV does — it just triggers the bound action. Similarly, `qsort` does not care how you compare elements; it calls your comparison function at the right moments.
 
-Key points: (1) Declaration syntax: `return_type (*name)(params)`. (2) `&func` and `func` are equivalent for obtaining the address. (3) Calling syntax: `(*op)(x)` or `op(x)` — both are valid. (4) `typedef` improves readability: `typedef int (*Op)(int, int)`. (5) Function pointer types must match exactly (parameters and return type) for correct behavior.
+Key points:
+1. Declaration syntax: `return_type (*name)(params)`.
+2. `&func` and `func` are equivalent for obtaining the address.
+3. Calling syntax: `(*op)(x)` or `op(x)` — both are valid.
+4. `typedef` improves readability: `typedef int (*Op)(int, int)`.
+5. Function pointer types must match exactly (parameters and return type) for correct behavior.
+
 
 Kernighan & Ritchie §5.11 introduces function pointers with `qsort`. "C Interfaces and Implementations" (Hanson) shows function pointers in abstract data types. The Linux kernel's `include/linux/fs.h` defines `struct file_operations` as a production example.

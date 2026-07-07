@@ -64,6 +64,12 @@ A practical example: an audio processing system has one audio task (uses FPU for
 
 Visualise a blackboard in a classroom where only the maths tutor writes equations. The FPCA bit is a light above the board — it lights up when someone writes a formula. The cleaner (context switcher) only erases the board if the light is on; otherwise, they leave it untouched.
 
-Key points: (1) FPCA is read‑only; only hardware sets and clears it. (2) Clearing FPCA does not clear FPU registers — the state remains. (3) RTOS must save FPCA in the TCB and restore it on switch. (4) FPCA is also set by CMSIS intrinsic functions that touch the FPU. (5) On Cortex‑M33 with TrustZone, FPCA is banked per security state.
+Key points:
+1. FPCA is read‑only; only hardware sets and clears it.
+2. Clearing FPCA does not clear FPU registers — the state remains.
+3. RTOS must save FPCA in the TCB and restore it on switch.
+4. FPCA is also set by CMSIS intrinsic functions that touch the FPU.
+5. On Cortex‑M33 with TrustZone, FPCA is banked per security state.
+
 
 The ARMv7‑M and ARMv8‑M Architecture Reference Manuals, "CONTROL register" section, document FPCA. FreeRTOS's Cortex‑M4 port (`port.c`) and Zephyr's ARM64 FPU context switch routines demonstrate production FPCA usage.

@@ -95,5 +95,6 @@ Visualize priorities as floors in a building. An interrupt at floor 0 (highest p
 
 Key points: 0x00 is highest priority, 0xE0 is lowest (or 0xFF depending on implemented bits); NVIC_IPR encodes four IRQs per register; system handlers use SCB_SHPR1–3; PRIGROUP controls preemption nesting depth; lower priority interrupts can starve if higher priority ones fire too frequently.
 
-References: ARM Architecture Reference Manual ARMv7-M (section B3.4 — NVIC priority registers), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 8.2 — Priority), ARM Infocenter DDI0403E.
+References:
+1. ARM Architecture Reference Manual ARMv7-M (section B3.4 — NVIC priority registers), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 8.2 — Priority), ARM Infocenter DDI0403E.
 

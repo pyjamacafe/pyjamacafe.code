@@ -103,5 +103,6 @@ Visualize bit field operations as surgeries on a 32-bit register. UBFX is a prec
 
 Key points: UBFX and SBFX extract and zero/sign-extend bit fields in one cycle; BFI inserts a bit field without affecting other bits; CLZ is essential for normalization and priority encoding; RBIT is useful for CRC and cryptographic operations; all are single-cycle on most Cortex-M implementations; SBFX sign-extends the extracted field, UBFX zero-extends.
 
-References: ARM Architecture Reference Manual ARMv7-M (section A6.7 — Data processing), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 4.10), ARM Infocenter DDI0403E.
+References:
+1. ARM Architecture Reference Manual ARMv7-M (section A6.7 — Data processing), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 4.10), ARM Infocenter DDI0403E.
 

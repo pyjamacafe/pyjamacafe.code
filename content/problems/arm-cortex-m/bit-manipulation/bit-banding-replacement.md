@@ -120,7 +120,13 @@ In practice, porting code from Cortex-M3/M4 to ARMv8-M requires systematic repla
 
 Visualize the comparison: bit-banding sets bit 3 of a variable at 0x20001000 by writing 1 to 0x22000000 + (0x20001000 - 0x20000000)*32 + 3*4 = 0x22000600C. Atomic, single cycle, no interrupt masking. The ARMv8-M replacement using LDREX/STREX: load the word from 0x20001000, OR with (1 << 3), conditionally store back, retry if the store fails. This is atomic but requires a loop and takes 3–10 cycles. The RMW with interrupt masking: disable interrupts, load, OR, store, enable interrupts. Simple and fast but blocks interrupts for a few cycles. The BFI replacement (for registers): load into a register, BFI to insert the bit, store back.
 
-Key points: (1) Bit-banding was removed in ARMv8-M (M23, M33, M55, M85). All code using it must be ported. (2) LDREX/STREX is truly atomic without interrupt disabling—use for shared variables between main code and ISRs. (3) Read-modify-write with PRIMASK disable is simpler and faster for single-threaded code—just ensure no ISR touches the same location. (4) BFI/BFC are register-to-register instructions; they do not operate on memory directly. Load first, then modify, then store. (5) For peripheral registers where each bit is controlled by writing the whole register (like GPIO BSRR on STM32), atomicity is already provided by hardware double-buffering.
+Key points:
+1. Bit-banding was removed in ARMv8-M (M23, M33, M55, M85). All code using it must be ported.
+2. LDREX/STREX is truly atomic without interrupt disabling—use for shared variables between main code and ISRs.
+3. Read-modify-write with PRIMASK disable is simpler and faster for single-threaded code—just ensure no ISR touches the same location.
+4. BFI/BFC are register-to-register instructions; they do not operate on memory directly. Load first, then modify, then store.
+5. For peripheral registers where each bit is controlled by writing the whole register (like GPIO BSRR on STM32), atomicity is already provided by hardware double-buffering.
 
-References: ARMv7-M Architecture Reference Manual (bit-banding section), ARMv8-M Architecture Reference Manual (removal note), "Definitive Guide to ARM Cortex-M3 and Cortex-M4" (Chapter 8), "Definitive Guide to ARM Cortex-M33 and Cortex-M55" (Joseph Yiu), and STM32L5/U5 migration application notes.
 
+References:
+1. ARMv7-M Architecture Reference Manual (bit-banding section), ARMv8-M Architecture Reference Manual (removal note), "Definitive Guide to ARM Cortex-M3 and Cortex-M4" (Chapter 8), "Definitive Guide to ARM Cortex-M33 and Cortex-M55" (Joseph Yiu), and STM32L5/U5 migration application notes.

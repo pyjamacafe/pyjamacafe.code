@@ -85,7 +85,13 @@ Professional RTOS implementations use the MPU for task isolation. FreeRTOS MPU p
 
 Visualize the MPU configuration flow as a sequence: disable MPU → for each region, set RNR = region number, set RBAR = base, set RASR = size+attr → enable MPU → DSB → ISB. Every write to RBAR or RASR needs the correct RNR first — RNR acts as a pointer into the region register bank.
 
-Key points: (1) Region size must be power of 2; base must be aligned to size. (2) Region numbers are not prioritised the same across v7-M (lower number = higher priority) and v8-M (higher number = higher priority). (3) DSB + ISB required after configuration — without them, the MPU may use stale settings. (4) The MPU can be enabled/disabled via MPU_CTRL[0]; disabling it allows all accesses. (5) Sub-regions (8 per region) can exclude specific 1/8th segments — useful for guard bands near stack boundaries.
+Key points:
+1. Region size must be power of 2; base must be aligned to size.
+2. Region numbers are not prioritised the same across v7-M (lower number = higher priority) and v8-M (higher number = higher priority).
+3. DSB + ISB required after configuration — without them, the MPU may use stale settings.
+4. The MPU can be enabled/disabled via MPU_CTRL[0]; disabling it allows all accesses.
+5. Sub-regions (8 per region) can exclude specific 1/8th segments — useful for guard bands near stack boundaries.
 
-References: ARMv7-M ARM (DDI0403) B4.2, ARMv8-M ARM (DDI0553) B4.2, FreeRTOS MPU port, Zephyr `arch/arm/core/cortex_m/mpu/arm_mpu.c`, CMSIS-Core `mpu_armv7.h` example configuration.
 
+References:
+1. ARMv7-M ARM (DDI0403) B4.2, ARMv8-M ARM (DDI0553) B4.2, FreeRTOS MPU port, Zephyr `arch/arm/core/cortex_m/mpu/arm_mpu.c`, CMSIS-Core `mpu_armv7.h` example configuration.

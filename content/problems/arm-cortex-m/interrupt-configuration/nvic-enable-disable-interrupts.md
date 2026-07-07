@@ -116,5 +116,6 @@ Visualize each interrupt as a light switch on a large panel. ISER is the panel o
 
 Key points: ISER at 0xE000E100, ICER at 0xE000E180; each register covers 32 interrupts; write 1 to enable/disable, write 0 has no effect; reading ISER returns the current enable state; enabling an interrupt does not automatically pend it; always configure priority before enabling.
 
-References: ARM Architecture Reference Manual ARMv7-M (section B3.4.1–B3.4.3), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 8.7), ARM Infocenter DDI0403E.
+References:
+1. ARM Architecture Reference Manual ARMv7-M (section B3.4.1–B3.4.3), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 8.7), ARM Infocenter DDI0403E.
 

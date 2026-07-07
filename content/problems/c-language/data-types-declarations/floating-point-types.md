@@ -58,15 +58,16 @@ typedef struct {
 
 A useful mental model: imagine a number line with a fixed set of tick marks. Between 1.0 and 2.0, there are about 8.4 million ticks for `float` and 2^52 ticks for `double`. As you move right, the ticks spread farther apart. The tick marks are not uniform — they're densest near zero. This is why subtracting two nearly-equal large numbers loses all precision (catastrophic cancellation).
 
-**Key points to never forget:**
-- Never compare floats with `==` — use an epsilon tolerance like `fabs(a - b) < 1e-9`.
-- `float` gives ~7 digits, `double` gives ~15 digits, `long double` gives ~18+ digits.
-- Mathematical operations are not associative in floating-point — `(a+b)+c ≠ a+(b+c)`.
-- Print enough digits: use `%.15g` for `double` to see the true value.
-- Enable `-Wfloat-equal` to catch equality comparisons at compile time.
+Key points:
+1. Never compare floats with `==` — use an epsilon tolerance like `fabs(a - b) < 1e-9`.
+2. `float` gives ~7 digits, `double` gives ~15 digits, `long double` gives ~18+ digits.
+3. Mathematical operations are not associative in floating-point — `(a+b)+c ≠ a+(b+c)`.
+4. Print enough digits: use `%.15g` for `double` to see the true value.
+5. Enable `-Wfloat-equal` to catch equality comparisons at compile time.
 
-**References:**
-1. Goldberg, D. "What Every Computer Scientist Should Know About Floating-Point Arithmetic." *ACM Computing Surveys*, 1991.
+References:
+1. Goldberg, D. "What Every Computer Scientist Should Know About Floating-Point Arithmetic." *ACM Computing Surveys*, 1991
+
 2. IEEE 754-2019 — Standard for Floating-Point Arithmetic.
 3. Kahan, W. "Lecture Notes on the Status of IEEE 754." UC Berkeley, 1997.
 4. CPython source: `Objects/floatobject.c` and `Include/floatobject.h`.

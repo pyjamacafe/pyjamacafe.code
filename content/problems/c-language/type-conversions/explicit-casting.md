@@ -57,6 +57,12 @@ A professional example: in a physics simulation, position updates use `x = x + v
 
 Visualize casting as a funnel: when you cast a `double` to `int`, the funnel has a grate at the decimal point — everything after the decimal is discarded (truncation toward zero). When you cast `int` to `float`, the funnel widens, and the integer passes through unchanged but now carries a `.0`. For pointer casts, imagine relabeling a container without changing its contents — `(int*)ptr` tells the compiler to interpret the bytes at `ptr` as an `int`, regardless of what they actually represent.
 
-Key points: (1) Cast precedence is higher than arithmetic — parenthesize carefully. (2) `(float)(a/b)` casts the result of integer division, not the operands. (3) Pointer casts can violate strict aliasing rules (C99 6.5/7) and lead to undefined behavior. (4) Use casts to silence compiler warnings only when you are certain the conversion is safe. (5) The `const` qualifier cannot be cast away safely via ordinary casts (use `memcpy` or a union instead).
+Key points:
+1. Cast precedence is higher than arithmetic — parenthesize carefully.
+2. `(float)(a/b)` casts the result of integer division, not the operands.
+3. Pointer casts can violate strict aliasing rules (C99 6.5/7) and lead to undefined behavior.
+4. Use casts to silence compiler warnings only when you are certain the conversion is safe.
+5. The `const` qualifier cannot be cast away safely via ordinary casts (use `memcpy` or a union instead).
+
 
 Read the C11 standard §6.5.4 (cast operators) and §6.3 (conversions). "The C Programming Language" by Kernighan & Ritchie (2nd ed., §2.7) covers type conversions concisely. MISRA-C Rule 10.1–10.3 provides safety guidelines for casting in embedded systems.

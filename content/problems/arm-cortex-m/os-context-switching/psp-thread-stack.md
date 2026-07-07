@@ -77,6 +77,12 @@ In FreeRTOS, each task's stack is allocated during `xTaskCreate()`. The task fun
 
 Visualise a building with two elevators. One elevator (MSP) runs express between the ground floor (handler mode) and the penthouse (kernel). The other elevator (PSP) serves each apartment's floor (thread stacks). If someone overloads the apartment elevator, it stops on that floor — the express elevator continues running.
 
-Key points: (1) CONTROL[1] selects PSP in thread mode; handler mode always uses MSP. (2) The PSP must be initialised before setting CONTROL[1] — an invalid PSP causes a fault immediately. (3) On exception entry, the hardware reads CURRENT stack pointer for the frame — not the active stack pointer. (4) Writing to CONTROL requires an ISB to ensure the new stack selection takes effect. (5) Some toolchain startup code uses MSP for both modes; RTOS ports switch to PSP in `main()`.
+Key points:
+1. CONTROL[1] selects PSP in thread mode; handler mode always uses MSP.
+2. The PSP must be initialised before setting CONTROL[1] — an invalid PSP causes a fault immediately.
+3. On exception entry, the hardware reads CURRENT stack pointer for the frame — not the active stack pointer.
+4. Writing to CONTROL requires an ISB to ensure the new stack selection takes effect.
+5. Some toolchain startup code uses MSP for both modes; RTOS ports switch to PSP in `main()`.
+
 
 The ARMv7‑M and ARMv8‑M Architecture Reference Manuals, "Stack Pointer Selection" section, specify the precise behaviour. FreeRTOS's `port.c` for Cortex‑M and the CMSIS‑RTOS2 thread management implementation demonstrate production PSP usage.

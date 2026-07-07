@@ -62,4 +62,19 @@ Linked lists are used in OS kernel task queues, memory allocator free lists, has
 
 ===EXPLANATION===
 
-The self‑referential struct is the cornerstone of dynamic data structures in C. It seems paradoxical at first — how can a structure contain a pointer to its own type without infinite recursion? The trick is that the pointer doesn't contain the struct; it *points* to another, separate instance. This one idea unlocks linked lists, binary trees, hash tables with chaining, and adjacency lists. Historically, self‑referential structs appeared in the earliest C implementations of linked lists (circa 1972) and were formalized in K&R C. Alan Kay's PhD thesis "The Reactive Engine" (1969) used similar patterns for graph structures. The intuition is a scavenger hunt: each clue (node) tells you where to find the next clue. When you reach a clue that says "NULL", the hunt ends. In code, `struct node { int data; struct node *next; }` — every node holds its value and the address of the follower. Professional use is universal: the Linux kernel's `struct list_head` is an embedded doubly‑linked list used for process scheduling, file system caches, and device management. The glibc memory allocator maintains free‑list bins as linked lists of memory chunks. The `undo` stack in every text editor is a linked list of `struct edit_action`. Visually, imagine three boxes on a whiteboard: box A has `data=10` and an arrow to box B; box B has `data=20` and an arrow to box C; box C has `data=30` and an arrow written "NULL". The `head` pointer holds the address of box A, and traversal is just following arrows. Key points: (1) insertion and deletion at a known position are O(1) — just redirect a pointer; (2) random access is O(n) — you must walk the chain; (3) you must manage memory manually (malloc/free); (4) doubly‑linked lists add a `prev` pointer for O(1) backward traversal; (5) circular lists connect the tail back to the head. References: K&R C §6.5 ("Self‑referential Structures"); ISO C11 §6.7.2.1; "Linux Kernel Development" by Robert Love covers the kernel's list implementation.
+The self‑referential struct is the cornerstone of dynamic data structures in C. It seems paradoxical at first — how can a structure contain a pointer to its own type without infinite recursion? The trick is that the pointer doesn't contain the struct; it *points* to another, separate instance. This one idea unlocks linked lists, binary trees, hash tables with chaining, and adjacency lists. Historically, self‑referential structs appeared in the earliest C implementations of linked lists (circa 1972) and were formalized in K&R C. Alan Kay's PhD thesis "The Reactive Engine" (1969) used similar patterns for graph structures. The intuition is a scavenger hunt: each clue (node) tells you where to find the next clue. When you reach a clue that says "NULL", the hunt ends. In code, `struct node { int data; struct node *next; }` — every node holds its value and the address of the follower. Professional use is universal: the Linux kernel's `struct list_head` is an embedded doubly‑linked list used for process scheduling, file system caches, and device management. The glibc memory allocator maintains free‑list bins as linked lists of memory chunks. The `undo` stack in every text editor is a linked list of `struct edit_action`. Visually, imagine three boxes on a whiteboard: box A has `data=10` and an arrow to box B; box B has `data=20` and an arrow to box C; box C has `data=30` and an arrow written "NULL". The `head` pointer holds the address of box A, and traversal is just following arrows.
+
+Key points:
+
+. insertion and deletion at a known position are O
+. — just redirect a pointer;
+. random access is O(n) — you must walk the chain;
+. you must manage memory manually (malloc/free);
+. doubly‑linked lists add a `prev` pointer for O
+. backward traversal;
+. circular lists connect the tail back to the head.
+
+References:
+1. K&R C §6.5 ("Self‑referential Structures").
+2. ISO C11 §6.7.2.1.
+3. "Linux Kernel Development" by Robert Love covers the kernel's list implementation.

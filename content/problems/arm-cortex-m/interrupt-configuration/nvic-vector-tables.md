@@ -117,5 +117,6 @@ Visualize the vector table as a hotel directory in a lobby. The first 16 listing
 
 Key points: entry 0 holds the initial SP (not a handler); each entry is 4 bytes; addresses must have bit 0 set for Thumb state; VTOR must be 128-byte aligned; on ARMv8-M with TrustZone, there are separate Secure and Non-Secure vector tables; weak aliases are commonly used for unhandled interrupts.
 
-References: ARM Architecture Reference Manual ARMv7-M (section B1.6.2 — Vector Table), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 7 — Vector Table), ARM Infocenter DDI0403E.
+References:
+1. ARM Architecture Reference Manual ARMv7-M (section B1.6.2 — Vector Table), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 7 — Vector Table), ARM Infocenter DDI0403E.
 

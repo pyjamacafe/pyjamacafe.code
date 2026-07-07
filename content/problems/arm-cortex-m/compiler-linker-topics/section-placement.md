@@ -62,6 +62,12 @@ The `.isr_vector` section ensures the vector table lands at the correct flash or
 
 Visualise custom sections as specialty rooms in a house. `.text` is the living room (everyday code). `.data` is the kitchen (cookware — initialised data). `.bss` is the storage closet (unused space). `.noinit` is a whiteboard in the garage (survives cleaning). `.ram_func` is a fast‑charging station installed in the living room for devices that need immediate power.
 
-Key points: (1) Custom sections require corresponding linker script output sections — otherwise they map to default regions. (2) `.noinit` must use `(NOLOAD)` in GNU ld to prevent zero‑fill. (3) Functions in `.ram_func` must be copied from LMA to VMA in the startup code. (4) Use `__attribute__((section(".name"), used))` for vector tables. (5) The `KEEP()` linker command prevents section garbage collection.
+Key points:
+1. Custom sections require corresponding linker script output sections — otherwise they map to default regions.
+2. `.noinit` must use `(NOLOAD)` in GNU ld to prevent zero‑fill.
+3. Functions in `.ram_func` must be copied from LMA to VMA in the startup code.
+4. Use `__attribute__((section(".name"), used))` for vector tables.
+5. The `KEEP()` linker command prevents section garbage collection.
+
 
 GNU ld documentation, "Output Section Description", explains how to define custom output sections. ARM Compiler's armlink User Guide describes equivalent `AREA` directives for scatter‑loading. CMSIS startup files and MCU vendor linker scripts provide real‑world custom‑section examples.

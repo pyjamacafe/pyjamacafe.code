@@ -63,6 +63,12 @@ A professional example: CPython's bytecode evaluation loop uses pointer-based ac
 
 Visualize pointer vs. subscript as the difference between a building and a guide. The building (array) cannot be moved; its rooms are fixed at Room 0, Room 1, etc. A tour guide (pointer) starts at Room 0 and can walk to Room 3 (`p = p + 3`). Another guide can start at Room 0 and jump directly to Room 2 (`p = &arr[2]`). The building stays put — only the guides move.
 
-Key points: (1) `a[i] == i[a]` — proven by C's definition of subscripting. (2) An array name is not a modifiable lvalue — it cannot appear on the left side of assignment. (3) A pointer can be indexed like an array (`p[i]`) after being assigned the array's address. (4) `&arr[0]` and `arr` produce the same address but have different types: `int *` vs. `int (*)[5]`. (5) `sizeof(p)` for a pointer is always `sizeof(void *)` (4 or 8 bytes), regardless of array size.
+Key points:
+1. `a[i] == i[a]` — proven by C's definition of subscripting.
+2. An array name is not a modifiable lvalue — it cannot appear on the left side of assignment.
+3. A pointer can be indexed like an array (`p[i]`) after being assigned the array's address.
+4. `&arr[0]` and `arr` produce the same address but have different types: `int *` vs. `int (*)[5]`.
+5. `sizeof(p)` for a pointer is always `sizeof(void *)` (4 or 8 bytes), regardless of array size.
+
 
 Kernighan & Ritchie §5.3 covers the equivalence. The C11 standard §6.5.2.1 formally defines array subscripting. "C Traps and Pitfalls" (Koening) devotes extensive coverage to array-pointer confusion and subscript commutativity.

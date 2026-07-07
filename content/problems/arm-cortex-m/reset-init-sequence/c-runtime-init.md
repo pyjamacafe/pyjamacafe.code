@@ -75,6 +75,11 @@ A professional example: a production IoT sensor stores calibration coefficients 
 
 Visualise the address space: flash holds both code and the initial values of .data in a contiguous region called the load memory address (LMA). RAM holds the runtime virtual memory address (VMA) of .data and .bss. The startup code is a `memcpy` of _sidata → _sdata for _edata - _sdata bytes, followed by a zero‑fill of _sbss to _ebss. A debugger showing memory before and after startup makes this concrete.
 
-Key points: (1) _sidata (flash) and _sdata (RAM) are often different — the copy is mandatory. (2) .bss takes no space in the binary; only the start and end addresses are stored. (3) C++ global constructors run after data/bss init. (4) The startup code must not use global variables until after init.
+Key points:
+1. _sidata (flash) and _sdata (RAM) are often different — the copy is mandatory.
+2. .bss takes no space in the binary; only the start and end addresses are stored.
+3. C++ global constructors run after data/bss init.
+4. The startup code must not use global variables until after init.
+
 
 ARM Compiler's `__main` and GCC's `_start` implementations are documented in their respective manuals. The ELF standard's section definitions and the System V ABI specify the expected behaviour of .data and .bss.

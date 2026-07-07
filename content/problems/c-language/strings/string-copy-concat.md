@@ -68,6 +68,12 @@ A professional example: the Heartbleed vulnerability (CVE-2014-0160) was caused 
 
 Visualize a string as people holding hands in a line. Each person is a character; the handshake is the link between consecutive characters. The null terminator is a person holding a stop sign. Copying is assembling a parallel line of people holding the same signs — you stop when you see the stop sign. Concatenation is bringing the second line to stand behind the last person in the first line. If the parade ground is too small, people spill onto the sidewalk.
 
-Key points: (1) Always null-terminate the destination after manual copy — forgetting is a common bug. (2) The destination must be at least `strlen(src) + 1` bytes for copy, and `strlen(dest) + strlen(src) + 1` for concatenation. (3) `strncpy` does not guarantee null-termination if the source is longer than the limit. (4) `strlcpy`/`strlcat` (BSD) provide safer bounded operations but are not standard C. (5) Buffer overflows from `strcpy`/`strcat` are the most common root cause of C security vulnerabilities.
+Key points:
+1. Always null-terminate the destination after manual copy — forgetting is a common bug.
+2. The destination must be at least `strlen(src) + 1` bytes for copy, and `strlen(dest) + strlen(src) + 1` for concatenation.
+3. `strncpy` does not guarantee null-termination if the source is longer than the limit.
+4. `strlcpy`/`strlcat` (BSD) provide safer bounded operations but are not standard C.
+5. Buffer overflows from `strcpy`/`strcat` are the most common root cause of C security vulnerabilities.
+
 
 Kernighan & Ritchie §1.9 shows the manual string copy loop. "The C Programming Language" §5.5 discusses character pointer versions. CERT C STR31-C and STR32-C provide guidelines for string copy safety. Seacord's "Secure Coding in C and C++" covers string vulnerability patterns in depth.

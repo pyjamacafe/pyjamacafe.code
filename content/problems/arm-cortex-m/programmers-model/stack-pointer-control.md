@@ -87,7 +87,13 @@ Real-world RTOS implementations rely on this heavily. FreeRTOS sets PSP during `
 
 Visualize the stack layout: MSP sits at a fixed high address (usually the end of SRAM) and grows downward. Each task's PSP sits at a different address in SRAM. The linker script defines `_estack` for MSP, and the OS allocates PSP ranges. The process stack pointer is only valid in Thread mode — writing to PSP in Handler mode has no effect until a return to Thread mode.
 
-Key points: (1) MSP is always used in Handler mode, regardless of CONTROL. (2) SPSEL (CONTROL[1]) only takes effect in Thread mode. (3) Writing CONTROL requires privileged mode and must be followed by an ISB. (4) PSP is typically set to the highest address of the task stack (minus 8 for AAPCS alignment). (5) The hardware does not switch to PSP automatically — the OS must program CONTROL and MSR PSP.
+Key points:
+1. MSP is always used in Handler mode, regardless of CONTROL.
+2. SPSEL (CONTROL[1]) only takes effect in Thread mode.
+3. Writing CONTROL requires privileged mode and must be followed by an ISB.
+4. PSP is typically set to the highest address of the task stack (minus 8 for AAPCS alignment).
+5. The hardware does not switch to PSP automatically — the OS must program CONTROL and MSR PSP.
 
-References: ARMv7-M ARM (DDI0403) B1.4, FreeRTOS `xPortStartScheduler`, Zephyr `arch/arm/core/thread.c`, CMSIS-Core `core_cm.h` stack functions (`__set_MSP`, `__set_PSP`), Cortex-M3 TRM (DDI0337) section 2.2.
 
+References:
+1. ARMv7-M ARM (DDI0403) B1.4, FreeRTOS `xPortStartScheduler`, Zephyr `arch/arm/core/thread.c`, CMSIS-Core `core_cm.h` stack functions (`__set_MSP`, `__set_PSP`), Cortex-M3 TRM (DDI0337) section 2.2.

@@ -1,0 +1,4 @@
+{{- $title := .Attributes.title | default "" -}}
+{{- $note := .Attributes.note | default "" -}}
+{{- $lang := .Type | default "" -}}
+<pre{{ if $title }} data-title="{{ $title }}"{{ end }}{{ if $note }} data-note="{{ $note }}"{{ end }}><code class="language-{{ $lang }}">{{ .Inner }}</code></pre>

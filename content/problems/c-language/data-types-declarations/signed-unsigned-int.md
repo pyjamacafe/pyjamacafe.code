@@ -56,15 +56,16 @@ for (unsigned long i = 0; i < sz; i++)
 
 One way to visualise signed and unsigned is to picture a number line wrapped into a circle of 2^N positions. For unsigned, the circle starts at 0 and increases clockwise to 2^N−1. For signed, the same circle is rotated so that 0 is at the top, positive numbers go clockwise down to 2^{N−1}−1, and negative numbers go counter-clockwise from 0 down to −2^{N−1}. This "wrapping" explains why adding 1 to the largest unsigned value yields 0, and why −1 is the same pattern as the largest unsigned value.
 
-**Key points to never forget:**
-- Signed and unsigned are the same bits, different interpretation.
-- Assigning a negative value to an unsigned variable wraps using modulo arithmetic — this is well-defined, not undefined behaviour.
-- Comparing signed with unsigned in C implicitly converts the signed value to unsigned, which can cause surprising results (e.g., `-1 < 1u` is false).
-- Always enable compiler warnings: `-Wsign-compare` (part of `-Wall`) catches most mismatches at compile time.
-- Use `size_t` (unsigned) for sizes and counts; use signed types for values that can meaningfully be negative.
+Key points:
+1. Signed and unsigned are the same bits, different interpretation.
+2. Assigning a negative value to an unsigned variable wraps using modulo arithmetic — this is well-defined, not undefined behaviour.
+3. Comparing signed with unsigned in C implicitly converts the signed value to unsigned, which can cause surprising results (e.g., `-1 < 1u` is false).
+4. Always enable compiler warnings: `-Wsign-compare` (part of `-Wall`) catches most mismatches at compile time.
+5. Use `size_t` (unsigned) for sizes and counts; use signed types for values that can meaningfully be negative.
 
-**References:**
-1. Koren, I. *Computer Arithmetic Algorithms*. CRC Press, 2018. — Two's complement history and properties.
+References:
+1. Koren, I. *Computer Arithmetic Algorithms*. CRC Press, 2018. — Two's complement history and properties
+
 2. Linux kernel `include/linux/kernel.h`, `MIN()` macro implementation.
 3. SQLite Internals — file format uses unsigned page numbers.
 4. WebKit CVE-2020-13523 — signed/unsigned mismatch leading to out-of-bounds access.

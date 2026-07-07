@@ -18,6 +18,7 @@ theme = 'pyjamacode'
   [markup.highlight]
     style = 'github'
     noClasses = true
+    codeFences = true
 
 disableKinds = ['taxonomy', 'term']
 

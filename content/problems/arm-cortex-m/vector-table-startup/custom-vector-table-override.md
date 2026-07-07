@@ -124,7 +124,14 @@ In professional CMSIS-based projects, this pattern is used in every startup file
 
 Picture the link process: the object file from startup.o contains `__isr_vector[]` with entry 15 being `SysTick_Handler`. The symbol `SysTick_Handler` in startup.o is weak and aliased to `Default_Handler`. The application file app.o contains a strong definition of `SysTick_Handler`. The linker resolves references: wherever `SysTick_Handler` is used, it points to the strong definition in app.o. The weak symbol in startup.o is discarded. The vector table entry 15 now holds the address of the application's SysTick handler. If app.o had not defined it, the weak alias would survive, and the vector table would point to Default_Handler.
 
-Key points: (1) GCC syntax: `__attribute__((weak))` makes a symbol weak; `__attribute__((alias("target")))` creates an alias. ARM Compiler 5 (armcc) uses `__weak` and `__attribute__((used))`; ARM Compiler 6 (armclang) uses the same GCC syntax. (2) The linker resolves weak symbols at link time—they are not resolved at compile time. (3) A weak symbol can be overridden by a strong symbol in any object file or library. (4) The Default_Handler should never return—it typically contains `while(1);` or calls a fault logging function and then resets the device. (5) This pattern also works for custom interrupt vectors beyond the standard 16 system exceptions (e.g., TIM2_IRQHandler, UART1_IRQHandler).
+Key points:
+1. GCC syntax: `__attribute__((weak))` makes a symbol weak; `__attribute__((alias("target")))` creates an alias. ARM Compiler 5 (armcc) uses `__weak` and `__attribute__((used))`; ARM Compiler 6 (armclang) uses the same GCC syntax.
+2. The linker resolves weak symbols at link time—they are not resolved at compile time.
+3. A weak symbol can be overridden by a strong symbol in any object file or library.
+4. The Default_Handler should never return—it typically contains `while.
+5. ;` or calls a fault logging function and then resets the device.
+6. This pattern also works for custom interrupt vectors beyond the standard 16 system exceptions (e.g., TIM2_IRQHandler, UART1_IRQHandler).
 
-References: CMSIS-Core documentation (ARM), GCC documentation on weak symbols and aliases, ARM Compiler Reference Guide, "Definitive Guide to ARM Cortex-M3 and Cortex-M4" (Chapter 4), and the startup files in STM32Cube_FW_F4 or any CMSIS-Pack example.
 
+References:
+1. CMSIS-Core documentation (ARM), GCC documentation on weak symbols and aliases, ARM Compiler Reference Guide, "Definitive Guide to ARM Cortex-M3 and Cortex-M4" (Chapter 4), and the startup files in STM32Cube_FW_F4 or any CMSIS-Pack example.

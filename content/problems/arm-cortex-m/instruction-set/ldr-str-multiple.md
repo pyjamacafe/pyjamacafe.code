@@ -112,5 +112,6 @@ Visualize LDM/STM as a luggage carousel at an airport. STM is placing your suitc
 
 Key points: LDMIA/STMIA increment after each access; LDMDB/STMDB decrement before each access; write-back (!) updates the base register; register list must be ascending order in encoding; loading PC causes a branch; for stack operations, use STMDB (push) and LDMIA (pop); LR is R14, PC is R15.
 
-References: ARM Architecture Reference Manual ARMv7-M (section A6.6 — LDM/STM), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 4.8), ARM Infocenter DDI0403E.
+References:
+1. ARM Architecture Reference Manual ARMv7-M (section A6.6 — LDM/STM), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 4.8), ARM Infocenter DDI0403E.
 

@@ -86,7 +86,13 @@ Professional RTOS implementations depend on this. FreeRTOS runs all tasks in Thr
 
 Visualize the mode transitions as a state machine with three states: Thread-Privileged (TP), Thread-Unprivileged (TU), and Handler (H). TP→TU via `MSR CONTROL, #1`. TU→H via any exception (interrupt, fault, SVC). H→TP via exception return (EXC_RETURN). H→TU is not directly possible — you must return to TP first, then switch to TU.
 
-Key points: (1) The IPSR field in xPSR is 0 in Thread mode, non-zero in Handler mode. (2) CONTROL register is only writable in privileged mode. (3) SVC is the standard mechanism for unprivileged-to-privileged transitions. (4) PendSV is used for context switching because it behaves like any other interrupt. (5) LR contains EXC_RETURN during handler execution — bit 2 indicates MSP vs PSP, bit 0 indicates return to Thread mode.
+Key points:
+1. The IPSR field in xPSR is 0 in Thread mode, non-zero in Handler mode.
+2. CONTROL register is only writable in privileged mode.
+3. SVC is the standard mechanism for unprivileged-to-privileged transitions.
+4. PendSV is used for context switching because it behaves like any other interrupt.
+5. LR contains EXC_RETURN during handler execution — bit 2 indicates MSP vs PSP, bit 0 indicates return to Thread mode.
 
-References: ARMv7-M ARM (DDI0403) B1.3, FreeRTOS `port.c` for Cortex-M, Zephyr `arch/arm/core/swap.c`, CMSIS-RTOS2 `osKernelInitialize` spec, Cortex-M3 TRM (DDI0337).
 
+References:
+1. ARMv7-M ARM (DDI0403) B1.3, FreeRTOS `port.c` for Cortex-M, Zephyr `arch/arm/core/swap.c`, CMSIS-RTOS2 `osKernelInitialize` spec, Cortex-M3 TRM (DDI0337).

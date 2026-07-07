@@ -67,15 +67,16 @@ while (argc-- > 0) {
 
 Visualize `x++` and `++x` as two doors. `x++` takes the current value through the door first, then increments x behind you. `++x` increments x first, then takes the new value through the door. In an isolated room (a standalone statement), both doors lead to the same place — x is incremented by 1. But when the value is used as part of a larger expression, the timing matters.
 
-**Key points to never forget:**
-- `++x` (prefix) returns the incremented value; `x++` (postfix) returns the original value.
-- Standalone `x++;` and `++x;` are identical in effect — use whichever is idiomatic for your codebase.
-- Using postfix increment twice on the same variable in one expression is undefined behavior: `i = i++` is illegal.
-- Compound assignments (`x += 5`) evaluate `x` once; `x = x + 5` evaluates `x` twice.
-- `*p++` reads the value at `p`, then advances `p` — the most common pointer traversal pattern in C.
+Key points:
+1. `++x` (prefix) returns the incremented value; `x++` (postfix) returns the original value.
+2. Standalone `x++;` and `++x;` are identical in effect — use whichever is idiomatic for your codebase.
+3. Using postfix increment twice on the same variable in one expression is undefined behavior: `i = i++` is illegal.
+4. Compound assignments (`x += 5`) evaluate `x` once; `x = x + 5` evaluates `x` twice.
+5. `*p++` reads the value at `p`, then advances `p` — the most common pointer traversal pattern in C.
 
-**References:**
-1. Ritchie, D. "The Development of the C Language." *HOPL II*, 1993 — describes the origin of `++` and `--` from B and PDP-11.
+References:
+1. Ritchie, D. "The Development of the C Language." *HOPL II*, 1993 — describes the origin of `++` and `--` from B and PDP-11
+
 2. Redis source: `src/server.c` — argument consumption with `*argv++`.
 3. SQLite source: `src/tokenize.c` — character scanning with `z[i++]`.
 4. Kernighan, B. & Ritchie, D. *The C Programming Language*, 2nd ed., §2.8 — Increment and Decrement Operators.

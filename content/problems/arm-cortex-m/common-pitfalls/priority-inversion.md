@@ -81,6 +81,12 @@ Solutions include: priority inheritance (the lock holder runs at the waiter's pr
 
 Visualise three checkout lanes at a supermarket. The express lane (high priority) needs a price check that only the customer in the regular lane (low priority) has. A customer with a full cart (medium priority) blocks the regular lane, chatting with the cashier. The express lane can't proceed. The store manager gives the regular‑lane customer "express lane overriding priority" (priority inheritance) so they finish the price check first.
 
-Key points: (1) Pure NVIC nesting prevents inversion among interrupts — inversion requires a software resource. (2) Priority inheritance adds code complexity but bounds the blocking time. (3) The priority ceiling protocol prevents chained blocking. (4) Lock‑free data structures and message passing avoid inversion entirely. (5) The BASEPRI register can boost interrupt priority without disabling exceptions.
+Key points:
+1. Pure NVIC nesting prevents inversion among interrupts — inversion requires a software resource.
+2. Priority inheritance adds code complexity but bounds the blocking time.
+3. The priority ceiling protocol prevents chained blocking.
+4. Lock‑free data structures and message passing avoid inversion entirely.
+5. The BASEPRI register can boost interrupt priority without disabling exceptions.
+
 
 The Mars Pathfinder bug analysis (NASA JPL, 1997) is a must‑read case study. Real‑time systems textbooks by Liu and Layland, and by Sha, Rajkumar, and Lehoczky, formalise priority inversion and its solutions. CMSIS‑RTOS2 defines priority inheritance as an optional mutex attribute.

@@ -62,15 +62,16 @@ enum dma_data_direction {
 
 A mental model: picture a deck of cards where each card has a name on one side and an integer on the other. The enum type is the deck — it tells you these cards belong together. The compiler fills in the numbers automatically (0, 1, 2...) unless you write a specific number on a card, in which case the next cards continue from that number. You can use the name or the number interchangeably.
 
-**Key points to never forget:**
-- Enumerators start at 0 by default and increment by 1.
-- An enum variable can hold any `int` value, not just the named enumerators.
-- The `enum` type is `int` — `sizeof(enum foo) == sizeof(int)`.
-- You can assign explicit values to break the sequence: `enum { A = 1, B, C }` → B=2, C=3.
-- For type-safe booleans in C23, use `bool`; for user-defined finite sets, use `enum`.
+Key points:
+1. Enumerators start at 0 by default and increment by 1.
+2. An enum variable can hold any `int` value, not just the named enumerators.
+3. The `enum` type is `int` — `sizeof(enum foo) == sizeof(int)`.
+4. You can assign explicit values to break the sequence: `enum { A = 1, B, C }` → B=2, C=3.
+5. For type-safe booleans in C23, use `bool`; for user-defined finite sets, use `enum`.
 
-**References:**
-1. ISO/IEC 9899:2011 (C11), §6.7.2.2 — Enumeration specifiers.
+References:
+1. ISO/IEC 9899:2011 (C11), §6.7.2.2 — Enumeration specifiers
+
 2. Linux kernel `include/linux/dma-direction.h` — enum for DMA operations.
 3. SQLite source: `sqlite3.h` — `sqlite3_index_constraint_op` enum.
 4. Redis source: `server.h` — `OBJ_STRING`, `OBJ_LIST`, etc. encoding type enums.

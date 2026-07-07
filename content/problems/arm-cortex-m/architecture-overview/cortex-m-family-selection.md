@@ -98,7 +98,13 @@ Professional firmware projects make selection decisions based on quantifiable cr
 
 Visualize the family as a bubble chart: x-axis = performance (DMIPS/MHz), y-axis = feature richness, bubble size = market adoption. M0/M0+ sit low-left (smallest), M3 centers as the sweet spot, M4 shifts right with FPU, M7 goes upper-right. M23 occupies M0+ territory plus TrustZone, M33 sits near M4. This chart explains why M4 dominates audio/DSP, M7 dominates motor control, and M33 dominates secure IoT.
 
-Key points: (1) Part number 0xD2x identifies Mainline, 0xCxx identifies Baseline. (2) M0+ has a vector table relocation feature that M0 lacks. (3) M7 can have up to two FPUs (double-precision and single-precision). (4) M55/M85 add Helium (MVE) for SIMD. (5) ARMv8.1-M introduces branch target identification and pointer authentication for safety.
+Key points:
+1. Part number 0xD2x identifies Mainline, 0xCxx identifies Baseline.
+2. M0+ has a vector table relocation feature that M0 lacks.
+3. M7 can have up to two FPUs (double-precision and single-precision).
+4. M55/M85 add Helium (MVE) for SIMD.
+5. ARMv8.1-M introduces branch target identification and pointer authentication for safety.
 
-References: ARM Cortex-M Processor Comparison Table, CMSIS-Core documentation, Zephyr RTOS board ports at `arch/arm/core/cortex_m/`, STM32Cube MCU selection guides, and the ARM Architecture Reference Manual for ARMv8-M (DDI0553).
 
+References:
+1. ARM Cortex-M Processor Comparison Table, CMSIS-Core documentation, Zephyr RTOS board ports at `arch/arm/core/cortex_m/`, STM32Cube MCU selection guides, and the ARM Architecture Reference Manual for ARMv8-M (DDI0553).

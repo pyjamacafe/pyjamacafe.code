@@ -58,6 +58,12 @@ In production, every major C codebase depends on pointers. The Redis key-value s
 
 Visualize memory addresses like house numbers on a street. `int x = 42` is House #100 with a sign reading "42". `int *p = &x` is a notecard that says "Look at House #100." `*p` walks to House #100 and reads the sign. `*p = 100` walks to House #100 and replaces the sign with "100". The notecard is just a piece of paper (typically 8 bytes on a 64-bit system) — small and easy to pass around.
 
-Key points: (1) A pointer is just an integer holding a memory address — `sizeof(p)` is 4 on 32-bit, 8 on 64-bit systems. (2) Dereferencing an uninitialized pointer is undefined behavior and a common source of segmentation faults. (3) `&` cannot take the address of a bit-field or a register variable. (4) `void *` can hold any address but requires a cast before dereference. (5) Pointer types must match the data they point to; casting `float *` to `int *` violates strict aliasing rules.
+Key points:
+1. A pointer is just an integer holding a memory address — `sizeof(p)` is 4 on 32-bit, 8 on 64-bit systems.
+2. Dereferencing an uninitialized pointer is undefined behavior and a common source of segmentation faults.
+3. `&` cannot take the address of a bit-field or a register variable.
+4. `void *` can hold any address but requires a cast before dereference.
+5. Pointer types must match the data they point to; casting `float *` to `int *` violates strict aliasing rules.
+
 
 Kernighan & Ritchie §5.1–5.2 introduce pointers. "Expert C Programming: Deep C Secrets" (Linden, 1994) covers pointer pitfalls. Ritchie's HOPL paper describes the evolution from B to C pointers. The CERT standard rule EXP08-C addresses safe pointer use.

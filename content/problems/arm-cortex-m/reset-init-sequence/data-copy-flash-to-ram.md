@@ -60,6 +60,12 @@ A real‑world scenario: an automotive ECU stores DTC (Diagnostic Trouble Code) 
 
 Visualise two buckets: one in flash (the original water) and one in RAM (the working bucket). Before you start using the water, you must pour it from the flash bucket into the RAM bucket. The linker symbols label both buckets' locations and sizes.
 
-Key points: (1) The .data region in flash occupies space in the binary; it is not free like .bss. (2) On devices with tight RAM, minimise initialised globals to reduce the copy time and RAM footprint. (3) The copy direction is always flash → RAM; never the reverse. (4) LDR/STR word‑wide copies are faster than byte‑wise memcpy — most startup code uses word copies. (5) For bootloaders that relocate, the VMA may differ between bootloader and application; the application's startup code must still run its own .data copy.
+Key points:
+1. The .data region in flash occupies space in the binary; it is not free like .bss.
+2. On devices with tight RAM, minimise initialised globals to reduce the copy time and RAM footprint.
+3. The copy direction is always flash → RAM; never the reverse.
+4. LDR/STR word‑wide copies are faster than byte‑wise memcpy — most startup code uses word copies.
+5. For bootloaders that relocate, the VMA may differ between bootloader and application; the application's startup code must still run its own .data copy.
+
 
 ARM's RealView Linker and GNU ld both document the distinction between AT (LMA) and ADDR (VMA) in their linker script language. Joseph Yiu's books on Cortex‑M processors devote a chapter to the startup sequence and memory layout.

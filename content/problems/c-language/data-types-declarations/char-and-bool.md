@@ -56,14 +56,15 @@ unsigned char sha1[GIT_SHA1_RAWSZ];
 
 A mental model: picture `char` as a container that holds exactly 8 bits (on virtually all platforms). Those 8 bits can represent a letter if interpreted as ASCII, or a small number from 0 to 255 (unsigned) or −128 to 127 (signed). The type system does not track which interpretation you intend — that's the programmer's job. `_Bool` is the same 8-bit container but with a contract: it will only ever hold 0 or 1.
 
-**Key points to never forget:**
-- `sizeof(char)` is always 1 by definition — it's the unit of measurement for all other types.
-- `char` may be signed or unsigned depending on the platform — use `signed char` or `unsigned char` when signedness matters.
-- Characters are stored as their integer ASCII codes — `'A' == 65`, `'0' == 48`.
-- `_Bool` converts any non-zero value to 1 — `bool x = 4;` sets `x` to 1.
-- Use `EOF` with `int`, not `char` — `getchar()` returns `int` because `char` may not be able to represent EOF.
+Key points:
+1. `sizeof(char)` is always 1 by definition — it's the unit of measurement for all other types.
+2. `char` may be signed or unsigned depending on the platform — use `signed char` or `unsigned char` when signedness matters.
+3. Characters are stored as their integer ASCII codes — `'A' == 65`, `'0' == 48`.
+4. `_Bool` converts any non-zero value to 1 — `bool x = 4;` sets `x` to 1.
+5. Use `EOF` with `int`, not `char` — `getchar()` returns `int` because `char` may not be able to represent EOF.
 
-**References:**
-1. Kernighan, B. & Ritchie, D. *The C Programming Language*, 2nd ed., §2.2 — Data Types and Sizes.
+References:
+1. Kernighan, B. & Ritchie, D. *The C Programming Language*, 2nd ed., §2.2 — Data Types and Sizes
+
 2. ISO/IEC 9899:2011 (C11), §6.2.5 — Types (char, _Bool).
 3. Git source: `hash.h` — unsigned char for SHA hashes to avoid sign-extension issues.

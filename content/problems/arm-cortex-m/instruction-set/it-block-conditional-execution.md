@@ -108,5 +108,6 @@ Visualize an IT block as a handful of dominoes. The first domino (the IT instruc
 
 Key points: IT block maximum length is 4 instructions; the last instruction in an IT block cannot be a branch (except BX in some cases); all instructions inside an IT block are marked with the condition suffix; flags are not updated by instructions inside IT blocks unless the instruction ends in S; IT blocks are not nestable.
 
-References: ARM Architecture Reference Manual ARMv7-M (section A6.8 — IT instruction), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 4.12), ARM Infocenter DDI0403E.
+References:
+1. ARM Architecture Reference Manual ARMv7-M (section A6.8 — IT instruction), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 4.12), ARM Infocenter DDI0403E.
 

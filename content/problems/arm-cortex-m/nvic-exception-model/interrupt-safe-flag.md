@@ -53,4 +53,5 @@ Visualize the interrupt timeline as a horizontal line. The main loop executes in
 
 Key points: `volatile` prevents compiler optimizations that would skip memory accesses; critical sections prevent interrupt preemption of multi-instruction sequences; use the minimum-duration critical section to keep interrupt latency low; always restore the previous interrupt state rather than unconditionally re-enabling, to support nested critical sections.
 
-References: ARM Architecture Reference Manual ARMv7-M (section B1.3.6 — PRIMASK and BASEPRI), Joseph Yiu's "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 8 — Exception Handling), and the seminal paper "Interrupts and Critical Sections in Embedded Systems" by Michael Barr.
+References:
+1. ARM Architecture Reference Manual ARMv7-M (section B1.3.6 — PRIMASK and BASEPRI), Joseph Yiu's "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 8 — Exception Handling), and the seminal paper "Interrupts and Critical Sections in Embedded Systems" by Michael Barr.

@@ -62,6 +62,12 @@ A professional code example: every linked list library faces the problem of modi
 
 Visualize double pointers as a treasure hunt. A map (first pointer) tells you which tree to look under. The tree is the second pointer. Under the tree is the chest (the actual value). If you only have a copy of the map, you can find the chest but you cannot change where the tree is. Moving the tree requires modifying the original map — which is exactly what a double pointer lets you do.
 
-Key points: (1) `int **p` means `p` holds the address of an `int *`. (2) Double pointers are required when a function must allocate or reassign a caller's pointer. (3) `argv` is a `char **` — an array of command-line strings. (4) Triple and quadruple pointers exist but often indicate overcomplicated design. (5) A 2D array is NOT the same as `int **` — they have different memory layouts.
+Key points:
+1. `int p` means `p` holds the address of an `int *`.
+2. Double pointers are required when a function must allocate or reassign a caller's pointer.
+3. `argv` is a `char ` — an array of command-line strings.
+4. Triple and quadruple pointers exist but often indicate overcomplicated design.
+5. A 2D array is NOT the same as `int ` — they have different memory layouts.
+
 
 Kernighan & Ritchie §5.6 covers pointer arrays including `argv`. "The C Programming Language" §5.10 shows command-line argument handling with `char **`. "Expert C Programming" chapter on memory access covers double-pointer allocation patterns.

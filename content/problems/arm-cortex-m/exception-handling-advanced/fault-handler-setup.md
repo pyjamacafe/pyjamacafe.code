@@ -113,5 +113,6 @@ Visualize the fault handler system as emergency responders in a building. The Us
 
 Key points: HardFault is always enabled; SHCSR enables MemManage, BusFault, UsageFault; the HardFault entry must decode EXC_RETURN for stack pointer selection; fault handlers must clear status bits to prevent immediate re-entry; CFSR + HFSR + stacked PC form a complete diagnostic payload; stored crash data should include a magic number for boot-time detection.
 
-References: ARM Architecture Reference Manual ARMv7-M (section B1.5.8–B1.5.11), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 10.5), ARM Infocenter DDI0403E.
+References:
+1. ARM Architecture Reference Manual ARMv7-M (section B1.5.8–B1.5.11), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 10.5), ARM Infocenter DDI0403E.
 

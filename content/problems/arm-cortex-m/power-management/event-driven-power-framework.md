@@ -144,7 +144,13 @@ In professional practice, FreeRTOS Tickless Idle mode is the most widely deploye
 
 Picture the framework as a layered architecture: at the top, an application calls `pm_transition(PM_IDLE_DEEPSLEEP)`. The framework checks current state, invokes pre-sleep hooks in priority order (e.g., DMA must complete transfers before UART can finish TX), writes SLEEPDEEP in SCB_SCR, executes DSB + WFI, and the CPU halts. On wakeup (interrupt or event), the ISR runs, the framework invokes post-wake hooks in reverse order, restores clocks, reinstates PLL settings, and returns the state to ACTIVE. The whole sequence is executed atomically within a critical section to prevent race conditions.
 
-Key points: (1) Pre-sleep hooks must be non-blocking or have bounded execution time—sleep latency depends on the slowest hook. (2) Post-wake hooks run with interrupts still disabled; only minimal reinitialization should happen here. (3) The framework should reject invalid transitions (e.g., going from ACTIVE directly to STANDBY without saving state). (4) RTC or LPTIM is the preferred wake-up source for time-based sleep because SysTick is disabled in deep sleep. (5) SEVONPEND (SCB_SCR bit 4) enables WFE to wake on interrupt pending without the interrupt actually firing—useful for avoiding ISR overhead in power-sensitive event loops.
+Key points:
+1. Pre-sleep hooks must be non-blocking or have bounded execution time—sleep latency depends on the slowest hook.
+2. Post-wake hooks run with interrupts still disabled; only minimal reinitialization should happen here.
+3. The framework should reject invalid transitions (e.g., going from ACTIVE directly to STANDBY without saving state).
+4. RTC or LPTIM is the preferred wake-up source for time-based sleep because SysTick is disabled in deep sleep.
+5. SEVONPEND (SCB_SCR bit 4) enables WFE to wake on interrupt pending without the interrupt actually firing—useful for avoiding ISR overhead in power-sensitive event loops.
 
-References: FreeRTOS Tickless Idle Mode documentation, Zephyr RTOS Power Management subsystem, ARM AN398 (Cortex-M3 Power Management), STM32 microprocessor PM0214 (Power control), and "Definitive Guide to ARM Cortex-M3 and Cortex-M4" Chapter 13 on low-power design.
 
+References:
+1. FreeRTOS Tickless Idle Mode documentation, Zephyr RTOS Power Management subsystem, ARM AN398 (Cortex-M3 Power Management), STM32 microprocessor PM0214 (Power control), and "Definitive Guide to ARM Cortex-M3 and Cortex-M4" Chapter 13 on low-power design.

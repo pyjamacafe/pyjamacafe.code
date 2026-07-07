@@ -69,6 +69,13 @@ A real TrustZone project typically configures 3‑5 SAU regions: one for the sec
 
 Visualise a museum with two security layers. The IDAU is the blueprint that says "the vault is always off‑limits" and "the gift shop is always public". The SAU is the day's guard schedule that adds "the restoration lab is secure today" — it can add restrictions but cannot override the blueprint.
 
-Key points: (1) SAU regions have alignment constraints — base and limit must be 32‑byte aligned. (2) RLAR bit 0 enables the region; bit 1 sets NSC attribute. (3) If the SAU is disabled, the default (IDAU‑only) attribution applies. (4) Up to 8 SAU regions are available (implementation dependent). (5) The SAU's CTRL register's ENABLE bit controls the entire unit. (6) Non‑secure code cannot read or write SAU registers — access causes a secure fault.
+Key points:
+1. SAU regions have alignment constraints — base and limit must be 32‑byte aligned.
+2. RLAR bit 0 enables the region; bit 1 sets NSC attribute.
+3. If the SAU is disabled, the default (IDAU‑only) attribution applies.
+4. Up to 8 SAU regions are available (implementation dependent).
+5. The SAU's CTRL register's ENABLE bit controls the entire unit.
+6. Non‑secure code cannot read or write SAU registers — access causes a secure fault.
+
 
 ARM's *ARMv8‑M Architecture Reference Manual*, "Security Attribution" chapter, provides the SAU register specification. Silicon vendors document IDAU implementation in their device reference manuals, and Arm's *TrustZone for Cortex‑M User Guide* offers practical configuration examples.

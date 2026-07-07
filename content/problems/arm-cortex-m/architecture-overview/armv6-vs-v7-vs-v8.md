@@ -61,6 +61,13 @@ Professional migration examples make this concrete. The Zephyr RTOS port from Co
 
 Visualize the three architectures as a layered onion: the core v6-M layer is a 56-instruction Thumb subset. v7-M wraps it with ~100 additional Thumb-2 instructions, hardware divide, and conditional execution (IT blocks). v8-M wraps another layer with SG, TT, and security-aware MPU/SAU. The outer layers have access to inner features, but inner layers cannot use outer instructions without faulting.
 
-Key points: (1) v6-M parts have CPUID architecture = 2, v7-M = 3, v8-M = 4, v8.1-M = 5. (2) v6-M cannot use IT blocks beyond single conditional instructions. (3) v7-M introduced exclusive access instructions (LDREX/STREX) for semaphores. (4) v8-M removed bit-banding — replace with MPU or atomic access. (5) v8-M banked registers for security are invisible to Non-Secure code, simplifying context switching.
+Key points:
+1. v6-M parts have CPUID architecture = 2, v7-M = 3, v8-M = 4, v8.1-M = 5.
+2. v6-M cannot use IT blocks beyond single conditional instructions.
+3. v7-M introduced exclusive access instructions (LDREX/STREX) for semaphores.
+4. v8-M removed bit-banding — replace with MPU or atomic access.
+5. v8-M banked registers for security are invisible to Non-Secure code, simplifying context switching.
 
-References: ARMv6-M ARM (DDI0419), ARMv7-M ARM (DDI0403), ARMv8-M ARM (DDI0553), CMSIS-Core migration guide from v7-M to v8-M, Zephyr `migrate_to_v8m.rst` documentation.
+
+References:
+1. ARMv6-M ARM (DDI0419), ARMv7-M ARM (DDI0403), ARMv8-M ARM (DDI0553), CMSIS-Core migration guide from v7-M to v8-M, Zephyr `migrate_to_v8m.rst` documentation.

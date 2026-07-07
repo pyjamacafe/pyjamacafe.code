@@ -129,5 +129,6 @@ Visualize CFSR as a fault-tree diagram. Each bit is a leaf node that indicates a
 
 Key points: CFSR at 0xE000ED28 combines MFSR, BFSR, UFSR; MMAR/BFAR valid bits (bit 7 in MFSR/BFSR) indicate if address registers hold valid data; stacking/unstacking faults occur during exception entry/exit; precise faults provide exact fault address; write 1 to CFSR to clear status bits; LSPERR/MLSPERR indicate faults during lazy FPU state preservation.
 
-References: ARM Architecture Reference Manual ARMv7-M (section B3.2.16 — CFSR), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 10.4), ARM Infocenter DDI0403E.
+References:
+1. ARM Architecture Reference Manual ARMv7-M (section B3.2.16 — CFSR), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 10.4), ARM Infocenter DDI0403E.
 

@@ -66,6 +66,13 @@ Consider an STM32G4 operating at 170 MHz: before SystemInit, the CPU runs from t
 
 Visualise the startup as a spacecraft launch sequence: the vector fetch is the ignition, SystemInit is the trajectory correction that ensures the rocket points at the right star, and main() is the scientific mission. Without trajectory correction, the mission fails before it begins.
 
-Key points: (1) SystemInit is called from the Reset_Handler, typically before .data/.bss init. (2) VTOR must be configured here if the vector table is not at the default address. (3) CPACR bits 20‑23 enable the FPU coprocessor. (4) After writing to SCB registers, always execute DSB and ISB. (5) SystemInit should not rely on global variables (they are not yet initialised). (6) On TrustZone devices, SystemInit also configures SAU regions and the secure VTOR.
+Key points:
+1. SystemInit is called from the Reset_Handler, typically before .data/.bss init.
+2. VTOR must be configured here if the vector table is not at the default address.
+3. CPACR bits 20‑23 enable the FPU coprocessor.
+4. After writing to SCB registers, always execute DSB and ISB.
+5. SystemInit should not rely on global variables (they are not yet initialised).
+6. On TrustZone devices, SystemInit also configures SAU regions and the secure VTOR.
+
 
 CMSIS‑Core documentation (ARM.CMSIS.5) specifies the SystemInit contract. MCU vendor reference manuals (e.g., ST RM0440 for STM32G4) detail the clock tree and register configuration needed in SystemInit.

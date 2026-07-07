@@ -70,6 +70,12 @@ A production STM32 startup file is typically ~300 lines of assembly or C. It cal
 
 Visualise the vector table as a theatre programme: each page lists an actor (exception) and the page number where their entrance happens (handler address). The stage manager (CPU) reads the programme at the top of the show (reset) and calls each actor when their cue arrives.
 
-Key points: (1) The vector table must be 256‑ or 512‑byte aligned (depending on implementation). (2) Bit 0 of every handler address must be 1 (Thumb bit). (3) External interrupt count and order are device‑specific — check the MCU's reference manual. (4) The initial SP value is typically `_estack` from the linker script. (5) Startup files can be written in C (CMSIS style) or assembly — C is more portable.
+Key points:
+1. The vector table must be 256‑ or 512‑byte aligned (depending on implementation).
+2. Bit 0 of every handler address must be 1 (Thumb bit).
+3. External interrupt count and order are device‑specific — check the MCU's reference manual.
+4. The initial SP value is typically `_estack` from the linker script.
+5. Startup files can be written in C (CMSIS style) or assembly — C is more portable.
+
 
 The CMSIS‑Core startup template (ARM.CMSIS.5) provides a reference C startup file. MCU vendor SDKs contain device‑specific startup files with correct vector ordering for each MCU.

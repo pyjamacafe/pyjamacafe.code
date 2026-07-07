@@ -69,6 +69,11 @@ In a professional RTOS, the reset handler rarely jumps straight to main(). It fi
 
 Visualise the process: picture a train leaving a station. The first word is the track gauge (stack pointer), the second word is the engine's destination (reset handler). If either is wrong, the train derails before it leaves the yard. Tools like a debugger's vector catch or a logic analyser on the boot pins help confirm the sequence.
 
-Key points: (1) The vector table must have bit 0 of every handler address set to 1 (Thumb). (2) On multi‑core devices, each core has its own reset sequence. (3) A watchdog timeout forces a reset, re‑running the full sequence. (4) The initial SP must point to valid RAM — an invalid SP causes an immediate HardFault on the first instruction.
+Key points:
+1. The vector table must have bit 0 of every handler address set to 1 (Thumb).
+2. On multi‑core devices, each core has its own reset sequence.
+3. A watchdog timeout forces a reset, re‑running the full sequence.
+4. The initial SP must point to valid RAM — an invalid SP causes an immediate HardFault on the first instruction.
+
 
 ARM Architecture Reference Manual ARMv7‑M and ARMv8‑M, Section B1.5 (“Reset and Initialization”) and the CMSIS‑Core documentation provide the authoritative specification. Joseph Yiu's *The Definitive Guide to ARM Cortex‑M3 and Cortex‑M4 Processors* offers an excellent practitioner's walkthrough.

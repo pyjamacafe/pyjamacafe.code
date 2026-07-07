@@ -62,6 +62,12 @@ I once reviewed a thermal simulation where a 2-kilobyte grid struct was passed b
 
 Visualize pass-by-value as handing someone a photocopy of your document. Any changes they make are on the copy; your original is untouched. Pass-by-pointer is handing them a key to your safe-deposit box. They open the box (dereference the pointer) and can change the contents directly. The key itself is still a copy (they could have made a duplicate), but what it *points to* is the original.
 
-Key points: (1) Everything in C is pass-by-value — including pointers. The pointer value (the address) is copied. (2) To modify a variable in the caller, pass its address with `&` and accept it as a pointer `*`. (3) Arrays are not copied — the array name decays to a pointer to its first element when passed to a function. (4) Use `const` pointers for read-only references: `void f(const int *p)` prevents modification. (5) Pass-by-pointer is also used for output parameters when a function needs to return multiple values.
+Key points:
+1. Everything in C is pass-by-value — including pointers. The pointer value (the address) is copied.
+2. To modify a variable in the caller, pass its address with `&` and accept it as a pointer `*`.
+3. Arrays are not copied — the array name decays to a pointer to its first element when passed to a function.
+4. Use `const` pointers for read-only references: `void f(const int *p)` prevents modification.
+5. Pass-by-pointer is also used for output parameters when a function needs to return multiple values.
+
 
 Kernighan & Ritchie §5.2 covers pointers and function arguments. "Expert C Programming: Deep C Secrets" dedicates a chapter to "C's Most Important, Most Confusing Feature — Pointers." CERT rule EXP01-C recommends using `const` for function parameters that are not modified.

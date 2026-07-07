@@ -59,6 +59,12 @@ An RTOS context‑switch routine uses `VPUSH {S0‑S31}` and `VPOP {S0‑S31}` t
 
 Visualise a painter's palette (FPU registers) separate from the painter's brush hand (core registers). The palette holds the colours (floating‑point values); the hand holds the brush (integer values and addresses). To change painters (context switch), you need to save both — but if a painter never mixes colours (didn't use FPU), you only save the brush position.
 
-Key points: (1) S registers are 32‑bit; D registers overlay them in pairs. (2) VMOV is the bridge between core and FPU registers. (3) FPU context save uses VPUSH/VPOP (or VSTM/VLDM). (4) The register file width (D16 vs D32) varies by Cortex‑M implementation. (5) FPSCR is saved separately from S/D registers.
+Key points:
+1. S registers are 32‑bit; D registers overlay them in pairs.
+2. VMOV is the bridge between core and FPU registers.
+3. FPU context save uses VPUSH/VPOP (or VSTM/VLDM).
+4. The register file width (D16 vs D32) varies by Cortex‑M implementation.
+5. FPSCR is saved separately from S/D registers.
+
 
 ARM's *Cortex‑M4 Technical Reference Manual*, "VFP" chapter, and the *ARMv7‑M Architecture Reference Manual* define the register layout and instruction set. CMSIS‑Core intrinsics like `__get_FPSCR()` provide C‑level access.

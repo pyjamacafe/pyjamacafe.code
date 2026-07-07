@@ -989,11 +989,19 @@ function toggleTheme() {
   htmlEl.setAttribute('data-bs-theme', newTheme);
   updateThemeIcon(newTheme);
   updateCodeMirrorTheme();
+  updateHighlightJsTheme(newTheme);
   try {
     localStorage.setItem('pyjamacode-theme', newTheme);
   } catch (e) {
     // localStorage may be unavailable (e.g. file:// origins).
   }
+}
+
+function updateHighlightJsTheme(theme) {
+  const lightCss = document.getElementById('hljs-light-css');
+  const darkCss = document.getElementById('hljs-dark-css');
+  if (lightCss) lightCss.disabled = theme === 'dark';
+  if (darkCss) darkCss.disabled = theme === 'light';
 }
 
 function updateThemeIcon(theme) {
@@ -1010,6 +1018,7 @@ function loadTheme() {
   }
   htmlEl.setAttribute('data-bs-theme', savedTheme);
   updateThemeIcon(savedTheme);
+  updateHighlightJsTheme(savedTheme);
 }
 
 function colorizeOutput(output) {
@@ -1084,9 +1093,14 @@ function enhanceCodeBlocks(root) {
 
     listingCounter++;
     const lang = extractLanguage(codeEl);
-    const title = codeEl.getAttribute('data-title') || lang;
-    const note = codeEl.getAttribute('data-note') || '';
+    const title = codeEl.getAttribute('data-title') || pre.getAttribute('data-title') || lang;
+    const note = codeEl.getAttribute('data-note') || pre.getAttribute('data-note') || '';
     const rawCode = codeEl.textContent || '';
+
+    // Apply highlight.js syntax highlighting
+    if (typeof hljs !== 'undefined') {
+      hljs.highlightElement(codeEl);
+    }
 
     // Preserve syntax-highlighted HTML, split by newlines
     const html = codeEl.innerHTML;

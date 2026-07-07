@@ -116,5 +116,6 @@ Visualize SEV/WFE as two people in adjacent rooms. One person finishes their wor
 
 Key points: SEV sets the event register on all cores; WFE checks and clears the event register; the event register prevents lost wake-ups; SEVONPEND makes interrupt pending set the event register; WFE is more power-efficient than polling; WFI is better for cases where an interrupt handler must run.
 
-References: ARM Architecture Reference Manual ARMv7-M (section B1.3.2–B1.3.3), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 14.4), ARM Infocenter DDI0403E.
+References:
+1. ARM Architecture Reference Manual ARMv7-M (section B1.3.2–B1.3.3), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 14.4), ARM Infocenter DDI0403E.
 

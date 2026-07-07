@@ -114,7 +114,13 @@ In professional practice, deep sleep is the cornerstone of battery-powered IoT p
 
 Visualize the power domains as concentric circles. The outermost circle is the backup domain (RTC, tamper, a few GPIO wakeup pins)—always powered. Inside is the standby domain (CPU, SRAM, most peripherals). Inside that is the active domain (PLL, main regulator, flash). Deep sleep turns off the active domain; standby turns off the standby domain too. Waking from deep sleep requires the PMU to ramp the regulator, enable the oscillator, and release the CPU reset. The CPU then runs the startup code—but can check a "wakeup flag" to skip full initialization and resume quickly.
 
-Key points: (1) SLEEPDEEP behavior is implementation-defined—always consult the vendor reference manual for exact current consumption and wakeup sources. (2) In deep sleep, the SysTick timer stops; use RTC or LPTIM for timed wakeup. (3) Wakeup from deep sleep is similar to reset: the CPU reboots, but backup registers and some SRAM are retained. (4) GPIO states during deep sleep can be configured (pull-up, analog, floating) to avoid extra leakage. (5) Debug connections (SWD) may prevent deep sleep entry on some MCUs—the debugger holds the core in a powered state.
+Key points:
+1. SLEEPDEEP behavior is implementation-defined—always consult the vendor reference manual for exact current consumption and wakeup sources.
+2. In deep sleep, the SysTick timer stops; use RTC or LPTIM for timed wakeup.
+3. Wakeup from deep sleep is similar to reset: the CPU reboots, but backup registers and some SRAM are retained.
+4. GPIO states during deep sleep can be configured (pull-up, analog, floating) to avoid extra leakage.
+5. Debug connections (SWD) may prevent deep sleep entry on some MCUs—the debugger holds the core in a powered state.
 
-References: "Definitive Guide to ARM Cortex-M3 and Cortex-M4" Chapter 13, STM32F4 Reference Manual (RM0090, Power Control section), Nordic nRF52 Reference Manual, ARM AN321, and application notes on "Ultra-Low Power Design" from NXP and Microchip.
 
+References:
+1. "Definitive Guide to ARM Cortex-M3 and Cortex-M4" Chapter 13, STM32F4 Reference Manual (RM0090, Power Control section), Nordic nRF52 Reference Manual, ARM AN321, and application notes on "Ultra-Low Power Design" from NXP and Microchip.

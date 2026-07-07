@@ -94,7 +94,14 @@ In professional firmware, ARMv8-M Baseline appears in constrained devices where 
 
 Visualize the M23 die as the M0+ die with the SAU and a second set of register banks squeezed into the same area — the security extension costs roughly 15-20% more gates but doubles the functionality. The ISA Venn diagram is the same 56-instruction subset, but the memory map now has two colours: Secure (blue) and Non-Secure (grey).
 
-Key points: (1) Part number 0xD22, architecture field 0x4. (2) No hardware divide — use software division or avoid division. (3) No unprivileged thread mode — the CONTROL register is fixed. (4) TrustZone is optional per chip — check the SAU_CTRL availability. (5) The vector table is banked between Secure and Non-Secure worlds. (6) Interrupt latency of 12 cycles is the lowest of any Cortex-M with security.
+Key points:
+1. Part number 0xD22, architecture field 0x4.
+2. No hardware divide — use software division or avoid division.
+3. No unprivileged thread mode — the CONTROL register is fixed.
+4. TrustZone is optional per chip — check the SAU_CTRL availability.
+5. The vector table is banked between Secure and Non-Secure worlds.
+6. Interrupt latency of 12 cycles is the lowest of any Cortex-M with security.
 
-References: ARM Cortex-M23 Technical Reference Manual (DDI0579), ARMv8-M Baseline Architecture (DDI0553), CMSIS-Core `core_cm23.h`, Zephyr M23 port in `arch/arm/core/cortex_m/`, PSA Certified Level 1 requirements.
 
+References:
+1. ARM Cortex-M23 Technical Reference Manual (DDI0579), ARMv8-M Baseline Architecture (DDI0553), CMSIS-Core `core_cm23.h`, Zephyr M23 port in `arch/arm/core/cortex_m/`, PSA Certified Level 1 requirements.

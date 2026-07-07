@@ -62,6 +62,12 @@ A professional example: SQLite's `sqlite3_stricmp()` performs case-insensitive c
 
 Visualize two people reading competing recipes out loud, one word at a time. At each step, they compare their current words. If one says "apple" and the other says "banana", the comparison stops because 'a' < 'b'. If both say "apple", then "sauce", they continue. If one recipe ends (hits \0) while the other continues with "pie", the shorter recipe is alphabetically first — an ending chapter is considered smaller than any continuation.
 
-Key points: (1) Never use `==` to compare strings — that compares pointer addresses, not contents. (2) `strcmp` returns 0 for equality, negative for s1 < s2, positive for s1 > s2. (3) Comparison is case-sensitive using ASCII ordering. (4) For case-insensitive comparison, use `strcasecmp` (POSIX) or convert both to lowercase. (5) `strncmp` limits comparison to `n` characters — ideal for prefix checks.
+Key points:
+1. Never use `==` to compare strings — that compares pointer addresses, not contents.
+2. `strcmp` returns 0 for equality, negative for s1 < s2, positive for s1 > s2.
+3. Comparison is case-sensitive using ASCII ordering.
+4. For case-insensitive comparison, use `strcasecmp` (POSIX) or convert both to lowercase.
+5. `strncmp` limits comparison to `n` characters — ideal for prefix checks.
+
 
 Kernighan & Ritchie §5.5 implements `strcmp` as a pointer-iteration example. "The C Programming Language" §5.5 covers string comparison. CERT C STR37-C recommends bounded operations where possible.

@@ -110,5 +110,6 @@ Visualize the processor as a librarian in a quiet library. WFI is the librarian 
 
 Key points: DSB before WFI ensures memory operations complete; SEVONPEND makes interrupt pending set the event register; deep sleep power domains are implementation-defined; SLEEPDEEP might stop system clocks or disable regulators; always configure wake-up sources before sleeping.
 
-References: ARM Architecture Reference Manual ARMv7-M (section B1.3.1–B1.3.3), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 14 — Power Management), ARM Infocenter DDI0403E.
+References:
+1. ARM Architecture Reference Manual ARMv7-M (section B1.3.1–B1.3.3), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 14 — Power Management), ARM Infocenter DDI0403E.
 

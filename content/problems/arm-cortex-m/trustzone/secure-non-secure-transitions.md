@@ -86,7 +86,13 @@ In professional firmware, BXNS is used extensively in PSA-compliant systems. Zep
 
 Visualize the transition as a state machine: Secure → BXNS → Non-Secure (all securable registers cleared). Non-Secure → SG at NSC entry → Secure (registers restored). During the Non-Secure execution, the secure stack is preserved but inaccessible to non-secure. The FPU context can be lazy-saved for efficiency if `FPU_FPCCR.LSPEN` is configured.
 
-Key points: (1) BXNS jumps to Non-Secure; BLXNS calls and saves return information on the secure stack. (2) On entry to Non-Secure, R0-R3, R12 are cleared for security isolation. (3) Non-secure returns via `SG` at an NSC entry point. (4) The secure stack must be MSP (not PSP) for the transition to work. (5) The `TT` (Test Target) instruction can check whether an address is Secure or Non-Secure before branching.
+Key points:
+1. BXNS jumps to Non-Secure; BLXNS calls and saves return information on the secure stack.
+2. On entry to Non-Secure, R0-R3, R12 are cleared for security isolation.
+3. Non-secure returns via `SG` at an NSC entry point.
+4. The secure stack must be MSP (not PSP) for the transition to work.
+5. The `TT` (Test Target) instruction can check whether an address is Secure or Non-Secure before branching.
 
-References: ARMv8-M ARM (DDI0553) section B1.6, Zephyr `trustzone.c`, FreeRTOS `secure_init.c`, CMSIS-Core `core_cm33.h` TZ functions, PSA Firmware Framework for M (FF-M) specification V1.1, ARM AN326 "TrustZone for Cortex-M".
 
+References:
+1. ARMv8-M ARM (DDI0553) section B1.6, Zephyr `trustzone.c`, FreeRTOS `secure_init.c`, CMSIS-Core `core_cm33.h` TZ functions, PSA Firmware Framework for M (FF-M) specification V1.1, ARM AN326 "TrustZone for Cortex-M".

@@ -63,15 +63,16 @@ if( c==' ' || c=='\t' || c=='\n' || c=='\f' || c=='\r' ){
 
 Visualize memory for `"hello"` as a contiguous block: `['h']['e']['l']['l']['o']['\0']` — six bytes in a row. Now visualize `'h'` — just a single 4-byte integer value (104) sitting in a register or on the stack. The difference is fundamental: one is a sequence in memory, the other is an immediate value.
 
-**Key points to never forget:**
-- `'x'` is an `int` (not `char`); `"x"` is a `char[2]` array.
-- String literals include an implicit `'\0'` terminator — `"A"` is 2 bytes.
-- Escape sequences are translated to single characters at compile time.
-- Modifying a string literal is undefined behavior — use `char str[] = "hello"` for mutable strings.
-- Adjacent string literals are concatenated at compile time: `"foo" "bar"` → `"foobar"`.
+Key points:
+1. `'x'` is an `int` (not `char`); `"x"` is a `char[2]` array.
+2. String literals include an implicit `'\0'` terminator — `"A"` is 2 bytes.
+3. Escape sequences are translated to single characters at compile time.
+4. Modifying a string literal is undefined behavior — use `char str[] = "hello"` for mutable strings.
+5. Adjacent string literals are concatenated at compile time: `"foo" "bar"` → `"foobar"`.
 
-**References:**
-1. ISO/IEC 9899:2011 (C11), §6.4.4.4 — Character constants (character constants have type int).
+References:
+1. ISO/IEC 9899:2011 (C11), §6.4.4.4 — Character constants (character constants have type int)
+
 2. Git source: `builtin.h`, `strbuf.c` — string handling with null-terminated strings.
 3. SQLite source: `src/tokenize.c` — character classification with character constants.
 4. Kernighan, B. & Ritchie, D. *The C Programming Language*, 2nd ed., §2.3 — Constants; §5.5 — Character Pointers and Functions.

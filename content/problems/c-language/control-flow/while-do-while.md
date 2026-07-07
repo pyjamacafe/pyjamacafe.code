@@ -60,6 +60,12 @@ A professional example: in a serial protocol driver, reading a stream of bytes u
 
 Visualize `while` as a turnstile that is locked until the condition (a green light) is true. If the light is red (condition false), nobody enters. `Do-while` is a revolving door: it admits one person unconditionally (the first rotation), then checks the light. If the light turns red after entry, no further entries happen, but the first person is already inside.
 
-Key points: (1) `while (condition)` — body may execute zero times. (2) `do { body } while (condition);` — body always executes at least once. Note the required semicolon after `while(...)`. (3) Both rely on the condition eventually becoming false — infinite loops occur if the condition never changes. (4) The condition is evaluated on every iteration, so avoid expensive function calls in the condition. (5) `break` and `continue` work inside both loop types — `continue` in a `while` jumps to the condition check.
+Key points:
+1. `while (condition)` — body may execute zero times.
+2. `do { body } while (condition);` — body always executes at least once. Note the required semicolon after `while(...)`.
+3. Both rely on the condition eventually becoming false — infinite loops occur if the condition never changes.
+4. The condition is evaluated on every iteration, so avoid expensive function calls in the condition.
+5. `break` and `continue` work inside both loop types — `continue` in a `while` jumps to the condition check.
+
 
 Kernighan & Ritchie §3.5 covers `while` and §3.6 covers `do-while`. For design patterns using these loops, "Programming Pearls" by Jon Bentley has excellent examples of input loops. CERT rule MSC21-C discusses loop termination guarantees in secure coding.

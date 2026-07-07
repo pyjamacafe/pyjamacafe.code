@@ -117,5 +117,6 @@ Visualize a checkout line at a grocery store. A customer (low-priority interrupt
 
 Key points: late arrival only applies during stacking, before the handler executes; it requires the arriving exception to have strictly higher priority; the stack frame is shared, not duplicated; late arrival + tail-chaining together form a powerful latency-reduction pair; the optimization is invisible to software — handlers never know it occurred.
 
-References: ARM Architecture Reference Manual ARMv7-M (section B1.5.7 — Late arrival), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 8.6.2), ARM Application Note AN298.
+References:
+1. ARM Architecture Reference Manual ARMv7-M (section B1.5.7 — Late arrival), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 8.6.2), ARM Application Note AN298.
 

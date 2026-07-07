@@ -63,6 +63,12 @@ A professional example: the Bash shell parser tokenizes command lines into words
 
 Visualize tokenization as a fruit sorter. The conveyor belt brings characters one at a time. A space (stem) is ignored. A letter (fruit) starts filling a box. Another stem closes the box and starts a new one. The `in_word` flag indicates whether you are currently filling a box. Multiple consecutive stems produce empty boxes, which the state machine naturally ignores.
 
-Key points: (1) `strtok` modifies the input string (inserts `'\0'`) and is not thread-safe. (2) Use `strtok_r` for reentrant tokenization or implement a custom state machine. (3) A manual tokenizer (like `count_words`) does not modify the input. (4) Multiple consecutive delimiters are handled by the state machine: a new word starts only after seeing a non-delimiter following a delimiter. (5) Production tokenizers handle quoting, escape sequences, and multiple delimiter sets.
+Key points:
+1. `strtok` modifies the input string (inserts `'\0'`) and is not thread-safe.
+2. Use `strtok_r` for reentrant tokenization or implement a custom state machine.
+3. A manual tokenizer (like `count_words`) does not modify the input.
+4. Multiple consecutive delimiters are handled by the state machine: a new word starts only after seeing a non-delimiter following a delimiter.
+5. Production tokenizers handle quoting, escape sequences, and multiple delimiter sets.
+
 
 Kernighan & Ritchie §7.8 mentions `strtok`. "The Practice of Programming" (Kernighan & Pike) §5.3 covers CSV tokenization. For compiler tokenizers, "Compilers: Principles, Techniques, and Tools" (Aho, Lam, Sethi, Ullman) provides the definitive treatment.

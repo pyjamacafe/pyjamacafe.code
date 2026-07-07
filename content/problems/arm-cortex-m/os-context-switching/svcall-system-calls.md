@@ -67,6 +67,12 @@ A real‑world microkernel system might define SVC numbers: 0 = yield, 1 = send 
 
 Visualise a hotel concierge desk. Guests (unprivileged threads) cannot enter the back office (kernel space). They write a request number on a slip of paper (SVC immediate) and slide it under the door. The concierge (SVC handler) reads the number, performs the service using their master key (privileged access), and returns the result.
 
-Key points: (1) SVC is synchronous — it always executes immediately. (2) The SVC number must be extracted from the instruction encoding, not from a register. (3) The handler must correctly determine MSP vs PSP from EXC_RETURN[2]. (4) SVC can be called from both privileged and unprivileged code. (5) Nested SVC calls are not recommended and require careful stack management.
+Key points:
+1. SVC is synchronous — it always executes immediately.
+2. The SVC number must be extracted from the instruction encoding, not from a register.
+3. The handler must correctly determine MSP vs PSP from EXC_RETURN[2].
+4. SVC can be called from both privileged and unprivileged code.
+5. Nested SVC calls are not recommended and require careful stack management.
+
 
 The ARM Architecture Reference Manual, "Supervisor Call" chapter, details the instruction encoding and exception behaviour. Joseph Yiu's *Definitive Guide to ARM Cortex‑M* provides step‑by‑step examples of SVC handler implementation with assembly.

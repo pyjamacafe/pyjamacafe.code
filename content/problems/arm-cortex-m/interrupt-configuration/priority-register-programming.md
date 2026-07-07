@@ -102,5 +102,6 @@ Visualize the IPR registers as a multi-drawer filing cabinet. Each drawer holds 
 
 Key points: NVIC_IPR_BASE is 0xE000E400; address = base + (irq_num / 4) * 4; byte offset = irq_num % 4; PRIGROUP is in SCB_AIRCR[10:8]; always use DSB after changing priorities; lower numeric value = higher priority.
 
-References: ARM Architecture Reference Manual ARMv7-M (section B3.4.8 — IPR registers), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 8.2.4), ARM Infocenter DDI0403E.
+References:
+1. ARM Architecture Reference Manual ARMv7-M (section B3.4.8 — IPR registers), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 8.2.4), ARM Infocenter DDI0403E.
 

@@ -74,6 +74,13 @@ In professional firmware development, the DWT cycle counter is used in many cont
 
 Imagine you want to know how long a particular function takes. You place a `start = DWT_CYCCNT;` before the call and `elapsed = DWT_CYCCNT - start;` after. The difference is the cycle count. For very short functions, the measurement overhead may be significant—account for 5–10 cycles by measuring an empty measurement. For longer functions, the overhead becomes negligible. The counter wraps around, but because you are using unsigned subtraction, the result is always correct as long as the measured interval does not exceed 2^32 cycles.
 
-Key points: (1) Enable CYCCNT by setting TRCENA (DEMCR bit 24) and CYCCNTENA (DWT_CONTROL bit 0). May also need to unlock DWT_LAR with 0xC5ACCE55. (2) Not available on Cortex-M0/M0+/M23—those processors lack the DWT unit entirely. (3) The counter stops in deep sleep modes if the CPU clock stops. (4) For very long measurements, chain a software counter: increment it on CYCCNT wrapping using the DWT comparator match interrupt. (5) CYCCNT can also be used for nanosecond-resolution delay loops, though WFI-based delays are preferred for power.
+Key points:
+1. Enable CYCCNT by setting TRCENA (DEMCR bit 24) and CYCCNTENA (DWT_CONTROL bit 0). May also need to unlock DWT_LAR with 0xC5ACCE55.
+2. Not available on Cortex-M0/M0+/M23—those processors lack the DWT unit entirely.
+3. The counter stops in deep sleep modes if the CPU clock stops.
+4. For very long measurements, chain a software counter: increment it on CYCCNT wrapping using the DWT comparator match interrupt.
+5. CYCCNT can also be used for nanosecond-resolution delay loops, though WFI-based delays are preferred for power.
 
-References: ARM Cortex-M3/M4/M7 Technical Reference Manual (DWT chapter), "Definitive Guide to ARM Cortex-M3 and Cortex-M4" (Chapter 16), ARM AN454, and numerous open-source profiling libraries (e.g., EmBitz profiler, Segger SystemView).
+
+References:
+1. ARM Cortex-M3/M4/M7 Technical Reference Manual (DWT chapter), "Definitive Guide to ARM Cortex-M3 and Cortex-M4" (Chapter 16), ARM AN454, and numerous open-source profiling libraries (e.g., EmBitz profiler, Segger SystemView).

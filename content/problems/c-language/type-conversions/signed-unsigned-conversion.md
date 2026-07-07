@@ -58,6 +58,12 @@ A real professional example: in 2014, a bug in Apple's SSL/TLS implementation (t
 
 Visualize signed and unsigned as two different clock faces. A signed 8-bit integer goes from -128 to +127, like a clock with -128 at the top and +127 half a turn later. An unsigned 8-bit integer goes from 0 to 255, with 0 at the top. When you compare values across the two faces, -128 on the signed clock maps to 128 on the unsigned clock — it jumps halfway around the dial. The same bit pattern (10000000) represents -128 on one face and 128 on the other.
 
-Key points: (1) In any mixed signed/unsigned operation, the signed value is implicitly converted to unsigned. (2) Avoid mixing signed and unsigned in comparisons — enable `-Wsign-compare` to catch them. (3) Use `size_t` for sizes and indices consistently to avoid the issue. (4) Literal constants like `1` are signed by default; use `1u` for unsigned. (5) The conversion is defined by the standard (C11 §6.3.1.3) — it is not undefined behavior, just surprising.
+Key points:
+1. In any mixed signed/unsigned operation, the signed value is implicitly converted to unsigned.
+2. Avoid mixing signed and unsigned in comparisons — enable `-Wsign-compare` to catch them.
+3. Use `size_t` for sizes and indices consistently to avoid the issue.
+4. Literal constants like `1` are signed by default; use `1u` for unsigned.
+5. The conversion is defined by the standard (C11 §6.3.1.3) — it is not undefined behavior, just surprising.
+
 
 Read "Secure Coding in C and C++" by Robert Seacord for an entire chapter on integer type conversions. C11 §6.3.1.3 covers signed-to-unsigned conversion. The CERT rule INT31-C warns about this exact pattern.

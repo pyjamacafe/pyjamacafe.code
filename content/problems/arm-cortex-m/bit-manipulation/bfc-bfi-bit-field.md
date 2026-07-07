@@ -105,7 +105,15 @@ In professional device drivers, BFC and BFI appear frequently. The STM32 HAL, fo
 
 Picture the operation: you have a destination register `dst = 0x1234FFFF`. You want to insert `src = 0xAB` into bits [15:8] of dst. BFI does: clear bits [15:8] of dst, then shift src left by 8 and copy bits [7:0] to dst's [15:8]. Result: dst = 0x1234ABFF. BFC is simpler: `BFC dst, 8, 8` clears bits [15:8]: dst = 0x123400FF. The width parameter specifies how many bits, the lsb specifies where they start. Both instructions ignore src bits beyond the width—upper bits of src are not considered.
 
-Key points: (1) BFC clears width bits starting at lsb. BFI copies width bits from src[width-1:0] to dst[lsb+width-1:lsb]. (2) Both are single-cycle on Cortex-M3/M4/M7/M33/M55. (3) The C equivalent: `dst = (dst & ~(((1<<width)-1)<<lsb)) | ((src & ((1<<width)-1)) << lsb)`—many instructions; BFI does it in one. (4) BFI with width=32 copies the entire source: `BFI dst, src, 0, 32` is equivalent to `MOV dst, src`. (5) BFC/BFI operate on registers only, not memory—you must load from memory, modify, then store back. (6) The lsb + width must not exceed 32. (7) ARMv6-M lacks these instructions; use shift-and-mask instead.
+Key points:
+1. BFC clears width bits starting at lsb. BFI copies width bits from src[width-1:0] to dst[lsb+width-1:lsb].
+2. Both are single-cycle on Cortex-M3/M4/M7/M33/M55.
+3. The C equivalent: `dst = (dst & ~(((1<<width)-1)<<lsb)) | ((src & ((1<<width)-1)) << lsb)`—many instructions; BFI does it in one.
+4. BFI with width=32 copies the entire source: `BFI dst, src, 0, 32` is equivalent to `MOV dst, src`.
+5. BFC/BFI operate on registers only, not memory—you must load from memory, modify, then store back.
+6. The lsb + width must not exceed 32.
+7. ARMv6-M lacks these instructions; use shift-and-mask instead.
 
-References: ARM Architecture Reference Manual ARMv7-M (BFC/BFI descriptions), "Definitive Guide to ARM Cortex-M3 and Cortex-M4" (Chapter 4), ARM Compiler Intrinsics Reference, and CMSIS-Core header file cmsis_armv7m.h for intrinsic implementations.
 
+References:
+1. ARM Architecture Reference Manual ARMv7-M (BFC/BFI descriptions), "Definitive Guide to ARM Cortex-M3 and Cortex-M4" (Chapter 4), ARM Compiler Intrinsics Reference, and CMSIS-Core header file cmsis_armv7m.h for intrinsic implementations.

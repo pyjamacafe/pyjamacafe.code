@@ -63,15 +63,16 @@ void display_progress(struct progress *progress, unsigned n)
 
 A visualization: picture dividing 7 apples among 3 people. Integer division says each person gets 2 apples (the quotient), and there is 1 apple left over (the remainder). Now picture dividing -7 apples among 3 people: C says each person gets -2 apples (truncation toward zero), and there is -1 left over (the remainder has the sign of the dividend).
 
-**Key points to never forget:**
-- Integer division truncates toward zero (C99 and later).
-- `%` requires integer operands; the result has the sign of the dividend.
-- Division by zero is undefined behavior — always check the divisor.
-- `(a/b)*b + a%b == a` is guaranteed for all `b != 0`.
-- Use `div()` and `ldiv()` from `<stdlib.h>` for getting quotient and remainder in one call.
+Key points:
+1. Integer division truncates toward zero (C99 and later).
+2. `%` requires integer operands; the result has the sign of the dividend.
+3. Division by zero is undefined behavior — always check the divisor.
+4. `(a/b)*b + a%b == a` is guaranteed for all `b != 0`.
+5. Use `div()` and `ldiv()` from `<stdlib.h>` for getting quotient and remainder in one call.
 
-**References:**
-1. ISO/IEC 9899:1999 (C99), §6.5.5 — Multiplicative operators (truncation toward zero).
+References:
+1. ISO/IEC 9899:1999 (C99), §6.5.5 — Multiplicative operators (truncation toward zero)
+
 2. Linux kernel `include/linux/hash.h` — `hash_long` and `hash_ptr` use modulo.
 3. Git source: `progress.c` — integer division for percentage.
 4. Kernighan, B. & Ritchie, D. *The C Programming Language*, 2nd ed., §2.5 — Arithmetic Operators.

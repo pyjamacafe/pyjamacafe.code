@@ -69,6 +69,12 @@ The underlying implementation is elegant: each intrinsic is a tiny static inline
 
 Visualise CMSIS intrinsics as a universal remote control. Instead of learning each TV's original remote (toolchain‑specific assembly), you press the "Volume Up" button (`__DSB()`) and the universal remote sends the correct infrared code for your specific TV brand.
 
-Key points: (1) CMSIS intrinsics are portable across all Cortex‑M variants and major toolchains (ARMCC, GCC, IAR, LLVM). (2) Intrinsics avoid inline assembly pitfalls: register clobber lists, asm volatile semantics, and compiler‑specific syntax. (3) The CMSIS‑Core header for the specific processor (e.g., `core_cm33.h`) includes all intrinsics. (4) Some intrinsics have memory barrier semantics that prevent compiler reordering. (5) CMSIS‑Core also provides `__STATIC_INLINE` and `__FORCEINLINE` for optimisation control.
+Key points:
+1. CMSIS intrinsics are portable across all Cortex‑M variants and major toolchains (ARMCC, GCC, IAR, LLVM).
+2. Intrinsics avoid inline assembly pitfalls: register clobber lists, asm volatile semantics, and compiler‑specific syntax.
+3. The CMSIS‑Core header for the specific processor (e.g., `core_cm33.h`) includes all intrinsics.
+4. Some intrinsics have memory barrier semantics that prevent compiler reordering.
+5. CMSIS‑Core also provides `__STATIC_INLINE` and `__FORCEINLINE` for optimisation control.
+
 
 The CMSIS‑Core documentation (part of ARM.CMSIS.5 pack) lists every intrinsic with its instruction mapping. ARM's *Cortex‑M0+ Devices Generic User Guide* and *Cortex‑M33 Devices Generic User Guide* document the underlying instructions.

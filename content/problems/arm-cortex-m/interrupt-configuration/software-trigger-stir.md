@@ -87,5 +87,6 @@ Visualize a telephone switchboard from the 1950s. ISPR is the old manual board w
 
 Key points: STIR is at 0xE000EF00; accepts IRQ numbers 0–479; requires a DSB after writing for ordering; cannot pend system exceptions (SVCall, PendSV, SysTick — use ICSR instead); on ARMv7-M, priority grouping must be configured before STIR is used; on ARMv8-M, STIR is banked for Secure and Non-Secure states.
 
-References: ARM Architecture Reference Manual ARMv7-M (section B3.4.13 — STIR), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 8.9), ARM Infocenter DDI0403E.
+References:
+1. ARM Architecture Reference Manual ARMv7-M (section B3.4.13 — STIR), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 8.9), ARM Infocenter DDI0403E.
 

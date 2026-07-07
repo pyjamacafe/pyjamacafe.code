@@ -83,7 +83,13 @@ Professional firmware uses the memory map for several purposes. Linker scripts (
 
 Visualize the map as a colour-coded bar: 0x00000000-0x1FFFFFFF (green = Code), 0x20000000-0x3FFFFFFF (blue = SRAM), 0x40000000-0x5FFFFFFF (red = Peripheral), 0x60000000-0x9FFFFFFF (yellow = External RAM/Device), 0xE0000000-0xFFFFFFFF (purple = System/PPB). Within the PPB, the NVIC is at 0xE000E000, SCB at 0xE000ED00, SysTick at 0xE000E010, and debug at 0xE000EDF0.
 
-Key points: (1) The top 2 bits of the 32-bit address determine the region. (2) The Code region is typically execute-in-place (XIP) flash memory. (3) Bit-banding aliases exist in a 1 MB window within SRAM (0x22000000) and Peripheral (0x42000000) on v7-M only. (4) The PPB is accessible only in privileged mode (unless the MPU opens it). (5) Writing to an alias of the PPB does not work — aliasing is only for SRAM and Peripheral.
+Key points:
+1. The top 2 bits of the 32-bit address determine the region.
+2. The Code region is typically execute-in-place (XIP) flash memory.
+3. Bit-banding aliases exist in a 1 MB window within SRAM (0x22000000) and Peripheral (0x42000000) on v7-M only.
+4. The PPB is accessible only in privileged mode (unless the MPU opens it).
+5. Writing to an alias of the PPB does not work — aliasing is only for SRAM and Peripheral.
 
-References: ARMv7-M ARM (DDI0403) section B3.1, ARMv8-M ARM (DDI0553) section B3.1, STM32L5 memory map in RM0432, Zephyr `dts/arm/` memory node definitions, CMSIS-Core `system_<device>.c` memory map comments.
 
+References:
+1. ARMv7-M ARM (DDI0403) section B3.1, ARMv8-M ARM (DDI0553) section B3.1, STM32L5 memory map in RM0432, Zephyr `dts/arm/` memory node definitions, CMSIS-Core `system_<device>.c` memory map comments.

@@ -123,5 +123,8 @@ A professional firmware engineer regularly tweaks the linker script. For example
 
 Visualize the memory map as a bookshelf. The FLASH shelf starts at 0x08000000 and holds immutable books: the vector table (first 256 bytes), code, and constant data. The SRAM shelf starts at 0x20000000 and holds mutable notebooks: .data (copied from flash at boot), .bss (blank notebooks zeroed at boot), heap (scratch paper), and stack (sticky notes growing downward from the top). The linker script is the librarian's catalog that tells each piece where to go.
 
-Key points: (1) VMA is runtime address; LMA is storage address (identical for .text/.rodata, different for .data). (2) The startup code uses linker symbols like _sdata, _edata, _sidata to copy .data. (3) Custom memory regions require both a MEMORY command and a SECTION assignment. (4) The stack top is usually the highest SRAM address — entry 0 of the vector table. Reference: GNU ld documentation ("MEMORY" and "SECTIONS" commands), CMSIS-Core linker script templates.
-
+Key points:
+1. VMA is runtime address; LMA is storage address (identical for .text/.rodata, different for .data).
+2. The startup code uses linker symbols like _sdata, _edata, _sidata to copy .data.
+3. Custom memory regions require both a MEMORY command and a SECTION assignment.
+4. The stack top is usually the highest SRAM address — entry 0 of the vector table. Reference: GNU ld documentation ("MEMORY" and "SECTIONS" commands), CMSIS-Core linker script templates.

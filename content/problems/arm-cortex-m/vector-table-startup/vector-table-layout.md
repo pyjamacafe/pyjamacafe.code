@@ -115,5 +115,9 @@ In professional firmware, the vector table is usually placed in the .isr_vector 
 
 Visualize the vector table as a street of 32-bit houses. House 0 stores the stack pointer — the address where the stack grows down from. House 1 stores Reset_Handler. Houses 2 through 15 are system exception handlers. Houses 16 and above are your peripheral interrupts. The Cortex-M hardware reads house 0 to set SP, reads house 1 to jump into your code, and for every subsequent interrupt it reads the corresponding house to find the handler address. That is the entire interrupt dispatch mechanism — no software lookup, no vectoring interrupt controller — just a direct table read.
 
-Key points: (1) Entry 0 is always the initial MSP value, never a function pointer. (2) The LSB of every handler address must be 1 (Thumb bit). (3) Unused entries should point to a default handler to catch spurious interrupts. (4) The table must be 256-byte aligned (128-byte on Cortex-M0/M0+). (5) ARMv8-M with TrustZone has separate secure and non-secure vector tables, each banked and controlled by the security attribution unit. For further reading, consult the ARMv7-M Architecture Reference Manual (section B1.5) and the CMSIS-Core documentation on system vectors.
-
+Key points:
+1. Entry 0 is always the initial MSP value, never a function pointer.
+2. The LSB of every handler address must be 1 (Thumb bit).
+3. Unused entries should point to a default handler to catch spurious interrupts.
+4. The table must be 256-byte aligned (128-byte on Cortex-M0/M0+).
+5. ARMv8-M with TrustZone has separate secure and non-secure vector tables, each banked and controlled by the security attribution unit. For further reading, consult the ARMv7-M Architecture Reference Manual (section B1.5) and the CMSIS-Core documentation on system vectors.

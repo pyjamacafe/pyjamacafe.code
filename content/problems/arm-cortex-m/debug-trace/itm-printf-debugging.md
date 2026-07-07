@@ -105,7 +105,13 @@ In real-world development, ITM is used extensively by professional firmware team
 
 Picture the data flow: software writes to ITM_STIM0 (address 0xE0000000). The ITM hardware encodes the byte into a trace packet: header byte (0 to 31 = stimulus port), data byte, optional timestamp. The TPIU (Trace Port Interface Unit) serializes these packets onto the SWO pin. The debug probe captures the bitstream, decodes packets, and sends them over USB to the host. The host software (Ozone, ST-Link Utility, putty) displays the characters. The entire path is asynchronous and buffered, so application timing is minimally affected.
 
-Key points: (1) ITM requires enabling TRCENA (DEMCR bit 24), unlocking ITM_LAR (key 0xC5ACCE55), configuring ITM_TCR, and enabling stimulus ports in ITM_TER. (2) ITM is available on Cortex-M3/M4/M7/M33/M55 but NOT on Cortex-M0/M0+/M23. (3) SWO pin must be connected and SWO frequency configured correctly for the host to decode. (4) Stimulus port 0 is conventional for simple text output; different ports can carry different data types (e.g., port 1 for RTOS events, port 2 for sensor data). (5) ITM can also be used for instrumentation on hardware (DWT comparator match events, ETM triggers), not just software output.
+Key points:
+1. ITM requires enabling TRCENA (DEMCR bit 24), unlocking ITM_LAR (key 0xC5ACCE55), configuring ITM_TCR, and enabling stimulus ports in ITM_TER.
+2. ITM is available on Cortex-M3/M4/M7/M33/M55 but NOT on Cortex-M0/M0+/M23.
+3. SWO pin must be connected and SWO frequency configured correctly for the host to decode.
+4. Stimulus port 0 is conventional for simple text output; different ports can carry different data types (e.g., port 1 for RTOS events, port 2 for sensor data).
+5. ITM can also be used for instrumentation on hardware (DWT comparator match events, ETM triggers), not just software output.
 
-References: ARM CoreSight Architecture Specification (ARM IHI 0029E), "Definitive Guide to ARM Cortex-M3 and Cortex-M4" Chapter 16, ARM AN454 (ITM and SWO), Segger J-Link ITM documentation, and STM32CubeProgrammer SWO viewer guide.
 
+References:
+1. ARM CoreSight Architecture Specification (ARM IHI 0029E), "Definitive Guide to ARM Cortex-M3 and Cortex-M4" Chapter 16, ARM AN454 (ITM and SWO), Segger J-Link ITM documentation, and STM32CubeProgrammer SWO viewer guide.

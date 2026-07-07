@@ -107,7 +107,13 @@ In professional RTOS implementations (FreeRTOS, Zephyr, ThreadX), context switch
 
 Visualize the register file as two neighborhoods: the "public square" (R0–R3, R12) where anyone can write, and the "private offices" (R4–R11) where occupants protect their desks. When a function call happens, it's like a visitor entering the office: the visitor can write on the public whiteboard freely, but must ask permission (push) before rearranging anything in a private office. SP (R13) is callee-saved—the stack must be balanced on return. LR (R14) is effectively caller-saved; the caller saves LR before a nested call because BL overwrites it.
 
-Key points: (1) The compiler manages save/restore automatically—you rarely need inline assembly for this unless writing OS code. (2) Interrupt handlers must save any register they modify, including R4–R11; the Cortex-M hardware saves R0–R3, R12, LR, PC, xPSR automatically. (3) The callee/caller distinction only applies to software-invoked function calls, not exceptions. (4) ARMv8-M adds TrustZone which introduces additional register banking for secure vs non-secure state. (5) FPU registers S0–S31 are caller-saved (lazy stacking can defer the save).
+Key points:
+1. The compiler manages save/restore automatically—you rarely need inline assembly for this unless writing OS code.
+2. Interrupt handlers must save any register they modify, including R4–R11; the Cortex-M hardware saves R0–R3, R12, LR, PC, xPSR automatically.
+3. The callee/caller distinction only applies to software-invoked function calls, not exceptions.
+4. ARMv8-M adds TrustZone which introduces additional register banking for secure vs non-secure state.
+5. FPU registers S0–S31 are caller-saved (lazy stacking can defer the save).
 
-References: AAPCS (ARM IHI 0042E), "Definitive Guide to ARM Cortex-M3 and Cortex-M4" by Joseph Yiu (Chapter 2 on registers and Chapter 8 on exceptions), FreeRTOS Cortex-M port source, and the ARM Compiler armasm User Guide section on procedure calls.
 
+References:
+1. AAPCS (ARM IHI 0042E), "Definitive Guide to ARM Cortex-M3 and Cortex-M4" by Joseph Yiu (Chapter 2 on registers and Chapter 8 on exceptions), FreeRTOS Cortex-M port source, and the ARM Compiler armasm User Guide section on procedure calls.

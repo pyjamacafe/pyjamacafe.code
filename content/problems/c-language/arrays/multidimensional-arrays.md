@@ -58,6 +58,12 @@ A professional example: in image processing, a 2D image is stored as a 1D array 
 
 Visualize a 2D array as a parking garage. `matrix[2][1]` means: take the elevator to floor 2, then walk to space 1 on that floor. The floors are stacked in memory — first all of floor 0 (spaces 0–3), then floor 1 (spaces 4–7), then floor 2 (spaces 8–11). With 4 spaces per floor, the attendant computes the absolute spot as `floor * 4 + space`.
 
-Key points: (1) `int matrix[3][4]` is an array of 3 arrays of 4 ints — `sizeof(matrix)` is `3 × 4 × sizeof(int)`. (2) Row-major means the rightmost index varies fastest in memory. (3) When passing to a function, all dimensions except the outermost must be specified. (4) `int **` is NOT the same as `int[3][4]` — they have different memory layouts. (5) Arrays of three or more dimensions follow the same principle recursively.
+Key points:
+1. `int matrix[3][4]` is an array of 3 arrays of 4 ints — `sizeof(matrix)` is `3 × 4 × sizeof(int)`.
+2. Row-major means the rightmost index varies fastest in memory.
+3. When passing to a function, all dimensions except the outermost must be specified.
+4. `int ` is NOT the same as `int[3][4]` — they have different memory layouts.
+5. Arrays of three or more dimensions follow the same principle recursively.
+
 
 Kernighan & Ritchie §5.7 explains multidimensional arrays. "The C Programming Language" §5.9 discusses pointers and multidimensional arrays. "Digital Image Processing" (Gonzalez & Woods) provides matrix-based algorithms implemented in C.

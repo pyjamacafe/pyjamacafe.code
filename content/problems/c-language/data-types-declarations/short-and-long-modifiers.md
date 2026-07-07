@@ -61,15 +61,16 @@ static void init_intel(struct cpuinfo_x86 *c)
 
 A simple visualization: think of integer types as parking spaces. `short` is a compact space — saves room but limits what fits. `int` is the standard space. `long` is oversized. `long long` is extra-long, guaranteed to fit even the largest vehicles. On a given platform, some of these spaces may be the same physical size, but the guarantee differs.
 
-**Key points to never forget:**
-- `short` ≤ `int` ≤ `long` ≤ `long long` — each is at least as large as the previous.
-- Use `sizeof(type)` to check actual sizes — never assume.
-- `%ld` for `long`, `%lld` for `long long`, `%hd` for `short`.
-- For portable exact-width types, use `<stdint.h>`: `int32_t`, `uint64_t`, etc.
-- `long` is 32-bit on Windows 64-bit — be careful when writing cross-platform code.
+Key points:
+1. `short` ≤ `int` ≤ `long` ≤ `long long` — each is at least as large as the previous.
+2. Use `sizeof(type)` to check actual sizes — never assume.
+3. `%ld` for `long`, `%lld` for `long long`, `%hd` for `short`.
+4. For portable exact-width types, use `<stdint.h>`: `int32_t`, `uint64_t`, etc.
+5. `long` is 32-bit on Windows 64-bit — be careful when writing cross-platform code.
 
-**References:**
-1. Ritchie, D. "The Development of the C Language." *History of Programming Languages*, 1993.
+References:
+1. Ritchie, D. "The Development of the C Language." *History of Programming Languages*, 1993
+
 2. Linux kernel coding style: `Documentation/process/coding-style.rst`.
 3. ISO/IEC 9899:1999 (C99), §5.2.4.2.1 — Sizes of integer types.
 4. SQLite source: `sqlite3.h` — `sqlite3_int64` definition.

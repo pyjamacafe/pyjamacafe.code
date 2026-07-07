@@ -55,6 +55,12 @@ A professional example: the Git version control system stores remote references 
 
 Visualize an array of pointers as a corkboard with pins. Each pin holds a string or object. The board itself is just a collection of pins — lightweight. The objects hang from pins on strings of varying lengths. To rearrange the display, you just move pins; you never touch the objects themselves.
 
-Key points: (1) `const char *fruits[]` declares an array where each element is a pointer. (2) String literal initializers are in read-only memory — modifying them is undefined behavior. (3) `sizeof(fruits) / sizeof(fruits[0])` gives the element count at definition scope. (4) A 2D char array wastes space with fixed column width; an array of pointers is compact for variable-length data. (5) Dynamically allocated strings require matching `free()` for each element.
+Key points:
+1. `const char *fruits[]` declares an array where each element is a pointer.
+2. String literal initializers are in read-only memory — modifying them is undefined behavior.
+3. `sizeof(fruits) / sizeof(fruits[0])` gives the element count at definition scope.
+4. A 2D char array wastes space with fixed column width; an array of pointers is compact for variable-length data.
+5. Dynamically allocated strings require matching `free()` for each element.
+
 
 Kernighan & Ritchie §5.6 covers pointer arrays with `argv`. "The C Programming Language" §5.10 shows command-line processing. For dynamic usage, "Expert C Programming" discusses arrays of pointers vs. 2D arrays.

@@ -133,5 +133,6 @@ Visualize a BusFault as a package delivery attempt to an invalid address. A prec
 
 Key points: BFAR contains the faulting address for precise BusFaults; BFARVALID flag confirms BFAR content validity; imprecise faults originate from buffered writes; STKERR/UNSTKERR occur during exception entry/exit; BusFault during vector table fetch causes lockup; precise BusFaults can potentially be recovered by fixing the address; always clear BFSR before returning from the handler.
 
-References: ARM Architecture Reference Manual ARMv7-M (section B1.5.9 — BusFault), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 10.2), ARM Infocenter DDI0403E.
+References:
+1. ARM Architecture Reference Manual ARMv7-M (section B1.5.9 — BusFault), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 10.2), ARM Infocenter DDI0403E.
 

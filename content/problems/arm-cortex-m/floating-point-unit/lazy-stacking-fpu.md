@@ -67,6 +67,12 @@ The benefit is dramatic: consider a system where a 10 kHz timer interrupt runs a
 
 Visualise a library where every patron checks in their backpack at the entrance. With eager stacking, security opens every backpack and inspects the contents regardless of whether the patron opens a book inside. With lazy stacking, security just records that a backpack was checked in. Only if a patron actually opens a book (uses the FPU) does security inspect the contents.
 
-Key points: (1) LSPEN and ASPEN must both be set for lazy stacking. (2) The first FPU instruction in a lazy‑stacked handler is slower due to the deferred save. (3) FPCAR indicates the save location — it is updated on each exception entry. (4) LSPACT is read‑only and indicates a lazy save is pending — do not clear it manually. (5) Lazy stacking works with nested exceptions: the outer context's FPU state is preserved through the inner handler.
+Key points:
+1. LSPEN and ASPEN must both be set for lazy stacking.
+2. The first FPU instruction in a lazy‑stacked handler is slower due to the deferred save.
+3. FPCAR indicates the save location — it is updated on each exception entry.
+4. LSPACT is read‑only and indicates a lazy save is pending — do not clear it manually.
+5. Lazy stacking works with nested exceptions: the outer context's FPU state is preserved through the inner handler.
+
 
 ARM's *Cortex‑M4 Technical Reference Manual*, "Floating‑Point Unit" chapter, and the *ARMv7‑M Architecture Reference Manual* describe the lazy stacking state machine. FreeRTOS `port.c` for Cortex‑M4F demonstrates production startup configuration of FPCCR.

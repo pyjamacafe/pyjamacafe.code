@@ -109,7 +109,13 @@ In professional practice, getting attributes wrong is a common source of bugs. T
 
 Visualise the TEX/C/B encoding as a 5-bit field: TEX[2:0] = 000 for Normal, 001 for Device, 010 for Strongly-Ordered; C = cacheable, B = bufferable, S = shareable. Shareable means the region may be accessed by multiple bus masters (DMA, another CPU) and requires cache coherence support.
 
-Key points: (1) Device memory must never be cached — each read must reach the peripheral. (2) Strongly-Ordered memory forces ordering across all masters — use sparingly. (3) AP bits: 000 = no access, 001 = privileged R/W only, 011 = both privileged/unpriv R/W; (4) Sub-regions (8 per MPU region) can disable access to specific 1/8th sections. (5) TEX remap (in ACTLR) can change TEX field interpretation on some cores — check your TRM.
+Key points:
+1. Device memory must never be cached — each read must reach the peripheral.
+2. Strongly-Ordered memory forces ordering across all masters — use sparingly.
+3. AP bits: 000 = no access, 001 = privileged R/W only, 011 = both privileged/unpriv R/W;.
+4. Sub-regions (8 per MPU region) can disable access to specific 1/8th sections.
+5. TEX remap (in ACTLR) can change TEX field interpretation on some cores — check your TRM.
 
-References: ARMv7-M ARM (DDI0403) section B4.3, ARMv8-M ARM (DDI0553) section B4.3, CMSIS-Core `mpu_armv7.h`, Zephyr `include/arch/arm/cortex_m/mpu/arm_mpu.h`, ARM Cortex-M7 TRM cache attributes.
 
+References:
+1. ARMv7-M ARM (DDI0403) section B4.3, ARMv8-M ARM (DDI0553) section B4.3, CMSIS-Core `mpu_armv7.h`, Zephyr `include/arch/arm/cortex_m/mpu/arm_mpu.h`, ARM Cortex-M7 TRM cache attributes.

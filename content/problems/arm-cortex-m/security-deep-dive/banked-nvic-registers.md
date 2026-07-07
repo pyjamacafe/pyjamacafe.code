@@ -67,6 +67,12 @@ A common scenario: an RTOS running on the non‑secure side uses UART IRQ (inter
 
 Visualise a shared mailroom with two sets of mailboxes. Secure world has the master key that opens both sets. Non‑secure world has a key that opens only its own mailboxes. Both worlds can send and receive their own mail (interrupts) independently.
 
-Key points: (1) The ITNS register is at the secure alias; non‑secure reads return 0xFFFFFFFF for secure interrupts. (2) The non‑secure NVIC sees only the subset of interrupts assigned as non‑secure. (3) Secure code can grant interrupt control to non‑secure by setting ITNS[n] = 1. (4) The secure NVIC includes all interrupts, regardless of ITNS setting. (5) Secure code can also configure the priority of non‑secure interrupts via the secure IPR alias.
+Key points:
+1. The ITNS register is at the secure alias; non‑secure reads return 0xFFFFFFFF for secure interrupts.
+2. The non‑secure NVIC sees only the subset of interrupts assigned as non‑secure.
+3. Secure code can grant interrupt control to non‑secure by setting ITNS[n] = 1.
+4. The secure NVIC includes all interrupts, regardless of ITNS setting.
+5. Secure code can also configure the priority of non‑secure interrupts via the secure IPR alias.
+
 
 The ARMv8‑M Architecture Reference Manual, "NVIC Register Descriptions" chapter, details the address map for banked registers. CMSIS‑Core headers define `NVIC_S_BASE` and `NVIC_NS_BASE` for accessing the aliases from C code.

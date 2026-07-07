@@ -63,15 +63,17 @@ while( p && p->zToken && p->zToken[0] ){
 
 Visualize `&&` as a series of circuit-breaker switches wired in series: all must be closed for current to flow. `||` is a parallel circuit: if any switch is closed, current flows. `!` is a NOT gate that inverts the signal. When you write `if (a > 0 && b / a > 2)`, the division by `a` is safe because the first condition guarantees `a > 0` before the second condition is evaluated.
 
-**Key points to never forget:**
-- Relational operators return `int` (1 or 0), not `bool` (until C23, where `bool` becomes a built-in type).
-- `&&` and `||` short-circuit — the right operand is evaluated only if needed.
-- In C, any non-zero value is true; zero is false.
-- `==` vs `=` is the most common C bug — enable `-Wparentheses` to catch it.
-- Comparison chaining like `a < b < c` does NOT work as in math — `a < b` evaluates to 0 or 1, then `(0 or 1) < c` is compared. Use `a < b && b < c` instead.
+Key points:
+1. Relational operators return `int` (1 or 0), not `bool` (until C23, where `bool` becomes a built-in type).
+2. `&&` and `||` short-circuit — the right operand is evaluated only if needed.
+3. In C, any non-zero value is true; zero is false.
+4. `==` vs `=` is the most common C bug — enable `-Wparentheses` to catch it.
+5. Comparison chaining like `a < b < c` does NOT work as in math — `a < b` evaluates to 0 or 1, then `(0 or 1) < c` is compared. Use `a < b && b < c` instead.
 
-**References:**
-1. ISO/IEC 9899:2011 (C11), §6.5.13 — Logical AND operator; §6.5.14 — Logical OR operator.
+References:
+1. ISO/IEC 9899:2011 (C11), §6.5.13 — Logical AND operator.
+2. §6.5.14 — Logical OR operator.
+
 2. SQLite source: `src/tokenize.c` — short-circuit in token list traversal.
 3. Redis source: `src/server.c` — `processCommand` uses short-circuit for sentinel mode checks.
 4. Linux kernel `include/linux/device.h` — device driver ops with null-check chaining.

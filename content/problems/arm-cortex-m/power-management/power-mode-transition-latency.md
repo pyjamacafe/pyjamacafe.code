@@ -115,7 +115,13 @@ Professionally, wakeup latency is a critical specification in real-time systems.
 
 Picture the wakeup timeline as a waterfall of stages. At time T0, the interrupt arrives. For sleep: T0+2 cycles is clock stable, T0+12 cycles is first instruction fetch (NVIC entry latency). For deep sleep: T0+0.5 µs for voltage regulator ramp, T0+5 µs for oscillator startup, T0+12 cycles for NVIC. For standby: T0+100 µs for boot ROM, T0+200 µs for PLL lock, T0+300 µs for flash initialization, T0+500 µs for C runtime startup, then the ISR. The DWT cycle counter can measure these intervals precisely by reading CYCCNT before WFI and after wakeup—though in deep sleep the counter itself may stop, requiring a different measurement approach (e.g., an external timer).
 
-Key points: (1) NVIC entry latency adds 12–15 cycles to wakeup on Cortex-M0/M3/M4 respectively. (2) Flash memory wakeup time can dominate deep sleep latency if the flash was powered down; keeping flash in low-power retention mode reduces this. (3) PLL relock time is typically 50–200 µs; if the CPU must respond faster, keep the PLL running. (4) The DWT cycle counter stops in deep sleep on most MCUs, so cycle-counting across deep sleep is not possible without an external counter or RTC. (5) Wakeup source priority matters—the highest priority interrupt wakes the CPU and its handler executes before lower priority handlers.
+Key points:
+1. NVIC entry latency adds 12–15 cycles to wakeup on Cortex-M0/M3/M4 respectively.
+2. Flash memory wakeup time can dominate deep sleep latency if the flash was powered down; keeping flash in low-power retention mode reduces this.
+3. PLL relock time is typically 50–200 µs; if the CPU must respond faster, keep the PLL running.
+4. The DWT cycle counter stops in deep sleep on most MCUs, so cycle-counting across deep sleep is not possible without an external counter or RTC.
+5. Wakeup source priority matters—the highest priority interrupt wakes the CPU and its handler executes before lower priority handlers.
 
-References: "Definitive Guide to ARM Cortex-M3 and Cortex-M4" Chapter 13 (low-power), STM32 RM (Reference Manual) sections on power control, ARM AN321 (Power Management for Cortex-M), and application notes from NXP and Microchip on wakeup time measurement.
 
+References:
+1. "Definitive Guide to ARM Cortex-M3 and Cortex-M4" Chapter 13 (low-power), STM32 RM (Reference Manual) sections on power control, ARM AN321 (Power Management for Cortex-M), and application notes from NXP and Microchip on wakeup time measurement.

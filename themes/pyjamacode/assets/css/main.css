@@ -192,6 +192,16 @@ body {
 .article-content h2 { font-size: 1.05rem; margin: 1rem 0 0.5rem 0; color: var(--bs-body-color); }
 .article-content h3 { font-size: 0.95rem; margin: 0.75rem 0 0.4rem 0; color: var(--bs-body-color); }
 .article-content p { line-height: 1.6; margin-bottom: 0.75rem; font-size: 0.875rem; color: var(--bs-secondary-color); }
+.article-content li,
+.article-content ul,
+.article-content ol {
+  font-size: 0.875rem;
+  color: var(--bs-secondary-color);
+  line-height: 1.6;
+}
+.article-content li {
+  margin-bottom: 0.25rem;
+}
 .article-content code {
   background-color: var(--code-bg);
   color: var(--editor-fg);
@@ -776,6 +786,114 @@ body {
   color: #c9d1d9;
 }
 
+/* Chroma syntax highlighting — matches CodeMirror GitHub themes */
+[data-bs-theme="light"] .chroma { background: #ffffff; color: #1f2328; }
+[data-bs-theme="light"] .chroma .c { color: #6e7781; font-style: italic; }     /* Comment */
+[data-bs-theme="light"] .chroma .k { color: #cf222e; }                        /* Keyword */
+[data-bs-theme="light"] .chroma .s { color: #0a3069; }                        /* String */
+[data-bs-theme="light"] .chroma .m { color: #0550ae; }                        /* Number */
+[data-bs-theme="light"] .chroma .o { color: #1f2328; }                        /* Operator */
+[data-bs-theme="light"] .chroma .n { color: #953800; }                        /* Name */
+[data-bs-theme="light"] .chroma .p { color: #1f2328; }                        /* Punctuation */
+[data-bs-theme="light"] .chroma .err { color: #cf222e; }                      /* Error */
+[data-bs-theme="light"] .chroma .kc { color: #cf222e; }                       /* KeywordConstant */
+[data-bs-theme="light"] .chroma .kd { color: #cf222e; }                       /* KeywordDeclaration */
+[data-bs-theme="light"] .chroma .kp { color: #cf222e; }                       /* KeywordPseudo */
+[data-bs-theme="light"] .chroma .kr { color: #cf222e; }                       /* KeywordReserved */
+[data-bs-theme="light"] .chroma .kt { color: #953800; }                       /* KeywordType */
+[data-bs-theme="light"] .chroma .nb { color: #8250df; }                       /* NameBuiltin */
+[data-bs-theme="light"] .chroma .nc { color: #953800; }                       /* NameClass */
+[data-bs-theme="light"] .chroma .no { color: #953800; }                       /* NameConstant */
+[data-bs-theme="light"] .chroma .nd { color: #8250df; }                       /* NameDecorator */
+[data-bs-theme="light"] .chroma .nf { color: #8250df; }                       /* NameFunction */
+[data-bs-theme="light"] .chroma .nx { color: #953800; }                       /* NameOther */
+[data-bs-theme="light"] .chroma .nt { color: #116329; }                       /* NameTag */
+[data-bs-theme="light"] .chroma .nv { color: #953800; }                       /* NameVariable */
+[data-bs-theme="light"] .chroma .na { color: #953800; }                       /* NameAttribute */
+[data-bs-theme="light"] .chroma .bp { color: #8250df; }                       /* NameBuiltinPseudo */
+[data-bs-theme="light"] .chroma .vc { color: #953800; }                       /* NameVariableClass */
+[data-bs-theme="light"] .chroma .vg { color: #953800; }                       /* NameVariableGlobal */
+[data-bs-theme="light"] .chroma .vi { color: #953800; }                       /* NameVariableInstance */
+[data-bs-theme="light"] .chroma .sb { color: #0a3069; }                       /* StringBacktick */
+[data-bs-theme="light"] .chroma .sc { color: #0a3069; }                       /* StringChar */
+[data-bs-theme="light"] .chroma .dl { color: #0a3069; }                       /* StringDelimiter */
+[data-bs-theme="light"] .chroma .s2 { color: #0a3069; }                       /* StringDouble */
+[data-bs-theme="light"] .chroma .se { color: #0a3069; }                       /* StringEscape */
+[data-bs-theme="light"] .chroma .sh { color: #0a3069; }                       /* StringHeredoc */
+[data-bs-theme="light"] .chroma .si { color: #0a3069; }                       /* StringInterpol */
+[data-bs-theme="light"] .chroma .sx { color: #0a3069; }                       /* StringOther */
+[data-bs-theme="light"] .chroma .sr { color: #0a3069; }                       /* StringRegex */
+[data-bs-theme="light"] .chroma .s1 { color: #0a3069; }                       /* StringSingle */
+[data-bs-theme="light"] .chroma .ss { color: #8250df; }                       /* StringSymbol */
+[data-bs-theme="light"] .chroma .il { color: #0550ae; }                       /* LiteralNumberIntegerLong */
+[data-bs-theme="light"] .chroma .mb { color: #0550ae; }                       /* LiteralNumberBin */
+[data-bs-theme="light"] .chroma .mf { color: #0550ae; }                       /* LiteralNumberFloat */
+[data-bs-theme="light"] .chroma .mh { color: #0550ae; }                       /* LiteralNumberHex */
+[data-bs-theme="light"] .chroma .mi { color: #0550ae; }                       /* LiteralNumberInteger */
+[data-bs-theme="light"] .chroma .mo { color: #0550ae; }                       /* LiteralNumberOct */
+[data-bs-theme="light"] .chroma .gd { color: #cf222e; background: #ffeef0; }  /* GenericDeleted */
+[data-bs-theme="light"] .chroma .ge { font-style: italic; }                   /* GenericEmph */
+[data-bs-theme="light"] .chroma .gh { color: #0550ae; font-weight: 600; }     /* GenericHeading */
+[data-bs-theme="light"] .chroma .gi { color: #116329; background: #dafbe1; }  /* GenericInserted */
+[data-bs-theme="light"] .chroma .gs { font-weight: 700; }                     /* GenericStrong */
+[data-bs-theme="light"] .chroma .gu { color: #6e7781; }                       /* GenericSubheading */
+[data-bs-theme="light"] .chroma .go { color: #6e7781; }                       /* GenericOutput */
+[data-bs-theme="light"] .chroma .gp { color: #6e7781; }                       /* GenericPrompt */
+
+/* Dark theme */
+[data-bs-theme="dark"] .chroma { background: #0d1117; color: #c9d1d9; }
+[data-bs-theme="dark"] .chroma .c { color: #8b949e; font-style: italic; }
+[data-bs-theme="dark"] .chroma .k { color: #ff7b72; }
+[data-bs-theme="dark"] .chroma .s { color: #a5d6ff; }
+[data-bs-theme="dark"] .chroma .m { color: #79c0ff; }
+[data-bs-theme="dark"] .chroma .o { color: #c9d1d9; }
+[data-bs-theme="dark"] .chroma .n { color: #ffa657; }
+[data-bs-theme="dark"] .chroma .p { color: #c9d1d9; }
+[data-bs-theme="dark"] .chroma .err { color: #ff7b72; }
+[data-bs-theme="dark"] .chroma .kc { color: #ff7b72; }
+[data-bs-theme="dark"] .chroma .kd { color: #ff7b72; }
+[data-bs-theme="dark"] .chroma .kp { color: #ff7b72; }
+[data-bs-theme="dark"] .chroma .kr { color: #ff7b72; }
+[data-bs-theme="dark"] .chroma .kt { color: #ffa657; }
+[data-bs-theme="dark"] .chroma .nb { color: #d2a8ff; }
+[data-bs-theme="dark"] .chroma .nc { color: #ffa657; }
+[data-bs-theme="dark"] .chroma .no { color: #ffa657; }
+[data-bs-theme="dark"] .chroma .nd { color: #d2a8ff; }
+[data-bs-theme="dark"] .chroma .nf { color: #d2a8ff; }
+[data-bs-theme="dark"] .chroma .nx { color: #ffa657; }
+[data-bs-theme="dark"] .chroma .nt { color: #7ee787; }
+[data-bs-theme="dark"] .chroma .nv { color: #ffa657; }
+[data-bs-theme="dark"] .chroma .na { color: #ffa657; }
+[data-bs-theme="dark"] .chroma .bp { color: #d2a8ff; }
+[data-bs-theme="dark"] .chroma .vc { color: #ffa657; }
+[data-bs-theme="dark"] .chroma .vg { color: #ffa657; }
+[data-bs-theme="dark"] .chroma .vi { color: #ffa657; }
+[data-bs-theme="dark"] .chroma .sb { color: #a5d6ff; }
+[data-bs-theme="dark"] .chroma .sc { color: #a5d6ff; }
+[data-bs-theme="dark"] .chroma .dl { color: #a5d6ff; }
+[data-bs-theme="dark"] .chroma .s2 { color: #a5d6ff; }
+[data-bs-theme="dark"] .chroma .se { color: #a5d6ff; }
+[data-bs-theme="dark"] .chroma .sh { color: #a5d6ff; }
+[data-bs-theme="dark"] .chroma .si { color: #a5d6ff; }
+[data-bs-theme="dark"] .chroma .sx { color: #a5d6ff; }
+[data-bs-theme="dark"] .chroma .sr { color: #a5d6ff; }
+[data-bs-theme="dark"] .chroma .s1 { color: #a5d6ff; }
+[data-bs-theme="dark"] .chroma .ss { color: #d2a8ff; }
+[data-bs-theme="dark"] .chroma .il { color: #79c0ff; }
+[data-bs-theme="dark"] .chroma .mb { color: #79c0ff; }
+[data-bs-theme="dark"] .chroma .mf { color: #79c0ff; }
+[data-bs-theme="dark"] .chroma .mh { color: #79c0ff; }
+[data-bs-theme="dark"] .chroma .mi { color: #79c0ff; }
+[data-bs-theme="dark"] .chroma .mo { color: #79c0ff; }
+[data-bs-theme="dark"] .chroma .gd { color: #ff7b72; background: #301b1e; }
+[data-bs-theme="dark"] .chroma .ge { font-style: italic; }
+[data-bs-theme="dark"] .chroma .gh { color: #79c0ff; font-weight: 600; }
+[data-bs-theme="dark"] .chroma .gi { color: #7ee787; background: #122c1b; }
+[data-bs-theme="dark"] .chroma .gs { font-weight: 700; }
+[data-bs-theme="dark"] .chroma .gu { color: #8b949e; }
+[data-bs-theme="dark"] .chroma .go { color: #8b949e; }
+[data-bs-theme="dark"] .chroma .gp { color: #8b949e; }
+
 .code-editor {
   display: none;
   background-color: var(--editor-bg);
@@ -873,6 +991,18 @@ body {
 .question-content p {
   line-height: 1.6;
   margin-bottom: 0.75rem;
+}
+
+.question-content li,
+.question-content ul,
+.question-content ol {
+  font-size: inherit;
+  color: var(--bs-secondary-color);
+  line-height: 1.6;
+}
+
+.question-content li {
+  margin-bottom: 0.25rem;
 }
 
 .question-content code {

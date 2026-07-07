@@ -77,7 +77,13 @@ Open-source RTOS implementations demonstrate this perfectly. FreeRTOS's `xPortPe
 
 Visualise the register file as a array of 16 32-bit locations indexed R0-R15. R13=SP, R14=LR, R15=PC. On exception entry, the hardware automatically pushes R0-R3, R12, LR, PC, xPSR onto the current stack in that exact order (8 words for Mainline, same for Baseline). The handler then has R4-R11 as workspace if needed. Exception return pops these 8 words.
 
-Key points: (1) R0-R7 are accessible in all Thumb instructions; R8-R12 need Thumb-2. (2) AAPCS: R0-R3 = arguments/scratch, R4-R11 = callee-saved, R12 = IP. (3) Hardware saves R0-R3, R12, LR, PC, xPSR on exception entry — automatically. (4) Context switches save/restore R4-R11 (and optionally FPU registers). (5) R12 is used by the linker for long-branch veneers — do not rely on its value across calls.
+Key points:
+1. R0-R7 are accessible in all Thumb instructions; R8-R12 need Thumb-2.
+2. AAPCS: R0-R3 = arguments/scratch, R4-R11 = callee-saved, R12 = IP.
+3. Hardware saves R0-R3, R12, LR, PC, xPSR on exception entry — automatically.
+4. Context switches save/restore R4-R11 (and optionally FPU registers).
+5. R12 is used by the linker for long-branch veneers — do not rely on its value across calls.
 
-References: ARM AAPCS (IHI0042), ARMv7-M ARM (DDI0403) A2.3, FreeRTOS Cortex-M port (`port.c`), Zephyr `arch/arm/core/cortex_m/swap.c`, CMSIS-Core `core_cm.h` register access macros.
 
+References:
+1. ARM AAPCS (IHI0042), ARMv7-M ARM (DDI0403) A2.3, FreeRTOS Cortex-M port (`port.c`), Zephyr `arch/arm/core/cortex_m/swap.c`, CMSIS-Core `core_cm.h` register access macros.

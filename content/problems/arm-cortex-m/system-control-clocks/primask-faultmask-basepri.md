@@ -124,5 +124,6 @@ Visualize interrupts as people trying to enter a building. PRIMASK is a solid st
 
 Key points: CPSID I sets PRIMASK, CPSIE I clears it; MRS/MSR access BASEPRI; BASEPRI only affects configurable exceptions; FAULTMASK survives warm reset; all masks are automatically restored on exception return; BASEPRI_MAX provides atomic raise-only semantics.
 
-References: ARM Architecture Reference Manual ARMv7-M (section B1.3.4–B1.3.6), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 8.3), ARM Infocenter DDI0403E.
+References:
+1. ARM Architecture Reference Manual ARMv7-M (section B1.3.4–B1.3.6), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 8.3), ARM Infocenter DDI0403E.
 

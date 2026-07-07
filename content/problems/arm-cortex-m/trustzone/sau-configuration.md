@@ -95,7 +95,13 @@ In professional practice, SAU configuration is the first step in TrustZone bring
 
 Visualize the SAU region descriptor: SAU_RBAR[31:8] = base address (aligned to region size in v8.0-M); SAU_RLAR[31:8] = limit address, [1] = NSC attribute (0 = NS, 1 = NSC), [0] = enable. The region covers `[base, limit]` inclusive. Write SAU_CTRL = 1 to enable. The SAU can be disabled and reconfigured at any time, though this resets all locked interrupts.
 
-Key points: (1) The SAU must be disabled (CTRL = 0) before modifying regions. (2) Region size must be a power of 2 in v8.0-M; any size with 32-byte granularity in v8.1-M. (3) Overlapping regions: Secure > NSC > NS. (4) The IDAU (Implementation-Defined Attribution Unit) may override SAU — check the chip TRM. (5) SAU_TYPE[7:0] = number of regions, [8] = IDAU present flag.
+Key points:
+1. The SAU must be disabled (CTRL = 0) before modifying regions.
+2. Region size must be a power of 2 in v8.0-M; any size with 32-byte granularity in v8.1-M.
+3. Overlapping regions: Secure > NSC > NS.
+4. The IDAU (Implementation-Defined Attribution Unit) may override SAU — check the chip TRM.
+5. SAU_TYPE[7:0] = number of regions, [8] = IDAU present flag.
 
-References: ARMv8-M ARM (DDI0553) section B4.4, Zephyr `arm_trustzone.c`, FreeRTOS `SecureInit.c`, CMSIS-Core `core_cm33.h` SAU access macros, PSA Certified Level 2 isolation requirements, ARM AN326 "TrustZone for Cortex-M".
 
+References:
+1. ARMv8-M ARM (DDI0553) section B4.4, Zephyr `arm_trustzone.c`, FreeRTOS `SecureInit.c`, CMSIS-Core `core_cm33.h` SAU access macros, PSA Certified Level 2 isolation requirements, ARM AN326 "TrustZone for Cortex-M".

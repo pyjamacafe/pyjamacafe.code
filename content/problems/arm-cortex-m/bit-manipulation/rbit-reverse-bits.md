@@ -108,7 +108,14 @@ In professional firmware, RBIT usage is everywhere. Ethernet controllers in MCUs
 
 Visualize the transformation: RBIT(0x12345678) reverses every bit. 0x12345678 in binary is 0001_0010_0011_0100_0101_0110_0111_1000. After RBIT: 0001_1110_0110_1010_0010_1100_0100_1000 = 0x1E6A2C48. You can verify: the MSB (bit 31) of the original is 0; the LSB (bit 0) of the result is 0. The LSB of the original is 0; the MSB of the result is 0. For byte reversal (reverse the order of 8 bits within a byte), combine RBIT with a shift: `reverse_byte(b) = RBIT(b) >> 24`. The 32-bit RBIT result has the byte's bits reversed and located in bits [31:24]; shifting right by 24 aligns them to [7:0].
 
-Key points: (1) RBIT reverses all 32 bits—bit 31 ↔ bit 0, bit 30 ↔ bit 1, etc. (2) Single-cycle on Cortex-M3/M4/M7/M33/M55. (3) For 8-bit byte reversal: RBIT >> 24. For 16-bit halfword reversal: RBIT >> 16. (4) CRC reflection (data or polynomial) uses RBIT then a shift: `REF reflected_data = RBIT(data) >> (32 - bits)` to reflect an N-bit value. (5) Available via intrinsic `__rbit()` in ARM Compiler, `__RBIT` in IAR, and inline assembly or built-in in GCC (`__builtin_arm_rbit`). (6) ARMv6-M (Cortex-M0/M0+) does not support RBIT—fall back to a loop for those targets.
+Key points:
+1. RBIT reverses all 32 bits—bit 31 ↔ bit 0, bit 30 ↔ bit 1, etc.
+2. Single-cycle on Cortex-M3/M4/M7/M33/M55.
+3. For 8-bit byte reversal: RBIT >> 24. For 16-bit halfword reversal: RBIT >> 16.
+4. CRC reflection (data or polynomial) uses RBIT then a shift: `REF reflected_data = RBIT(data) >> (32 - bits)` to reflect an N-bit value.
+5. Available via intrinsic `__rbit()` in ARM Compiler, `__RBIT` in IAR, and inline assembly or built-in in GCC (`__builtin_arm_rbit`).
+6. ARMv6-M (Cortex-M0/M0+) does not support RBIT—fall back to a loop for those targets.
 
-References: ARM Architecture Reference Manual ARMv7-M (RBIT instruction), "Definitive Guide to ARM Cortex-M3 and Cortex-M4" (Chapter 4 on DSP instructions), CMSIS-DSP library source (cfft_f32.c for bit-reversal), and Ross Williams' "A Painless Guide to CRC Error Detection Algorithms" (documenting reflected vs non-reflected CRC conventions).
 
+References:
+1. ARM Architecture Reference Manual ARMv7-M (RBIT instruction), "Definitive Guide to ARM Cortex-M3 and Cortex-M4" (Chapter 4 on DSP instructions), CMSIS-DSP library source (cfft_f32.c for bit-reversal), and Ross Williams' "A Painless Guide to CRC Error Detection Algorithms" (documenting reflected vs non-reflected CRC conventions).

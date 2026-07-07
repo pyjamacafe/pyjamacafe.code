@@ -108,5 +108,6 @@ Visualize SysTick as a grandfather clock's pendulum. Each swing triggers the tic
 
 Key points: 24-bit counter, maximum reload 0xFFFFFF; reload value = (clock_freq / desired_freq) - 1; CLKSOURCE = 1 uses processor clock; default SysTick priority is implementation-defined (set via SHPR3); COUNTFLAG is cleared by reading CSR or writing CVR; writing to CVR clears the counter and COUNTFLAG.
 
-References: ARM Architecture Reference Manual ARMv7-M (section B3.3 — SysTick), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 13 — SysTick Timer), ARM Infocenter DDI0403E.
+References:
+1. ARM Architecture Reference Manual ARMv7-M (section B3.3 — SysTick), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 13 — SysTick Timer), ARM Infocenter DDI0403E.
 

@@ -55,6 +55,14 @@ In professional firmware, circular buffers are everywhere. The STM32 USART drive
 
 Picture a 16-byte buffer. The head index starts at 0, tail at 0. Bytes arrive: 'H' at head=0, 'e' at head=1, 'l' at head=2, 'l' at head=3, 'o' at head=4. The consumer reads: tail advances 0,1,2,3,4, consuming each byte. Now head=5, tail=5 — buffer empty. More data arrives at head=5,6,7... The head wraps: after filling positions 0–15, head wraps to 0. If head ever reaches tail with data still arriving, the buffer is full and the next byte is discarded (or overwrites the oldest data, depending on policy).
 
-Key points: (1) Empty condition: `head == tail`. Full condition: `(head + 1) % size == tail` (one slot unused) or maintain a separate `count` variable. (2) The buffer and indices must be `volatile` if accessed from both main and interrupt contexts. (3) Critical sections (interrupt disable/enable) are needed around multi-word operations (like updating head and checking full). (4) For single-producer-single-consumer (one ISR, one main loop), the implementation can be lock-free if reads and writes are atomic. (5) Buffer size should be a power of two for efficient modulo with `& (size - 1)` instead of `%` division. (6) The buffer's worst-case size must accommodate the maximum interrupt burst without losing data.
+Key points:
+1. Empty condition: `head == tail`. Full condition: `(head + 1) % size == tail` (one slot unused) or maintain a separate `count` variable.
+2. The buffer and indices must be `volatile` if accessed from both main and interrupt contexts.
+3. Critical sections (interrupt disable/enable) are needed around multi-word operations (like updating head and checking full).
+4. For single-producer-single-consumer (one ISR, one main loop), the implementation can be lock-free if reads and writes are atomic.
+5. Buffer size should be a power of two for efficient modulo with `& (size - 1)` instead of `%` division.
+6. The buffer's worst-case size must accommodate the maximum interrupt burst without losing data.
 
-References: "The Art of Computer Programming" by Donald Knuth (Vol 1, Section 2.2.2 on sequential allocation), "Embedded Systems: Introduction to ARM Cortex-M Microcontrollers" by Jonathan Valvano (Chapter 5 on I/O synchronization), Linux kernel `kfifo` implementation, and FreeRTOS queue implementation source code.
+
+References:
+1. "The Art of Computer Programming" by Donald Knuth (Vol 1, Section 2.2.2 on sequential allocation), "Embedded Systems: Introduction to ARM Cortex-M Microcontrollers" by Jonathan Valvano (Chapter 5 on I/O synchronization), Linux kernel `kfifo` implementation, and FreeRTOS queue implementation source code.

@@ -60,6 +60,12 @@ I once benchmarked factorial implementations: a recursive version hit stack over
 
 Visualize recursion as a set of Russian nesting dolls (matryoshka). To get the innermost doll (base case), you must open each outer doll (recursive call). The process of opening dolls goes deeper and deeper. Once you reach the core, you close each doll as you return, combining their contents. Each open doll is a stack frame — the stack depth equals the number of nested dolls.
 
-Key points: (1) Every recursive function must have at least one base case that does not recurse — otherwise, infinite recursion causes a stack overflow. (2) The call stack is finite: typical default limits are 1–8 MB (≈ 8,000–64,000 calls depending on frame size). (3) Tail recursion (where the recursive call is the last operation) can be optimized into iteration by some compilers, eliminating stack growth. (4) Mutual recursion (A calls B calls A) works the same as direct recursion. (5) Recursion is not always slower — tree traversal using recursion can be faster than managing an explicit stack.
+Key points:
+1. Every recursive function must have at least one base case that does not recurse — otherwise, infinite recursion causes a stack overflow.
+2. The call stack is finite: typical default limits are 1–8 MB (≈ 8,000–64,000 calls depending on frame size).
+3. Tail recursion (where the recursive call is the last operation) can be optimized into iteration by some compilers, eliminating stack growth.
+4. Mutual recursion (A calls B calls A) works the same as direct recursion.
+5. Recursion is not always slower — tree traversal using recursion can be faster than managing an explicit stack.
+
 
 Kernighan & Ritchie §4.10 covers recursion. "Structure and Interpretation of Computer Programs" (SICP) by Abelson & Sussman is the classic text on recursive thinking. "The Art of Computer Programming" by Knuth covers recursion analysis with mathematical rigor. CERT rule MSC19-C discusses recursion depth limits in secure coding.

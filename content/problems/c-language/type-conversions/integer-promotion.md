@@ -58,6 +58,12 @@ A real-world example: in networking code, checksum algorithms like Internet chec
 
 Imagine integer promotion as a loading dock. You have a small crate (8-bit `char`). To move it on the conveyor belt (the CPU's ALU), it must be placed onto a standard pallet (`int`). If the crate is labeled signed, the loading dock fills empty space with copies of the "sign bit" — a dark stain that spreads. If unsigned, the dock fills with clean zeros. The pallet is always full-width; the crate just rides on top.
 
-Key points: (1) `char` and `short` are promoted to `int` in expressions — always. (2) If `int` cannot represent all values of the source type (rare), promotion goes to `unsigned int`. (3) Sign extension from signed types can produce negative intermediate values that break bitwise logic. (4) The result of `sizeof('a')` is `sizeof(int)`, not `sizeof(char)`, because character constants are `int` in C. (5) To prevent unwanted promotion, mask after promotion: `(c & 0xFF) << 1`.
+Key points:
+1. `char` and `short` are promoted to `int` in expressions — always.
+2. If `int` cannot represent all values of the source type (rare), promotion goes to `unsigned int`.
+3. Sign extension from signed types can produce negative intermediate values that break bitwise logic.
+4. The result of `sizeof('a')` is `sizeof(int)`, not `sizeof(char)`, because character constants are `int` in C.
+5. To prevent unwanted promotion, mask after promotion: `(c & 0xFF) << 1`.
+
 
 C11 §6.3.1.1 defines integer promotion. "The C Standard" by Derek M. Jones is an exhaustive reference. The CERT rule INT02-C discusses integer promotions in secure coding contexts.

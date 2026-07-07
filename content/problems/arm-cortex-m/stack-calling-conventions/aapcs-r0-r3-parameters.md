@@ -91,5 +91,6 @@ Picture the register file during a function call: before the branch, the caller 
 
 Key points to remember: (1) 32-bit arguments go in a single register; 64-bit arguments (double, long long) occupy two registers (e.g., R2:R3). (2) For variadic functions (printf-style), the standard says all arguments are passed on the stack, even the first four, to simplify the callee's argument traversal. (3) Structures up to 4 words may be passed in registers; larger structures are passed by pointer. (4) The callee does not save R0–R3, so the caller must preserve its own values before the call. (5) R12 (IP) is an intra-procedure-call scratch register, used by the linker for veneers and long branches.
 
-References: AAPCS Specification (ARM IHI 0042E), "Definitive Guide to ARM Cortex-M3 and Cortex-M4" (Chapter 2), ARM Compiler Reference Guide, and the ELF for ARM Architecture Supplement (defining how these conventions map to object files and debug info).
+References:
+1. AAPCS Specification (ARM IHI 0042E), "Definitive Guide to ARM Cortex-M3 and Cortex-M4" (Chapter 2), ARM Compiler Reference Guide, and the ELF for ARM Architecture Supplement (defining how these conventions map to object files and debug info).
 

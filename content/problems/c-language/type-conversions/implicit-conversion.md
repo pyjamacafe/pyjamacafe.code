@@ -56,6 +56,12 @@ Professionally, implicit conversions are everywhere. A financial application mig
 
 Picture the conversion visually: imagine two measuring cups, one marked in whole ounces (`int`) and one in milliliters (`float`). To combine them, you pour the ounces into the milliliter cup — the whole number becomes a real number with a `.0` tail. That is implicit conversion in action. The reverse — pouring milliliters into the ounce cup — truncates any fractional milliliter, which is what happens when you assign a `float` to an `int`.
 
-Key points: (1) Implicit conversion follows the usual arithmetic conversion rules, always toward the wider type. (2) Integer promotion promotes `char`, `short`, and `_Bool` to `int` before any operation. (3) Assignment to a narrower type truncates without warning. (4) Signed-to-unsigned conversion in comparisons can cause logical surprises (see the signed-unsigned topic). (5) These conversions happen silently — the compiler does not ask permission.
+Key points:
+1. Implicit conversion follows the usual arithmetic conversion rules, always toward the wider type.
+2. Integer promotion promotes `char`, `short`, and `_Bool` to `int` before any operation.
+3. Assignment to a narrower type truncates without warning.
+4. Signed-to-unsigned conversion in comparisons can cause logical surprises (see the signed-unsigned topic).
+5. These conversions happen silently — the compiler does not ask permission.
+
 
 For deeper study, read the C11 standard sections 6.3.1 (arithmetic operands) and 6.3.1.8 (usual arithmetic conversions). "Expert C Programming: Deep C Secrets" by Peter van der Linden has an excellent chapter on type conversions. The CERT C Coding Standard rule INT02-C also covers understanding implicit conversions to prevent data loss.

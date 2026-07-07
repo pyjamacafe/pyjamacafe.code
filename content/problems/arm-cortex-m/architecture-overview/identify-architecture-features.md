@@ -52,6 +52,13 @@ In professional practice, Zephyr's `arch/arm/core/cortex_m/arm_cortexm_cpu_id.c`
 
 Visualize the register as a bitfield diagram: the top byte is ARM's vendor code (0x41), next nibble is the chip stepping (revision), then architecture version, then a 12-bit part number, then minor revision. This is the same format used across all Cortex-A/R/M processors since ARMv7 — it is the universal CPU identifier in the ARM ecosystem.
 
-Key points: (1) CPUID is read-only and architecturally defined; you cannot fake it. (2) Architecture field 0x4 does not tell you Baseline vs Mainline — check the part number for that. (3) System Control Block ID registers at `0xE000EDE0-0xE000EDFC` provide optional feature presence (FPU, MPU, TrustZone, debug). (4) CMSIS-Core macros are the portable way; raw register reads are for bring-up. (5) Always assume the hardware may have unexpected features — probe, don't presume.
+Key points:
+1. CPUID is read-only and architecturally defined; you cannot fake it.
+2. Architecture field 0x4 does not tell you Baseline vs Mainline — check the part number for that.
+3. System Control Block ID registers at `0xE000EDE0-0xE000EDFC` provide optional feature presence (FPU, MPU, TrustZone, debug).
+4. CMSIS-Core macros are the portable way; raw register reads are for bring-up.
+5. Always assume the hardware may have unexpected features — probe, don't presume.
 
-References: ARMv8-M Architecture Reference Manual (DDI0553), CMSIS-Core 5.9.0 `core_cm33.h`, Zephyr `arch/arm/core/arm_cortexm_cpu_id.c`, ARM Cortex-M3/M4/M7 CPUID example code in CMSIS-Pack.
+
+References:
+1. ARMv8-M Architecture Reference Manual (DDI0553), CMSIS-Core 5.9.0 `core_cm33.h`, Zephyr `arch/arm/core/arm_cortexm_cpu_id.c`, ARM Cortex-M3/M4/M7 CPUID example code in CMSIS-Pack.

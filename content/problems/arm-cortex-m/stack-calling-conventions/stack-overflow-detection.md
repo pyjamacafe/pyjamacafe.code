@@ -134,7 +134,13 @@ Professionally, production firmware from companies like ARM, NXP, and STMicroele
 
 Visualize a stack region as a block of 256 bytes. The very first word (lowest address) is the canary, set to 0xDEADBEEF. The entire rest of the block is filled with 0xCD (the "dead man's pattern"). The stack pointer starts at the highest address. As functions call deeper and allocate local arrays, the SP descends. A deeply recursive function like `recursive_func` with a 64-word local array will quickly consume stack space. If the recursion goes too deep, the SP passes the canary address, writing 0xCD's above it—but also overwriting the canary. The next check sees the canary is gone and triggers a fault handler.
 
-Key points: (1) Stack canaries cannot prevent overflow—they only detect it after the fact. (2) High-water marking gives you the data to right-size stacks: measure during worst-case testing, then allocate 20–30% headroom. (3) On Cortex-M, if using the process stack pointer (PSP) for tasks, each task needs its own canary and stack region. (4) The main stack pointer (MSP) is used for interrupts—interrupt stack overflow will corrupt the main stack's canary. (5) Canary corruption itself can trigger a HardFault if the corrupted memory contains a function pointer or other critical data.
+Key points:
+1. Stack canaries cannot prevent overflow—they only detect it after the fact.
+2. High-water marking gives you the data to right-size stacks: measure during worst-case testing, then allocate 20–30% headroom.
+3. On Cortex-M, if using the process stack pointer (PSP) for tasks, each task needs its own canary and stack region.
+4. The main stack pointer (MSP) is used for interrupts—interrupt stack overflow will corrupt the main stack's canary.
+5. Canary corruption itself can trigger a HardFault if the corrupted memory contains a function pointer or other critical data.
 
-References: "Definitive Guide to ARM Cortex-M3 and Cortex-M4" by Joseph Yiu (Chapter 10 on fault handling), FreeRTOS documentation on stack overflow detection, The GNU Linker manual section on MEMORY regions and stack placement, and the MPU guide in ARM AN321 on using the MPU for stack protection.
 
+References:
+1. "Definitive Guide to ARM Cortex-M3 and Cortex-M4" by Joseph Yiu (Chapter 10 on fault handling), FreeRTOS documentation on stack overflow detection, The GNU Linker manual section on MEMORY regions and stack placement, and the MPU guide in ARM AN321 on using the MPU for stack protection.

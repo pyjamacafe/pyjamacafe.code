@@ -72,6 +72,12 @@ In production, SysTick's interrupt handler is the RTOS's scheduler heartbeat. Fr
 
 Visualise a metronome: SysTick is the metronome arm ticking at a precise interval, driving the tempo of the entire software orchestra. The conductor (RTOS scheduler) uses each tick to decide if a new piece (task) should start playing.
 
-Key points: (1) SysTick is a 24‑bit timer — the reload value must not exceed 0x00FFFFFF. (2) The COUNTFLAG bit in CSR lets you poll without an interrupt. (3) The TENMS calibration value in CALIB register is provided by the silicon vendor for 10 ms timing. (4) Do not use SysTick for precise hardware timing — use a dedicated timer instead. (5) When debugging, SysTick keeps running; you can pause it via the debugger's SysTick control.
+Key points:
+1. SysTick is a 24‑bit timer — the reload value must not exceed 0x00FFFFFF.
+2. The COUNTFLAG bit in CSR lets you poll without an interrupt.
+3. The TENMS calibration value in CALIB register is provided by the silicon vendor for 10 ms timing.
+4. Do not use SysTick for precise hardware timing — use a dedicated timer instead.
+5. When debugging, SysTick keeps running; you can pause it via the debugger's SysTick control.
+
 
 ARM's *Cortex‑M3 Devices Generic User Guide* Chapter 4 and the *ARMv7‑M Architecture Reference Manual* define SysTick. The CMSIS‑Core API (`SysTick_Config()`) provides a simple initialisation wrapper used in virtually all Cortex‑M projects.

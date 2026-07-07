@@ -61,15 +61,16 @@ Professional C projects use `#define` carefully but extensively. The Linux kerne
 
 Visualize `#define` as a search-and-replace step that runs before compilation. Every occurrence of the macro name is replaced with its definition verbatim. This is why `#define X = 5` (with an equals sign) would cause compilation errors — the preprocessor doesn't know that `=` is not part of the value.
 
-**Key points to never forget:**
-- `#define` is text substitution, not a variable — no type, no address, no scope.
-- Always parenthesize macro bodies and each parameter: `#define SQUARE(x) ((x)*(x))`.
-- Never put a semicolon after `#define` — it becomes part of the substitution.
-- Use `const` or `enum` instead of `#define` when possible — they provide type checking and are debugger-friendly.
-- Undefine macros with `#undef NAME` when they're no longer needed to avoid name clashes.
+Key points:
+1. `#define` is text substitution, not a variable — no type, no address, no scope.
+2. Always parenthesize macro bodies and each parameter: `#define SQUARE(x) ((x)*(x))`.
+3. Never put a semicolon after `#define` — it becomes part of the substitution.
+4. Use `const` or `enum` instead of `#define` when possible — they provide type checking and are debugger-friendly.
+5. Undefine macros with `#undef NAME` when they're no longer needed to avoid name clashes.
 
-**References:**
-1. Ritchie, D. "The Development of the C Language." *HOPL II*, 1993 — describes the C preprocessor origins.
+References:
+1. Ritchie, D. "The Development of the C Language." *HOPL II*, 1993 — describes the C preprocessor origins
+
 2. Linux kernel, board-specific headers — `arch/arm/mach-bcm/include/mach/platform.h`.
 3. SQLite source: `sqlite3.c` — compile-time limits as `#define` macros.
 4. Redis source: `src/server.h` — protocol reply type macros.

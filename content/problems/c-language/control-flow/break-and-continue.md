@@ -62,6 +62,12 @@ I once reviewed embedded firmware for a medical ventilator where a `break` was m
 
 Visualize a loop as a conveyor belt carrying items past inspection stations. `continue` is a reject arm that pushes a faulty item off the belt before it reaches the packing station; the belt keeps moving. `break` is an emergency stop button — the entire belt halts when triggered, and you step off the line.
 
-Key points: (1) `break` exits only the innermost loop/switch — nested loops require a flag or `goto` to break out multiple levels. (2) `continue` in a `for` loop still evaluates the update expression — do not skip important updates. (3) `continue` in a `while` loop jumps directly to the condition — if you forget to update the loop variable before `continue`, you get an infinite loop. (4) Overusing `break` inside loops can make termination logic hard to follow — prefer structured conditions when possible. (5) In a `switch` inside a loop, `break` exits only the `switch`, not the loop.
+Key points:
+1. `break` exits only the innermost loop/switch — nested loops require a flag or `goto` to break out multiple levels.
+2. `continue` in a `for` loop still evaluates the update expression — do not skip important updates.
+3. `continue` in a `while` loop jumps directly to the condition — if you forget to update the loop variable before `continue`, you get an infinite loop.
+4. Overusing `break` inside loops can make termination logic hard to follow — prefer structured conditions when possible.
+5. In a `switch` inside a loop, `break` exits only the `switch`, not the loop.
+
 
 Kernighan & Ritchie §3.7 covers `break` and `continue`. "C Traps and Pitfalls" by Andrew Koenig has practical examples of loop-control bugs. CERT rule FLP32-C warns about floating-point loop conditions that may never allow `continue` to reach a terminating condition.

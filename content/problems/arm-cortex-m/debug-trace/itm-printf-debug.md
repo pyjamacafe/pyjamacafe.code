@@ -75,6 +75,13 @@ In practice, ITM printf is widely adopted across the ARM ecosystem over UART-bas
 
 Picture the data path: `printf("Hello\n")` → `fputc()` (retargeted by the C library) → `ITM_STIM0 = 'H'` → ITM hardware packetizes it → TPIU encodes it as NRZ bitstream on SWO → debug probe decodes → USB to host → viewer displays "Hello". The total latency from printf to display is a few microseconds, and the CPU is only involved for the register write (1 cycle). Compare this to a UART, where each character requires configuring the baud rate generator, waiting for the TX register to be ready, waiting for the shift register to complete, and handling potential TX interrupts—hundreds of cycles per character.
 
-Key points: (1) ITM requires TRCENA in DEMCR, ITM_LAR unlock (0xC5ACCE55), ITM_TCR configuration (enable ITM and stimulus ports), and ITM_TER enable for each port. (2) The SWO pin must be connected and the SWO frequency must match between the chip and the debug probe (typically configured by the debug probe automatically via SWD). (3) ITM is available on Cortex-M3/M4/M7/M33/M55 but NOT on Cortex-M0/M0+/M23. (4) Stimulus port 0 is conventional for text; ports 1–31 can carry binary data, RTOS events, or custom instrumentation. (5) The ITM hardware includes a timestamp generator that can be enabled to annotate trace data with cycle counts.
+Key points:
+1. ITM requires TRCENA in DEMCR, ITM_LAR unlock (0xC5ACCE55), ITM_TCR configuration (enable ITM and stimulus ports), and ITM_TER enable for each port.
+2. The SWO pin must be connected and the SWO frequency must match between the chip and the debug probe (typically configured by the debug probe automatically via SWD).
+3. ITM is available on Cortex-M3/M4/M7/M33/M55 but NOT on Cortex-M0/M0+/M23.
+4. Stimulus port 0 is conventional for text; ports 1–31 can carry binary data, RTOS events, or custom instrumentation.
+5. The ITM hardware includes a timestamp generator that can be enabled to annotate trace data with cycle counts.
 
-References: ARM CoreSight Primer (ARM white paper), ARM ITM Technical Reference Manual, "Definitive Guide to ARM Cortex-M3 and Cortex-M4" (Chapter 16), Segger J-Link ITM User Guide, and STM32CubeProgrammer SWO documentation.
+
+References:
+1. ARM CoreSight Primer (ARM white paper), ARM ITM Technical Reference Manual, "Definitive Guide to ARM Cortex-M3 and Cortex-M4" (Chapter 16), Segger J-Link ITM User Guide, and STM32CubeProgrammer SWO documentation.

@@ -74,6 +74,12 @@ A signal processing pipeline illustrates practical FPSCR use: the decimator uses
 
 Visualise the FPSCR as a mixing board in a recording studio. Each slider (bit field) controls a different aspect of the sound: the rounding knob selects the mastering curve, the FZ switch eliminates background hiss (denormals), the DN switch normalises how distorted sounds (NaNs) are handled, and the status LEDs (cumulative flags) light up when a channel is clipping.
 
-Key points: (1) FPSCR is read via VMRS and written via VMSR — these are coprocessor register transfers. (2) Rounding mode affects all subsequent FPU operations until changed. (3) The cumulative exception flags are sticky across multiple operations. (4) AHP (Alternate Half‑Precision) selects IEEE 754 vs ARM alternative format for 16‑bit floats. (5) FPSCR must be saved and restored during context switches for FPU‑using tasks.
+Key points:
+1. FPSCR is read via VMRS and written via VMSR — these are coprocessor register transfers.
+2. Rounding mode affects all subsequent FPU operations until changed.
+3. The cumulative exception flags are sticky across multiple operations.
+4. AHP (Alternate Half‑Precision) selects IEEE 754 vs ARM alternative format for 16‑bit floats.
+5. FPSCR must be saved and restored during context switches for FPU‑using tasks.
+
 
 The ARM Architecture Reference Manual, "FPSCR" register description, documents all bit fields. The IEEE 754‑2008 standard specifies the rounding modes and exception semantics. CMSIS‑Core provides `__get_FPSCR()` and `__set_FPSCR()` access functions.

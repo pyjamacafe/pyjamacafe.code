@@ -77,7 +77,13 @@ In professional TrustZone firmware, SG instructions are placed at the very begin
 
 Visualize the assembly: at the NSC entry address (e.g., `0x00200000`), the first word is `0xE97FE97F` (SG instruction). The next instruction is often a branch (`B` or `BL`) to the secure function body. The SG must be the first instruction at the entry point — even a NOP before SG causes a fault. The linker ensures the NSC section is 32-byte aligned so the SG falls at a proper NSC region boundary.
 
-Key points: (1) SG is a single 32-bit instruction — it does not take any operands or registers. (2) It must be the first instruction at the NSC entry point. (3) SG is only available on ARMv8-M and later with TrustZone. (4) Executing SG outside an NSC region or in Non-Secure state without a prior BLXNS causes a SecureFault. (5) The compiler must not reorder instructions before SG — use `__attribute__((naked))` and inline assembly to guarantee placement.
+Key points:
+1. SG is a single 32-bit instruction — it does not take any operands or registers.
+2. It must be the first instruction at the NSC entry point.
+3. SG is only available on ARMv8-M and later with TrustZone.
+4. Executing SG outside an NSC region or in Non-Secure state without a prior BLXNS causes a SecureFault.
+5. The compiler must not reorder instructions before SG — use `__attribute__((naked))` and inline assembly to guarantee placement.
 
-References: ARMv8-M ARM (DDI0553) section B4.5, Zephyr `arm_trustzone.c`, FreeRTOS `secure_port.c`, CMSIS-Core TrustZone examples, ARM AN326 "TrustZone for Cortex-M", PSA Firmware Framework for M specification.
 
+References:
+1. ARMv8-M ARM (DDI0553) section B4.5, Zephyr `arm_trustzone.c`, FreeRTOS `secure_port.c`, CMSIS-Core TrustZone examples, ARM AN326 "TrustZone for Cortex-M", PSA Firmware Framework for M specification.

@@ -71,15 +71,16 @@ void setBit(robj *o, off_t offset, int val) {
 
 Visualize bitwise operations on an 8-bit value: `a = 0b11001100`, `b = 0b10101010`. Then `a & b` = `0b10001000` (bits 7 and 3 are set in both), `a | b` = `0b11101110` (every position where either has a 1), `a ^ b` = `0b01100110` (positions where they differ), `~a` = `0b00110011` (all bits flipped). Shift `a << 2` = `0b00110000` (bits shifted left, zeros on right).
 
-**Key points to never forget:**
-- `<< 1` multiplies by 2; `>> 1` divides by 2 (for unsigned).
-- `x & (x - 1)` clears the lowest set bit — a classic O(1) population test.
-- Use unsigned types for bitwise operations to avoid sign-extension surprises.
-- `1 << 31` overflows a 32-bit signed int — use `1U << 31`.
-- Bitwise operators have lower precedence than arithmetic — `x & 3 == 2` is `x & (3 == 2)`, not `(x & 3) == 2`.
+Key points:
+1. `<< 1` multiplies by 2; `>> 1` divides by 2 (for unsigned).
+2. `x & (x - 1)` clears the lowest set bit — a classic O(1) population test.
+3. Use unsigned types for bitwise operations to avoid sign-extension surprises.
+4. `1 << 31` overflows a 32-bit signed int — use `1U << 31`.
+5. Bitwise operators have lower precedence than arithmetic — `x & 3 == 2` is `x & (3 == 2)`, not `(x & 3) == 2`.
 
-**References:**
-1. Ritchie, D. "The Development of the C Language." *HOPL II*, 1993.
+References:
+1. Ritchie, D. "The Development of the C Language." *HOPL II*, 1993
+
 2. Linux kernel `include/linux/bitops.h` — `BIT()`, `BIT_ULL()` macros.
 3. Redis source: `src/object.c` — object type encoding with bitwise masks.
 4. SQLite source: `src/btree.c` — varint decoding with shift and mask.

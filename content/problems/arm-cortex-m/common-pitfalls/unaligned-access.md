@@ -63,6 +63,12 @@ The CCR (Configuration and Control Register) bit `UNALIGN_TRP` is available on s
 
 Visualise a row of mailboxes at a post office. Aligned access is like picking up a whole shelf (32‑bit bus transfer). Unaligned access on supporting cores is like taking two trips to pick up parts of a shelf. On non‑supporting cores, trying to pick up half a shelf causes the shelf to collapse (fault).
 
-Key points: (1) Cortex‑M0/M0+/M23 always fault on unaligned access — no workaround in hardware. (2) Cortex‑M3+ handle unaligned access for LDR/STR but not LDM/STM/LDRD/STRD. (3) `memcpy` of 4 bytes compiles to a single LDR/STR on aligned pointers and byte operations on unaligned. (4) Packed structs generate byte accesses — slower but safe. (5) The linker ensures global variables are aligned to their natural alignment; heap allocations may not be.
+Key points:
+1. Cortex‑M0/M0+/M23 always fault on unaligned access — no workaround in hardware.
+2. Cortex‑M3+ handle unaligned access for LDR/STR but not LDM/STM/LDRD/STRD.
+3. `memcpy` of 4 bytes compiles to a single LDR/STR on aligned pointers and byte operations on unaligned.
+4. Packed structs generate byte accesses — slower but safe.
+5. The linker ensures global variables are aligned to their natural alignment; heap allocations may not be.
+
 
 ARM Architecture Reference Manual, "Alignment Support" section. ARM's *Cortex‑M0+ Devices Generic User Guide* documents the fault behaviour. MISRA‑C Rule 3.16 advises against casting between incompatible pointer types that may violate alignment.

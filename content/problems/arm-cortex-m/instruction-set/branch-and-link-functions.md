@@ -126,5 +126,6 @@ Visualize branches as a road network. B is a straight highway. BL is a highway w
 
 Key points: BL saves PC in LR and branches; BX LR returns; TBB/TBH uses byte/halfword offset table; BLX is used for inter-mode switching (not needed on Cortex-M); conditional branches have ±2KB to ±16MB range; LR bit 0 set indicates Thumb state; TBB table must be within 256 bytes of the instruction.
 
-References: ARM Architecture Reference Manual ARMv7-M (section A6.4 — Branch instructions), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 4.7), ARM Infocenter DDI0403E.
+References:
+1. ARM Architecture Reference Manual ARMv7-M (section A6.4 — Branch instructions), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 4.7), ARM Infocenter DDI0403E.
 

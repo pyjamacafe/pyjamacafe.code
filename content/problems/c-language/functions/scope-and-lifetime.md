@@ -63,6 +63,12 @@ I once debugged a use-after-return bug where a function returned a pointer to it
 
 Visualize a theater stage. Local variables are props that appear during a scene and vanish when the scene changes. Each scene change (function call/re-entry) clears the props. `static` local variables are set pieces bolted to the stage floor — they remain between scenes but are still "local" because the audience (other functions) cannot walk onto the stage and touch them. Global variables are the theater marquee and sign — visible to everyone on the street (every function in the program).
 
-Key points: (1) Automatic variables have block scope and automatic storage duration — they are created on the stack. (2) `static` local variables have block scope but static storage duration — they live in the data/BSS segment. (3) Global variables have file scope and static storage duration — minimize their use to avoid coupling. (4) `extern` declares a variable defined in another translation unit — it does not allocate storage. (5) Returning a pointer to an automatic local is undefined behavior — the pointer dangles after the function returns.
+Key points:
+1. Automatic variables have block scope and automatic storage duration — they are created on the stack.
+2. `static` local variables have block scope but static storage duration — they live in the data/BSS segment.
+3. Global variables have file scope and static storage duration — minimize their use to avoid coupling.
+4. `extern` declares a variable defined in another translation unit — it does not allocate storage.
+5. Returning a pointer to an automatic local is undefined behavior — the pointer dangles after the function returns.
+
 
 Kernighan & Ritchie §4.2–4.3 covers scope rules and §4.8 covers block structure. "The C Programming Language" §5.5–5.6 discusses the interaction of scope with pointers. For modern best practices, "C Interfaces and Implementations" by David R. Hanson demonstrates techniques for managing scope in large programs. CERT rule DCL30-C warns against returning pointers to automatic storage.

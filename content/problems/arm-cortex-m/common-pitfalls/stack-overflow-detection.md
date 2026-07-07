@@ -80,6 +80,12 @@ Stack watermarking fills the entire stack area with a pattern (e.g., 0xAAAAAAAA)
 
 Visualise the stack as a water well. The bucket (function calls) lowers the water level (grows the stack) until it reaches the bottom. A canary is a bell at the bottom — if the bucket hits it, a bell rings. An MPU guard is a fence around the well — if the bucket hits the fence, a loud alarm sounds.
 
-Key points: (1) Stack grows downward — the canary is placed at the lowest address. (2) MPU guard regions must be aligned to 32 bytes. (3) Watermarking is non‑destructive and can run alongside production code. (4) RTOS task stacks each need individual overflow protection. (5) The linker script must allocate the stack region and export `_estack`.
+Key points:
+1. Stack grows downward — the canary is placed at the lowest address.
+2. MPU guard regions must be aligned to 32 bytes.
+3. Watermarking is non‑destructive and can run alongside production code.
+4. RTOS task stacks each need individual overflow protection.
+5. The linker script must allocate the stack region and export `_estack`.
+
 
 ARM's *Cortex‑M3 Technical Reference Manual* "MPU" chapter and Joseph Yiu's *Definitive Guide* cover MPU‑based stack protection. MISRA‑C and CERT C coding standards recommend stack overflow detection for safety‑critical systems.

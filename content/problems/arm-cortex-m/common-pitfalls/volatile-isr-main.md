@@ -65,6 +65,12 @@ A DMA buffer shared between a DMA controller and the CPU must be declared `volat
 
 Visualise `volatile` as a "no caching" sign on a mailbox. The mail carrier (interrupt/DMA) delivers letters directly to the box. Without the sign, the postal sorter (compiler) might pile all letters in a bin (register) and check the bin instead of the box, missing new deliveries.
 
-Key points: (1) Always use `volatile` for flags shared between ISR and main code. (2) Always use `volatile` for memory‑mapped peripheral registers. (3) Always use `volatile` for buffers accessed by DMA. (4) `volatile` prevents read optimisation but does NOT prevent write merging — use barriers if needed. (5) Casting away `volatile` from a pointer is undefined behaviour.
+Key points:
+1. Always use `volatile` for flags shared between ISR and main code.
+2. Always use `volatile` for memory‑mapped peripheral registers.
+3. Always use `volatile` for buffers accessed by DMA.
+4. `volatile` prevents read optimisation but does NOT prevent write merging — use barriers if needed.
+5. Casting away `volatile` from a pointer is undefined behaviour.
+
 
 The C standard (ISO/IEC 9899, Section 6.7.3) defines volatile semantics. The MISRA‑C guidelines (Rule 3.4) mandate volatile for shared and asynchronously‑modified variables. Embedded textbooks like Michael Barr's *Embedded C Coding Standard* dedicate sections to volatile usage patterns.

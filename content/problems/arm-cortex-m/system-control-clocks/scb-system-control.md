@@ -109,5 +109,6 @@ Visualize the SCB as the cockpit of an aircraft. CPUID shows the aircraft type. 
 
 Key points: SCB base is 0xE000ED00; VTOR must be 128-byte aligned; AIRCR requires VECTKEY 0x05FA to write; SHCSR enables configurable fault handlers; reset defaults have only HardFault and NMI enabled; ICSR provides current and pending exception numbers.
 
-References: ARM Architecture Reference Manual ARMv7-M (section B3.2 — System Control Block), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 7), ARM Infocenter DDI0403E.
+References:
+1. ARM Architecture Reference Manual ARMv7-M (section B3.2 — System Control Block), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 7), ARM Infocenter DDI0403E.
 

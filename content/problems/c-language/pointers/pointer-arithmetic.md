@@ -58,6 +58,12 @@ A professional example: SQLite's B-tree implementation uses pointer arithmetic t
 
 Visualize pointer arithmetic as a subway line: each station is one element. `p` is platform 0. `p + 1` is the next station, one stop away. `p + 5` is five stations down the line. The distance between stations (the sizeof element) is fixed — all stops are equally spaced. Pointer subtraction `end - start` tells you how many stations apart two platforms are. The `%td` format specifier prints this difference correctly as a signed integer.
 
-Key points: (1) `p[i]` is defined as `*(p + i)` — this is the fundamental equivalence. (2) Pointer arithmetic beyond array bounds is undefined behavior (even without dereferencing). (3) Pointer subtraction yields `ptrdiff_t` (format `%td`), a signed type. (4) `void *` cannot be used in arithmetic; cast to `char *` for byte-level access. (5) `&arr[0] + i` is identical to `arr + i`.
+Key points:
+1. `p[i]` is defined as `*(p + i)` — this is the fundamental equivalence.
+2. Pointer arithmetic beyond array bounds is undefined behavior (even without dereferencing).
+3. Pointer subtraction yields `ptrdiff_t` (format `%td`), a signed type.
+4. `void *` cannot be used in arithmetic; cast to `char *` for byte-level access.
+5. `&arr[0] + i` is identical to `arr + i`.
+
 
 Kernighan & Ritchie §5.3 covers pointer arithmetic. "C: A Reference Manual" (Harbison & Steele) §7.5 provides formal semantics. The C11 standard §6.5.6 describes additive operators and pointer arithmetic rules.

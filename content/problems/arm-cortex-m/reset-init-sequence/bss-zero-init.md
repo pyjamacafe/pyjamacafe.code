@@ -63,6 +63,12 @@ In a professional RTOS, the idle task stack, message queue buffers, and task con
 
 Visualise a row of unlit LEDs before a performance. The .bss loop is the stagehand who walks down the row, turning each one off to guarantee darkness. Without this step, each LED could be in an unknown state from the previous show (a system crash or power glitch leaves random values in RAM).
 
-Key points: (1) .bss includes global and static variables without explicit initialisers. (2) The startup code must zero .bss before any C code accesses those variables. (3) Some toolchains optimise the zero loop using `memset` or 16‑byte SIMD stores. (4) Variables placed in `.noinit` sections explicitly bypass zero‑init for data that must survive a warm reset. (5) The linker script symbol `_sbss` points to the start, `_ebss` to the end of the section.
+Key points:
+1. .bss includes global and static variables without explicit initialisers.
+2. The startup code must zero .bss before any C code accesses those variables.
+3. Some toolchains optimise the zero loop using `memset` or 16‑byte SIMD stores.
+4. Variables placed in `.noinit` sections explicitly bypass zero‑init for data that must survive a warm reset.
+5. The linker script symbol `_sbss` points to the start, `_ebss` to the end of the section.
+
 
 The C standard (ISO/IEC 9899, Section 6.7.9) mandates zero‑initialisation of static storage duration objects. The GNU ld documentation and ARM Compiler armlink user guide describe how linker symbols for .bss are generated.

@@ -58,6 +58,12 @@ A professional example: in an audio processing pipeline, a `for` loop iterates o
 
 Visualize a `for` loop as a carousel: the init step places you at the starting position. Each revolution (iteration), you check whether you have completed enough cycles (condition). If not, you ride once more (body), then advance one position (update). The ride stops when the counter reaches its limit. The three-part header is like a control panel with a start button, a go/no-go light, and a nudge lever.
 
-Key points: (1) Variables declared in the init clause (C99+) are scoped to the loop — use `-std=c99` or later. (2) The loop body may modify the loop variable — be careful not to skip the update. (3) `continue` jumps to the update step, not the body start. (4) Off-by-one errors (using `<` vs `<=`) are the most common `for` loop bugs. (5) Loop-invariant code should be hoisted out of the body for performance.
+Key points:
+1. Variables declared in the init clause (C99+) are scoped to the loop — use `-std=c99` or later.
+2. The loop body may modify the loop variable — be careful not to skip the update.
+3. `continue` jumps to the update step, not the body start.
+4. Off-by-one errors (using `<` vs `<=`) are the most common `for` loop bugs.
+5. Loop-invariant code should be hoisted out of the body for performance.
+
 
 Kernighan & Ritchie §3.5 covers the `for` loop. For optimization techniques, "Computer Systems: A Programmer's Perspective" by Bryant & O'Hallaron explains loop optimization and vectorization. CERT rule MSC21-C warns about using signed loop counters with unsigned comparisons.

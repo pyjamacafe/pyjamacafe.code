@@ -82,7 +82,13 @@ Professional TrustZone projects define NSC regions in the SAU configuration at b
 
 Visualise a memory map with three colours: Secure (blue) containing secure code and data, NSC (yellow) as small islands at the boundary, and Non-Secure (grey) for everything else. The yellow islands are the only bridges from grey to blue — each island has a guard (SG) and a path function. The SAU ensures that jumping to a blue address from grey causes a fault.
 
-Key points: (1) NSC = Non-Secure for data, Secure for entry via SG. (2) Each NSC region must be aligned to 32 bytes (ARMv8.0-M) or arbitrary (ARMv8.1-M). (3) The first instruction in an NSC entry must be SG — any other instruction causes a fault. (4) More than one secure function can share an NSC region if properly spaced. (5) The linker script must place NSC functions in a separate, aligned section — use `__attribute__((section(".nsc_func")))`.
+Key points:
+1. NSC = Non-Secure for data, Secure for entry via SG.
+2. Each NSC region must be aligned to 32 bytes (ARMv8.0-M) or arbitrary (ARMv8.1-M).
+3. The first instruction in an NSC entry must be SG — any other instruction causes a fault.
+4. More than one secure function can share an NSC region if properly spaced.
+5. The linker script must place NSC functions in a separate, aligned section — use `__attribute__((section(".nsc_func")))`.
 
-References: ARMv8-M ARM (DDI0553) section B4.4, Zephyr `include/linker/arm/nsc.ld`, FreeRTOS `secure_port_mem.h`, CMSIS-Core `core_cm33.h` SAU functions, ARM AN326 "TrustZone for Cortex-M".
 
+References:
+1. ARMv8-M ARM (DDI0553) section B4.4, Zephyr `include/linker/arm/nsc.ld`, FreeRTOS `secure_port_mem.h`, CMSIS-Core `core_cm33.h` SAU functions, ARM AN326 "TrustZone for Cortex-M".

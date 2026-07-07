@@ -101,7 +101,13 @@ In professional use, Sleep-on-Exit is a common pattern in bare-metal sensor firm
 
 Visualize a timeline: without Sleep-on-Exit, the sequence is: SLEEP -> WAKE (interrupt) -> HANDLER -> RETURN TO MAIN -> WFI -> SLEEP. With Sleep-on-Exit: SLEEP -> WAKE -> HANDLER -> SLEEP. The handler's exception return (BX LR with EXC_RETURN) checks bit 1 of SCB_SCR; if SLEEPONEXIT is set, the processor enters sleep immediately after the unstacking completes—before fetching the next instruction from the thread.
 
-Key points: (1) SLEEPONEXIT is a single bit in SCB_SCR (bit 1). Set it before entering the main loop or after initialization. (2) This mode is only useful when the main thread has no work to do; if any polling or background processing is needed, do not enable it. (3) The processor enters sleep (not deep sleep) by default; combine with SLEEPDEEP for additional power savings. (4) An interrupt that occurs while the CPU is already handling an exception will keep the CPU awake—sleep only happens when the nested return completes. (5) Any interrupt can wake the CPU, including SysTick, GPIO EXTI, UART RX, etc. Sleep-on-Exit does not restrict wakeup sources.
+Key points:
+1. SLEEPONEXIT is a single bit in SCB_SCR (bit 1). Set it before entering the main loop or after initialization.
+2. This mode is only useful when the main thread has no work to do; if any polling or background processing is needed, do not enable it.
+3. The processor enters sleep (not deep sleep) by default; combine with SLEEPDEEP for additional power savings.
+4. An interrupt that occurs while the CPU is already handling an exception will keep the CPU awake—sleep only happens when the nested return completes.
+5. Any interrupt can wake the CPU, including SysTick, GPIO EXTI, UART RX, etc. Sleep-on-Exit does not restrict wakeup sources.
 
-References: ARM Cortex-M3/M4/M7 Technical Reference Manual (SCB section), "Definitive Guide to ARM Cortex-M3 and Cortex-M4" Chapter 13, STM32 Reference Manual (Power Control section), and ARM AN321 (Power Management for Cortex-M).
 
+References:
+1. ARM Cortex-M3/M4/M7 Technical Reference Manual (SCB section), "Definitive Guide to ARM Cortex-M3 and Cortex-M4" Chapter 13, STM32 Reference Manual (Power Control section), and ARM AN321 (Power Management for Cortex-M).

@@ -67,6 +67,12 @@ The `weak` attribute is also critical: it allows toolchain‑supplied default ha
 
 Visualise function attributes as stage directions in a play script. `interrupt` is "enter with full costume and exit with a flourish". `naked` is "enter with no costume and leave through the trapdoor". `weak` is "understudy available — star actor may replace".
 
-Key points: (1) `interrupt`‑attribute functions cannot return a value. (2) `naked` functions cannot use local C variables. (3) `weak` symbol resolution happens at link time, not compile time. (4) ARM Compiler uses `__irq` for interrupt and `__asm` for naked. (5) The `always_inline` attribute is useful for ISRs in performance‑critical paths.
+Key points:
+1. `interrupt`‑attribute functions cannot return a value.
+2. `naked` functions cannot use local C variables.
+3. `weak` symbol resolution happens at link time, not compile time.
+4. ARM Compiler uses `__irq` for interrupt and `__asm` for naked.
+5. The `always_inline` attribute is useful for ISRs in performance‑critical paths.
+
 
 GCC documentation for ARM‑specific function attributes, and ARM Compiler's `__attribute__` reference, list all available attributes. CMSIS‑Core source files (e.g., `core_cm33.h`) demonstrate modern attribute usage patterns.

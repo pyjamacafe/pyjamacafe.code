@@ -118,5 +118,6 @@ Visualize the stack growing downward: main()'s frame at the top (highest address
 
 Key points to remember: (1) Frame pointer-based unwinding only works with compiler optimizations that preserve the frame pointer (-O0 or -fno-omit-frame-pointer). (2) The Cortex-M exception stack frame (8 words pushed by hardware) is a different structure from the regular function call frame—don't confuse them. (3) LR contains the return address, not the address of the call instruction; the actual caller address is typically one instruction before the LR value. (4) For Thumb-2 code, return addresses may have bit 0 set (Thumb indicator); mask it off when comparing addresses.
 
-References: AAPCS (ARM IHI 0042E), "Definitive Guide to ARM Cortex-M3 and Cortex-M4" by Joseph Yiu (Chapter 10 on debugging), ARM Infocenter documentation on fault handling and stack unwinding, and the open-source libunwind project which provides platform-independent unwinding.
+References:
+1. AAPCS (ARM IHI 0042E), "Definitive Guide to ARM Cortex-M3 and Cortex-M4" by Joseph Yiu (Chapter 10 on debugging), ARM Infocenter documentation on fault handling and stack unwinding, and the open-source libunwind project which provides platform-independent unwinding.
 

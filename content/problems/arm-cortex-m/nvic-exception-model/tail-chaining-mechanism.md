@@ -103,5 +103,6 @@ Visualize two handlers as adjacent rooms. Without tail-chaining, leaving one roo
 
 Key points: tail-chaining only works when the pending exception has equal or higher priority than the current one; it saves approximately 12 cycles per chain; it is automatic — no software configuration required; it is distinct from late arrival (which happens during stacking, not unstacking); combined with late arrival, it minimizes the worst-case interrupt latency in deeply nested scenarios.
 
-References: ARM Architecture Reference Manual ARMv7-M (section B1.5.5 — Exception entry and exit), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 8.6 — Tail-chaining), and ARM Application Note AN298 "Cortex-M3 Exception Handling".
+References:
+1. ARM Architecture Reference Manual ARMv7-M (section B1.5.5 — Exception entry and exit), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 8.6 — Tail-chaining), and ARM Application Note AN298 "Cortex-M3 Exception Handling".
 

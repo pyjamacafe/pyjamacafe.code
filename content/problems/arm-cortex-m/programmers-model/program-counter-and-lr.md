@@ -72,7 +72,13 @@ Professional debugging tools exploit this. In FreeRTOS, when a task crash occurs
 
 Visualize program flow as a stack of frames: each `BL` pushes LR (implicitly) and a frame pointer, creating a linked list of call frames. On exception entry, the hardware pushes PC+LR (and other registers) onto the stack as part of the 8-word exception frame. Reading the stacked PC shows exactly where the fault occurred.
 
-Key points: (1) PC bit 0 = 1 always in Cortex-M (Thumb state). (2) LR after BL = return address with bit 0 = 1. (3) On exception entry, LR becomes EXC_RETURN (0xFFFFFFFx). (4) To read the true return address during an exception, read stacked LR from the stack frame. (5) Nested calls require the callee to push LR onto the stack — the compiler does this automatically for non-leaf functions.
+Key points:
+1. PC bit 0 = 1 always in Cortex-M (Thumb state).
+2. LR after BL = return address with bit 0 = 1.
+3. On exception entry, LR becomes EXC_RETURN (0xFFFFFFFx).
+4. To read the true return address during an exception, read stacked LR from the stack frame.
+5. Nested calls require the callee to push LR onto the stack — the compiler does this automatically for non-leaf functions.
 
-References: ARMv7-M ARM (DDI0403) B1.5, AAPCS (IHI0042) section 5.2, FreeRTOS `vTaskSwitchContext` stack frame inspection, Zephyr `arch/arm/core/fault.c`, ARM Infocenter KB "Reading LR in Exception Handlers".
 
+References:
+1. ARMv7-M ARM (DDI0403) B1.5, AAPCS (IHI0042) section 5.2, FreeRTOS `vTaskSwitchContext` stack frame inspection, Zephyr `arch/arm/core/fault.c`, ARM Infocenter KB "Reading LR in Exception Handlers".

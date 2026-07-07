@@ -60,15 +60,16 @@ if( (pCur->info.nKeyField & 0x01)!=0 ){
 
 Visualize precedence as a pyramid. At the top (highest precedence) are postfix operators: `()`, `[]`, `->`, `.`, postfix `++`/`--`. Below them are unary operators: `&`, `*`, `+`, `-`, `~`, `!`, prefix `++`/`--`, `sizeof`. Then multiplicative, additive, shift, relational, equality, bitwise AND, XOR, OR, logical AND, OR, conditional, assignment, comma — in that order. Associativity is a rule for ties: most tie-breaks go left to right, but assignments, unary, and conditional go right to left.
 
-**Key points to never forget:**
-- `*p++` is `*(p++)` — postfix `++` binds tighter than unary `*`.
-- `a << 1 + b` is `a << (1 + b)` — addition precedes shift.
-- `*p.f` is `*(p.f)` — member access precedes dereference.
-- Assignment is right-associative and has very low precedence: `a = b = c` is `a = (b = c)`.
-- The comma operator has the lowest precedence: `a = 1, 2` is `(a = 1), 2` (not `a = (1, 2)`).
+Key points:
+1. `*p++` is `*(p++)` — postfix `++` binds tighter than unary `*`.
+2. `a << 1 + b` is `a << (1 + b)` — addition precedes shift.
+3. `*p.f` is `*(p.f)` — member access precedes dereference.
+4. Assignment is right-associative and has very low precedence: `a = b = c` is `a = (b = c)`.
+5. The comma operator has the lowest precedence: `a = 1, 2` is `(a = 1), 2` (not `a = (1, 2)`).
 
-**References:**
-1. ISO/IEC 9899:2011 (C11), §6.5 — Expressions (full precedence table is implicit in the grammar).
+References:
+1. ISO/IEC 9899:2011 (C11), §6.5 — Expressions (full precedence table is implicit in the grammar)
+
 2. Linux kernel coding style: `Documentation/process/coding-style.rst` — Chapter 3: Placing Braces and Spaces.
 3. SQLite source: `src/btree.c` — explicit parenthesization of bitwise comparisons.
 4. Kernighan, B. & Ritchie, D. *The C Programming Language*, 2nd ed., §2.12 — Precedence and Order of Evaluation.

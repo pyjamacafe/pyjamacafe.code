@@ -110,7 +110,14 @@ In professional firmware, these instructions appear frequently in device driver 
 
 Picture the bit layout: a 32-bit register with 8-bit fields at positions 0, 8, 16, 24. UBFX(reg, 0, 8) → bits [7:0] become result bits [7:0], upper bits zeroed. UBFX(reg, 8, 8) → bits [15:8] shifted down to [7:0], upper bits zeroed. SBFX(reg, 16, 4) → bits [19:16] extracted and sign-extended to 32 bits: if bit 19 is 1, the result is 0xFFFFFFFx; if 0, it is 0x0000000x. This is equivalent to: `(int32_t)(value << (32 - 4 - 16)) >> (32 - 4)`—three shift operations replaced by one SBFX.
 
-Key points: (1) UBFX extracts width bits at lsb, zero-extends; SBFX extracts and sign-extends. (2) Both are single-cycle on Cortex-M3/M4/M7/M33/M55. (3) Width must be 1–32 and lsb + width ≤ 32. (4) ARMv6-M (Cortex-M0/M0+) does not have these instructions—the compiler generates shift + AND sequences instead. (5) The compiler typically generates UBFX/SBFX automatically from C bit field operators (`&` and `>>`) and from `__builtin_arm_ubfx`/`__builtin_arm_sbfx` intrinsics. (6) For signed bit fields in C bit fields (`int field : 4`), the compiler must choose between SBFX + mask or shift + sign-extend; SBFX is optimal.
+Key points:
+1. UBFX extracts width bits at lsb, zero-extends; SBFX extracts and sign-extends.
+2. Both are single-cycle on Cortex-M3/M4/M7/M33/M55.
+3. Width must be 1–32 and lsb + width ≤ 32.
+4. ARMv6-M (Cortex-M0/M0+) does not have these instructions—the compiler generates shift + AND sequences instead.
+5. The compiler typically generates UBFX/SBFX automatically from C bit field operators (`&` and `>>`) and from `__builtin_arm_ubfx`/`__builtin_arm_sbfx` intrinsics.
+6. For signed bit fields in C bit fields (`int field : 4`), the compiler must choose between SBFX + mask or shift + sign-extend; SBFX is optimal.
 
-References: ARM Architecture Reference Manual ARMv7-M (instruction descriptions), "Definitive Guide to ARM Cortex-M3 and Cortex-M4" (Chapter 4 on instruction set), ARM Compiler Reference Guide for intrinsics, and the ARM Cortex-M33/M55 Technical Reference Manuals.
 
+References:
+1. ARM Architecture Reference Manual ARMv7-M (instruction descriptions), "Definitive Guide to ARM Cortex-M3 and Cortex-M4" (Chapter 4 on instruction set), ARM Compiler Reference Guide for intrinsics, and the ARM Cortex-M33/M55 Technical Reference Manuals.

@@ -57,15 +57,16 @@ Real code relies on this for performance. The SQLite engine uses constant expres
 
 A visualization: think of constant expressions as arithmetic you do on paper before starting to build. When the C standard says a constant expression is evaluated at compile time, it means the compiler does the math in its head (during compilation) and hardcodes the result into the binary. No ALU cycles, no registers needed at runtime — the answer is literally etched into the machine code as an immediate operand.
 
-**Key points to never forget:**
-- Constant expressions contain only literals, enum constants, sizeof, and operators.
-- They are required for array sizes (in C89/C99), `case` labels, and bit-field widths.
-- `#define` macros composed of literals yield constant expressions; function call results do not.
-- C99's `static const int` is not a constant expression in pre-C99 contexts (like array sizes in C89 mode).
-- Use `enum` to create named constant expressions that are type-safe and debugger-friendly.
+Key points:
+1. Constant expressions contain only literals, enum constants, sizeof, and operators.
+2. They are required for array sizes (in C89/C99), `case` labels, and bit-field widths.
+3. `#define` macros composed of literals yield constant expressions; function call results do not.
+4. C99's `static const int` is not a constant expression in pre-C99 contexts (like array sizes in C89 mode).
+5. Use `enum` to create named constant expressions that are type-safe and debugger-friendly.
 
-**References:**
-1. ISO/IEC 9899:2011 (C11), §6.6 — Constant Expressions.
+References:
+1. ISO/IEC 9899:2011 (C11), §6.6 — Constant Expressions
+
 2. SQLite source: `src/sort.c` — sort-merge threshold computation via constant expressions.
 3. Linux kernel `include/linux/build_bug.h` — compile-time assertion macros.
 4. Kernighan, B. & Ritchie, D. *The C Programming Language*, 2nd ed., §2.3 — Constants.

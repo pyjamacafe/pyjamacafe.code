@@ -52,6 +52,15 @@ In professional firmware, ADC readings feed into control loops (motor current se
 
 Picture the signal chain: a thermistor varies its resistance with temperature. A voltage divider converts this resistance to a voltage between 0 and 3.3 V. The ADC samples this voltage at a 12-bit resolution. The firmware reads the raw 12-bit value (0–4095), scales it to volts, then applies the thermistor's transfer function to compute temperature in degrees Celsius. The result is sent over I2C or displayed on an LCD. Each step—acquisition, scaling, calibration, output—must be correct and deterministic.
 
-Key points: (1) Always use floating-point literals (e.g., `4095.0`) in the division to prevent integer truncation. (2) The reference voltage is not always exactly 3.3 V—measure it with a precision voltmeter and use the measured value for accuracy. (3) Oversampling and averaging can increase effective resolution: taking 64 samples and averaging gives 3 extra bits of resolution (12 + log2(64)/2 = 15 bits). (4) ADC readings may require digital filtering (median filter, moving average) to remove noise. (5) The ADC Nyquist theorem requires sampling at >2× the highest frequency component in the signal. (6) The ADC input impedance may require a buffer amplifier for high-impedance sensors.
+Key points:
+1. Always use floating-point literals (e.g., `4095.0`) in the division to prevent integer truncation.
+2. The reference voltage is not always exactly 3.3 V—measure it with a precision voltmeter and use the measured value for accuracy.
+3. Oversampling and averaging can increase effective resolution: taking 64 samples and averaging gives 3 extra bits of resolution (12 + log2.
+4. /2 = 15 bits).
+5. ADC readings may require digital filtering (median filter, moving average) to remove noise.
+6. The ADC Nyquist theorem requires sampling at >2× the highest frequency component in the signal.
+7. The ADC input impedance may require a buffer amplifier for high-impedance sensors.
 
-References: STM32 Reference Manual (ADC chapter), "Embedded Systems: Introduction to ARM Cortex-M Microcontrollers" by Jonathan Valvano (Chapter on analog interfacing), Microchip AN693 (Understanding A/D Converter Performance Specifications), and "The Art of Electronics" by Horowitz and Hill (Chapter 13 on digital-to-analog and analog-to-digital conversion).
+
+References:
+1. STM32 Reference Manual (ADC chapter), "Embedded Systems: Introduction to ARM Cortex-M Microcontrollers" by Jonathan Valvano (Chapter on analog interfacing), Microchip AN693 (Understanding A/D Converter Performance Specifications), and "The Art of Electronics" by Horowitz and Hill (Chapter 13 on digital-to-analog and analog-to-digital conversion).

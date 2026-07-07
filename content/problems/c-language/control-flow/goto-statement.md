@@ -61,6 +61,12 @@ I once maintained a database engine where a transaction commit function had seve
 
 Visualize a high-rise building with a `goto` as an elevator that goes directly from any floor to the ground floor (or to any other floor). Structured control flow is the staircase — you can only go one floor at a time. `break` is a fire escape that skips one floor at most. For a 10-floor exit, `goto` is the elevator; for a 1-floor exit, the stairs are fine.
 
-Key points: (1) `goto` cannot jump across function boundaries or into the scope of a VLA. (2) **Only** use `goto` for forward jumps to a common exit/cleanup point — backward jumps create loops better written with `while`/`for`. (3) The Linux kernel coding style endorses `goto` for cleanup (see kernel.org/doc/Documentation/process/coding-style.rst). (4) Avoid `goto` in application-level business logic — structured control is clearer. (5) Always keep the label and the `goto` within the same or adjacent visual block; long-distance `goto`s harm readability.
+Key points:
+1. `goto` cannot jump across function boundaries or into the scope of a VLA.
+2. Only use `goto` for forward jumps to a common exit/cleanup point — backward jumps create loops better written with `while`/`for`.
+3. The Linux kernel coding style endorses `goto` for cleanup (see kernel.org/doc/Documentation/process/coding-style.rst).
+4. Avoid `goto` in application-level business logic — structured control is clearer.
+5. Always keep the label and the `goto` within the same or adjacent visual block; long-distance `goto`s harm readability.
+
 
 Dijkstra's original letter is worth reading (Communications of the ACM, March 1968). The Linux kernel coding style guide explicitly covers `goto`. "C Programming: A Modern Approach" by K.N. King has a balanced discussion. For the opposite perspective, Frank Rubin's "GOTO Considered Harmful" Considered Harmful (CACM, 1987) provides the counter-argument.

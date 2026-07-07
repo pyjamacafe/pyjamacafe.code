@@ -57,6 +57,12 @@ A professional example: in a medical infusion pump, the control loop might look 
 
 Visualize an `if-else` chain as a sorting machine with a series of funnels. An item enters the first funnel — if it fits (condition true), it drops into that bin and never reaches the next funnel. If it does not fit, it slides to the next funnel. The final `else` is the catch-all tray at the bottom. Without `else`, the item would fall through every funnel simultaneously — impossible physically, but exactly what happens in code without proper branching.
 
-Key points: (1) C has no boolean type (until C23 `_Bool`/`bool`); conditions use zero/non-zero logic. (2) Always use braces `{}` even for single statements — this prevents the dangling-else problem where an `else` binds to the nearest unmatched `if`. (3) `else if` is not a keyword; it is an `else` followed by another `if` statement. (4) Deeply nested `if-else` (beyond 3–4 levels) should be replaced with a `switch`, a lookup table, or polymorphism. (5) The ternary operator `? :` is a compact `if-else` for expressions.
+Key points:
+1. C has no boolean type (until C23 `_Bool`/`bool`); conditions use zero/non-zero logic.
+2. Always use braces `{}` even for single statements — this prevents the dangling-else problem where an `else` binds to the nearest unmatched `if`.
+3. `else if` is not a keyword; it is an `else` followed by another `if` statement.
+4. Deeply nested `if-else` (beyond 3–4 levels) should be replaced with a `switch`, a lookup table, or polymorphism.
+5. The ternary operator `? :` is a compact `if-else` for expressions.
+
 
 Kernighan & Ritchie's "The C Programming Language" §3.1–3.2 covers control flow. The CERT rule MSC01-C recommends using `else` for mutually exclusive conditions. For a deeper look at decision logic, "Code Complete" by Steve McConnell dedicates a chapter to controlling condition complexity.

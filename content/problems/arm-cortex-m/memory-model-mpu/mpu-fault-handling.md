@@ -92,7 +92,13 @@ In professional firmware, MPU fault analysis is critical for ISO 26262 (automoti
 
 Visualize the fault analysis flow: read CFSR → isolate MFSR (low byte) → check MMARVALID → read MMAR → decode IACCVIOL/DACCVIOL/MSTKERR → clear sticky bits by writing 1 to them → return. The sticky bits persist until explicitly cleared — a handler that returns without clearing will immediately re-enter on the next instruction.
 
-Key points: (1) MemManage faults are precise (synchronous) — the PC in the stacked frame points to the faulting instruction. (2) Stacking/unstacking faults (MSTKERR/MUNSTKERR) escalate to HardFault — the MMAR may not be valid. (3) CFSR bits are "write-1-to-clear" — always clear them before returning from the handler. (4) If MemManage handler is not enabled (SHCSR[16] = 0), faults escalate to HardFault. (5) The fault address in MMAR is valid only when MMARVALID = 1 — check before using it.
+Key points:
+1. MemManage faults are precise (synchronous) — the PC in the stacked frame points to the faulting instruction.
+2. Stacking/unstacking faults (MSTKERR/MUNSTKERR) escalate to HardFault — the MMAR may not be valid.
+3. CFSR bits are "write-1-to-clear" — always clear them before returning from the handler.
+4. If MemManage handler is not enabled (SHCSR[16] = 0), faults escalate to HardFault.
+5. The fault address in MMAR is valid only when MMARVALID = 1 — check before using it.
 
-References: ARMv7-M ARM (DDI0403) B5.2, ARMv8-M ARM (DDI0553) B5.2, Zephyr `arch/arm/core/cortex_m/fault.c`, FreeRTOS `port.c` MPU fault handling, CMSIS-Core `core_cm.h` SCB struct.
 
+References:
+1. ARMv7-M ARM (DDI0403) B5.2, ARMv8-M ARM (DDI0553) B5.2, Zephyr `arch/arm/core/cortex_m/fault.c`, FreeRTOS `port.c` MPU fault handling, CMSIS-Core `core_cm.h` SCB struct.

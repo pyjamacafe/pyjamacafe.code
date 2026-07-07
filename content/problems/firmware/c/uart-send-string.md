@@ -45,6 +45,14 @@ In professional firmware, string output over UART is used for both development a
 
 Picture the signal on the wire with a logic analyzer: idle is high. For the character 'A' (0x41 = 0b01000001), the line goes low for one bit period (start bit), then the bits are sent LSB-first: 1, 0, 0, 0, 0, 0, 1, 0 (data bits), then high for one or more bit periods (stop bit). At 115200 baud, each bit period is about 8.7 µs, so one character takes about 87 µs. A 100-character string takes about 8.7 ms to transmit—a significant blocking delay in a real-time system, which is why production code often uses DMA or interrupt-driven UART.
 
-Key points: (1) String transmission is blocking by default—the CPU spins while each character is sent. Use interrupt or DMA for non-blocking operation. (2) Baud rate must match between sender and receiver within about 2% error tolerance. (3) The standard UART frame is 8-N-1: 8 data bits, No parity, 1 stop bit. (4) `uart_putc` typically polls the TXE (transmit data register empty) flag before writing the data register to avoid overwriting a byte being shifted out. (5) For binary data, do not use string functions—send the raw bytes along with a length or framing protocol. (6) Buffered UART drivers use a circular buffer for TX: the ISR pulls bytes from the buffer when the shift register is empty, minimizing CPU load.
+Key points:
+1. String transmission is blocking by default—the CPU spins while each character is sent. Use interrupt or DMA for non-blocking operation.
+2. Baud rate must match between sender and receiver within about 2% error tolerance.
+3. The standard UART frame is 8-N-1: 8 data bits, No parity, 1 stop bit.
+4. `uart_putc` typically polls the TXE (transmit data register empty) flag before writing the data register to avoid overwriting a byte being shifted out.
+5. For binary data, do not use string functions—send the raw bytes along with a length or framing protocol.
+6. Buffered UART drivers use a circular buffer for TX: the ISR pulls bytes from the buffer when the shift register is empty, minimizing CPU load.
 
-References: "Embedded Systems: Introduction to ARM Cortex-M Microcontrollers" by Jonathan Valvano (Chapter 6 on serial communication), STM32 Reference Manual (USART chapter), "Serial Port Complete" by Jan Axelson (comprehensive guide to RS-232 and UART), and the Linux serial programming guide (termios documentation).
+
+References:
+1. "Embedded Systems: Introduction to ARM Cortex-M Microcontrollers" by Jonathan Valvano (Chapter 6 on serial communication), STM32 Reference Manual (USART chapter), "Serial Port Complete" by Jan Axelson (comprehensive guide to RS-232 and UART), and the Linux serial programming guide (termios documentation).

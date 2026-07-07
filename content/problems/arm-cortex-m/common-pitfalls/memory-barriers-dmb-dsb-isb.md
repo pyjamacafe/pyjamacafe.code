@@ -79,6 +79,12 @@ A typical bug scenario: an engineer writes `SCB->VTOR = 0x08004000;` and immedia
 
 Visualise the barriers as traffic control at a busy intersection. DMB is a yield sign — traffic from the previous street must clear before new traffic enters. DSB is a red light — all traffic must come to a complete stop before proceeding. ISB is a road closure sign — all drivers must recalculate their GPS routes (re‑fetch instructions) before driving on.
 
-Key points: (1) Always use ISB after system control register modifications. (2) Always use DSB before WFI/WFE. (3) Use DMB for DMA buffer ownership transfer. (4) CMSIS provides `__DMB()`, `__DSB()`, `__ISB()` intrinsics. (5) Compiler barriers (`asm volatile("" ::: "memory")`) prevent compiler reordering but are NOT hardware barriers.
+Key points:
+1. Always use ISB after system control register modifications.
+2. Always use DSB before WFI/WFE.
+3. Use DMB for DMA buffer ownership transfer.
+4. CMSIS provides `__DMB()`, `__DSB()`, `__ISB()` intrinsics.
+5. Compiler barriers (`asm volatile("" ::: "memory")`) prevent compiler reordering but are NOT hardware barriers.
+
 
 ARM Architecture Reference Manual, "Memory System" chapter, defines barrier instruction semantics. ARM's *Barrier Litmus Tests* application note provides practical test cases. CMSIS‑Core documentation lists each barrier's recommended usage.

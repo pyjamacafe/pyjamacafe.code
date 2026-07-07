@@ -104,5 +104,9 @@ A common failure mode: the application crashes on reset because SystemInit() was
 
 Visualize the memory at reset: flash contains the vector table, all code, read-only data, and the initial values of .data. SRAM is uninitialized. The startup sequence copies the .data initial values from flash into SRAM, zeros the .bss area in SRAM, then hands control to the C++ runtime and finally to main(). Without this sequence, global variables would have garbage values, and the program would behave unpredictably.
 
-Key points: (1) Reset_Handler is the first C code executed (not main()). (2) SystemInit runs first — do not access flash-dependent features before it. (3) .data copy source is LMA (flash), destination is VMA (SRAM). (4) .bss must be zeroed before any code relies on zero-initialized globals. (5) Static constructors run after data/bss init but before main(). Reference: CMSIS-Core startup template files and the ARM Compiler guide on runtime initialization.
-
+Key points:
+1. Reset_Handler is the first C code executed (not main()).
+2. SystemInit runs first — do not access flash-dependent features before it.
+3. .data copy source is LMA (flash), destination is VMA (SRAM).
+4. .bss must be zeroed before any code relies on zero-initialized globals.
+5. Static constructors run after data/bss init but before main(). Reference: CMSIS-Core startup template files and the ARM Compiler guide on runtime initialization.

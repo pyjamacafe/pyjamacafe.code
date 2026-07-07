@@ -71,6 +71,12 @@ A real example: an automotive ECU manufacturer needs to debug a field‑returned
 
 Visualise a high‑security laboratory door. The door has three locks: one for general access (non‑secure debug), one for the lab manager (secure debug), and one that requires corporate approval (lifecycle management). An engineer scans their badge; the system checks their clearance level and unlocks only the appropriate locks.
 
-Key points: (1) DHCSR write requires a key (0xA05F in upper 16 bits) to prevent accidental writes. (2) DEMCR[24] (TRCENA) enables trace — this must be separate from debug enable. (3) The DAP can be locked by setting the appropriate DCRDR bits. (4) Debug authentication keys are provisioned during manufacturing in OTP. (5) JTAG/SWD interface can be permanently disabled via device life cycle management.
+Key points:
+1. DHCSR write requires a key (0xA05F in upper 16 bits) to prevent accidental writes.
+2. DEMCR[24] (TRCENA) enables trace — this must be separate from debug enable.
+3. The DAP can be locked by setting the appropriate DCRDR bits.
+4. Debug authentication keys are provisioned during manufacturing in OTP.
+5. JTAG/SWD interface can be permanently disabled via device life cycle management.
+
 
 ARM's *CoreSight Debug Authentication* specification and *ARMv8‑M Debug* chapter define the protocol. The *Secure Debug Authentication* application note from ARM provides detailed implementation guidance. Silicon vendors like NXP and STMicroelectronics document their specific debug authentication schemes in their reference manuals.

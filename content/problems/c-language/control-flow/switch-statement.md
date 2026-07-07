@@ -58,6 +58,12 @@ A professional example: in a network protocol parser, a `switch` on the packet t
 
 Visually, a `switch` is like a railway roundhouse with multiple tracks. The engine (the expression) enters the turntable, which rotates to align with the correct track (case label). The engine rolls down that track. The `break` is a bumper stopping the engine; without it, the engine rolls through the switchyard onto the next track. `default` is a siding that catches any engine whose destination does not match a numbered track.
 
-Key points: (1) The controlling expression must be an integer type (`int`, `char`, `enum`, `_Bool`). C does not support `switch` on strings or floats. (2) `case` values must be compile-time integer constant expressions. (3) Omitting `break` causes fall-through — annotate intentional fall-through with a comment to prevent warnings. (4) Variables can be declared inside a case block, but must be wrapped in braces `{}` to limit scope. (5) Some compilers warn on missing `default` or uncovered enum values — treat these warnings seriously.
+Key points:
+1. The controlling expression must be an integer type (`int`, `char`, `enum`, `_Bool`). C does not support `switch` on strings or floats.
+2. `case` values must be compile-time integer constant expressions.
+3. Omitting `break` causes fall-through — annotate intentional fall-through with a comment to prevent warnings.
+4. Variables can be declared inside a case block, but must be wrapped in braces `{}` to limit scope.
+5. Some compilers warn on missing `default` or uncovered enum values — treat these warnings seriously.
+
 
 C11 §6.8.4.2 specifies the `switch` statement. "The C Standard" by Derek M. Jones provides exhaustive detail. For state machine design patterns using switch, see "Practical Statecharts in C/C++" by Miro Samek. MISRA-C Rule 15.0–15.7 provides safety guidelines for switch in embedded code.

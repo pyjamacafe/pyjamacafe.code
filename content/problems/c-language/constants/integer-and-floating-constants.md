@@ -59,15 +59,16 @@ Real code relies on getting constant types right. The Linux kernel uses `UL` suf
 
 A mental model: think of the constant's literal form as a label on a box. The digits tell you what's inside the box, the prefix tells you how to read the label (decimal, octal, hex), and the suffix tells you the box's size and whether it can hold signed values. The compiler uses the label and box to pack the value correctly, and if the box is too small, it prints a warning.
 
-**Key points to never forget:**
-- Octal `052` = decimal 42; hex `0x2A` = decimal 42 — choose the notation that matches the context.
-- Default types: integer constants are `int`; floating constants are `double`.
-- Use suffixes explicitly when the type matters (hardware registers, large values, arithmetic with mixed types).
-- `1 << 31` overflows a 32-bit `int` — use `1U << 31` or `1UL << 31`.
-- C23 officially supports `0b` binary literals; GCC/Clang have supported them for decades.
+Key points:
+1. Octal `052` = decimal 42; hex `0x2A` = decimal 42 — choose the notation that matches the context.
+2. Default types: integer constants are `int`; floating constants are `double`.
+3. Use suffixes explicitly when the type matters (hardware registers, large values, arithmetic with mixed types).
+4. `1 << 31` overflows a 32-bit `int` — use `1U << 31` or `1UL << 31`.
+5. C23 officially supports `0b` binary literals; GCC/Clang have supported them for decades.
 
-**References:**
-1. Ritchie, D. "The Development of the C Language." *HOPL II*, 1993 — describes the origin of `0x` and `0` prefixes.
+References:
+1. Ritchie, D. "The Development of the C Language." *HOPL II*, 1993 — describes the origin of `0x` and `0` prefixes
+
 2. Linux kernel `include/linux/bitops.h` — bit manipulation macros with explicit type suffixes.
 3. ISO/IEC 9899:2024 (C23), §6.4.4.1 — Integer constants and binary literals.
 4. Kernighan, B. & Ritchie, D. *The C Programming Language*, 2nd ed., §2.3 — Constants.

@@ -60,15 +60,16 @@ void qsort(void *base, size_t nmemb, size_t size,
 
 Visualize `void *` as a plain envelope with no label. It can contain a letter (an `int`), a photograph (a `struct`), or a contract (a `long double`). To read the contents, you must write the type on the envelope — that's the cast. The envelope itself has a fixed size (the pointer width), but the content it points to is known only through the cast.
 
-**Key points to never forget:**
-- `void` as return type = no return value; `void` in parameters = no arguments.
-- `void *` can be assigned to any pointer type and vice versa without explicit cast in C (but not in C++).
-- You cannot dereference a `void *` — you must cast it to a complete type first.
-- Pointer arithmetic on `void *` is not allowed in standard C (GCC allows it as an extension, treating it as `char *`).
-- `void (*fp)(void)` is a function pointer to a function taking no arguments and returning nothing.
+Key points:
+1. `void` as return type = no return value; `void` in parameters = no arguments.
+2. `void *` can be assigned to any pointer type and vice versa without explicit cast in C (but not in C++).
+3. You cannot dereference a `void *` — you must cast it to a complete type first.
+4. Pointer arithmetic on `void *` is not allowed in standard C (GCC allows it as an extension, treating it as `char *`).
+5. `void (*fp)(void)` is a function pointer to a function taking no arguments and returning nothing.
 
-**References:**
-1. ISO/IEC 9899:1990 (C89/C90), §3.1.2.5 — The void type.
+References:
+1. ISO/IEC 9899:1990 (C89/C90), §3.1.2.5 — The void type
+
 2. Kernighan, B. & Ritchie, D. *The C Programming Language*, 2nd ed., §5.11 — Pointers to Functions.
 3. Linux kernel `include/linux/list.h` — generic doubly-linked list implementation.
 4. SQLite source: `sqlite3.h` — `sqlite3_exec` callback signature.

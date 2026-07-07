@@ -60,15 +60,16 @@ Professional C codebases enforce the ODR rigorously. The Linux kernel's build sy
 
 A useful mental model is to think of each `.c` file as a room in a museum. Each room has its own unique exhibits (definitions). The doorways are the header files — they tell visitors what they can find in other rooms without duplicating the exhibits themselves. If two rooms contain the same painting, the curator (linker) cannot decide which one to display and shuts down the entire museum.
 
-**Key points to never forget:**
-- Exactly one definition per function and global variable across the entire program.
-- Multiple `extern` declarations are allowed — that is the purpose of header files.
-- `static` at file scope makes a symbol local to its translation unit, bypassing the ODR.
-- Tentative definitions (`int x;` at file scope without `extern`) are a C89 special case — avoid relying on them.
-- Linker errors for ODR violations mean you have a symbol defined in two different `.c` files.
-- LTO (Link-Time Optimisation) can expose ODR violations that were previously hidden.
+Key points:
+1. Exactly one definition per function and global variable across the entire program.
+2. Multiple `extern` declarations are allowed — that is the purpose of header files.
+3. `static` at file scope makes a symbol local to its translation unit, bypassing the ODR.
+4. Tentative definitions (`int x;` at file scope without `extern`) are a C89 special case — avoid relying on them.
+5. Linker errors for ODR violations mean you have a symbol defined in two different `.c` files.
+6. LTO (Link-Time Optimisation) can expose ODR violations that were previously hidden.
 
-**References:**
-1. Linux kernel: `include/linux/export.h` — `EXPORT_SYMBOL()` macro and ODR enforcement.
+References:
+1. Linux kernel: `include/linux/export.h` — `EXPORT_SYMBOL()` macro and ODR enforcement
+
 2. Git source: `git-compat-util.h` — uses `static inline` extensively to avoid ODR.
 3. WebKit bug 245132 — ODR violation in WTF::fastMalloc causing production crashes.

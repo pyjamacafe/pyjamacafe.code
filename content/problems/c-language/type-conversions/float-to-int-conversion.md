@@ -57,6 +57,12 @@ In professional practice, I once worked on a radar display system where target c
 
 Picture the conversion as a number line from -5 to +5. Truncation draws a vertical blade at each integer, cutting at the decimal point — anything to the right of the blade is discarded. Ceil draws a blade that always lifts to the next integer above. Floor always drops to the next integer below. Round draws the blade at the halfway point between integers.
 
-Key points: (1) Direct cast truncates toward zero, not toward negative infinity. (2) `round()`, `ceil()`, and `floor()` require `<math.h>` and the `-lm` linker flag. (3) `round()` in C11 rounds half away from zero; C++ and IEEE 754 default to round half to even (banker's rounding). (4) Converting a float outside the `int` range is undefined behavior. (5) For financial calculations, avoid floating-point entirely — use fixed-point or integer cents.
+Key points:
+1. Direct cast truncates toward zero, not toward negative infinity.
+2. `round()`, `ceil()`, and `floor()` require `<math.h>` and the `-lm` linker flag.
+3. `round()` in C11 rounds half away from zero; C++ and IEEE 754 default to round half to even (banker's rounding).
+4. Converting a float outside the `int` range is undefined behavior.
+5. For financial calculations, avoid floating-point entirely — use fixed-point or integer cents.
+
 
 Read C11 §6.3.1.4 for floating-to-integer conversion rules and §7.12.9 for the math rounding functions. IEEE 754-2019 §4.3 specifies the five rounding-direction attributes. "What Every Computer Scientist Should Know About Floating-Point Arithmetic" by David Goldberg is the definitive reference.

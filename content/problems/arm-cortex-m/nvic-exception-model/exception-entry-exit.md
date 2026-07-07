@@ -107,5 +107,6 @@ Visualize the stack frame as a time capsule. When an exception interrupts normal
 
 Key points: eight registers are pushed in a fixed order; the stack pointer selection (MSP/PSP) depends on the exception and current mode; EXC_RETURN bits encode the return behavior; the xPSR preserves ALU flags across the exception; on ARMv7-M with FPU, an additional 16 words may be pushed for floating-point state.
 
-References: ARM Architecture Reference Manual ARMv7-M (section B1.5.6 — Stack frame), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 8.4 — Exception Entry and Exit), ARM Infocenter document DDI0403E.
+References:
+1. ARM Architecture Reference Manual ARMv7-M (section B1.5.6 — Stack frame), Joseph Yiu "The Definitive Guide to ARM Cortex-M3 and Cortex-M4 Processors" (Chapter 8.4 — Exception Entry and Exit), ARM Infocenter document DDI0403E.
 
