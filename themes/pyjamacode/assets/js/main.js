@@ -114,7 +114,6 @@ function init() {
   if (questionSearchEl) {
     questionSearchEl.addEventListener('input', (e) => renderQuestionList(e.target.value));
   }
-  if (runBtn) runBtn.addEventListener('click', runCode);
   if (submitBtn) submitBtn.addEventListener('click', submitCode);
   if (resetBtn) resetBtn.addEventListener('click', resetCase);
   if (resetAllBtn) resetAllBtn.addEventListener('click', resetAllFiles);
@@ -818,6 +817,10 @@ function selectQuestion(id) {
   if (question.difficulty) {
     questionContentEl.classList.add('diff-' + question.difficulty);
   }
+
+  // Update case title in the center pane titlebar
+  const caseTitleEl = document.getElementById('caseTitle');
+  if (caseTitleEl) caseTitleEl.textContent = question.title;
   if (languageLabelEl) {
     languageLabelEl.textContent = (question.language || 'c').toUpperCase();
   }
@@ -891,7 +894,7 @@ function updateStatus(status) {
     statusTextEl.textContent = displayStatus;
   }
   if (workspaceTitleEl) {
-    workspaceTitleEl.textContent = 'Status: ' + displayStatus;
+    workspaceTitleEl.textContent = displayStatus;
     workspaceTitleEl.className = 'mb-0 ' + (
       displayStatus === 'Accepted' ? 'text-pass' :
       displayStatus === 'Wrong Answer' || displayStatus === 'Runtime Error' || displayStatus === 'Compilation Error' ? 'text-fail' :
@@ -1268,14 +1271,23 @@ function extractLanguage(codeEl) {
 
 function initSidebarToggle() {
   const btn = document.getElementById('sidebarToggle');
+  const sidebar = document.getElementById('sidebarPane');
   const body = document.body;
-  if (!btn) return;
+  if (!btn || !sidebar) return;
   const collapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-  if (collapsed) body.classList.add('sidebar-collapsed');
+  if (collapsed) {
+    body.classList.add('sidebar-collapsed');
+    sidebar.style.width = '';
+  }
   btn.addEventListener('click', () => {
     const isCollapsed = body.classList.toggle('sidebar-collapsed');
     localStorage.setItem('sidebarCollapsed', isCollapsed);
     btn.setAttribute('title', isCollapsed ? 'Show sidebar' : 'Collapse sidebar');
+    if (isCollapsed) {
+      sidebar.style.width = '';
+    } else {
+      sidebar.style.width = '';
+    }
     if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
       const tp = bootstrap.Tooltip.getInstance(btn);
       if (tp) tp.hide();

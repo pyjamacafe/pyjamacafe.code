@@ -128,11 +128,13 @@ body {
 
 #sidebarPane {
   width: 20%;
-  transition: width 0.2s, min-width 0.2s, padding 0.2s, opacity 0.2s;
+  min-width: 0;
   overflow: hidden;
+  contain: layout style;
 }
 
-body.sidebar-collapsed #sidebarPane {
+body.sidebar-collapsed #sidebarPane,
+body.sidebar-collapsed #resizerCasesCase {
   width: 0;
   min-width: 0;
   padding: 0;
@@ -161,13 +163,11 @@ body.sidebar-collapsed #editorPane {
 
 .pane-header {
   flex: 0 0 auto;
-  height: 56px;
-  min-height: 56px;
-  padding: 0 1rem;
+  height: 42px;
+  min-height: 42px;
+  padding: 0 0.75rem;
   display: flex;
   align-items: center;
-  position: relative;
-  z-index: 10;
 }
 
 .notes-header {
@@ -181,34 +181,43 @@ body.sidebar-collapsed #editorPane {
   line-height: 1.2;
 }
 
-/* Tab bar */
-.tab-bar {
-  display: flex;
-  align-items: stretch;
-  height: 100%;
-  gap: 0;
-}
-
-.tab {
-  background: none;
-  border: none;
-  border-bottom: 2px solid transparent;
-  color: var(--bs-secondary-color);
-  font-size: 0.85rem;
+#workspaceTitle {
+  font-size: 0.875rem;
   font-weight: 600;
-  padding: 0 0.75rem;
+}
+
+/* Center tabs (match file tab style) */
+.center-tabs {
+  display: flex;
+  background: var(--bs-secondary-bg);
+  border-bottom: 1px solid var(--border-color);
+  overflow-x: auto;
+  flex-shrink: 0;
+  min-height: 32px;
+}
+
+.center-tab {
+  flex-shrink: 0;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.8rem;
   cursor: pointer;
-  transition: color 0.15s, border-color 0.15s;
+  color: var(--bs-secondary-color);
+  border-right: 1px solid var(--border-color);
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
   white-space: nowrap;
+  user-select: none;
 }
 
-.tab:hover {
+.center-tab:hover {
   color: var(--bs-body-color);
+  background: var(--bs-tertiary-bg);
 }
 
-.tab.active {
+.center-tab.active {
   color: var(--bs-body-color);
   border-bottom-color: var(--accent-color);
+  background: var(--bs-code-bg, var(--bs-body-bg));
 }
 
 .article-content {
@@ -588,6 +597,22 @@ body.sidebar-collapsed #editorPane {
   font-weight: 600;
   text-transform: uppercase;
   overflow: hidden;
+}
+
+#authAvatarBtn {
+  border: none;
+  background: none;
+  padding: 2px 0.5rem;
+  box-shadow: none;
+  outline: none;
+  transition: background 0.15s;
+}
+
+#authAvatarBtn:hover,
+#authAvatarBtn:active,
+#authAvatarBtn.show {
+  background: var(--bs-border-color);
+  color: var(--bs-body-color);
 }
 
 .auth-avatar img {

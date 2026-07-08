@@ -69,12 +69,14 @@
 
   <!-- Middle: Case Details -->
   <aside class="platform-pane question-pane" id="questionPane">
-    <div class="pane-header border-bottom d-flex align-items-center">
+    <div class="pane-header border-bottom d-flex align-items-center" style="justify-content:space-between">
       <button id="sidebarToggle" class="btn btn-sm py-0 btn-link text-decoration-none" data-bs-toggle="tooltip" title="Collapse sidebar" style="font-size:0.9rem;color:var(--bs-secondary-color);flex-shrink:0;padding:0 0.25rem"><i class="bi bi-layout-sidebar"></i></button>
-      <div class="tab-bar d-flex gap-1" id="tabBar">
-        <button class="tab active" id="tabChallenge">Challenge</button>
-        <button class="tab d-none" id="tabArticle">Lecture &amp; Notes</button>
-      </div>
+      <span id="caseTitle" class="small fw-semibold" style="flex:1;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Select a Case</span>
+      <span style="width:1.4rem;flex-shrink:0"></span>
+    </div>
+    <div class="center-tabs" id="centerTabs">
+      <div class="center-tab active" id="tabChallenge">Challenge</div>
+      <div class="center-tab d-none" id="tabArticle">Lecture &amp; Notes</div>
     </div>
     <div class="question-pane-body" id="questionPaneBody">
       <div id="questionContentWrapper">
@@ -120,11 +122,9 @@
   <!-- Right: Coding Workspace -->
   <section class="platform-pane editor-pane" id="editorPane">
     <div class="pane-header border-bottom d-flex align-items-center justify-content-between gap-2">
-      <h5 class="mb-0" id="workspaceTitle">Status: Unattempted</h5>
+      <h5 class="mb-0" id="workspaceTitle">Unattempted</h5>
       <div class="d-flex gap-2 align-items-center">
-        <span id="languageLabel" class="badge text-bg-secondary text-uppercase">C</span>
-        <button id="runBtn" class="btn btn-sm btn-info text-white" data-bs-toggle="tooltip" title="Compile and run (Ctrl/Cmd + S)"><i class="bi bi-play-fill"></i> Run</button>
-        <button id="submitBtn" class="btn btn-sm btn-success" data-bs-toggle="tooltip" title="Submit solution"><i class="bi bi-check-lg"></i> Submit</button>
+        <button id="submitBtn" class="btn btn-sm btn-success" data-bs-toggle="tooltip" title="Check solution"><i class="bi bi-check-lg"></i> Check</button>
         <button id="resetBtn" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="Reset active file to starter"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
         <button id="resetAllBtn" class="btn btn-sm btn-outline-secondary d-none" data-bs-toggle="tooltip" title="Reset all files to starter"><i class="bi bi-arrow-counterclockwise"></i> Reset All</button>
       </div>
