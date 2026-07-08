@@ -118,6 +118,7 @@ function init() {
   if (resetBtn) resetBtn.addEventListener('click', resetCase);
   if (resetAllBtn) resetAllBtn.addEventListener('click', resetAllFiles);
   initSidebarToggle();
+  initProblemNav();
   if (clearConsoleBtn) clearConsoleBtn.addEventListener('click', () => (consoleOutputEl.textContent = ''));
   if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
   if (notesModeBtn) notesModeBtn.addEventListener('click', toggleNotesMode);
@@ -1267,6 +1268,23 @@ function extractLanguage(codeEl) {
     }
   }
   return '';
+}
+
+function initProblemNav() {
+  const prevBtn = document.getElementById('prevProblemBtn');
+  const nextBtn = document.getElementById('nextProblemBtn');
+  if (!prevBtn || !nextBtn) return;
+
+  const navigate = (dir) => {
+    const idx = questions.findIndex((q) => q.id === activeQuestionId);
+    if (idx < 0) return;
+    const target = idx + dir;
+    if (target < 0 || target >= questions.length) return;
+    selectQuestion(questions[target].id);
+  };
+
+  prevBtn.addEventListener('click', () => navigate(-1));
+  nextBtn.addEventListener('click', () => navigate(1));
 }
 
 function initSidebarToggle() {
