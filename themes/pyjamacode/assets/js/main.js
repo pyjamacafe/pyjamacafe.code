@@ -138,6 +138,7 @@ function init() {
   initTabs();
   initFirebase();
   setupAuth();
+  initSync();
 }
 
 function handleKeyboardShortcuts(e) {
@@ -366,10 +367,32 @@ function updateCodeMirrorMode(language) {
 
 function updateCodeMirrorTheme() {
   if (!codeMirror) return;
-  codeMirror.setOption('theme', getCodeMirrorTheme());
+  const theme = getCodeMirrorTheme();
+  setEditorTheme(codeMirror, theme);
+  forceEditorRepaint(codeMirror);
   if (notesCodeMirror) {
-    notesCodeMirror.setOption('theme', getCodeMirrorTheme());
+    setEditorTheme(notesCodeMirror, theme);
+    forceEditorRepaint(notesCodeMirror);
   }
+}
+
+function setEditorTheme(editor, theme) {
+  if (!editor || !editor.getWrapperElement) return;
+  const wrapper = editor.getWrapperElement();
+  // Remove all existing cm-s-* classes
+  wrapper.className = wrapper.className.replace(/cm-s-\S+/g, '').trim();
+  // Force add via setOption AND classList for reliability
+  editor.setOption('theme', theme);
+  wrapper.classList.add('cm-s-' + theme);
+}
+
+function forceEditorRepaint(editor) {
+  if (!editor || !editor.getWrapperElement) return;
+  const wrapper = editor.getWrapperElement();
+  // Force a reflow by toggling a harmless style
+  wrapper.style.opacity = '0.999';
+  requestAnimationFrame(() => { wrapper.style.opacity = ''; });
+  editor.refresh();
 }
 
 function initNotesCodeMirror() {
@@ -1591,6 +1614,152 @@ function showAuthError(msg) {
     authError.textContent = msg;
     authError.style.display = 'block';
   }
+}
+
+/* ─── Cloud Sync ─── */
+function initSync() {
+  if (typeof firebase === 'undefined' || !firebase.apps.length) return;
+  const db = firebase.firestore();
+  let syncUid = null;
+  let syncTimer = null;
+
+  function getData() {
+    return {
+      submissions: localStorage.getItem('pyjamacode-submissions') || '{}',
+      notes: localStorage.getItem('pyjamacode-notes') || '{}',
+      theme: localStorage.getItem('pyjamacode-theme') || 'dark',
+      tab: new URL(window.location).searchParams.get('tab') || '',
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+  }
+
+  let isPushingLocally = false;
+  let cloudUnsub = null;
+
+  function applyCloudData(d) {
+    let changed = false;
+    if (d.submissions) {
+      localStorage.setItem('pyjamacode-submissions', d.submissions);
+      try { submissions = JSON.parse(d.submissions) || {}; } catch (e) { submissions = {}; }
+      changed = true;
+    }
+    if (d.notes) {
+      localStorage.setItem('pyjamacode-notes', d.notes);
+      try { notes = JSON.parse(d.notes) || {}; } catch (e) { notes = {}; }
+      changed = true;
+    }
+      if (d.theme) {
+        localStorage.setItem('pyjamacode-theme', d.theme);
+        htmlEl.setAttribute('data-bs-theme', d.theme);
+        updateThemeIcon(d.theme);
+        updateCodeMirrorTheme();
+        updateHighlightJsTheme(d.theme);
+        changed = true;
+      }
+    if (changed) refreshUI();
+  }
+
+  function pushToCloud() {
+    if (!syncUid) return;
+    clearTimeout(syncTimer);
+    syncTimer = setTimeout(() => {
+      isPushingLocally = true;
+      db.collection('userData').doc(syncUid).set(getData()).then(() => {
+        setTimeout(() => { isPushingLocally = false; }, 1000);
+      }).catch(() => { isPushingLocally = false; });
+    }, 300);
+  }
+
+  function startCloudListener(uid) {
+    if (cloudUnsub) cloudUnsub();
+    cloudUnsub = db.collection('userData').doc(uid).onSnapshot((snap) => {
+      if (isPushingLocally) return;
+      if (snap.exists) applyCloudData(snap.data());
+      else db.collection('userData').doc(uid).set(getData()).catch(() => {});
+    });
+  }
+
+  function stopCloudListener() {
+    if (cloudUnsub) { cloudUnsub(); cloudUnsub = null; }
+  }
+
+  function pullFromCloud(uid) {
+    return db.collection('userData').doc(uid).get().then((snap) => {
+      if (!snap.exists) {
+        db.collection('userData').doc(uid).set(getData()).catch(() => {});
+        return;
+      }
+      applyCloudData(snap.data());
+    });
+  }
+
+  function refreshUI() {
+    loadSubmissions();
+    loadNotes();
+    if (activeQuestionId) selectQuestion(activeQuestionId);
+    else renderQuestionList(questionSearchEl ? questionSearchEl.value : '');
+  }
+
+  // Listen for auth changes
+  onAuthChange((user) => {
+    if (user) {
+      syncUid = user.uid;
+      pullFromCloud(user.uid).then(() => {
+        refreshUI();
+        startCloudListener(user.uid);
+      }).catch(() => {
+        db.collection('userData').doc(user.uid).set(getData()).catch(() => {});
+        startCloudListener(user.uid);
+      });
+    } else {
+      syncUid = null;
+      stopCloudListener();
+    }
+  });
+
+  // Tab changes push to cloud
+  const origSetActiveTab = setActiveTab;
+  setActiveTab = function(tab) {
+    origSetActiveTab(tab);
+    if (syncUid) pushToCloud();
+  };
+
+  // Push on every data mutation
+  const origPersistSubmissions = persistSubmissions;
+  persistSubmissions = function() {
+    origPersistSubmissions();
+    if (syncUid) pushToCloud();
+  };
+
+  const origPersistNotes = persistNotes;
+  persistNotes = function() {
+    origPersistNotes();
+    if (syncUid) pushToCloud();
+  };
+
+  const origToggleTheme = toggleTheme;
+  toggleTheme = function() {
+    origToggleTheme();
+    if (syncUid) pushToCloud();
+  };
+
+  // Push on visibility change (tab switch, minimize)
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && syncUid) {
+      pushToCloud();
+    } else if (!document.hidden && syncUid) {
+      pullFromCloud(syncUid).then(() => {
+        refreshUI();
+      }).catch(() => {});
+    }
+  });
+
+  // Push on page close — only if this tab is the active one
+  window.addEventListener('beforeunload', () => {
+    if (syncUid && !document.hidden) {
+      db.collection('userData').doc(syncUid).set(getData());
+    }
+  });
 }
 
 if (document.readyState === 'loading') {
