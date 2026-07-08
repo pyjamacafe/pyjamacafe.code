@@ -118,6 +118,7 @@ function init() {
   if (submitBtn) submitBtn.addEventListener('click', submitCode);
   if (resetBtn) resetBtn.addEventListener('click', resetCase);
   if (resetAllBtn) resetAllBtn.addEventListener('click', resetAllFiles);
+  initSidebarToggle();
   if (clearConsoleBtn) clearConsoleBtn.addEventListener('click', () => (consoleOutputEl.textContent = ''));
   if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
   if (notesModeBtn) notesModeBtn.addEventListener('click', toggleNotesMode);
@@ -1263,6 +1264,24 @@ function extractLanguage(codeEl) {
     }
   }
   return '';
+}
+
+function initSidebarToggle() {
+  const btn = document.getElementById('sidebarToggle');
+  const body = document.body;
+  if (!btn) return;
+  const collapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+  if (collapsed) body.classList.add('sidebar-collapsed');
+  btn.addEventListener('click', () => {
+    const isCollapsed = body.classList.toggle('sidebar-collapsed');
+    localStorage.setItem('sidebarCollapsed', isCollapsed);
+    btn.setAttribute('title', isCollapsed ? 'Show sidebar' : 'Collapse sidebar');
+    if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+      const tp = bootstrap.Tooltip.getInstance(btn);
+      if (tp) tp.hide();
+    }
+    setTimeout(() => { if (codeMirror) codeMirror.refresh(); }, 250);
+  });
 }
 
 function initVimeoPlayers(root) {
