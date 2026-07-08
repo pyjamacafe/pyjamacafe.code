@@ -67,3 +67,43 @@ Key points:
 
 
 Kernighan & Ritchie §5.1–5.2 introduce pointers. "Expert C Programming: Deep C Secrets" (Linden, 1994) covers pointer pitfalls. Ritchie's HOPL paper describes the evolution from B to C pointers. The CERT standard rule EXP08-C addresses safe pointer use.
+
+===CODE===
+
+```c {title="main.c"}
+#include <stdio.h>
+
+int main(void) {
+    int x = 42;
+    int *p = &x;
+
+    printf("Value of x: %d\\n", x);
+    printf("Address of x: %p\\n", (void *)&x);
+    printf("Pointer p holds: %p\\n", (void *)p);
+    printf("Value via dereference: %d\\n", *p);
+
+    // Modify through pointer
+    *p = 100;
+    printf("After *p = 100, x = %d\\n", x);
+
+    return 0;
+}
+```
+
+```c {title="pointer_utils.h"}
+#ifndef POINTER_UTILS_H
+#define POINTER_UTILS_H
+
+void print_ptr_info(const int *p);
+
+#endif
+```
+
+```c {title="pointer_utils.c"}
+#include <stdio.h>
+#include "pointer_utils.h"
+
+void print_ptr_info(const int *p) {
+    printf("Address: %p, Value: %d\\n", (void *)p, *p);
+}
+```

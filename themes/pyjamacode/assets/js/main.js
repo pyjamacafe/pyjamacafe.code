@@ -1545,7 +1545,6 @@ function buildFileTabs(question) {
       tab.addEventListener('click', () => switchFileTab(idx));
       fileTabs.appendChild(tab);
     });
-    fileTabs.classList.toggle('d-none', fileList.length <= 1);
   }
 
   // Show/hide reset all button
