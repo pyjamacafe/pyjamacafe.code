@@ -40,6 +40,8 @@ const workspaceTitleEl = document.getElementById('workspaceTitle');
 const runBtn = document.getElementById('runBtn');
 const submitBtn = document.getElementById('submitBtn');
 const resetBtn = document.getElementById('resetBtn');
+const resetAllBtn = document.getElementById('resetAllBtn');
+const fileTabs = document.getElementById('fileTabs');
 const clearConsoleBtn = document.getElementById('clearConsole');
 const themeToggle = document.getElementById('themeToggle');
 const themeIcon = document.getElementById('themeIcon');
@@ -76,6 +78,9 @@ let notesSaveTimeout = null;
 let isSettingValue = false;
 let isSettingNotesValue = false;
 let notesPreviewMode = true;
+let activeFileIndex = 0;
+let fileList = [];
+let filePerProblem = {};
 let notesSavedHeight = null;
 let notesViewState = 'normal';
 let treeExpanded = {};
@@ -112,6 +117,7 @@ function init() {
   if (runBtn) runBtn.addEventListener('click', runCode);
   if (submitBtn) submitBtn.addEventListener('click', submitCode);
   if (resetBtn) resetBtn.addEventListener('click', resetCase);
+  if (resetAllBtn) resetAllBtn.addEventListener('click', resetAllFiles);
   if (clearConsoleBtn) clearConsoleBtn.addEventListener('click', () => (consoleOutputEl.textContent = ''));
   if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
   if (notesModeBtn) notesModeBtn.addEventListener('click', toggleNotesMode);
@@ -816,9 +822,8 @@ function selectQuestion(id) {
   }
   updateCodeMirrorMode(question.language || 'c');
 
-  const savedCode = submissions[id]?.code;
-  const starterCode = question.initial_code || '';
-  setEditorValue(savedCode || starterCode);
+  // Build file tabs from ===CODE=== section
+  buildFileTabs(question);
 
   const savedNotes = notes[id] || '';
   setNotesEditorValue(savedNotes);
@@ -919,22 +924,59 @@ function resetCase() {
   const question = questions.find((q) => q.id === activeQuestionId);
   if (!question) return;
 
-  delete submissions[activeQuestionId];
-  persistSubmissions();
-
-  setEditorValue(question.initial_code || '');
-  consoleOutputEl.textContent = 'Code reset to initial state.';
+  if (fileList.length > 0) {
+    // Reset active file only
+    const file = fileList[activeFileIndex];
+    if (!submissions[activeQuestionId]) submissions[activeQuestionId] = {};
+    if (!submissions[activeQuestionId].files) submissions[activeQuestionId].files = {};
+    submissions[activeQuestionId].files[file.filename] = file.content;
+    setEditorValue(file.content);
+    consoleOutputEl.textContent = 'Reset: ' + file.filename;
+  } else {
+    delete submissions[activeQuestionId];
+    setEditorValue(question.initial_code || '');
+    consoleOutputEl.textContent = 'Code reset to initial state.';
+  }
+  if (!submissions[activeQuestionId]) submissions[activeQuestionId] = { status: 'Unattempted', output: '' };
+  submissions[activeQuestionId].status = 'Unattempted';
   updateStatus('Unattempted');
+  persistSubmissions();
+  renderQuestionList(questionSearchEl ? questionSearchEl.value : '');
+}
+
+function resetAllFiles() {
+  if (!activeQuestionId) return;
+  const question = questions.find((q) => q.id === activeQuestionId);
+  if (!question || fileList.length === 0) return;
+
+  fileList.forEach((file) => {
+    if (!submissions[activeQuestionId]) submissions[activeQuestionId] = {};
+    if (!submissions[activeQuestionId].files) submissions[activeQuestionId].files = {};
+    submissions[activeQuestionId].files[file.filename] = file.content;
+  });
+  setEditorValue(fileList[activeFileIndex].content);
+  consoleOutputEl.textContent = 'All files reset to starter.';
+  submissions[activeQuestionId].status = 'Unattempted';
+  updateStatus('Unattempted');
+  persistSubmissions();
   renderQuestionList(questionSearchEl ? questionSearchEl.value : '');
 }
 
 function saveCurrentCode() {
   if (!activeQuestionId) return;
-  if (!submissions[activeQuestionId]) {
-    submissions[activeQuestionId] = { status: 'In Progress', output: '', code: '' };
+  const code = getEditorValue();
+  if (fileList.length > 0) {
+    const file = fileList[activeFileIndex];
+    if (!submissions[activeQuestionId]) submissions[activeQuestionId] = {};
+    if (!submissions[activeQuestionId].files) submissions[activeQuestionId].files = {};
+    submissions[activeQuestionId].files[file.filename] = code;
+  } else {
+    if (!submissions[activeQuestionId]) {
+      submissions[activeQuestionId] = { status: 'In Progress', output: '', code: '' };
+    }
+    submissions[activeQuestionId].code = code;
   }
-  submissions[activeQuestionId].code = getEditorValue();
-  if (submissions[activeQuestionId].status === 'Unattempted') {
+  if (!submissions[activeQuestionId].status || submissions[activeQuestionId].status === 'Unattempted') {
     submissions[activeQuestionId].status = 'In Progress';
     updateStatus('In Progress');
     renderQuestionList(questionSearchEl ? questionSearchEl.value : '');
@@ -1467,6 +1509,93 @@ function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
+}
+
+/* ─── File Tabs ─── */
+function buildFileTabs(question) {
+  fileList = [];
+  activeFileIndex = 0;
+
+  if (question.codes) {
+    const div = document.createElement('div');
+    div.innerHTML = question.codes;
+    const pres = div.querySelectorAll('pre');
+    pres.forEach((pre) => {
+      const codeEl = pre.querySelector('code');
+      if (!codeEl) return;
+      const raw = pre.getAttribute('data-title') || '';
+      const lang = extractLanguage(codeEl);
+      const filename = raw || 'untitled.' + (lang || 'c').toLowerCase();
+      const content = codeEl.textContent || '';
+      fileList.push({ filename: filename, language: lang || 'c', content: content });
+    });
+  }
+
+  if (fileList.length === 0 && question.initial_code) {
+    fileList.push({ filename: 'main.c', language: 'c', content: question.initial_code });
+  }
+
+  // Render tabs
+  if (fileTabs) {
+    fileTabs.innerHTML = '';
+    fileList.forEach((file, idx) => {
+      const tab = document.createElement('div');
+      tab.className = 'file-tab' + (idx === activeFileIndex ? ' active' : '');
+      tab.textContent = file.filename;
+      tab.addEventListener('click', () => switchFileTab(idx));
+      fileTabs.appendChild(tab);
+    });
+    fileTabs.classList.toggle('d-none', fileList.length <= 1);
+  }
+
+  // Show/hide reset all button
+  if (resetAllBtn) resetAllBtn.classList.toggle('d-none', fileList.length <= 1);
+
+  // Load active file content
+  loadActiveFile(question);
+}
+
+function loadActiveFile(question) {
+  if (!question) return;
+  const id = question.id;
+  let code = '';
+  if (fileList.length > 0) {
+    const file = fileList[activeFileIndex];
+    const saved = submissions[id]?.files?.[file.filename];
+    code = saved || file.content;
+    const lang = file.language || 'c';
+    if (languageLabelEl) languageLabelEl.textContent = lang.toUpperCase();
+    updateCodeMirrorMode(lang);
+  } else {
+    const saved = submissions[id]?.code;
+    const starter = question.initial_code || '';
+    code = saved || starter;
+    if (languageLabelEl) languageLabelEl.textContent = (question.language || 'c').toUpperCase();
+    updateCodeMirrorMode(question.language || 'c');
+  }
+  setEditorValue(code);
+}
+
+function switchFileTab(idx) {
+  if (idx === activeFileIndex) return;
+  // Save current file code
+  if (activeQuestionId && fileList.length > 0) {
+    const file = fileList[activeFileIndex];
+    if (!submissions[activeQuestionId]) submissions[activeQuestionId] = {};
+    if (!submissions[activeQuestionId].files) submissions[activeQuestionId].files = {};
+    submissions[activeQuestionId].files[file.filename] = getEditorValue();
+  }
+  activeFileIndex = idx;
+  // Update tab styles
+  if (fileTabs) {
+    fileTabs.querySelectorAll('.file-tab').forEach((tab, i) => {
+      tab.classList.toggle('active', i === idx);
+    });
+  }
+  // Load new file
+  const question = questions.find((q) => q.id === activeQuestionId);
+  if (question) loadActiveFile(question);
+  persistSubmissions();
 }
 
 /* ─── Auth ─── */

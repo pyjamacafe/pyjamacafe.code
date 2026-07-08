@@ -9,12 +9,25 @@
   {{ $parts := split (strings.TrimSuffix "/" .File.Dir) "/" }}
   {{ $topic := index $parts 1 }}
   {{ $subtopic := index $parts 2 }}
-  {{ $challengeMarkdown := .RawContent }}
+  {{ $raw := .RawContent }}
+  {{ $challengeMarkdown := $raw }}
   {{ $explanationMarkdown := "" }}
-  {{ if in .RawContent "===EXPLANATION===" }}
-    {{ $parts := split .RawContent "===EXPLANATION===" }}
+  {{ $codesMarkdown := "" }}
+  {{ if in $raw "===EXPLANATION===" }}
+    {{ $parts := split $raw "===EXPLANATION===" }}
     {{ $challengeMarkdown = index $parts 0 }}
-    {{ $explanationMarkdown = index $parts 1 }}
+    {{ $remaining := index $parts 1 }}
+    {{ if in $remaining "===CODE===" }}
+      {{ $parts2 := split $remaining "===CODE===" }}
+      {{ $explanationMarkdown = index $parts2 0 }}
+      {{ $codesMarkdown = index $parts2 1 }}
+    {{ else }}
+      {{ $explanationMarkdown = $remaining }}
+    {{ end }}
+  {{ else if in $raw "===CODE===" }}
+    {{ $parts := split $raw "===CODE===" }}
+    {{ $challengeMarkdown = index $parts 0 }}
+    {{ $codesMarkdown = index $parts 1 }}
   {{ end }}
   {{ $item := dict
     "id" .File.ContentBaseName
@@ -24,6 +37,7 @@
     "permalink" .RelPermalink
     "content" ($challengeMarkdown | .RenderString)
     "article" ($explanationMarkdown | .RenderString)
+    "codes" ($codesMarkdown | .RenderString)
     "initial_code" .Params.initial_code
     "test_cases" .Params.test_cases
     "topic" $topic
@@ -108,10 +122,12 @@
         <span id="languageLabel" class="badge text-bg-secondary text-uppercase">C</span>
         <button id="runBtn" class="btn btn-sm btn-info text-white" data-bs-toggle="tooltip" title="Compile and run (Ctrl/Cmd + S)"><i class="bi bi-play-fill"></i> Run</button>
         <button id="submitBtn" class="btn btn-sm btn-success" data-bs-toggle="tooltip" title="Submit solution"><i class="bi bi-check-lg"></i> Submit</button>
-        <button id="resetBtn" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="Reset code to starter"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
+        <button id="resetBtn" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="Reset active file to starter"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
+        <button id="resetAllBtn" class="btn btn-sm btn-outline-secondary d-none" data-bs-toggle="tooltip" title="Reset all files to starter"><i class="bi bi-arrow-counterclockwise"></i> Reset All</button>
       </div>
     </div>
 
+    <div class="file-tabs" id="fileTabs"></div>
     <div class="editor-area" id="editorArea">
       <div id="codeEditorWrapper" class="code-editor-wrapper"></div>
       <textarea id="codeEditor" class="code-editor w-100 h-100 p-3" spellcheck="false"></textarea>

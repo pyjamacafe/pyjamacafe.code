@@ -816,6 +816,44 @@ body {
   border-left-color: var(--topic-color);
 }
 
+/* File tabs */
+.file-tabs {
+  display: flex;
+  background: var(--bs-secondary-bg);
+  border-bottom: 1px solid var(--border-color);
+  overflow-x: auto;
+  flex-shrink: 0;
+  min-height: 32px;
+}
+
+.file-tabs.d-none {
+  display: none;
+}
+
+.file-tab {
+  flex-shrink: 0;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  color: var(--bs-secondary-color);
+  border-right: 1px solid var(--border-color);
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.file-tab:hover {
+  color: var(--bs-body-color);
+  background: var(--bs-tertiary-bg);
+}
+
+.file-tab.active {
+  color: var(--bs-body-color);
+  border-bottom-color: var(--accent-color);
+  background: var(--bs-code-bg, var(--bs-body-bg));
+}
+
 /* Code editor */
 .code-editor-wrapper {
   position: absolute;
