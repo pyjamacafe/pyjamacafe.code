@@ -228,6 +228,46 @@ body.sidebar-collapsed #editorPane {
   background: var(--bs-code-bg, var(--bs-body-bg));
 }
 
+.sidebar-tabs {
+  display: flex;
+  background: var(--bs-secondary-bg);
+  border-bottom: 1px solid var(--border-color);
+  overflow-x: auto;
+  flex-shrink: 0;
+  min-height: 32px;
+}
+
+.sidebar-tab {
+  flex-shrink: 0;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  color: var(--bs-secondary-color);
+  border-right: 1px solid var(--border-color);
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.sidebar-tab:hover {
+  color: var(--bs-body-color);
+  background: var(--bs-tertiary-bg);
+}
+
+.sidebar-tab.active {
+  color: var(--bs-body-color);
+  border-bottom-color: var(--accent-color);
+  background: var(--bs-code-bg, var(--bs-body-bg));
+}
+
+.bi {
+  color: var(--bs-body-color);
+}
+#bookmarkBtn .bi-bookmark-fill {
+  color: var(--bs-danger);
+}
+
 .article-content {
   flex: 1 1 auto;
   overflow: auto;
@@ -337,14 +377,6 @@ body.sidebar-collapsed #editorPane {
   font-weight: 600;
 }
 
-.console-area {
-  flex: 0 0 auto;
-  height: 200px;
-  background-color: var(--console-bg);
-  display: flex;
-  flex-direction: column;
-  min-height: 80px;
-}
 
 .sidebar-pane,
 .editor-pane,
@@ -546,6 +578,10 @@ body.sidebar-collapsed #editorPane {
   border-radius: 0;
 }
 
+#questionSearch {
+  background-color: transparent;
+}
+
 .form-control:focus,
 .form-select:focus {
   background-color: var(--editor-bg);
@@ -583,11 +619,11 @@ body.sidebar-collapsed #editorPane {
 
 .question-title {
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.75rem;
 }
 
 .question-meta {
-  font-size: 0.8rem;
+  font-size: 0.6rem;
   color: var(--bs-secondary-color);
 }
 
@@ -914,6 +950,16 @@ body.sidebar-collapsed #editorPane {
   background: var(--bs-tertiary-bg);
 }
 
+.file-tab .bi-dot,
+#notesUnsavedDot {
+  color: #e3b341;
+  visibility: hidden;
+}
+.file-tab .bi-dot.d-unsaved,
+#notesUnsavedDot.d-unsaved {
+  visibility: visible;
+}
+
 .file-tab.active {
   color: var(--bs-body-color);
   border-bottom-color: var(--accent-color);
@@ -1179,8 +1225,10 @@ body.sidebar-collapsed #editorPane {
 
 /* Console */
 .console-area {
+  flex: 0 0 auto;
   height: 200px;
-  background-color: var(--console-bg);
+  min-height: 80px;
+  background-color: var(--editor-bg);
   display: flex;
   flex-direction: column;
 }
@@ -1199,7 +1247,7 @@ body.sidebar-collapsed #editorPane {
 .terminal-body {
   flex: 1;
   min-height: 0;
-  background-color: transparent;
+  background-color: var(--bs-body-bg);
 }
 
 .console-output {
@@ -1518,6 +1566,15 @@ body.sidebar-collapsed #editorPane {
   background-color: var(--btn-default-hover);
   border-color: var(--btn-default-border);
   color: var(--bs-body-color);
+}
+
+#submitBtn, #resetBtn, #resetAllBtn {
+  background: none;
+  border: none;
+}
+
+#submitBtn:hover, #resetBtn:hover, #resetAllBtn:hover {
+  background-color: var(--btn-default-hover);
 }
 
 .btn-link {

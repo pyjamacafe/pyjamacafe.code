@@ -43,6 +43,7 @@ const resetAllBtn = document.getElementById('resetAllBtn');
 const fileTabs = document.getElementById('fileTabs');
 const clearConsoleBtn = document.getElementById('clearConsole');
 const terminalInput = document.getElementById('terminalInput');
+const bookmarkBtn = document.getElementById('bookmarkBtn');
 const themeToggle = document.getElementById('themeToggle');
 const themeIcon = document.getElementById('themeIcon');
 const sidebarPane = document.getElementById('sidebarPane');
@@ -67,11 +68,14 @@ const resizerQuestionNotes = document.getElementById('resizerQuestionNotes');
 
 const SUBMISSIONS_STORAGE_KEY = 'pyjamacode-submissions';
 const NOTES_STORAGE_KEY = 'pyjamacode-notes';
+const BOOKMARKS_STORAGE_KEY = 'pyjamacode-bookmarks';
 
 let questions = [];
 let activeQuestionId = null;
 let submissions = {};
 let notes = {};
+let bookmarks = {};
+let unsavedFiles = {};
 let codeMirror = null;
 let notesCodeMirror = null;
 let saveTimeout = null;
@@ -106,6 +110,7 @@ function init() {
   loadTheme();
   loadSubmissions();
   loadNotes();
+  loadBookmarks();
   initCodeMirror();
   initNotesCodeMirror();
   renderQuestionList();
@@ -116,12 +121,18 @@ function init() {
   notesSavedHeight = notesArea ? notesArea.offsetHeight : 200;
 
   if (questionSearchEl) {
-    questionSearchEl.addEventListener('input', (e) => renderQuestionList(e.target.value));
+    questionSearchEl.addEventListener('input', (e) => {
+      const isBookmarks = document.getElementById('bookmarksList') && !document.getElementById('bookmarksList').classList.contains('d-none');
+      if (isBookmarks) renderBookmarksList(e.target.value);
+      else renderQuestionList(e.target.value);
+    });
   }
   if (submitBtn) submitBtn.addEventListener('click', submitCode);
   if (resetBtn) resetBtn.addEventListener('click', resetCase);
   if (resetAllBtn) resetAllBtn.addEventListener('click', resetAllFiles);
   initSidebarToggle();
+  initSidebarTabs();
+  initBookmarkBtn();
   initProblemNav();
   if (clearConsoleBtn) clearConsoleBtn.addEventListener('click', () => { consoleOutputEl.textContent = ''; if (terminalInput) terminalInput.value = ''; });
   if (terminalInput) {
@@ -223,6 +234,7 @@ function handleKeyboardShortcuts(e) {
     if (activeQuestionId) {
       saveCurrentCode();
       saveCurrentNotes();
+      hideAllUnsavedDots();
     }
   }
   if (e.key === 'Escape' && !notesPreviewMode) {
@@ -425,7 +437,7 @@ function initCodeMirror() {
       codeEditorEl.value = codeMirror.getValue();
     }
     if (!isSettingValue) {
-      debounceSaveCurrentCode();
+      showFileUnsavedDot(activeFileIndex);
     }
   });
 }
@@ -497,7 +509,7 @@ function initNotesCodeMirror() {
       notesEditorEl.value = notesCodeMirror.getValue();
     }
     if (!isSettingNotesValue) {
-      debounceSaveCurrentNotes();
+      showNotesUnsavedDot();
       if (notesPreviewMode) {
         renderNotesPreview();
       }
@@ -532,6 +544,97 @@ function loadNotes() {
   }
 }
 
+function loadBookmarks() {
+  try {
+    const saved = localStorage.getItem(BOOKMARKS_STORAGE_KEY);
+    if (saved) {
+      bookmarks = JSON.parse(saved) || {};
+    }
+  } catch (e) {
+    bookmarks = {};
+  }
+}
+
+function persistBookmarks() {
+  try {
+    localStorage.setItem(BOOKMARKS_STORAGE_KEY, JSON.stringify(bookmarks));
+  } catch (e) {}
+}
+
+function toggleBookmark(id) {
+  if (!id) return;
+  if (bookmarks[id]) {
+    delete bookmarks[id];
+  } else {
+    bookmarks[id] = true;
+  }
+  persistBookmarks();
+  updateBookmarkBtn(id);
+  renderBookmarksList(questionSearchEl ? questionSearchEl.value : '');
+}
+
+function updateBookmarkBtn(id) {
+  const icon = document.querySelector('#bookmarkBtn i');
+  if (!icon) return;
+  const isBookmarked = id && bookmarks[id];
+  icon.className = isBookmarked ? 'bi bi-bookmark-fill' : 'bi bi-bookmark';
+  if (bookmarkBtn) bookmarkBtn.classList.toggle('d-none', !id);
+}
+
+function renderBookmarksList(filter) {
+  const el = document.getElementById('bookmarksList');
+  if (!el) return;
+  const ids = Object.keys(bookmarks);
+  if (ids.length === 0) {
+    el.innerHTML = '<div class="p-3 text-muted small">No bookmarked problems yet. Click the <i class="bi bi-bookmark"></i> icon on a problem to add it here.</div>';
+    return;
+  }
+  const filterLower = (filter || '').toLowerCase();
+  const matched = questions.filter((q) => ids.includes(q.id) && (!filterLower || q.title.toLowerCase().includes(filterLower)));
+  if (matched.length === 0) {
+    el.innerHTML = '<div class="p-3 text-muted small">No bookmarks match your search.</div>';
+    return;
+  }
+  el.innerHTML = matched.map((q) => `
+    <div class="tree-leaf" data-id="${q.id}">
+      <div class="question-title">${escapeHtml(q.title)}</div>
+      <div class="question-meta">${q.difficulty} · ${submissions[q.id]?.status || 'Unattempted'}</div>
+    </div>
+  `).join('');
+  el.querySelectorAll('.tree-leaf').forEach((item) => {
+    item.addEventListener('click', () => selectQuestion(item.dataset.id));
+  });
+}
+
+function initSidebarTabs() {
+  const tabLessons = document.getElementById('tabLessons');
+  const tabBookmarks = document.getElementById('tabBookmarks');
+  const questionList = document.getElementById('questionList');
+  const bookmarksList = document.getElementById('bookmarksList');
+  if (!tabLessons || !tabBookmarks || !questionList || !bookmarksList) return;
+
+  function setSidebarTab(tab) {
+    const isBookmarks = tab === 'bookmarks';
+    tabLessons.classList.toggle('active', !isBookmarks);
+    tabBookmarks.classList.toggle('active', isBookmarks);
+    questionList.classList.toggle('d-none', isBookmarks);
+    bookmarksList.classList.toggle('d-none', !isBookmarks);
+    if (isBookmarks) renderBookmarksList(questionSearchEl ? questionSearchEl.value : '');
+    else renderQuestionList(questionSearchEl ? questionSearchEl.value : '');
+  }
+
+  tabLessons.addEventListener('click', () => setSidebarTab('lessons'));
+  tabBookmarks.addEventListener('click', () => setSidebarTab('bookmarks'));
+}
+
+function initBookmarkBtn() {
+  const btn = document.getElementById('bookmarkBtn');
+  if (!btn) return;
+  btn.addEventListener('click', () => {
+    toggleBookmark(activeQuestionId);
+  });
+}
+
 function persistNotes() {
   try {
     localStorage.setItem(NOTES_STORAGE_KEY, JSON.stringify(notes));
@@ -543,6 +646,7 @@ function persistNotes() {
 function saveCurrentNotes() {
   if (!activeQuestionId) return;
   notes[activeQuestionId] = getNotesEditorValue();
+  hideNotesUnsavedDot();
   persistNotes();
 }
 
@@ -944,6 +1048,7 @@ function selectQuestion(id) {
   // Update case title in the center pane titlebar
   const caseTitleEl = document.getElementById('caseTitle');
   if (caseTitleEl) caseTitleEl.textContent = question.title;
+  updateBookmarkBtn(activeQuestionId);
   if (languageLabelEl) {
     languageLabelEl.textContent = (question.language || 'c').toUpperCase();
   }
@@ -1057,6 +1162,15 @@ function resetCase() {
   submissions[activeQuestionId].status = 'Unattempted';
   updateStatus('Unattempted');
   persistSubmissions();
+  // Clear unsaved dot for the reset file
+  if (fileList.length > 0) {
+    const file = fileList[activeFileIndex];
+    delete unsavedFiles[file.filename];
+    refreshFileUnsavedDots();
+  } else {
+    unsavedFiles = {};
+    hideAllUnsavedDots();
+  }
   renderQuestionList(questionSearchEl ? questionSearchEl.value : '');
 }
 
@@ -1074,6 +1188,8 @@ function resetAllFiles() {
   consoleOutputEl.textContent = 'All files reset to starter.';
   submissions[activeQuestionId].status = 'Unattempted';
   updateStatus('Unattempted');
+  unsavedFiles = {};
+  hideAllUnsavedDots();
   persistSubmissions();
   renderQuestionList(questionSearchEl ? questionSearchEl.value : '');
 }
@@ -1097,6 +1213,7 @@ function saveCurrentCode() {
     updateStatus('In Progress');
     updateTreeItemStatus(activeQuestionId, 'In Progress');
   }
+  hideFileUnsavedDot();
   persistSubmissions();
 }
 
@@ -1478,30 +1595,39 @@ function initProblemNav() {
 }
 
 function initSidebarToggle() {
-  const btn = document.getElementById('sidebarToggle');
+  const hideBtn = document.getElementById('sidebarHideBtn');
+  const showBtn = document.getElementById('sidebarShowBtn');
   const sidebar = document.getElementById('sidebarPane');
   const body = document.body;
-  if (!btn || !sidebar) return;
-  const collapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-  if (collapsed) {
-    body.classList.add('sidebar-collapsed');
+  if (!hideBtn || !showBtn || !sidebar) return;
+
+  function updateUI(collapsed) {
+    body.classList.toggle('sidebar-collapsed', collapsed);
+    hideBtn.classList.toggle('d-none', collapsed);
+    showBtn.classList.toggle('d-none', !collapsed);
+    hideBtn.setAttribute('title', collapsed ? 'Show sidebar' : 'Collapse sidebar');
+    showBtn.setAttribute('title', collapsed ? 'Show sidebar' : 'Collapse sidebar');
     sidebar.style.width = '';
   }
-  btn.addEventListener('click', () => {
-    const isCollapsed = body.classList.toggle('sidebar-collapsed');
+
+  const collapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+  if (collapsed) updateUI(true);
+
+  function toggle() {
+    const isCollapsed = !body.classList.contains('sidebar-collapsed');
+    updateUI(isCollapsed);
     localStorage.setItem('sidebarCollapsed', isCollapsed);
-    btn.setAttribute('title', isCollapsed ? 'Show sidebar' : 'Collapse sidebar');
-    if (isCollapsed) {
-      sidebar.style.width = '';
-    } else {
-      sidebar.style.width = '';
-    }
-    if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
-      const tp = bootstrap.Tooltip.getInstance(btn);
-      if (tp) tp.hide();
-    }
+    [hideBtn, showBtn].forEach((btn) => {
+      if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+        const tp = bootstrap.Tooltip.getInstance(btn);
+        if (tp) tp.hide();
+      }
+    });
     setTimeout(() => { if (codeMirror) codeMirror.refresh(); }, 250);
-  });
+  }
+
+  hideBtn.addEventListener('click', toggle);
+  showBtn.addEventListener('click', toggle);
 }
 
 function initVimeoPlayers(root) {
@@ -1799,6 +1925,7 @@ function ansiToHtml(text) {
 function buildFileTabs(question) {
   fileList = [];
   activeFileIndex = 0;
+  unsavedFiles = {};
 
   if (question.codes) {
     const div = document.createElement('div');
@@ -1825,7 +1952,12 @@ function buildFileTabs(question) {
     fileList.forEach((file, idx) => {
       const tab = document.createElement('div');
       tab.className = 'file-tab' + (idx === activeFileIndex ? ' active' : '');
-      tab.textContent = file.filename;
+      const dot = document.createElement('i');
+      dot.className = 'bi bi-dot';
+      dot.style.fontSize = '1em';
+      dot.style.verticalAlign = 'middle';
+      tab.appendChild(dot);
+      tab.appendChild(document.createTextNode(file.filename));
       tab.addEventListener('click', () => switchFileTab(idx));
       fileTabs.appendChild(tab);
     });
@@ -1867,6 +1999,7 @@ function switchFileTab(idx) {
     if (!submissions[activeQuestionId]) submissions[activeQuestionId] = {};
     if (!submissions[activeQuestionId].files) submissions[activeQuestionId].files = {};
     submissions[activeQuestionId].files[file.filename] = getEditorValue();
+    delete unsavedFiles[file.filename];
   }
   activeFileIndex = idx;
   // Update tab styles
@@ -1879,6 +2012,65 @@ function switchFileTab(idx) {
   const question = questions.find((q) => q.id === activeQuestionId);
   if (question) loadActiveFile(question);
   persistSubmissions();
+  refreshFileUnsavedDots();
+}
+
+function getActiveFileTab() {
+  if (!fileTabs) return null;
+  return fileTabs.querySelector('.file-tab.active');
+}
+
+function getFilenameForIndex(idx) {
+  if (!fileList || idx < 0 || idx >= fileList.length) return null;
+  return fileList[idx].filename;
+}
+
+function showFileUnsavedDot(idx) {
+  const name = getFilenameForIndex(idx);
+  if (!name) return;
+  unsavedFiles[name] = true;
+  const tab = fileTabs ? fileTabs.querySelectorAll('.file-tab')[idx] : null;
+  if (tab) {
+    const dot = tab.querySelector('.bi-dot');
+    if (dot) dot.classList.add('d-unsaved');
+  }
+}
+
+function hideFileUnsavedDot() {
+  const name = getFilenameForIndex(activeFileIndex);
+  if (!name) return;
+  delete unsavedFiles[name];
+  const tab = fileTabs ? fileTabs.querySelectorAll('.file-tab')[activeFileIndex] : null;
+  if (tab) {
+    const dot = tab.querySelector('.bi-dot');
+    if (dot) dot.classList.remove('d-unsaved');
+  }
+}
+
+function hideAllUnsavedDots() {
+  unsavedFiles = {};
+  if (!fileTabs) return;
+  fileTabs.querySelectorAll('.file-tab .bi-dot').forEach((d) => d.classList.remove('d-unsaved'));
+}
+
+function refreshFileUnsavedDots() {
+  if (!fileTabs) return;
+  fileTabs.querySelectorAll('.file-tab').forEach((tab, idx) => {
+    const name = getFilenameForIndex(idx);
+    const dot = tab.querySelector('.bi-dot');
+    if (!dot || !name) return;
+    dot.classList.toggle('d-unsaved', !!unsavedFiles[name]);
+  });
+}
+
+function showNotesUnsavedDot() {
+  const el = document.getElementById('notesUnsavedDot');
+  if (el) el.classList.add('d-unsaved');
+}
+
+function hideNotesUnsavedDot() {
+  const el = document.getElementById('notesUnsavedDot');
+  if (el) el.classList.remove('d-unsaved');
 }
 
 /* ─── Auth ─── */
@@ -2221,13 +2413,11 @@ function initSync() {
   const origPersistSubmissions = persistSubmissions;
   persistSubmissions = function() {
     origPersistSubmissions();
-    if (syncUid) setDirty(true);
   };
 
   const origPersistNotes = persistNotes;
   persistNotes = function() {
     origPersistNotes();
-    if (syncUid) setDirty(true);
   };
 }
 

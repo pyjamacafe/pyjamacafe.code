@@ -6,8 +6,8 @@ theme = 'pyjamacode'
 [params]
   author = 'Typobrahe Education LLP'
   description = 'A coding platform for embedded systems software and firmware development.'
-  freeViews = 7
-  nudgeDelay = 30000
+  freeViews = 3
+  nudgeDelay = 5000
   judgeUrl = 'https://checker.pyjamacafe.com'
 
   [params.firebase]
