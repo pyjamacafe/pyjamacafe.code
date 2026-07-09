@@ -783,6 +783,12 @@ function selectQuestion(id) {
   const question = questions.find((q) => q.id === id);
   if (!question) return;
 
+  // On landing page (no question content element), just expand tree and update URL
+  if (!questionContentEl) {
+    window.location.href = question.permalink;
+    return;
+  }
+
   // Set up tabs
   const hasArticle = question.article && question.article.trim().length > 0;
   if (tabArticle) {
@@ -1275,12 +1281,59 @@ function initProblemNav() {
   const nextBtn = document.getElementById('nextProblemBtn');
   if (!prevBtn || !nextBtn) return;
 
+  function getFlatTree() {
+    const tree = buildQuestionTree();
+    const result = [];
+    const topicKeys = Object.keys(tree).sort(
+      (a, b) => (getTopicWeight(a) ?? 99) - (getTopicWeight(b) ?? 99)
+    );
+    topicKeys.forEach((topic) => {
+      const subtopics = tree[topic];
+      const subKeys = Object.keys(subtopics).sort((a, b) => {
+        const skA = topic + '/' + a;
+        const skB = topic + '/' + b;
+        return (getSubtopicWeight(skA) ?? 99) - (getSubtopicWeight(skB) ?? 99);
+      });
+      subKeys.forEach((sub) => {
+        const qs = [...subtopics[sub]].sort(
+          (a, b) => (getWeight(a, 'weight', 99) - getWeight(b, 'weight', 99))
+        );
+        qs.forEach((q) => result.push(q));
+      });
+    });
+    return result;
+  }
+
+  function getTopicWeight(topic) {
+    let w;
+    questions.forEach((q) => {
+      if (q.topic === topic) {
+        const tw = getWeight(q, 'topic_weight', 99);
+        if (w === undefined || tw < w) w = tw;
+      }
+    });
+    return w;
+  }
+
+  function getSubtopicWeight(key) {
+    let w;
+    questions.forEach((q) => {
+      const sk = q.topic + '/' + q.subtopic;
+      if (sk === key) {
+        const sw = getWeight(q, 'subtopic_weight', 99);
+        if (w === undefined || sw < w) w = sw;
+      }
+    });
+    return w;
+  }
+
   const navigate = (dir) => {
-    const idx = questions.findIndex((q) => q.id === activeQuestionId);
+    const flat = getFlatTree();
+    const idx = flat.findIndex((q) => q.id === activeQuestionId);
     if (idx < 0) return;
     const target = idx + dir;
-    if (target < 0 || target >= questions.length) return;
-    selectQuestion(questions[target].id);
+    if (target < 0 || target >= flat.length) return;
+    selectQuestion(flat[target].id);
   };
 
   prevBtn.addEventListener('click', () => navigate(-1));

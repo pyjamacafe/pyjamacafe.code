@@ -1,0 +1,53 @@
+{{ $problems := where site.RegularPages "Section" "problems" }}
+{{ $active := index $problems 0 }}
+{{ $activeId := "" }}
+{{ with $active }}{{ $activeId = .File.ContentBaseName }}{{ end }}
+
+<script id="problem-data" type="application/json">
+{{ $data := slice }}
+{{ range $problems }}
+  {{ $parts := split (strings.TrimSuffix "/" .File.Dir) "/" }}
+  {{ $topic := index $parts 1 }}
+  {{ $subtopic := index $parts 2 }}
+  {{ $item := dict
+    "id" .File.ContentBaseName
+    "title" .Title
+    "difficulty" .Params.difficulty
+    "language" .Params.language
+    "permalink" .RelPermalink
+    "content" ""
+    "article" ""
+    "codes" ""
+    "initial_code" ""
+    "test_cases" .Params.test_cases
+    "topic" $topic
+    "subtopic" $subtopic
+    "topic_weight" (cond (isset .Params "topic_weight") (.Params.topic_weight | int) 99)
+    "subtopic_weight" (cond (isset .Params "subtopic_weight") (.Params.subtopic_weight | int) 99)
+    "weight" (cond (isset .Params "weight") (.Params.weight | int) 99)
+  }}
+  {{ $data = $data | append $item }}
+{{ end }}
+{{ $data | jsonify | safeJS }}
+</script>
+<input type="hidden" id="active-problem-id" value="{{ $activeId }}">
+
+<div class="platform-layout" id="platformLayout">
+  <!-- Sidebar: Cases -->
+  <aside class="platform-pane sidebar-pane" id="sidebarPane" style="width:25%">
+    <div class="pane-header border-bottom">
+      <input type="text" id="questionSearch" class="form-control form-control-sm" placeholder="Search cases...">
+    </div>
+    <div class="pane-body overflow-auto p-2">
+      <div class="tree-container" id="questionList"></div>
+    </div>
+  </aside>
+
+  <div class="pane-resizer" id="resizerCasesCase" aria-label="Resize cases pane"></div>
+
+  <!-- Landing content -->
+  <div class="landing-content" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bs-body-bg);overflow:hidden">
+    <h1 style="font-size:2.5rem;font-weight:700;margin:0;color:var(--bs-body-color);text-align:center">Learning Embedded Systems</h1>
+    <p style="margin-top:1rem;font-size:1rem;color:var(--bs-secondary-color);text-align:center;max-width:480px">Select a problem from the sidebar to begin coding. Each problem includes a challenge, theory, real-world context, and optional explanations.</p>
+  </div>
+</div>
