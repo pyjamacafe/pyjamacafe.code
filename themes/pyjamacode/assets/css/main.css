@@ -584,6 +584,11 @@ body.sidebar-collapsed #editorPane {
 }
 
 /* Auth */
+#authUserMenu .dropdown-item,
+#authUserMenu .dropdown-item-text {
+  font-size: 0.875rem;
+}
+
 .auth-avatar {
   display: inline-flex;
   align-items: center;
@@ -662,6 +667,14 @@ body.sidebar-collapsed #editorPane {
 .vm-wrapper:fullscreen .vm-thumb iframe {
   width: 100%;
   height: 100%;
+}
+
+/* Content blur for unauthenticated limit */
+.content-blurred-force {
+  filter: blur(6px);
+  pointer-events: none;
+  user-select: none;
+  position: relative;
 }
 
 /* Auth blur */

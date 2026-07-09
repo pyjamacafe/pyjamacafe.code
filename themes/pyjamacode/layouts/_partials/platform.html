@@ -1,4 +1,4 @@
-{{ $problems := where site.RegularPages "Section" "problems" }}
+{{ $problems := where site.RegularPages "Section" "courses" }}
 {{ $active := .activeProblem | default (index $problems 0) }}
 {{ $activeId := "" }}
 {{ with $active }}{{ $activeId = .File.ContentBaseName }}{{ end }}

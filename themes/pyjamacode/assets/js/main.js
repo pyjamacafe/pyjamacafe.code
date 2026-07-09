@@ -49,6 +49,7 @@ const sidebarPane = document.getElementById('sidebarPane');
 const editorPane = document.getElementById('editorPane');
 const questionPane = document.getElementById('questionPane');
 const consoleArea = document.getElementById('consoleArea');
+const editorArea = document.getElementById('editorArea');
 const resizerCasesCase = document.getElementById('resizerCasesCase');
 const resizerCaseWorkspace = document.getElementById('resizerCaseWorkspace');
 const resizerEditorConsole = document.getElementById('resizerEditorConsole');
@@ -78,6 +79,8 @@ let notesSaveTimeout = null;
 let isSettingValue = false;
 let isSettingNotesValue = false;
 let notesPreviewMode = true;
+let _viewCount = 0;
+let _authNudged = false;
 let activeFileIndex = 0;
 let fileList = [];
 let filePerProblem = {};
@@ -87,7 +90,7 @@ let treeExpanded = {};
 
 function init() {
   if (!problemDataEl || !activeProblemInput) {
-    // Not on a platform page (e.g. /problems/ list page).
+    // Not on a platform page (e.g. /courses/ list page).
     return;
   }
 
@@ -106,7 +109,8 @@ function init() {
   initCodeMirror();
   initNotesCodeMirror();
   renderQuestionList();
-  selectQuestion(activeQuestionId);
+  // On landing page (no content pane), don't call selectQuestion which would redirect
+  if (questionContentEl) selectQuestion(activeQuestionId);
   setNotesPreviewMode(true);
   initTypedTitle();
   notesSavedHeight = notesArea ? notesArea.offsetHeight : 200;
@@ -120,6 +124,50 @@ function init() {
   initSidebarToggle();
   initProblemNav();
   if (clearConsoleBtn) clearConsoleBtn.addEventListener('click', () => (consoleOutputEl.textContent = ''));
+  // Logo/title link — update href based on auth state and save auto-resume
+  // Logo/title link — route based on auth state
+  const homeLink = document.getElementById('homeLink');
+  if (homeLink) {
+    function updateHomeHref() {
+      homeLink.href = (typeof isAuthenticated === 'function' && isAuthenticated()) ? '/dashboard/' : '/';
+    }
+    updateHomeHref();
+    if (typeof onAuthChange !== 'undefined') onAuthChange(updateHomeHref);
+  }
+
+  // Cancel forced auth (user dismissed) — 3 more views + timer
+  window._dismissForceAuth = function() {
+    if (questionContentEl) questionContentEl.classList.remove('content-blurred-force');
+    if (editorArea) editorArea.classList.remove('content-blurred-force');
+    if (authCloseLink) authCloseLink.style.display = '';
+    if (authModal) authModal._backdropClose = false;
+    // Set forced flag (persists across page refreshes)
+    localStorage.setItem('authForced', 'true');
+    // Start one-shot timer for forced auth
+    const nudgeDelay = (window.__APP_CONFIG__ && window.__APP_CONFIG__.nudgeDelay) || 10000;
+    clearTimeout(window._authNudgeTimer);
+    window._authNudgeTimer = setTimeout(() => {
+      if (!isAuthenticated() && questionContentEl) {
+        if (authCloseLink) authCloseLink.style.display = 'none';
+        if (authModal) authModal._backdropClose = true;
+        questionContentEl.classList.add('content-blurred-force');
+        if (editorArea) editorArea.classList.add('content-blurred-force');
+        if (typeof openAuthModal === 'function') openAuthModal('signin');
+      }
+    }, nudgeDelay);
+  };
+
+  // Resume button in dropdown — navigate to last saved problem
+  const resumeLink = document.getElementById('resumeLink');
+  if (resumeLink) {
+    resumeLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      const saved = localStorage.getItem('lastProblemUrl');
+      if (saved && saved.includes('/courses/')) {
+        window.location.href = saved;
+      }
+    });
+  }
   if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
   if (notesModeBtn) notesModeBtn.addEventListener('click', toggleNotesMode);
   if (exportNotesBtn) exportNotesBtn.addEventListener('click', exportNotes);
@@ -785,8 +833,43 @@ function selectQuestion(id) {
 
   // On landing page (no question content element), just expand tree and update URL
   if (!questionContentEl) {
+    // Landing page — redirect to the problem page
     window.location.href = question.permalink;
     return;
+  }
+
+  // Auth nudge for unauthenticated users
+  if (!isAuthenticated()) {
+    const freeViews = (window.__APP_CONFIG__ && window.__APP_CONFIG__.freeViews) || 3;
+    const nudgeDelay = (window.__APP_CONFIG__ && window.__APP_CONFIG__.nudgeDelay) || 10000;
+
+    // Check if user is already in forced state (persisted across refreshes)
+    const isForced = localStorage.getItem('authForced') === 'true';
+
+    if (isForced) {
+      // Let content load first, then show auth modal
+      requestAnimationFrame(() => {
+        if (authCloseLink) authCloseLink.style.display = 'none';
+        if (authModal) authModal._backdropClose = true;
+        questionContentEl.classList.add('content-blurred-force');
+        if (editorArea) editorArea.classList.add('content-blurred-force');
+        if (typeof openAuthModal === 'function') openAuthModal('signin');
+      });
+      // Do NOT return — let content load normally
+    }
+
+    // Free views counter (in-memory only, resets on page refresh)
+    if (!_authNudged) {
+      _viewCount++;
+      if (_viewCount > freeViews) {
+        _authNudged = true;
+        questionContentEl.classList.add('content-blurred-force');
+        if (editorArea) editorArea.classList.add('content-blurred-force');
+        if (authCloseLink) authCloseLink.style.display = '';
+        if (authModal) authModal._backdropClose = false;
+        if (typeof openAuthModal === 'function') openAuthModal('signin');
+      }
+    }
   }
 
   // Set up tabs
@@ -867,6 +950,7 @@ function selectQuestion(id) {
     }
     url += window.location.hash;
     history.replaceState(null, '', url);
+    maybeSaveProblemUrl(url);
   } catch (e) {
     // History API may be restricted on file:// origins.
   }
@@ -1719,7 +1803,26 @@ const authUserName = document.getElementById('authUserName');
 const authUserEmail = document.getElementById('authUserEmail');
 const authLogoutLink = document.getElementById('authLogoutLink');
 const themeToggleDropdown = document.getElementById('themeToggleDropdown');
+const resetProfileLink = document.getElementById('resetProfileLink');
 const authGoogleBtn = document.getElementById('authGoogleBtn');
+/* ─── Resume (track last problem URL) ─── */
+function maybeSaveProblemUrl(url) {
+  if (url && url.includes('/courses/')) {
+    localStorage.setItem('lastProblemUrl', url);
+  }
+}
+
+(function() {
+  maybeSaveProblemUrl(window.location.href);
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) maybeSaveProblemUrl(window.location.href);
+  });
+
+  window.addEventListener('popstate', () => {
+    maybeSaveProblemUrl(window.location.href);
+  });
+})();
 
 function updateAuthBlur() {
   const authed = isAuthenticated();
@@ -1743,6 +1846,23 @@ function setupAuth() {
   if (authLoginBtn) authLoginBtn.addEventListener('click', () => openAuthModal('signin'));
   if (authLogoutLink) authLogoutLink.addEventListener('click', () => { signOut().catch(() => {}); });
   if (themeToggleDropdown) themeToggleDropdown.addEventListener('click', () => { toggleTheme(); });
+  if (resetProfileLink) {
+    resetProfileLink.addEventListener('click', () => {
+      if (!confirm('This will delete all your saved data (submissions, notes, theme, preferences) from both local storage and the cloud. Continue?')) return;
+      // Wipe local
+      localStorage.removeItem('pyjamacode-submissions');
+      localStorage.removeItem('pyjamacode-notes');
+      localStorage.removeItem('pyjamacode-theme');
+      localStorage.removeItem('lastProblemUrl');
+      // Wipe cloud if signed in
+      const uid = typeof getCurrentUser === 'function' ? (getCurrentUser() || {}).uid : null;
+      if (uid && typeof firebase !== 'undefined' && firebase.apps.length) {
+        firebase.firestore().collection('userData').doc(uid).delete().catch(() => {});
+      }
+      // Reload page
+      window.location.href = '/';
+    });
+  }
   if (authGoogleBtn) authGoogleBtn.addEventListener('click', () => {
     signInWithGoogle().then(() => { closeAuthModal(); }).catch((err) => {
       showAuthError(err.message || 'Google sign-in failed.');
@@ -1751,6 +1871,19 @@ function setupAuth() {
 
   onAuthChange((user) => {
     const isAuthed = user !== null;
+
+    // Clear force blur and reset view count on login
+    if (isAuthed) {
+      if (questionContentEl) questionContentEl.classList.remove('content-blurred-force');
+      if (editorArea) editorArea.classList.remove('content-blurred-force');
+      if (authCloseLink) authCloseLink.style.display = '';
+      if (authModal) authModal._backdropClose = false;
+      clearTimeout(window._authNudgeTimer);
+      localStorage.removeItem('authForced');
+      _viewCount = 0;
+      _authNudged = false;
+
+    }
 
     if (authLoginBtn) authLoginBtn.classList.toggle('d-none', isAuthed);
     if (authUserMenu) authUserMenu.classList.toggle('d-none', !isAuthed);
@@ -1785,7 +1918,7 @@ function setupAuth() {
 
   // Close modal
   if (authCloseLink) authCloseLink.addEventListener('click', closeAuthModal);
-  if (authModal) authModal.addEventListener('click', (e) => { if (e.target === authModal) closeAuthModal(); });
+  if (authModal) authModal.addEventListener('click', (e) => { if (e.target === authModal && !authModal._backdropClose) closeAuthModal(); });
 
   // Action button
   if (authActionBtn) authActionBtn.addEventListener('click', handleAuthAction);
@@ -1806,10 +1939,16 @@ function openAuthModal(mode) {
   if (authModal) authModal.classList.add('show');
   if (authEmail) setTimeout(() => authEmail.focus(), 100);
 }
+window.openAuthModal = openAuthModal;
 
 function closeAuthModal() {
   if (authModal) authModal.classList.remove('show');
   if (authError) authError.style.display = 'none';
+  // If force auth is active, dismiss and start timer
+  if (questionContentEl && questionContentEl.classList.contains('content-blurred-force')) {
+    if (typeof window._dismissForceAuth === 'function') window._dismissForceAuth();
+    return;
+  }
 }
 
 function handleAuthAction() {
@@ -1926,7 +2065,7 @@ function initSync() {
   function refreshUI() {
     loadSubmissions();
     loadNotes();
-    if (activeQuestionId) selectQuestion(activeQuestionId);
+    if (activeQuestionId && questionContentEl) selectQuestion(activeQuestionId);
     else renderQuestionList(questionSearchEl ? questionSearchEl.value : '');
   }
 

@@ -6,6 +6,8 @@ theme = 'pyjamacode'
 [params]
   author = 'Typobrahe Education LLP'
   description = 'A coding platform for embedded systems software and firmware development.'
+  freeViews = 7
+  nudgeDelay = 30000
 
   [params.firebase]
     apiKey = 'AIzaSyC3rYp82RGSZVJrHwq-WrGX-UUgBneAcDo'

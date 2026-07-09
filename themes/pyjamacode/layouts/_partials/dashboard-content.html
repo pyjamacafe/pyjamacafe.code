@@ -45,36 +45,16 @@
 
   <div class="pane-resizer" id="resizerCasesCase" aria-label="Resize cases pane"></div>
 
-  <!-- Landing content -->
-  <div class="landing-content" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bs-body-bg);overflow:hidden;padding:2rem">
-    <h1 style="font-size:2.5rem;font-weight:700;margin:0;color:var(--bs-body-color);text-align:center;max-width:600px">Learn Embedded Systems by Doing</h1>
-    <p style="margin-top:1rem;font-size:1rem;color:var(--bs-secondary-color);text-align:center;max-width:500px;line-height:1.6">
-      Hands-on exercises covering C programming, ARM Cortex-M internals, and firmware development — from pointers and memory management to TrustZone and RTOS context switching.
-    </p>
-
-    <div style="margin:1.5rem 0;display:flex;flex-direction:column;gap:0.5rem;max-width:420px;width:100%">
-      <div style="display:flex;align-items:start;gap:0.75rem">
-        <i class="bi bi-code-slash" style="color:var(--accent-color);font-size:1.2rem;flex-shrink:0;margin-top:2px"></i>
-        <span style="color:var(--bs-body-color);font-size:0.9rem">100+ problems across C, ARM Cortex-M, and firmware topics</span>
-      </div>
-      <div style="display:flex;align-items:start;gap:0.75rem">
-        <i class="bi bi-book" style="color:var(--accent-color);font-size:1.2rem;flex-shrink:0;margin-top:2px"></i>
-        <span style="color:var(--bs-body-color);font-size:0.9rem">Inline editor, real-time explanations, and auto-sync to cloud</span>
-      </div>
-      <div style="display:flex;align-items:start;gap:0.75rem">
-        <i class="bi bi-diagram-3" style="color:var(--accent-color);font-size:1.2rem;flex-shrink:0;margin-top:2px"></i>
-        <span style="color:var(--bs-body-color);font-size:0.9rem">Structured content: theory, real-world context, and code walkthroughs</span>
-      </div>
-      <div style="display:flex;align-items:start;gap:0.75rem">
-        <i class="bi bi-cloud-check" style="color:var(--accent-color);font-size:1.2rem;flex-shrink:0;margin-top:2px"></i>
-        <span style="color:var(--bs-body-color);font-size:0.9rem">Progress saved across devices — pick up where you left off</span>
-      </div>
+  <!-- Dashboard content -->
+  <div class="landing-content" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bs-body-bg);overflow:hidden">
+    <div id="dashboardContent" style="display:none;text-align:center">
+      <h1 id="dashboardGreeting" style="font-size:2rem;font-weight:700;margin:0;color:var(--bs-body-color)">Welcome</h1>
+      <p style="margin-top:0.5rem;font-size:1rem;color:var(--bs-secondary-color)">Your learning dashboard</p>
+      <button id="dashboardResumeBtn" class="btn btn-primary btn-sm mt-3" style="display:none">Resume</button>
     </div>
-
-    <button id="landingSignupBtn" class="btn btn-primary" style="font-size:1rem;padding:0.5rem 2rem" onclick="if(window.openAuthModal)openAuthModal('signup')">
-      <i class="bi bi-person"></i> Sign Up &amp; Start Learning
-    </button>
-    <p style="margin-top:0.5rem;font-size:0.8rem;color:var(--bs-secondary-color)">Free. No credit card required.</p>
+    <div id="dashboardLoading" style="text-align:center">
+      <div class="spinner-border text-secondary" role="status" style="width:2rem;height:2rem"><span class="visually-hidden">Loading...</span></div>
+    </div>
   </div>
 </div>
 
@@ -98,3 +78,32 @@
     </div>
   </div>
 </div>
+
+<script>
+  (function() {
+    var checkUser = function() {
+      if (typeof getCurrentUser !== 'undefined' && getCurrentUser()) {
+        var user = getCurrentUser();
+        var name = user.displayName || user.email || 'User';
+        var el = document.getElementById('dashboardGreeting');
+        if (el) el.textContent = 'Welcome, ' + name;
+        var content = document.getElementById('dashboardContent');
+        var loading = document.getElementById('dashboardLoading');
+        if (content) content.style.display = 'block';
+        if (loading) loading.style.display = 'none';
+        // Show resume button if there's a saved problem
+        var resumeBtn = document.getElementById('dashboardResumeBtn');
+        var saved = localStorage.getItem('lastProblemUrl');
+        if (resumeBtn && saved && saved.includes('/courses/')) {
+          resumeBtn.style.display = '';
+          resumeBtn.onclick = function() { window.location.href = saved; };
+        }
+      } else if (typeof isAuthReady === 'undefined' || !isAuthReady()) {
+        setTimeout(checkUser, 200);
+      } else {
+        window.location.href = '/';
+      }
+    };
+    checkUser();
+  })();
+</script>
