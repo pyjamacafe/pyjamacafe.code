@@ -1,6 +1,7 @@
 <script>
 window.__APP_CONFIG__ = {
-  freeViews: {{ .Params.freeViews | default 3 }},
-  nudgeDelay: {{ .Params.nudgeDelay | default 10000 }}
+  freeViews: {{ site.Params.freeViews | default 3 }},
+  nudgeDelay: {{ site.Params.nudgeDelay | default 10000 }},
+  judgeUrl: {{ with site.Params.judgeUrl }}"{{ . }}"{{ else }}null{{ end }}
 };
 </script>

@@ -73,6 +73,11 @@ html[data-bs-theme="light"] {
   --btn-default-bg: var(--gh-light-btn-default-bg);
   --btn-default-border: var(--gh-light-btn-default-border);
   --btn-default-hover: var(--gh-light-btn-default-hover);
+
+  --ansi-0: #000;    --ansi-1: #c41;    --ansi-2: #1a7233; --ansi-3: #9a5;
+  --ansi-4: #1a5fb4; --ansi-5: #873d9e; --ansi-6: #0f7a7a; --ansi-7: #6e7681;
+  --ansi-8: #57606a; --ansi-9: #cf222e; --ansi-10: #116329;--ansi-11: #9a6700;
+  --ansi-12: #0969da;--ansi-13: #8250df;--ansi-14: #1b7c83;--ansi-15: #fff;
 }
 
 /* Dark mode: GitHub dark */
@@ -104,6 +109,11 @@ html[data-bs-theme="dark"] {
   --btn-default-bg: var(--gh-dark-btn-default-bg);
   --btn-default-border: var(--gh-dark-btn-default-border);
   --btn-default-hover: var(--gh-dark-btn-default-hover);
+
+  --ansi-0: #000;    --ansi-1: #ff7b72; --ansi-2: #3fb950; --ansi-3: #d29922;
+  --ansi-4: #58a6ff; --ansi-5: #bc8cff; --ansi-6: #39c5cf; --ansi-7: #8b949e;
+  --ansi-8: #484f58; --ansi-9: #ffa198; --ansi-10: #56d364;--ansi-11: #e3b341;
+  --ansi-12: #79c0ff;--ansi-13: #d2a8ff;--ansi-14: #56d4dd;--ansi-15: #f0f6fc;
 }
 
 body {

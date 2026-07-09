@@ -807,6 +807,7 @@ function renderQuestionList(filter = '') {
 
         const item = document.createElement('div');
         item.className = 'tree-leaf';
+        item.dataset.id = q.id;
         item.dataset.topicIndex = topicIndex;
         if (q.id === activeQuestionId) item.classList.add('active');
         if (submissions[q.id]?.status === 'Accepted') item.classList.add('solved');
@@ -824,6 +825,17 @@ function renderQuestionList(filter = '') {
       });
     });
   });
+}
+
+function updateTreeItemStatus(id, status) {
+  const item = questionListEl?.querySelector(`.tree-leaf[data-id="${id}"]`);
+  if (!item) return;
+  const meta = item.querySelector('.question-meta');
+  if (meta) {
+    const parts = meta.textContent.split('·');
+    meta.textContent = (parts[0] || '').trim() + ' · ' + status;
+  }
+  item.classList.toggle('solved', status === 'Accepted');
 }
 
 function selectQuestion(id) {
@@ -1074,7 +1086,7 @@ function saveCurrentCode() {
   if (!submissions[activeQuestionId].status || submissions[activeQuestionId].status === 'Unattempted') {
     submissions[activeQuestionId].status = 'In Progress';
     updateStatus('In Progress');
-    renderQuestionList(questionSearchEl ? questionSearchEl.value : '');
+    updateTreeItemStatus(activeQuestionId, 'In Progress');
   }
   persistSubmissions();
 }
@@ -1110,6 +1122,12 @@ function runCode() {
   }, 600);
 }
 
+const JUDGE_URL = window.__APP_CONFIG__ && window.__APP_CONFIG__.judgeUrl
+  ? window.__APP_CONFIG__.judgeUrl
+  : (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://127.0.0.1:4000'
+    : 'https://judge.code.pyjamacafe.com';
+
 function submitCode() {
   if (!activeQuestionId) {
     consoleOutputEl.textContent = 'Please select a case first.';
@@ -1117,32 +1135,61 @@ function submitCode() {
   }
 
   saveCurrentCode();
-  consoleOutputEl.textContent = 'Running tests...\n';
+  consoleOutputEl.textContent = 'Running...\n';
 
-  setTimeout(() => {
-    const question = questions.find((q) => q.id === activeQuestionId);
-    const code = getEditorValue().trim();
-    const starter = question.initial_code || '';
-    const hasContent = code.length > starter.length * 0.8;
-    const testCases = question.test_cases || [];
-    const expected = testCases[0]?.expected || 'All tests passed';
+  // Collect files from file tabs or fallback to single editor
+  const files = [];
+  const question = questions.find((q) => q.id === activeQuestionId);
+  if (!question) return;
 
+  if (fileList.length > 0) {
+    fileList.forEach((f) => {
+      const saved = submissions[activeQuestionId]?.files?.[f.filename];
+      files.push({ name: f.filename, content: saved || f.content });
+    });
+  } else {
+    const code = getEditorValue();
+    const lang = question.language || 'c';
+    const ext = { c: 'c', cpp: 'cpp', python: 'py', assembly: 's' }[lang] || 'c';
+    files.push({ name: 'main.' + ext, content: code || '' });
+  }
+
+  fetch(JUDGE_URL + '/api/submit', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ files, language: question.language || 'c' })
+  })
+  .then((r) => r.json())
+  .then((res) => {
     let status, outputHtml;
-    if (hasContent && Math.random() > 0.3) {
+    if (res.exitCode === 0) {
       status = 'Accepted';
-      outputHtml = `<span class="text-pass">All test cases passed.</span>\n${escapeHtml(expected)}\nExecution time: 12 ms`;
+      outputHtml = '<span class="text-pass">All test cases passed.</span>\n' + ansiToHtml(res.stdout || '') + '\n<small class="text-muted">Exit code: 0</small>';
     } else {
-      status = 'Wrong';
-      outputHtml = `<span class="text-fail">Test case 2 failed.</span>\nExpected: ${escapeHtml(expected)}\nGot: incomplete implementation`;
+      const phase = res.phase || 'run';
+      status = phase === 'compile' ? 'Compilation Error' : 'Runtime Error';
+      outputHtml = '<span class="text-fail">' + status + '</span>\n' + ansiToHtml(res.stderr || res.stdout || 'No output');
     }
 
-    submissions[activeQuestionId] = { status, output: outputHtml, code };
+    if (!submissions[activeQuestionId]) submissions[activeQuestionId] = {};
+    submissions[activeQuestionId].status = status;
+    submissions[activeQuestionId].output = outputHtml;
+    if (fileList.length > 0) {
+      fileList.forEach((f) => {
+        if (!submissions[activeQuestionId].files) submissions[activeQuestionId].files = {};
+        submissions[activeQuestionId].files[f.filename] = getEditorValue();
+      });
+    } else {
+      submissions[activeQuestionId].code = getEditorValue();
+    }
     persistSubmissions();
-
     consoleOutputEl.innerHTML = outputHtml;
     updateStatus(status);
     renderQuestionList(questionSearchEl ? questionSearchEl.value : '');
-  }, 1000);
+  })
+  .catch((err) => {
+    consoleOutputEl.innerHTML = '<span class="text-fail">Connection error</span>\nCould not reach the judge server. Is docker running?\n' + escapeHtml(err.message || '');
+  });
 }
 
 function toggleTheme() {
@@ -1185,9 +1232,8 @@ function loadTheme() {
 
 function colorizeOutput(output) {
   if (!output) return '';
-  // If already HTML, return as-is.
   if (output.includes('<span')) return output;
-
+  output = output.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '');
   return output
     .replace(/(All test cases passed\.?)/gi, '<span class="text-pass">$1</span>')
     .replace(/(Test case \d+ failed\.?)/gi, '<span class="text-fail">$1</span>')
@@ -1697,6 +1743,51 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
+function ansiToHtml(text) {
+  if (!text) return '';
+  let s = text.split('\n').map(l => { const p = l.split('\r'); return p[p.length-1]; }).join('\n');
+  s = s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\t/g, '  ');
+
+  const AN = {
+    1: [0,'b'], 3: [0,'i'], 4: [0,'u'],
+    30:[1,0], 31:[1,1], 32:[1,2], 33:[1,3], 34:[1,4], 35:[1,5], 36:[1,6], 37:[1,7],
+    90:[1,8], 91:[1,9], 92:[1,10], 93:[1,11], 94:[1,12], 95:[1,13], 96:[1,14], 97:[1,15],
+    40:[2,0], 41:[2,1], 42:[2,2], 43:[2,3], 44:[2,4], 45:[2,5], 46:[2,6], 47:[2,7],
+    100:[2,8], 101:[2,9], 102:[2,10], 103:[2,11], 104:[2,12], 105:[2,13], 106:[2,14], 107:[2,15],
+  };
+  const STYLES = [
+    '', 'font-weight:bold', 'font-style:italic', 'text-decoration:underline',
+  ];
+
+  const re = /\x1b\[([0-9;]*)m/g;
+  let out = '', last = 0, state = {}, open = false, m;
+  while ((m = re.exec(s)) !== null) {
+    out += s.slice(last, m.index);
+    if (open) { out += '</span>'; open = false; }
+    const codes = m[1] ? m[1].split(';') : ['0'];
+    for (const c of codes) {
+      if (c === '0' || c === '') { state = {}; }
+      else if (AN[c]) {
+        const [type, val] = AN[c];
+        if (type === 0) state['s'+val] = true;
+        else if (type === 1) state.fg = val;
+        else if (type === 2) state.bg = val;
+      }
+    }
+    const parts = [];
+    if (state.sb) parts.push(STYLES[1]);
+    if (state.si) parts.push(STYLES[2]);
+    if (state.su) parts.push(STYLES[3]);
+    if (state.fg !== undefined) parts.push('color:var(--ansi-'+state.fg+')');
+    if (state.bg !== undefined) parts.push('background-color:var(--ansi-'+state.bg+')');
+    if (parts.length) { out += '<span style="'+parts.join(';')+'">'; open = true; }
+    last = m.index + m[0].length;
+  }
+  out += s.slice(last);
+  if (open) out += '</span>';
+  return out;
+}
+
 /* ─── File Tabs ─── */
 function buildFileTabs(question) {
   fileList = [];
@@ -2006,6 +2097,7 @@ function initSync() {
   let cloudUnsub = null;
 
   function applyCloudData(d) {
+    if (activeQuestionId) saveCurrentCode();
     let changed = false;
     if (d.submissions) {
       localStorage.setItem('pyjamacode-submissions', d.submissions);
@@ -2043,8 +2135,8 @@ function initSync() {
     if (cloudUnsub) cloudUnsub();
     cloudUnsub = db.collection('userData').doc(uid).onSnapshot((snap) => {
       if (isPushingLocally) return;
-      if (snap.exists) applyCloudData(snap.data());
-      else db.collection('userData').doc(uid).set(getData()).catch(() => {});
+      if (snap.exists) { applyCloudData(snap.data()); setDirty(false); }
+      else db.collection('userData').doc(uid).set(getData()).then(() => setDirty(false)).catch(() => {});
     });
   }
 
@@ -2055,10 +2147,11 @@ function initSync() {
   function pullFromCloud(uid) {
     return db.collection('userData').doc(uid).get().then((snap) => {
       if (!snap.exists) {
-        db.collection('userData').doc(uid).set(getData()).catch(() => {});
+        db.collection('userData').doc(uid).set(getData()).then(() => setDirty(false)).catch(() => {});
         return;
       }
       applyCloudData(snap.data());
+      setDirty(false);
     });
   }
 
@@ -2076,59 +2169,52 @@ function initSync() {
       pullFromCloud(user.uid).then(() => {
         refreshUI();
         startCloudListener(user.uid);
+        setDirty(false);
       }).catch(() => {
-        db.collection('userData').doc(user.uid).set(getData()).catch(() => {});
+        db.collection('userData').doc(user.uid).set(getData()).then(() => setDirty(false)).catch(() => {});
         startCloudListener(user.uid);
       });
     } else {
       syncUid = null;
       stopCloudListener();
+      setDirty(false);
     }
   });
 
-  // Tab changes push to cloud
-  const origSetActiveTab = setActiveTab;
-  setActiveTab = function(tab) {
-    origSetActiveTab(tab);
-    if (syncUid) pushToCloud();
-  };
+  let dirty = false;
 
-  // Push on every data mutation
+  function setDirty(v) {
+    if (!syncUid) return;
+    dirty = v;
+    const base = document.title.replace(/^\* /, '');
+    document.title = v ? '* ' + base : base;
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault();
+      if (!syncUid) return;
+      saveCurrentCode();
+      saveCurrentNotes();
+      isPushingLocally = true;
+      db.collection('userData').doc(syncUid).set(getData()).then(() => {
+        setTimeout(() => { isPushingLocally = false; }, 1000);
+        setDirty(false);
+      }).catch(() => { isPushingLocally = false; });
+    }
+  });
+
   const origPersistSubmissions = persistSubmissions;
   persistSubmissions = function() {
     origPersistSubmissions();
-    if (syncUid) pushToCloud();
+    if (syncUid) setDirty(true);
   };
 
   const origPersistNotes = persistNotes;
   persistNotes = function() {
     origPersistNotes();
-    if (syncUid) pushToCloud();
+    if (syncUid) setDirty(true);
   };
-
-  const origToggleTheme = toggleTheme;
-  toggleTheme = function() {
-    origToggleTheme();
-    if (syncUid) pushToCloud();
-  };
-
-  // Push on visibility change (tab switch, minimize)
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden && syncUid) {
-      pushToCloud();
-    } else if (!document.hidden && syncUid) {
-      pullFromCloud(syncUid).then(() => {
-        refreshUI();
-      }).catch(() => {});
-    }
-  });
-
-  // Push on page close — only if this tab is the active one
-  window.addEventListener('beforeunload', () => {
-    if (syncUid && !document.hidden) {
-      db.collection('userData').doc(syncUid).set(getData());
-    }
-  });
 }
 
 if (document.readyState === 'loading') {
