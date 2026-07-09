@@ -8,9 +8,7 @@ theme = 'pyjamacode'
   description = 'A coding platform for embedded systems software and firmware development.'
   freeViews = 7
   nudgeDelay = 30000
-  # judgeUrl — overrides auto-detection. Defaults to http://127.0.0.1:4000 on localhost,
-  # https://judge.code.pyjamacafe.com on production. Uncomment to set explicitly:
-  # judgeUrl = 'http://127.0.0.1:4000'
+  judgeUrl = 'https://checker.pyjamacafe.com'
 
   [params.firebase]
     apiKey = 'AIzaSyC3rYp82RGSZVJrHwq-WrGX-UUgBneAcDo'
