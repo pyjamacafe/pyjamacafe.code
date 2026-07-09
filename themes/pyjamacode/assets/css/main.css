@@ -191,10 +191,8 @@ body.sidebar-collapsed #editorPane {
   line-height: 1.2;
 }
 
-#workspaceTitle {
-  font-size: 0.875rem;
-  font-weight: 600;
-}
+
+
 
 /* Center tabs (match file tab style) */
 .center-tabs {
@@ -1198,6 +1196,12 @@ body.sidebar-collapsed #editorPane {
   border-color: var(--border-color) !important;
 }
 
+.terminal-body {
+  flex: 1;
+  min-height: 0;
+  background-color: transparent;
+}
+
 .console-output {
   flex: 1;
   overflow-y: auto;
@@ -1206,6 +1210,35 @@ body.sidebar-collapsed #editorPane {
   color: var(--editor-fg);
   white-space: pre-wrap;
   background-color: transparent;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.terminal-input-line {
+  flex: 0 0 auto;
+  background-color: transparent;
+}
+
+.prompt {
+  color: var(--ansi-2);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  user-select: none;
+}
+
+.terminal-input {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--editor-fg);
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 0;
+  caret-color: var(--editor-fg);
+}
+
+.terminal-input::placeholder {
+  color: var(--bs-secondary-color);
+  font-style: italic;
 }
 
 /* Question content */

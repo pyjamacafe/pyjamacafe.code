@@ -36,13 +36,13 @@ const codeEditorWrapper = document.getElementById('codeEditorWrapper');
 const languageLabelEl = document.getElementById('languageLabel');
 const consoleOutputEl = document.getElementById('consoleOutput');
 const statusTextEl = document.getElementById('statusText');
-const workspaceTitleEl = document.getElementById('workspaceTitle');
 const runBtn = document.getElementById('runBtn');
 const submitBtn = document.getElementById('submitBtn');
 const resetBtn = document.getElementById('resetBtn');
 const resetAllBtn = document.getElementById('resetAllBtn');
 const fileTabs = document.getElementById('fileTabs');
 const clearConsoleBtn = document.getElementById('clearConsole');
+const terminalInput = document.getElementById('terminalInput');
 const themeToggle = document.getElementById('themeToggle');
 const themeIcon = document.getElementById('themeIcon');
 const sidebarPane = document.getElementById('sidebarPane');
@@ -123,7 +123,28 @@ function init() {
   if (resetAllBtn) resetAllBtn.addEventListener('click', resetAllFiles);
   initSidebarToggle();
   initProblemNav();
-  if (clearConsoleBtn) clearConsoleBtn.addEventListener('click', () => (consoleOutputEl.textContent = ''));
+  if (clearConsoleBtn) clearConsoleBtn.addEventListener('click', () => { consoleOutputEl.textContent = ''; if (terminalInput) terminalInput.value = ''; });
+  if (terminalInput) {
+    terminalInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const cmd = terminalInput.value.trim();
+        if (!cmd) return;
+        consoleOutputEl.textContent += '\n$ ' + cmd + '\n';
+        terminalInput.value = '';
+        terminalInput.disabled = true;
+        execCommand(cmd).then((res) => {
+          consoleOutputEl.textContent += (res.stdout || '') + (res.stderr || '') + (res.exitCode !== 0 ? '\nExit code: ' + res.exitCode : '');
+          consoleOutputEl.scrollTop = consoleOutputEl.scrollHeight;
+        }).catch((err) => {
+          consoleOutputEl.textContent += 'Error: ' + (err.message || 'Connection failed');
+          consoleOutputEl.scrollTop = consoleOutputEl.scrollHeight;
+        }).finally(() => {
+          terminalInput.disabled = false;
+          terminalInput.focus();
+        });
+      }
+    });
+  }
   // Logo/title link — update href based on auth state and save auto-resume
   // Logo/title link — route based on auth state
   const homeLink = document.getElementById('homeLink');
@@ -937,14 +958,8 @@ function selectQuestion(id) {
     renderNotesPreview();
   }
 
-  const sub = submissions[id];
-  if (sub) {
-    consoleOutputEl.innerHTML = colorizeOutput(sub.output);
-    updateStatus(sub.status);
-  } else {
-    consoleOutputEl.textContent = 'Ready to code. Click Run to compile or Submit to check this case.';
-    updateStatus('Unattempted');
-  }
+  consoleOutputEl.textContent = 'When ready, hit Check to compile and run the code.';
+  updateStatus('Unattempted');
 
   // Expand the tree to show the active problem
   if (question.topic) {
@@ -995,14 +1010,8 @@ function updateStatus(status) {
   const displayStatus = status || 'Unattempted';
   if (statusTextEl) {
     statusTextEl.textContent = displayStatus;
-  }
-  if (workspaceTitleEl) {
-    workspaceTitleEl.textContent = displayStatus;
-    workspaceTitleEl.className = 'mb-0 ' + (
-      displayStatus === 'Accepted' ? 'text-pass' :
-      displayStatus === 'Wrong Answer' || displayStatus === 'Runtime Error' || displayStatus === 'Compilation Error' ? 'text-fail' :
-      ''
-    );
+    statusTextEl.className = 'small ' + (displayStatus === 'Accepted' ? 'text-pass' :
+      displayStatus === 'Wrong Answer' || displayStatus === 'Runtime Error' || displayStatus === 'Compilation Error' ? 'text-fail' : '');
   }
 }
 
@@ -1128,6 +1137,14 @@ const JUDGE_URL = window.__APP_CONFIG__ && window.__APP_CONFIG__.judgeUrl
     ? 'http://127.0.0.1:4000'
     : 'https://judge.code.pyjamacafe.com';
 
+function execCommand(cmd) {
+  return fetch(JUDGE_URL + '/api/exec', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ command: cmd })
+  }).then((r) => r.json());
+}
+
 function submitCode() {
   if (!activeQuestionId) {
     consoleOutputEl.textContent = 'Please select a case first.';
@@ -1171,24 +1188,14 @@ function submitCode() {
       outputHtml = '<span class="text-fail">' + status + '</span>\n' + ansiToHtml(res.stderr || res.stdout || 'No output');
     }
 
-    if (!submissions[activeQuestionId]) submissions[activeQuestionId] = {};
-    submissions[activeQuestionId].status = status;
-    submissions[activeQuestionId].output = outputHtml;
-    if (fileList.length > 0) {
-      fileList.forEach((f) => {
-        if (!submissions[activeQuestionId].files) submissions[activeQuestionId].files = {};
-        submissions[activeQuestionId].files[f.filename] = getEditorValue();
-      });
-    } else {
-      submissions[activeQuestionId].code = getEditorValue();
-    }
-    persistSubmissions();
     consoleOutputEl.innerHTML = outputHtml;
+    consoleOutputEl.scrollTop = consoleOutputEl.scrollHeight;
     updateStatus(status);
     renderQuestionList(questionSearchEl ? questionSearchEl.value : '');
   })
   .catch((err) => {
     consoleOutputEl.innerHTML = '<span class="text-fail">Connection error</span>\nCould not reach the judge server. Is docker running?\n' + escapeHtml(err.message || '');
+    consoleOutputEl.scrollTop = consoleOutputEl.scrollHeight;
   });
 }
 
@@ -1939,18 +1946,25 @@ function setupAuth() {
   if (themeToggleDropdown) themeToggleDropdown.addEventListener('click', () => { toggleTheme(); });
   if (resetProfileLink) {
     resetProfileLink.addEventListener('click', () => {
-      if (!confirm('This will delete all your saved data (submissions, notes, theme, preferences) from both local storage and the cloud. Continue?')) return;
-      // Wipe local
+      document.getElementById('resetConfirmModal').style.display = '';
+    });
+  }
+  const resetConfirmYes = document.getElementById('resetConfirmYes');
+  const resetConfirmNo = document.getElementById('resetConfirmNo');
+  if (resetConfirmNo) resetConfirmNo.addEventListener('click', () => {
+    document.getElementById('resetConfirmModal').style.display = 'none';
+  });
+  if (resetConfirmYes) {
+    resetConfirmYes.addEventListener('click', () => {
+      document.getElementById('resetConfirmModal').style.display = 'none';
       localStorage.removeItem('pyjamacode-submissions');
       localStorage.removeItem('pyjamacode-notes');
       localStorage.removeItem('pyjamacode-theme');
       localStorage.removeItem('lastProblemUrl');
-      // Wipe cloud if signed in
       const uid = typeof getCurrentUser === 'function' ? (getCurrentUser() || {}).uid : null;
       if (uid && typeof firebase !== 'undefined' && firebase.apps.length) {
         firebase.firestore().collection('userData').doc(uid).delete().catch(() => {});
       }
-      // Reload page
       window.location.href = '/';
     });
   }

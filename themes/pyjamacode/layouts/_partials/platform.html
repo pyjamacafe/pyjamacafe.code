@@ -125,7 +125,7 @@
   <!-- Right: Coding Workspace -->
   <section class="platform-pane editor-pane" id="editorPane">
     <div class="pane-header border-bottom d-flex align-items-center justify-content-between gap-2">
-      <h5 class="mb-0" id="workspaceTitle">Unattempted</h5>
+      <span id="statusText" class="small"></span>
       <div class="d-flex gap-2 align-items-center">
         <button id="submitBtn" class="btn btn-sm btn-success" data-bs-toggle="tooltip" title="Check solution"><i class="bi bi-check-lg"></i> Check</button>
         <button id="resetBtn" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="Reset active file to starter"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
@@ -142,11 +142,17 @@
     <div class="console-resizer" id="resizerEditorConsole" aria-label="Resize console"></div>
 
     <div class="console-area" id="consoleArea">
-        <div class="console-header border-bottom d-flex justify-content-between align-items-center">
-        <span class="fw-semibold small">Output / Console</span>
-        <button id="clearConsole" class="btn btn-link btn-sm p-0 text-decoration-none" data-bs-toggle="tooltip" title="Clear console output"><i class="bi bi-eraser"></i> Clear</button>
+      <div class="console-header border-bottom d-flex justify-content-between align-items-center">
+        <span class="fw-semibold small">Terminal</span>
+        <button id="clearConsole" class="btn btn-link btn-sm p-0 text-decoration-none"><i class="bi bi-eraser"></i></button>
       </div>
-      <pre id="consoleOutput" class="console-output m-0 p-3">Select a case and start coding...</pre>
+      <div class="terminal-body d-flex flex-column">
+        <pre id="consoleOutput" class="console-output m-0 p-3">When ready, hit Check to compile and run the code.</pre>
+        <div class="terminal-input-line d-flex align-items-center px-3 py-1">
+          <span class="prompt me-1">$</span>
+          <input id="terminalInput" type="text" class="terminal-input flex-grow-1" autocomplete="off" spellcheck="false" placeholder="type a command...">
+        </div>
+      </div>
     </div>
   </section>
 
@@ -176,5 +182,16 @@
     <div class="auth-toggle" style="margin-top:0.5rem">
       <a id="authCloseLink" style="color:var(--bs-secondary-color)">Close</a>
     </div>
+  </div>
+</div>
+
+<!-- Reset confirmation modal -->
+<div id="resetConfirmModal" class="auth-modal-backdrop" style="display:none">
+  <div class="auth-modal">
+    <h3>Reset Profile</h3>
+    <p style="margin:1rem 0;line-height:1.5">This will delete all your saved data (submissions, notes, theme, preferences) from both local storage and the cloud. This cannot be undone.</p>
+    <p style="margin:0 0 1rem;font-weight:600;color:var(--bs-danger)">Are you sure you want to continue?</p>
+    <button id="resetConfirmYes" class="btn btn-danger w-100" style="margin-bottom:0.5rem">Yes, Reset Everything</button>
+    <button id="resetConfirmNo" class="btn btn-outline-secondary w-100">Cancel</button>
   </div>
 </div>
