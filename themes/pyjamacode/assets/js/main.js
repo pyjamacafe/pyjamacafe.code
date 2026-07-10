@@ -28,8 +28,10 @@ const questionListEl = document.getElementById('questionList');
 const questionSearchEl = document.getElementById('questionSearch');
 const questionContentEl = document.getElementById('questionContent');
 const articleContentEl = document.getElementById('articleContent');
+const quizContentEl = document.getElementById('quizContent');
 const tabChallenge = document.getElementById('tabChallenge');
 const tabArticle = document.getElementById('tabArticle');
+const tabQuiz = document.getElementById('tabQuiz');
 const difficultyBadgeEl = document.getElementById('difficultyBadge');
 const codeEditorEl = document.getElementById('codeEditor');
 const codeEditorWrapper = document.getElementById('codeEditorWrapper');
@@ -1019,8 +1021,12 @@ function selectQuestion(id) {
 
   // Set up tabs
   const hasArticle = question.article && question.article.trim().length > 0;
+  const hasQuiz = question.quiz && question.quiz.trim().length > 0;
   if (tabArticle) {
     tabArticle.classList.toggle('d-none', !hasArticle);
+  }
+  if (tabQuiz) {
+    tabQuiz.classList.toggle('d-none', !hasQuiz);
   }
   // Remember tab before resetting URL
   const prevTab = new URL(window.location).searchParams.get('tab') || 'challenge';
@@ -1381,13 +1387,115 @@ function initTabs() {
   if (tabArticle) {
     tabArticle.addEventListener('click', () => setActiveTab('explanation'));
   }
+  if (tabQuiz) {
+    tabQuiz.addEventListener('click', () => setActiveTab('quiz'));
+  }
+}
+
+function parseQuizData(raw) {
+  if (!raw) return [];
+  const blocks = raw.split(/\n##\s*/).filter(Boolean);
+  return blocks.map((block) => {
+    const lines = block.trim().split('\n');
+    let question = lines[0].replace(/^##\s*/, '').trim();
+    const label = question.toLowerCase();
+    if (label === 'question' || label === 'q' || label === 'quiz') {
+      question = lines.slice(1).find((l) => l.trim()) || '';
+      question = question.trim();
+    }
+    const options = [];
+    let correct = -1;
+    let explanation = '';
+    let optIdx = 0;
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (/^-\s*\[.\]/.test(line)) {
+        const marker = line[3];
+        const text = line.slice(5).trim();
+        options.push({ letter: marker, text });
+        if (marker.toUpperCase() === 'X') correct = optIdx;
+        optIdx++;
+      } else if (/^Correct:\s*([A-D])/i.test(line)) {
+        const match = line.match(/^Correct:\s*([A-D])/i);
+        if (match) correct = match[1].toUpperCase().charCodeAt(0) - 65;
+      } else if (/^Explanation:/i.test(line)) {
+        explanation = line.replace(/^Explanation:\s*/i, '').trim();
+      }
+    }
+    return { question, options, correct, explanation };
+  });
+}
+
+function renderQuiz() {
+  if (!quizContentEl) return;
+  const question = questions.find((q) => q.id === activeQuestionId);
+  if (!question || !question.quiz) {
+    quizContentEl.innerHTML = '<p class="text-muted">No quiz available for this lesson.</p>';
+    return;
+  }
+  const items = parseQuizData(question.quiz);
+  if (items.length === 0) {
+    quizContentEl.innerHTML = '<p class="text-muted">No quiz available for this lesson.</p>';
+    return;
+  }
+  quizContentEl.innerHTML = items.map((item, qi) => `
+    <div class="quiz-question mb-4" data-q="${qi}">
+      <p class="fw-semibold mb-2">${escapeHtml(item.question)}</p>
+      <div class="quiz-options">
+        ${item.options.map((opt, oi) => `
+          <label class="quiz-option d-block py-1 px-2 mb-1" data-qi="${qi}" data-oi="${oi}">
+            <input type="radio" name="quiz-${qi}" value="${oi}" class="me-2">
+            <span class="option-letter">${opt.letter}.</span> ${escapeHtml(opt.text)}
+          </label>
+        `).join('')}
+      </div>
+      <div class="quiz-feedback mt-1 small d-none"></div>
+    </div>
+  `).join('');
+
+  quizContentEl.querySelectorAll('.quiz-option input[type="radio"]').forEach((input) => {
+    input.addEventListener('change', (e) => {
+      const label = e.target.closest('.quiz-option');
+      const qi = parseInt(label.dataset.qi);
+      const oi = parseInt(label.dataset.oi);
+      const item = items[qi];
+      const feedback = quizContentEl.querySelector(`.quiz-question[data-q="${qi}"] .quiz-feedback`);
+      const allLabels = quizContentEl.querySelectorAll(`.quiz-question[data-q="${qi}"] .quiz-option`);
+      allLabels.forEach((l) => {
+        l.style.borderColor = '';
+        l.querySelector('input').disabled = true;
+      });
+      if (oi === item.correct) {
+        label.style.borderColor = 'var(--bs-success)';
+        label.style.background = 'var(--bs-success-bg-subtle)';
+        feedback.className = 'quiz-feedback mt-1 small text-pass';
+        feedback.innerHTML = '<span class="fw-semibold">&#10003; Correct!</span> ' + escapeHtml(item.explanation);
+      } else {
+        label.style.borderColor = 'var(--bs-danger)';
+        label.style.background = 'var(--bs-danger-bg-subtle)';
+        const correctLabel = allLabels[item.correct];
+        if (correctLabel) {
+          correctLabel.style.borderColor = 'var(--bs-success)';
+          correctLabel.style.background = 'var(--bs-success-bg-subtle)';
+        }
+        feedback.className = 'quiz-feedback mt-1 small text-fail';
+        const nudges = ['Not quite. Think about what the CPU actually does.', 'Almost! Try considering the key function of this component.', 'Not correct. Review the theory section and try again.'];
+        feedback.innerHTML = '<span class="fw-semibold">&#10007; Incorrect.</span> ' + nudges[qi % nudges.length];
+      }
+      feedback.classList.remove('d-none');
+    });
+  });
 }
 
 function setActiveTab(tab) {
   if (questionContentEl) questionContentEl.classList.toggle('d-none', tab !== 'challenge');
   if (articleContentEl) articleContentEl.classList.toggle('d-none', tab !== 'explanation');
+  if (quizContentEl) quizContentEl.classList.toggle('d-none', tab !== 'quiz');
   if (tabChallenge) tabChallenge.classList.toggle('active', tab === 'challenge');
   if (tabArticle) tabArticle.classList.toggle('active', tab === 'explanation');
+  if (tabQuiz) tabQuiz.classList.toggle('active', tab === 'quiz');
+
+  if (tab === 'quiz') renderQuiz();
 
   // Show/hide auth blur based on tab
   updateAuthBlur();

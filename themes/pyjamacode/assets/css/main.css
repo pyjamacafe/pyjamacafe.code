@@ -1672,3 +1672,29 @@ footer {
     height: 160px;
   }
 }
+
+/* Quiz */
+.quiz-option {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.quiz-option:hover {
+  background: var(--bs-tertiary-bg);
+}
+
+.quiz-option input[type="radio"] {
+  accent-color: var(--accent-color);
+}
+
+.quiz-option .option-letter {
+  font-weight: 600;
+  color: var(--bs-secondary-color);
+}
+
+.quiz-feedback {
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+}
