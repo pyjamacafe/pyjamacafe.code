@@ -13,7 +13,7 @@ initial_code = '''#include <stdio.h>
 __attribute__((interrupt)) void my_isr(void) {
     // The compiler automatically saves/restores context
     // and uses BX LR with EXC_RETURN
-    printf("ISR executed\\n");
+    printf("ISR executed\n");
 }
 
 // naked attribute: no prologue/epilogue — for pure assembly
@@ -21,15 +21,15 @@ __attribute__((naked)) void startup_asm(void) {
     // Must contain only assembly — the compiler will not
     // generate any function frame
     __asm(
-        "LDR R0, =_estack\\n"
-        "MOV SP, R0\\n"
-        "BL main\\n"
-        "B .\\n"
+        "LDR R0, =_estack\n"
+        "MOV SP, R0\n"
+        "BL main\n"
+        "B .\n"
     );
 }
 
 int main(void) {
-    printf("Attributes demonstrated\\n");
+    printf("Attributes demonstrated\n");
     return 0;
 }
 '''

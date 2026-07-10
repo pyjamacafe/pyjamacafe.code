@@ -37,7 +37,7 @@ int main(void) {
     set_control(0x03);
 
     // Now running on PSP in unprivileged mode
-    printf("PSP = 0x%08X\\n", get_psp());
+    printf("PSP = 0x%08X\n", get_psp());
 
     // Switch back to MSP for kernel
     set_control(0x00);

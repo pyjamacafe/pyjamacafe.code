@@ -28,9 +28,9 @@ int main(void) {
         {"123 Main St", "Springfield", 12345}
     };
 
-    printf("Name: %s\\n", p.name);
-    printf("City: %s\\n", p.addr.city);
-    printf("Zip: %d\\n", p.addr.zip);
+    printf("Name: %s\n", p.name);
+    printf("City: %s\n", p.addr.city);
+    printf("Zip: %d\n", p.addr.zip);
 
     return 0;
 }

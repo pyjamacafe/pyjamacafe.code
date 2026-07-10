@@ -20,16 +20,16 @@ enum permission {
 int main(void) {
     int user_perm = PERM_READ | PERM_WRITE;
 
-    if (user_perm & PERM_READ)   printf("Can read\\n");
-    if (user_perm & PERM_WRITE)  printf("Can write\\n");
-    if (user_perm & PERM_EXECUTE) printf("Can execute\\n");
+    if (user_perm & PERM_READ)   printf("Can read\n");
+    if (user_perm & PERM_WRITE)  printf("Can write\n");
+    if (user_perm & PERM_EXECUTE) printf("Can execute\n");
 
     // Check specific permission
     if ((user_perm & PERM_WRITE) == PERM_WRITE) {
-        printf("Write access confirmed\\n");
+        printf("Write access confirmed\n");
     }
 
-    printf("Permission value: %d\\n", user_perm);
+    printf("Permission value: %d\n", user_perm);
 
     return 0;
 }

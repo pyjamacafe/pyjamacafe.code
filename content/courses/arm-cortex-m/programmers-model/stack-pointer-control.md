@@ -19,11 +19,11 @@ void set_psp_and_control(void) {
     psp_addr &= ~7;
 
     __asm volatile(
-        "MSR PSP, %0     \\n\\t"
-        "MRS R0, CONTROL \\n\\t"
-        "ORR R0, R0, #2  \\n\\t"
-        "MSR CONTROL, R0 \\n\\t"
-        "ISB             \\n\\t"
+        "MSR PSP, %0     \n\\t"
+        "MRS R0, CONTROL \n\\t"
+        "ORR R0, R0, #2  \n\\t"
+        "MSR CONTROL, R0 \n\\t"
+        "ISB             \n\\t"
         : : "r" (psp_addr) : "r0"
     );
 }
@@ -35,20 +35,20 @@ uint32_t get_current_sp(void) {
 }
 
 int main(void) {
-    printf("Initial SP: 0x%08X\\n", get_current_sp());
+    printf("Initial SP: 0x%08X\n", get_current_sp());
 
     set_psp_and_control();
 
-    printf("After PSP switch SP: 0x%08X\\n", get_current_sp());
+    printf("After PSP switch SP: 0x%08X\n", get_current_sp());
 
     uint32_t current_sp = get_current_sp();
     uint32_t psp_start = (uint32_t)&psp_stack[0];
     uint32_t psp_end = (uint32_t)&psp_stack[PSP_STACK_SIZE / 4 - 1];
 
     if (current_sp >= psp_start && current_sp <= psp_end + 3) {
-        printf("Using PSP: YES\\n");
+        printf("Using PSP: YES\n");
     } else {
-        printf("Using PSP: NO (using MSP)\\n");
+        printf("Using PSP: NO (using MSP)\n");
     }
 
     return 0;

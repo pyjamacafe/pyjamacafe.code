@@ -30,7 +30,7 @@ int main(void) {
 
     for (int i = 0; i < 4; i++) {
         struct tt_result r = test_target(test_addrs[i]);
-        printf("Address 0x%08X: result=0x%08X\\n",
+        printf("Address 0x%08X: result=0x%08X\n",
                (unsigned int)test_addrs[i], r.result);
 
         // Bit 0: secure

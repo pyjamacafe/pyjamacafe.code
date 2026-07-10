@@ -16,7 +16,7 @@ int main(void) {
         printf("%d ", i);
         i++;
     }
-    printf("\\n");
+    printf("\n");
 
     // Do-while: runs at least once
     int j = 1;
@@ -24,7 +24,7 @@ int main(void) {
         printf("%d ", j);
         j++;
     } while (j <= 5);
-    printf("\\n");
+    printf("\n");
 
     return 0;
 }

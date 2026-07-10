@@ -24,7 +24,7 @@ int main(void) {
     // Cortex-M0/M23 do not support unaligned access (HardFault)
     // Cortex-M3/M33/M55 support unaligned access but with a performance penalty
 
-    printf("Unaligned access behaviour demonstrated\\n");
+    printf("Unaligned access behaviour demonstrated\n");
     return 0;
 }
 '''

@@ -38,8 +38,8 @@ int initialized_data = 42;
 int uninitialized_data;
 
 int main(void) {
-    printf("Initialized: %d\\n", initialized_data);  // Must be 42
-    printf("Uninitialized: %d\\n", uninitialized_data);  // Must be 0
+    printf("Initialized: %d\n", initialized_data);  // Must be 42
+    printf("Uninitialized: %d\n", uninitialized_data);  // Must be 0
     return 0;
 }
 '''

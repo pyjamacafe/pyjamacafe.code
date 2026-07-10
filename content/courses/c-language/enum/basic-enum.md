@@ -14,14 +14,14 @@ enum color { RED, GREEN, BLUE, YELLOW, CYAN, MAGENTA };
 int main(void) {
     enum color c = GREEN;
 
-    printf("GREEN = %d\\n", c);
+    printf("GREEN = %d\n", c);
 
     // Using enum in a switch
     switch (c) {
-        case RED:    printf("Red\\n"); break;
-        case GREEN:  printf("Green\\n"); break;
-        case BLUE:   printf("Blue\\n"); break;
-        default:     printf("Other\\n"); break;
+        case RED:    printf("Red\n"); break;
+        case GREEN:  printf("Green\n"); break;
+        case BLUE:   printf("Blue\n"); break;
+        default:     printf("Other\n"); break;
     }
 
     return 0;

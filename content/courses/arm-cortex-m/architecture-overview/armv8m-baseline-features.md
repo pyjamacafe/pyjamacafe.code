@@ -35,26 +35,26 @@ int main(void) {
     uint32_t cpuid = SCB_CPUID;
     cpuid_fields_t f = decode_cpuid(cpuid);
 
-    printf("CPUID: 0x%08X\\n", cpuid);
-    printf("Implementer:  0x%02X (%s)\\n",
+    printf("CPUID: 0x%08X\n", cpuid);
+    printf("Implementer:  0x%02X (%s)\n",
            f.implementer, f.implementer == 0x41 ? "ARM" : "Other");
-    printf("Variant:      0x%X\\n", f.variant);
+    printf("Variant:      0x%X\n", f.variant);
     printf("Architecture: 0x%X ", f.architecture);
 
     switch (f.architecture) {
-        case 2: printf("ARMv6-M\\n"); break;
-        case 3: printf("ARMv7-M\\n"); break;
-        case 4: printf("ARMv8-M\\n"); break;
-        default: printf("Unknown\\n"); break;
+        case 2: printf("ARMv6-M\n"); break;
+        case 3: printf("ARMv7-M\n"); break;
+        case 4: printf("ARMv8-M\n"); break;
+        default: printf("Unknown\n"); break;
     }
 
     printf("Part number:  0x%03X ", f.part_no);
-    if (f.part_no == 0xD22) printf("(Cortex-M23 - Baseline)\\n");
+    if (f.part_no == 0xD22) printf("(Cortex-M23 - Baseline)\n");
 
-    printf("Revision:     %u\\n", f.revision);
+    printf("Revision:     %u\n", f.revision);
 
     if (f.part_no == 0xD22) {
-        printf("\\n=> ARMv8-M Baseline: No FPU, No DSP, optional MPU\\n");
+        printf("\n=> ARMv8-M Baseline: No FPU, No DSP, optional MPU\n");
     }
 
     return 0;

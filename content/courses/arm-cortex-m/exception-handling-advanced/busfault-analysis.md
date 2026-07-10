@@ -23,30 +23,30 @@ void BusFault_Handler(void) {
     uint32_t cfsr = SCB_CFSR;
     uint32_t bfsr = (cfsr >> 8) & 0xFF;
 
-    printf("\\n=== BUS FAULT ===\\n");
+    printf("\n=== BUS FAULT ===\n");
 
-    if (bfsr & (1 << 0)) printf("Instruction bus error\\n");
-    if (bfsr & (1 << 1)) printf("Precise data bus error\\n");
-    if (bfsr & (1 << 2)) printf("Imprecise data bus error\\n");
-    if (bfsr & (1 << 3)) printf("Bus fault on unstacking\\n");
-    if (bfsr & (1 << 4)) printf("Bus fault on stacking\\n");
+    if (bfsr & (1 << 0)) printf("Instruction bus error\n");
+    if (bfsr & (1 << 1)) printf("Precise data bus error\n");
+    if (bfsr & (1 << 2)) printf("Imprecise data bus error\n");
+    if (bfsr & (1 << 3)) printf("Bus fault on unstacking\n");
+    if (bfsr & (1 << 4)) printf("Bus fault on stacking\n");
 
     if (bfsr & (1 << 7)) {
         last_fault_addr = SCB_BFAR;
-        printf("Fault address (BFAR): 0x%08X\\n", last_fault_addr);
+        printf("Fault address (BFAR): 0x%08X\n", last_fault_addr);
     }
 
     last_fault_type = bfsr;
 
     if (bfsr & (1 << 1)) {
-        printf("Precise fault - can retry after fixing address\\n");
+        printf("Precise fault - can retry after fixing address\n");
     } else if (bfsr & (1 << 2)) {
-        printf("Imprecise fault - cannot determine fault address\\n");
+        printf("Imprecise fault - cannot determine fault address\n");
     }
 
     SCB_CFSR = cfsr & 0x0000FF00;
 
-    printf("Fault logged. Continuing...\\n");
+    printf("Fault logged. Continuing...\n");
 }
 
 void cause_busfault(void) {
@@ -62,7 +62,7 @@ uint32_t safe_read(uint32_t *addr) {
     uint32_t val;
 
     __asm volatile(
-        "LDREX %0, [%1]   \\n\\t"
+        "LDREX %0, [%1]   \n\\t"
         : "=r" (val)
         : "r" (addr)
     );
@@ -71,21 +71,21 @@ uint32_t safe_read(uint32_t *addr) {
 }
 
 int main(void) {
-    printf("BusFault Analysis and Recovery\\n\\n");
+    printf("BusFault Analysis and Recovery\n\n");
 
     SCB_SHCSR |= (1UL << 17);
-    printf("BusFault handler enabled\\n");
+    printf("BusFault handler enabled\n");
 
     cause_busfault();
 
-    printf("\\nRecovery simulation:\\n");
-    printf("Last fault PC:  0x%08X\\n", last_fault_pc);
-    printf("Last fault addr: 0x%08X\\n", last_fault_addr);
+    printf("\nRecovery simulation:\n");
+    printf("Last fault PC:  0x%08X\n", last_fault_pc);
+    printf("Last fault addr: 0x%08X\n", last_fault_addr);
 
-    printf("\\nAvoiding bus faults:\\n");
-    printf("  - Check address validity before access\\n");
-    printf("  - Use MPU to block invalid regions\\n");
-    printf("  - Use safe_read with fault handler\\n");
+    printf("\nAvoiding bus faults:\n");
+    printf("  - Check address validity before access\n");
+    printf("  - Use MPU to block invalid regions\n");
+    printf("  - Use safe_read with fault handler\n");
 
     return 0;
 }

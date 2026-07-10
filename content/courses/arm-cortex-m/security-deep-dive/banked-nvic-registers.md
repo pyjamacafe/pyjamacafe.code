@@ -29,7 +29,7 @@ void set_interrupt_priority_nonsecure(int irq, unsigned int priority) {
 int main(void) {
     set_interrupt_priority_secure(10, 0x80);
     set_interrupt_priority_nonsecure(15, 0xC0);
-    printf("Banked NVIC priorities configured\\n");
+    printf("Banked NVIC priorities configured\n");
     return 0;
 }
 '''

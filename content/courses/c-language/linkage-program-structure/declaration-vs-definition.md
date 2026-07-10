@@ -24,7 +24,7 @@ void update_counter(void) {
 int main(void) {
     update_counter();
     update_counter();
-    printf("Counter: %d\\n", global_counter);
+    printf("Counter: %d\n", global_counter);
     return 0;
 }
 '''

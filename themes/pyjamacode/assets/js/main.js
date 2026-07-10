@@ -98,6 +98,14 @@ function init() {
     return;
   }
 
+  // Redirect authenticated users from landing page to dashboard
+  if (window.location.pathname === '/' || window.location.pathname === '') {
+    if (typeof isAuthenticated === 'function' && isAuthenticated()) {
+      window.location.replace('/dashboard/');
+      return;
+    }
+  }
+
   try {
     questions = JSON.parse(problemDataEl.textContent);
   } catch (e) {
@@ -2136,28 +2144,55 @@ function setupAuth() {
   if (authLoginBtn) authLoginBtn.addEventListener('click', () => openAuthModal('signin'));
   if (authLogoutLink) authLogoutLink.addEventListener('click', () => { signOut().catch(() => {}); });
   if (themeToggleDropdown) themeToggleDropdown.addEventListener('click', () => { toggleTheme(); });
+  const resetDialog = document.getElementById('resetConfirmModal');
   if (resetProfileLink) {
     resetProfileLink.addEventListener('click', () => {
-      document.getElementById('resetConfirmModal').style.display = '';
+      if (resetDialog) resetDialog.showModal();
     });
   }
   const resetConfirmYes = document.getElementById('resetConfirmYes');
   const resetConfirmNo = document.getElementById('resetConfirmNo');
   if (resetConfirmNo) resetConfirmNo.addEventListener('click', () => {
-    document.getElementById('resetConfirmModal').style.display = 'none';
+    if (resetDialog) resetDialog.close();
   });
   if (resetConfirmYes) {
     resetConfirmYes.addEventListener('click', () => {
-      document.getElementById('resetConfirmModal').style.display = 'none';
-      localStorage.removeItem('pyjamacode-submissions');
-      localStorage.removeItem('pyjamacode-notes');
-      localStorage.removeItem('pyjamacode-theme');
-      localStorage.removeItem('lastProblemUrl');
-      const uid = typeof getCurrentUser === 'function' ? (getCurrentUser() || {}).uid : null;
-      if (uid && typeof firebase !== 'undefined' && firebase.apps.length) {
-        firebase.firestore().collection('userData').doc(uid).delete().catch(() => {});
+      if (resetDialog) resetDialog.close();
+      // Use firebase.auth().currentUser directly — always up to date
+      let uid = null;
+      try {
+        if (typeof firebase !== 'undefined' && firebase.apps.length && firebase.auth().currentUser) {
+          uid = firebase.auth().currentUser.uid;
+        }
+      } catch (e) {}
+      const deletePromise = uid
+        ? firebase.firestore().collection('userData').doc(uid).delete()
+        : Promise.resolve();
+      if (uid) {
+        deletePromise.then(() => {
+          localStorage.removeItem('pyjamacode-submissions');
+          localStorage.removeItem('pyjamacode-notes');
+          localStorage.removeItem('pyjamacode-theme');
+          localStorage.removeItem('pyjamacode-bookmarks');
+          localStorage.removeItem('lastProblemUrl');
+          window.location.href = '/dashboard/';
+        }).catch((e) => {
+          console.error('Failed to delete cloud data:', e);
+          localStorage.removeItem('pyjamacode-submissions');
+          localStorage.removeItem('pyjamacode-notes');
+          localStorage.removeItem('pyjamacode-theme');
+          localStorage.removeItem('pyjamacode-bookmarks');
+          localStorage.removeItem('lastProblemUrl');
+          window.location.href = '/dashboard/';
+        });
+      } else {
+        localStorage.removeItem('pyjamacode-submissions');
+        localStorage.removeItem('pyjamacode-notes');
+        localStorage.removeItem('pyjamacode-theme');
+        localStorage.removeItem('pyjamacode-bookmarks');
+        localStorage.removeItem('lastProblemUrl');
+        window.location.href = '/dashboard/';
       }
-      window.location.href = '/';
     });
   }
   if (authGoogleBtn) authGoogleBtn.addEventListener('click', () => {
@@ -2180,6 +2215,11 @@ function setupAuth() {
       _viewCount = 0;
       _authNudged = false;
 
+      // Redirect to dashboard after login if on landing page
+      if (isAuthed && (window.location.pathname === '/' || window.location.pathname === '')) {
+        window.location.replace('/dashboard/');
+        return;
+      }
     }
 
     if (authLoginBtn) authLoginBtn.classList.toggle('d-none', isAuthed);
@@ -2299,6 +2339,55 @@ function initSync() {
     };
   }
 
+  function getFilteredData() {
+    const raw = getData();
+    let subs = {};
+    try { subs = JSON.parse(raw.submissions); } catch (e) { subs = {}; }
+    let filteredSubs = {};
+    for (const id of Object.keys(subs)) {
+      const q = questions.find((x) => x.id === id);
+      if (!q) continue;
+      const starter = q.initial_code || '';
+      const sub = subs[id];
+      const code = sub.code || sub.files?.['main.c'] || '';
+      const hasCodeChange = multiFileChangesExist(q, sub);
+      const hasStatus = sub.status && sub.status !== 'Unattempted';
+      if (hasCodeChange || hasStatus) {
+        filteredSubs[id] = sub;
+      }
+    }
+    let filteredNotes = {};
+    try {
+      const allNotes = JSON.parse(raw.notes);
+      for (const id of Object.keys(allNotes)) {
+        if (allNotes[id] && allNotes[id].trim()) filteredNotes[id] = allNotes[id];
+      }
+    } catch (e) {}
+    return {
+      submissions: JSON.stringify(filteredSubs),
+      notes: JSON.stringify(filteredNotes),
+      theme: raw.theme,
+      tab: raw.tab,
+      updatedAt: raw.updatedAt
+    };
+  }
+
+  function multiFileChangesExist(q, sub) {
+    if (!q.codes || !sub.files) return false;
+    const div = document.createElement('div');
+    div.innerHTML = q.codes;
+    const pres = div.querySelectorAll('pre');
+    for (const pre of pres) {
+      const raw = pre.getAttribute('data-title') || '';
+      const codeEl = pre.querySelector('code');
+      const content = codeEl ? codeEl.textContent || '' : '';
+      const filename = raw || 'untitled.c';
+      const saved = sub.files[filename];
+      if (saved !== undefined && saved !== content) return true;
+    }
+    return false;
+  }
+
   let isPushingLocally = false;
   let cloudUnsub = null;
 
@@ -2342,7 +2431,6 @@ function initSync() {
     cloudUnsub = db.collection('userData').doc(uid).onSnapshot((snap) => {
       if (isPushingLocally) return;
       if (snap.exists) { applyCloudData(snap.data()); setDirty(false); }
-      else db.collection('userData').doc(uid).set(getData()).then(() => setDirty(false)).catch(() => {});
     });
   }
 
@@ -2353,7 +2441,7 @@ function initSync() {
   function pullFromCloud(uid) {
     return db.collection('userData').doc(uid).get().then((snap) => {
       if (!snap.exists) {
-        db.collection('userData').doc(uid).set(getData()).then(() => setDirty(false)).catch(() => {});
+        db.collection('userData').doc(uid).set(getFilteredData()).then(() => setDirty(false)).catch(() => {});
         return;
       }
       applyCloudData(snap.data());
@@ -2377,7 +2465,7 @@ function initSync() {
         startCloudListener(user.uid);
         setDirty(false);
       }).catch(() => {
-        db.collection('userData').doc(user.uid).set(getData()).then(() => setDirty(false)).catch(() => {});
+        db.collection('userData').doc(user.uid).set(getFilteredData()).then(() => setDirty(false)).catch(() => {});
         startCloudListener(user.uid);
       });
     } else {
@@ -2403,12 +2491,20 @@ function initSync() {
       saveCurrentCode();
       saveCurrentNotes();
       isPushingLocally = true;
-      db.collection('userData').doc(syncUid).set(getData()).then(() => {
+      db.collection('userData').doc(syncUid).set(getFilteredData()).then(() => {
         setTimeout(() => { isPushingLocally = false; }, 1000);
         setDirty(false);
       }).catch(() => { isPushingLocally = false; });
     }
   });
+
+  const origToggleTheme = toggleTheme;
+  toggleTheme = function() {
+    origToggleTheme();
+    if (syncUid) {
+      db.collection('userData').doc(syncUid).set(getFilteredData()).catch(() => {});
+    }
+  };
 
   const origPersistSubmissions = persistSubmissions;
   persistSubmissions = function() {

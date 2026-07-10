@@ -12,17 +12,17 @@ initial_code = '''// Decode the xPSR register fields
 #include <stdint.h>
 
 void print_xpsr_fields(uint32_t xpsr) {
-    printf("xPSR = 0x%08X\\n", xpsr);
-    printf("  Negative (N) [31]: %d\\n", (xpsr >> 31) & 1);
-    printf("  Zero     (Z) [30]: %d\\n", (xpsr >> 30) & 1);
-    printf("  Carry    (C) [29]: %d\\n", (xpsr >> 29) & 1);
-    printf("  Overflow (V) [28]: %d\\n", (xpsr >> 28) & 1);
+    printf("xPSR = 0x%08X\n", xpsr);
+    printf("  Negative (N) [31]: %d\n", (xpsr >> 31) & 1);
+    printf("  Zero     (Z) [30]: %d\n", (xpsr >> 30) & 1);
+    printf("  Carry    (C) [29]: %d\n", (xpsr >> 29) & 1);
+    printf("  Overflow (V) [28]: %d\n", (xpsr >> 28) & 1);
 
     uint32_t ici_it = (xpsr >> 10) & 0x3F;
-    printf("  ICI/IT  [15:10]: 0x%02X\\n", ici_it);
+    printf("  ICI/IT  [15:10]: 0x%02X\n", ici_it);
 
     uint32_t exception_num = xpsr & 0x1FF;
-    printf("  Exception [8:0]: %u\\n", exception_num);
+    printf("  Exception [8:0]: %u\n", exception_num);
 }
 
 int main(void) {
@@ -35,9 +35,9 @@ int main(void) {
     int result = a + b;
 
     __asm volatile("MRS %0, xPSR" : "=r" (xpsr));
-    printf("\\nAfter signed operation (-5 + 3):\\n");
+    printf("\nAfter signed operation (-5 + 3):\n");
     print_xpsr_fields(xpsr);
-    printf("result = %d\\n", result);
+    printf("result = %d\n", result);
 
     return 0;
 }

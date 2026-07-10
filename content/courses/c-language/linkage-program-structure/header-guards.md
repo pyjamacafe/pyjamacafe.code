@@ -34,7 +34,7 @@ struct config {  // Would be redefinition without the guard!
 
 int main(void) {
     struct config cfg = {1000, 3};
-    printf("Config: timeout=%d, retries=%d\\n", cfg.timeout, cfg.retries);
+    printf("Config: timeout=%d, retries=%d\n", cfg.timeout, cfg.retries);
     return 0;
 }
 '''

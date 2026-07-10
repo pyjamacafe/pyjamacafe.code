@@ -31,9 +31,9 @@ void PendSV_Handler(void) {
 }
 
 int main(void) {
-    printf("System ready. Triggering context switch...\\n");
+    printf("System ready. Triggering context switch...\n");
     trigger_context_switch();
-    printf("Back in main\\n");
+    printf("Back in main\n");
     return 0;
 }
 '''

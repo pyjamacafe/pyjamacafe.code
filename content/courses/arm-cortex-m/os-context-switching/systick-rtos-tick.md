@@ -34,9 +34,9 @@ void delay_ms(unsigned int ms) {
 
 int main(void) {
     systick_init(1000, 48000000);  // 1 kHz tick at 48 MHz
-    printf("Waiting...\\n");
+    printf("Waiting...\n");
     delay_ms(1000);
-    printf("Done!\\n");
+    printf("Done!\n");
     return 0;
 }
 '''

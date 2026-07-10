@@ -12,17 +12,17 @@ initial_code = '''// Branch instructions and function call mechanisms
 #include <stdint.h>
 
 void unconditional_branch(void) {
-    printf("  Entered via unconditional branch\\n");
+    printf("  Entered via unconditional branch\n");
 }
 
 void conditional_branch_example(int32_t a, int32_t b) {
-    printf("  Comparing %d and %d:\\n", a, b);
+    printf("  Comparing %d and %d:\n", a, b);
 
     __asm volatile(
-        "CMP %0, %1       \\n\\t"
-        "ITT GT             \\n\\t"
-        "MOVGT R0, #1      \\n\\t"
-        "MOVLE R0, #0      \\n\\t"
+        "CMP %0, %1       \n\\t"
+        "ITT GT             \n\\t"
+        "MOVGT R0, #1      \n\\t"
+        "MOVLE R0, #0      \n\\t"
         : : "r" (a), "r" (b) : "r0", "cc"
     );
 }
@@ -31,25 +31,25 @@ uint32_t table_branch(uint32_t index) {
     uint32_t result;
 
     __asm volatile(
-        "CMP %1, #3       \\n\\t"
-        "ITT HI             \\n\\t"
-        "MOVHI %0, #0      \\n\\t"
-        "BXHI LR           \\n\\t"
+        "CMP %1, #3       \n\\t"
+        "ITT HI             \n\\t"
+        "MOVHI %0, #0      \n\\t"
+        "BXHI LR           \n\\t"
 
-        "TBB [PC, %1]      \\n\\t"
-        "BRANCH_TABLE:      \\n\\t"
-        ".byte 0            \\n\\t"
-        ".byte 6            \\n\\t"
-        ".byte 12           \\n\\t"
-        ".byte 18           \\n\\t"
-        "CASE0: MOV %0, #100 \\n\\t"
-        "B DONE              \\n\\t"
-        "CASE1: MOV %0, #200 \\n\\t"
-        "B DONE              \\n\\t"
-        "CASE2: MOV %0, #300 \\n\\t"
-        "B DONE              \\n\\t"
-        "CASE3: MOV %0, #400 \\n\\t"
-        "DONE:               \\n\\t"
+        "TBB [PC, %1]      \n\\t"
+        "BRANCH_TABLE:      \n\\t"
+        ".byte 0            \n\\t"
+        ".byte 6            \n\\t"
+        ".byte 12           \n\\t"
+        ".byte 18           \n\\t"
+        "CASE0: MOV %0, #100 \n\\t"
+        "B DONE              \n\\t"
+        "CASE1: MOV %0, #200 \n\\t"
+        "B DONE              \n\\t"
+        "CASE2: MOV %0, #300 \n\\t"
+        "B DONE              \n\\t"
+        "CASE3: MOV %0, #400 \n\\t"
+        "DONE:               \n\\t"
         : "=r" (result)
         : "r" (index)
         : "cc"
@@ -59,25 +59,25 @@ uint32_t table_branch(uint32_t index) {
 }
 
 int main(void) {
-    printf("Branch Instructions and Function Calls\\n\\n");
+    printf("Branch Instructions and Function Calls\n\n");
 
     unconditional_branch();
 
     conditional_branch_example(10, 5);
     conditional_branch_example(3, 7);
 
-    printf("\\nTable branch:\\n");
+    printf("\nTable branch:\n");
     for (int i = 0; i <= 3; i++) {
-        printf("  TBB(%d) = %u\\n", i, table_branch(i));
+        printf("  TBB(%d) = %u\n", i, table_branch(i));
     }
 
-    printf("\\nBranch instructions:\\n");
-    printf("  B  - Unconditional branch\\n");
-    printf("  BL - Branch and link (function call)\\n");
-    printf("  BX - Branch and exchange (indirect)\\n");
-    printf("  BLX- Branch link and exchange\\n");
-    printf("  TBB- Table branch byte\\n");
-    printf("  TBH- Table branch halfword\\n");
+    printf("\nBranch instructions:\n");
+    printf("  B  - Unconditional branch\n");
+    printf("  BL - Branch and link (function call)\n");
+    printf("  BX - Branch and exchange (indirect)\n");
+    printf("  BLX- Branch link and exchange\n");
+    printf("  TBB- Table branch byte\n");
+    printf("  TBH- Table branch halfword\n");
 
     return 0;
 }

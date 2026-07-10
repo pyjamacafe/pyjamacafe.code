@@ -49,31 +49,31 @@ uint32_t measure_deepsleep_latency(void) {
 }
 
 int main(void) {
-    printf("Power Mode Transition Latency\\n\\n");
+    printf("Power Mode Transition Latency\n\n");
 
     dwt_enable();
 
-    printf("Using DWT cycle counter for measurements\\n\\n");
+    printf("Using DWT cycle counter for measurements\n\n");
 
-    printf("Typical latencies:\\n");
-    printf("  Sleep -> Active:    %u cycles\\n", measure_wfi_latency());
-    printf("  DeepSleep -> Active (may be larger on real HW)\\n");
+    printf("Typical latencies:\n");
+    printf("  Sleep -> Active:    %u cycles\n", measure_wfi_latency());
+    printf("  DeepSleep -> Active (may be larger on real HW)\n");
 
-    printf("\\nExpected latencies (typical MCU):\\n");
-    printf("  Sleep wakeup:       2-12 cycles (CPU clock on)\\n");
-    printf("  Deep sleep wakeup:  5-100 us (regulator ramp)\\n");
-    printf("  Standby wakeup:     100-1000 us (like reset)\\n\\n");
+    printf("\nExpected latencies (typical MCU):\n");
+    printf("  Sleep wakeup:       2-12 cycles (CPU clock on)\n");
+    printf("  Deep sleep wakeup:  5-100 us (regulator ramp)\n");
+    printf("  Standby wakeup:     100-1000 us (like reset)\n\n");
 
-    printf("Factors affecting latency:\\n");
-    printf("  - Flash wakeup time (if flash powered down)\\n");
-    printf("  - PLL relock time (if PLL was disabled)\\n");
-    printf("  - Regulator startup time\\n");
-    printf("  - External oscillator startup\\n\\n");
+    printf("Factors affecting latency:\n");
+    printf("  - Flash wakeup time (if flash powered down)\n");
+    printf("  - PLL relock time (if PLL was disabled)\n");
+    printf("  - Regulator startup time\n");
+    printf("  - External oscillator startup\n\n");
 
-    printf("Optimizing wakeup:\\n");
-    printf("  - Keep memories powered in sleep\\n");
-    printf("  - Use low-power oscillator for fast restart\\n");
-    printf("  - Configure wakeup interrupt with highest priority\\n");
+    printf("Optimizing wakeup:\n");
+    printf("  - Keep memories powered in sleep\n");
+    printf("  - Use low-power oscillator for fast restart\n");
+    printf("  - Configure wakeup interrupt with highest priority\n");
 
     return 0;
 }

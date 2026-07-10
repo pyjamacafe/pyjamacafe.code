@@ -33,7 +33,7 @@ int main(void) {
     // Region 2: part of flash as secure
     sau_configure_region(2, 0x10000000, 0x10000FFF, 0);
 
-    printf("SAU configured\\n");
+    printf("SAU configured\n");
     return 0;
 }
 '''

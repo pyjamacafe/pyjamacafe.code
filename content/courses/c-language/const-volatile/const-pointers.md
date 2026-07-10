@@ -26,7 +26,7 @@ int main(void) {
     // *p3 = 30;  // ERROR
     // p3 = &y;   // ERROR
 
-    printf("x = %d (via p2)\\n", *p2);
+    printf("x = %d (via p2)\n", *p2);
 
     return 0;
 }

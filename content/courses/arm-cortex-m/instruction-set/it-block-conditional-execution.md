@@ -14,10 +14,10 @@ initial_code = '''// Use IT (If-Then) blocks for conditional execution
 int32_t abs_value_it(int32_t x) {
     int32_t result;
     __asm volatile(
-        "MOV %0, %1      \\n\\t"
-        "CMP %0, #0      \\n\\t"
-        "ITT MI            \\n\\t"
-        "RSBMI %0, %0, #0 \\n\\t"
+        "MOV %0, %1      \n\\t"
+        "CMP %0, #0      \n\\t"
+        "ITT MI            \n\\t"
+        "RSBMI %0, %0, #0 \n\\t"
         : "=r" (result)
         : "r" (x)
         : "cc"
@@ -28,9 +28,9 @@ int32_t abs_value_it(int32_t x) {
 int32_t conditional_add(int32_t a, int32_t b, int32_t should_add) {
     int32_t result = a;
     __asm volatile(
-        "CMP %1, #0      \\n\\t"
-        "ITT EQ            \\n\\t"
-        "ADDEQ %0, %0, %2 \\n\\t"
+        "CMP %1, #0      \n\\t"
+        "ITT EQ            \n\\t"
+        "ADDEQ %0, %0, %2 \n\\t"
         : "+r" (result)
         : "r" (should_add), "r" (b)
         : "cc"
@@ -41,7 +41,7 @@ int32_t conditional_add(int32_t a, int32_t b, int32_t should_add) {
 int32_t saturate_add(int32_t a, int32_t b) {
     int32_t result;
     __asm volatile(
-        "QADD %0, %1, %2 \\n\\t"
+        "QADD %0, %1, %2 \n\\t"
         : "=r" (result)
         : "r" (a), "r" (b)
     );
@@ -49,19 +49,19 @@ int32_t saturate_add(int32_t a, int32_t b) {
 }
 
 int main(void) {
-    printf("IT Block and Conditional Execution\\n\\n");
+    printf("IT Block and Conditional Execution\n\n");
 
-    printf("abs_value_it(-50) = %d\\n", abs_value_it(-50));
-    printf("abs_value_it(30)  = %d\\n", abs_value_it(30));
+    printf("abs_value_it(-50) = %d\n", abs_value_it(-50));
+    printf("abs_value_it(30)  = %d\n", abs_value_it(30));
 
-    printf("\\nconditional_add(10, 5, 1) = %d (no add)\\n",
+    printf("\nconditional_add(10, 5, 1) = %d (no add)\n",
            conditional_add(10, 5, 1));
-    printf("conditional_add(10, 5, 0) = %d (added)\\n",
+    printf("conditional_add(10, 5, 0) = %d (added)\n",
            conditional_add(10, 5, 0));
 
-    printf("\\nSaturating arithmetic:\\n");
+    printf("\nSaturating arithmetic:\n");
     int32_t max_val = 0x7FFFFFFF;
-    printf("QADD(%d, 1) = %d (saturated to max)\\n", max_val,
+    printf("QADD(%d, 1) = %d (saturated to max)\n", max_val,
            saturate_add(max_val, 1));
 
     return 0;

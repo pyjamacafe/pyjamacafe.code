@@ -36,30 +36,30 @@ typedef struct {
 } full_context_t;
 
 void print_full_context(const full_context_t *ctx) {
-    printf("Full CPU Context Reconstruction:\\n\\n");
-    printf("  R0  = 0x%08X   R8  = 0x%08X\\n",
+    printf("Full CPU Context Reconstruction:\n\n");
+    printf("  R0  = 0x%08X   R8  = 0x%08X\n",
            ctx->basic_frame.r0, ctx->r8);
-    printf("  R1  = 0x%08X   R9  = 0x%08X\\n",
+    printf("  R1  = 0x%08X   R9  = 0x%08X\n",
            ctx->basic_frame.r1, ctx->r9);
-    printf("  R2  = 0x%08X   R10 = 0x%08X\\n",
+    printf("  R2  = 0x%08X   R10 = 0x%08X\n",
            ctx->basic_frame.r2, ctx->r10);
-    printf("  R3  = 0x%08X   R11 = 0x%08X\\n",
+    printf("  R3  = 0x%08X   R11 = 0x%08X\n",
            ctx->basic_frame.r3, ctx->r11);
-    printf("  R4  = 0x%08X   R12 = 0x%08X\\n",
+    printf("  R4  = 0x%08X   R12 = 0x%08X\n",
            ctx->r4, ctx->basic_frame.r12);
-    printf("  R5  = 0x%08X   SP  = 0x%08X\\n",
+    printf("  R5  = 0x%08X   SP  = 0x%08X\n",
            ctx->r5, ctx->sp);
-    printf("  R6  = 0x%08X   LR  = 0x%08X\\n",
+    printf("  R6  = 0x%08X   LR  = 0x%08X\n",
            ctx->r6, ctx->basic_frame.lr);
-    printf("  R7  = 0x%08X   PC  = 0x%08X\\n",
+    printf("  R7  = 0x%08X   PC  = 0x%08X\n",
            ctx->r7, ctx->basic_frame.pc);
 
     uint32_t xpsr = ctx->basic_frame.xpsr;
-    printf("\\n  xPSR = 0x%08X\\n", xpsr);
-    printf("    N=%u Z=%u C=%u V=%u\\n",
+    printf("\n  xPSR = 0x%08X\n", xpsr);
+    printf("    N=%u Z=%u C=%u V=%u\n",
            (xpsr >> 31) & 1, (xpsr >> 30) & 1,
            (xpsr >> 29) & 1, (xpsr >> 28) & 1);
-    printf("    Exception: %u\\n", xpsr & 0x1FF);
+    printf("    Exception: %u\n", xpsr & 0x1FF);
 }
 
 full_context_t capture_context(exception_frame_t *frame) {
@@ -68,7 +68,7 @@ full_context_t capture_context(exception_frame_t *frame) {
 
     ctx.basic_frame = *frame;
     __asm volatile(
-        "STM %0!, {R4-R11}  \\n\\t"
+        "STM %0!, {R4-R11}  \n\\t"
         : : "r" (&ctx.r4) : "memory"
     );
 
@@ -79,7 +79,7 @@ full_context_t capture_context(exception_frame_t *frame) {
 }
 
 int main(void) {
-    printf("Exception Stack Frame Reconstruction\\n\\n");
+    printf("Exception Stack Frame Reconstruction\n\n");
 
     exception_frame_t test_frame = {
         .r0 = 0xAAAAAAAA,
@@ -96,10 +96,10 @@ int main(void) {
 
     print_full_context(&context);
 
-    printf("\\nReconstruction method:\\n");
-    printf("  1. Hardware pushes: R0-R3, R12, LR, PC, xPSR\\n");
-    printf("  2. Software saves:  R4-R11 (by handler or RTOS)\\n");
-    printf("  3. SP determines if MSP or PSP was used\\n");
+    printf("\nReconstruction method:\n");
+    printf("  1. Hardware pushes: R0-R3, R12, LR, PC, xPSR\n");
+    printf("  2. Software saves:  R4-R11 (by handler or RTOS)\n");
+    printf("  3. SP determines if MSP or PSP was used\n");
 
     return 0;
 }

@@ -27,9 +27,9 @@ int main(void) {
     struct point p = {10, 20};
 
     // Print everything
-    printf("a=%d, f=%.2f, ch=%c\\n", a, f, ch);
-    printf("array[4]=%d, partial[9]=%d\\n", arr[4], partial[9]);
-    printf("point: (%d, %d)\\n", p.x, p.y);
+    printf("a=%d, f=%.2f, ch=%c\n", a, f, ch);
+    printf("array[4]=%d, partial[9]=%d\n", arr[4], partial[9]);
+    printf("point: (%d, %d)\n", p.x, p.y);
 
     return 0;
 }

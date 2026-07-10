@@ -13,12 +13,12 @@ initial_code = '''#include <stdio.h>
 #define VALUE 20  // Some compilers warn about redefinition
 
 int main(void) {
-    printf("VALUE = %d\\n", VALUE);
+    printf("VALUE = %d\n", VALUE);
 
 #undef VALUE
 #define VALUE 30
 
-    printf("After #undef: VALUE = %d\\n", VALUE);
+    printf("After #undef: VALUE = %d\n", VALUE);
     return 0;
 }
 '''

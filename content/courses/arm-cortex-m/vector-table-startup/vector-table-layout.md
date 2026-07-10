@@ -47,34 +47,34 @@ void print_vector_entry(uint32_t index, handler_t handler) {
     if (handler == Default_Handler) {
         printf(" (Default)");
     }
-    printf("\\n");
+    printf("\n");
 }
 
 int main(void) {
-    printf("Cortex-M Vector Table Layout\\n\\n");
+    printf("Cortex-M Vector Table Layout\n\n");
 
-    printf("Exception table (first 16 entries):\\n");
+    printf("Exception table (first 16 entries):\n");
     for (int i = 0; i < 16; i++) {
         print_vector_entry(i, vector_table[i]);
     }
 
-    printf("\\nExternal interrupts (entries 16+):\\n");
+    printf("\nExternal interrupts (entries 16+):\n");
     for (int i = 0; i < 4; i++) {
         print_vector_entry(16 + i, vector_table[16 + i]);
     }
 
-    printf("\\nEntry 0 (SP)     = stack pointer initial value\\n");
-    printf("Entry 1 (Reset)  = reset handler address\\n");
-    printf("Entry 2 (NMI)    = non-maskable interrupt handler\\n");
-    printf("Entry 3 (Hard)   = hard fault handler\\n");
-    printf("Entry 11 (SVC)   = supervisor call handler\\n");
-    printf("Entry 14 (PendSV)= pendSV handler (RTOS context switch)\\n");
-    printf("Entry 15 (SysTck)= system tick timer handler\\n");
+    printf("\nEntry 0 (SP)     = stack pointer initial value\n");
+    printf("Entry 1 (Reset)  = reset handler address\n");
+    printf("Entry 2 (NMI)    = non-maskable interrupt handler\n");
+    printf("Entry 3 (Hard)   = hard fault handler\n");
+    printf("Entry 11 (SVC)   = supervisor call handler\n");
+    printf("Entry 14 (PendSV)= pendSV handler (RTOS context switch)\n");
+    printf("Entry 15 (SysTck)= system tick timer handler\n");
 
     return 0;
 }
 
-void Reset_Handler(void) { printf("Reset Handler called\\n"); }
+void Reset_Handler(void) { printf("Reset Handler called\n"); }
 void NMI_Handler(void) {}
 void HardFault_Handler(void) { while (1); }
 void Default_Handler(void) { while (1); }

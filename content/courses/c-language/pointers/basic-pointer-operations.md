@@ -13,14 +13,14 @@ int main(void) {
     int x = 42;
     int *p = &x;
 
-    printf("Value of x: %d\\n", x);
-    printf("Address of x: %p\\n", (void *)&x);
-    printf("Pointer p holds: %p\\n", (void *)p);
-    printf("Value via dereference: %d\\n", *p);
+    printf("Value of x: %d\n", x);
+    printf("Address of x: %p\n", (void *)&x);
+    printf("Pointer p holds: %p\n", (void *)p);
+    printf("Value via dereference: %d\n", *p);
 
     // Modify through pointer
     *p = 100;
-    printf("After *p = 100, x = %d\\n", x);
+    printf("After *p = 100, x = %d\n", x);
 
     return 0;
 }
@@ -77,14 +77,14 @@ int main(void) {
     int x = 42;
     int *p = &x;
 
-    printf("Value of x: %d\\n", x);
-    printf("Address of x: %p\\n", (void *)&x);
-    printf("Pointer p holds: %p\\n", (void *)p);
-    printf("Value via dereference: %d\\n", *p);
+    printf("Value of x: %d\n", x);
+    printf("Address of x: %p\n", (void *)&x);
+    printf("Pointer p holds: %p\n", (void *)p);
+    printf("Value via dereference: %d\n", *p);
 
     // Modify through pointer
     *p = 100;
-    printf("After *p = 100, x = %d\\n", x);
+    printf("After *p = 100, x = %d\n", x);
 
     return 0;
 }
@@ -104,6 +104,6 @@ void print_ptr_info(const int *p);
 #include "pointer_utils.h"
 
 void print_ptr_info(const int *p) {
-    printf("Address: %p, Value: %d\\n", (void *)p, *p);
+    printf("Address: %p, Value: %d\n", (void *)p, *p);
 }
 ```

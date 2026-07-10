@@ -13,11 +13,11 @@ int main(void) {
     int temperature = 75;
 
     if (temperature > 85) {
-        printf("Hot\\n");
+        printf("Hot\n");
     } else if (temperature > 60) {
-        printf("Warm\\n");
+        printf("Warm\n");
     } else {
-        printf("Cool\\n");
+        printf("Cool\n");
     }
 
     // Modify values and observe

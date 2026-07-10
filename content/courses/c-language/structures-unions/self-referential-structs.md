@@ -20,7 +20,7 @@ void print_list(const struct node *head) {
         printf("%d -> ", head->data);
         head = head->next;
     }
-    printf("NULL\\n");
+    printf("NULL\n");
 }
 
 int main(void) {

@@ -26,9 +26,9 @@ int main(void) {
     struct sensor s2;
     memset(&s2, 0, sizeof(s2));
 
-    printf("s1.id = %d, s1.value = %.1f\\n", s1.id, s1.value);
-    printf("arr1[5] = %d\\n", arr1[5]);
-    printf("s2.id = %d\\n", s2.id);
+    printf("s1.id = %d, s1.value = %.1f\n", s1.id, s1.value);
+    printf("arr1[5] = %d\n", arr1[5]);
+    printf("s2.id = %d\n", s2.id);
 
     return 0;
 }

@@ -16,11 +16,11 @@ uint32_t add_four(uint32_t a, uint32_t b, uint32_t c, uint32_t d) {
 }
 
 void capture_args(uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3) {
-    printf("Function arguments received in:\\n");
-    printf("  R0 = 0x%08X\\n", r0);
-    printf("  R1 = 0x%08X\\n", r1);
-    printf("  R2 = 0x%08X\\n", r2);
-    printf("  R3 = 0x%08X\\n", r3);
+    printf("Function arguments received in:\n");
+    printf("  R0 = 0x%08X\n", r0);
+    printf("  R1 = 0x%08X\n", r1);
+    printf("  R2 = 0x%08X\n", r2);
+    printf("  R3 = 0x%08X\n", r3);
 }
 
 uint64_t return_64bit(uint32_t lo, uint32_t hi) {
@@ -28,26 +28,26 @@ uint64_t return_64bit(uint32_t lo, uint32_t hi) {
 }
 
 int main(void) {
-    printf("AAPCS Parameter Passing (R0-R3)\\n\\n");
+    printf("AAPCS Parameter Passing (R0-R3)\n\n");
 
-    printf("Test 1: Four 32-bit parameters\\n");
+    printf("Test 1: Four 32-bit parameters\n");
     uint32_t sum = add_four(0x11, 0x22, 0x44, 0x88);
-    printf("  Result in R0: 0x%08X\\n\\n", sum);
+    printf("  Result in R0: 0x%08X\n\n", sum);
 
-    printf("Test 2: Capture argument registers\\n");
+    printf("Test 2: Capture argument registers\n");
     capture_args(0xDEAD, 0xBEEF, 0xCAFE, 0xBAAB);
 
-    printf("\\nTest 3: 64-bit return (R0:R1 pair)\\n");
+    printf("\nTest 3: 64-bit return (R0:R1 pair)\n");
     uint64_t val = return_64bit(0x12345678, 0x9ABCDEF0);
-    printf("  64-bit result: 0x%016llX\\n", (unsigned long long)val);
-    printf("  R0 (low):  0x%08X\\n", (uint32_t)val);
-    printf("  R1 (high): 0x%08X\\n", (uint32_t)(val >> 32));
+    printf("  64-bit result: 0x%016llX\n", (unsigned long long)val);
+    printf("  R0 (low):  0x%08X\n", (uint32_t)val);
+    printf("  R1 (high): 0x%08X\n", (uint32_t)(val >> 32));
 
-    printf("\\nAAPCS rules:\\n");
-    printf("  R0-R3: argument registers (caller-saved)\\n");
-    printf("  R0:    return value (32-bit) or low half (64-bit)\\n");
-    printf("  R1:    return high half (64-bit)\\n");
-    printf("  >4 args: passed on stack\\n");
+    printf("\nAAPCS rules:\n");
+    printf("  R0-R3: argument registers (caller-saved)\n");
+    printf("  R0:    return value (32-bit) or low half (64-bit)\n");
+    printf("  R1:    return high half (64-bit)\n");
+    printf("  >4 args: passed on stack\n");
 
     return 0;
 }

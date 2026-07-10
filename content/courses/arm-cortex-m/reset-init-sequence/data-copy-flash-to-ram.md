@@ -24,7 +24,7 @@ void copy_data(void) {
 
 int main(void) {
     copy_data();
-    printf(".data copy complete\\n");
+    printf(".data copy complete\n");
     return 0;
 }
 '''

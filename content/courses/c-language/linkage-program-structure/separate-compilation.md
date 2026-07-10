@@ -34,8 +34,8 @@ int main(void) {
     int sum = add(5, 3);
     int product = multiply(5, 3);
 
-    printf("Sum: %d\\n", sum);
-    printf("Product: %d\\n", product);
+    printf("Sum: %d\n", sum);
+    printf("Product: %d\n", product);
 
     return 0;
 }

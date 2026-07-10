@@ -31,7 +31,7 @@ int main(void) {
     // float bad = 1.0f / 0.0f;
 
     float safe = 1.0f / 2.0f;
-    printf("Result: %f\\n", safe);
+    printf("Result: %f\n", safe);
     return 0;
 }
 '''

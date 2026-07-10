@@ -22,11 +22,11 @@ int main(void) {
 
     // Using #define constants
     c = COLOR_RED;
-    printf("#define: %d\\n", c);
+    printf("#define: %d\n", c);
 
     // Using enum constants
     enum color ec = ENUM_GREEN;
-    printf("Enum: %d\\n", ec);
+    printf("Enum: %d\n", ec);
 
     // Enum with wrong value — compiler may warn
     // enum color invalid = 99;  // Allowed but warns with -Wenum-conversion

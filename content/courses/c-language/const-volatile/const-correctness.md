@@ -14,7 +14,7 @@ void print_array(const int *arr, int len) {
     for (int i = 0; i < len; i++) {
         printf("%d ", arr[i]);
     }
-    printf("\\n");
+    printf("\n");
 }
 
 // Also modifies: no const
@@ -38,7 +38,7 @@ int main(void) {
 
 [[test_cases]]
 input = ''
-expected = '1 2 3 4 5 \\n 10 20 30 40 50'
+expected = '1 2 3 4 5 \n 10 20 30 40 50'
 +++
 
 ## Problem Statement

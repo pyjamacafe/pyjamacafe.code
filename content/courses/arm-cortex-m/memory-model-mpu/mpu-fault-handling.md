@@ -22,16 +22,16 @@ void print_mpu_fault_status(void) {
     uint32_t cfsr = SCB_CFSR;
     uint32_t mfsr = cfsr & 0xFF;
 
-    printf("MemManage Fault Status (MFSR):\\n");
-    printf("  IACCVIOL: %d\\n", (mfsr >> 0) & 1);
-    printf("  DACCVIOL: %d\\n", (mfsr >> 1) & 1);
-    printf("  MUNSTKERR: %d\\n", (mfsr >> 3) & 1);
-    printf("  MSTKERR: %d\\n", (mfsr >> 4) & 1);
-    printf("  MLSPERR: %d\\n", (mfsr >> 5) & 1);
-    printf("  MMARVALID: %d\\n", (mfsr >> 7) & 1);
+    printf("MemManage Fault Status (MFSR):\n");
+    printf("  IACCVIOL: %d\n", (mfsr >> 0) & 1);
+    printf("  DACCVIOL: %d\n", (mfsr >> 1) & 1);
+    printf("  MUNSTKERR: %d\n", (mfsr >> 3) & 1);
+    printf("  MSTKERR: %d\n", (mfsr >> 4) & 1);
+    printf("  MLSPERR: %d\n", (mfsr >> 5) & 1);
+    printf("  MMARVALID: %d\n", (mfsr >> 7) & 1);
 
     if (mfsr & MFSR_MMARV) {
-        printf("  Fault address (MMAR): 0x%08X\\n", SCB_MMAR);
+        printf("  Fault address (MMAR): 0x%08X\n", SCB_MMAR);
     }
 }
 
@@ -42,18 +42,18 @@ void cause_mpu_fault(void) {
 }
 
 void HardFault_Handler(void) {
-    printf("Hard Fault! Checking MemManage status...\\n");
+    printf("Hard Fault! Checking MemManage status...\n");
     print_mpu_fault_status();
 
     while (1);
 }
 
 int main(void) {
-    printf("Testing MPU fault handling\\n");
-    printf("Enabling MPU with restricted region...\\n");
+    printf("Testing MPU fault handling\n");
+    printf("Enabling MPU with restricted region...\n");
 
     cause_mpu_fault();
-    printf("Survived (fault was handled)\\n");
+    printf("Survived (fault was handled)\n");
 
     return 0;
 }

@@ -35,35 +35,35 @@ void print_binary(uint32_t val, int bits) {
 }
 
 int main(void) {
-    printf("Bit Field Clear and Insert (BFC/BFI)\\n\\n");
+    printf("Bit Field Clear and Insert (BFC/BFI)\n\n");
 
     uint32_t val = 0x12345678;
     printf("Original:  0x%08X  ", val);
     print_binary(val, 32);
-    printf("\\n");
+    printf("\n");
 
     uint32_t cleared = bit_field_clear(val, 8, 8);
     printf("BFC(8,8):  0x%08X  ", cleared);
     print_binary(cleared, 32);
-    printf("  (bits 15:8 cleared)\\n\\n");
+    printf("  (bits 15:8 cleared)\n\n");
 
     uint32_t src = 0x000000AB;
     uint32_t inserted = bit_field_insert(0xFFFF0000, src, 0, 8);
-    printf("BFI(0xFFFF0000, 0xAB, 0, 8):\\n");
+    printf("BFI(0xFFFF0000, 0xAB, 0, 8):\n");
     printf("  Result:   0x%08X  ", inserted);
     print_binary(inserted, 32);
-    printf("\\n");
+    printf("\n");
 
     inserted = bit_field_insert(0x0000FFFF, src, 8, 8);
-    printf("BFI(0x0000FFFF, 0xAB, 8, 8):\\n");
+    printf("BFI(0x0000FFFF, 0xAB, 8, 8):\n");
     printf("  Result:   0x%08X  ", inserted);
     print_binary(inserted, 32);
-    printf("\\n\\n");
+    printf("\n\n");
 
-    printf("Advantages over shift+mask:\\n");
-    printf("  - Single instruction (no bits to mask creation)\\n");
-    printf("  - No temporary register needed\\n");
-    printf("  - Executes in 1 cycle on Cortex-M3+\\n");
+    printf("Advantages over shift+mask:\n");
+    printf("  - Single instruction (no bits to mask creation)\n");
+    printf("  - No temporary register needed\n");
+    printf("  - Executes in 1 cycle on Cortex-M3+\n");
 
     return 0;
 }

@@ -21,8 +21,8 @@ int main(void) {
     int *valid = &x;
     int *invalid = NULL;
 
-    printf("Valid: %d\\n", safe_dereference(valid));
-    printf("Invalid: %d\\n", safe_dereference(invalid));
+    printf("Valid: %d\n", safe_dereference(valid));
+    printf("Invalid: %d\n", safe_dereference(invalid));
 
     return 0;
 }
@@ -30,7 +30,7 @@ int main(void) {
 
 [[test_cases]]
 input = ''
-expected = 'Valid: 42\\nInvalid: -1'
+expected = 'Valid: 42\nInvalid: -1'
 +++
 
 ## Problem Statement

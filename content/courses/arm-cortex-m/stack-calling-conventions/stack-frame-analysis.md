@@ -35,13 +35,13 @@ void print_stack_trace(uint32_t depth) {
     uint32_t fp = get_fp();
     uint32_t sp = get_sp();
 
-    printf("Stack trace:\\n");
+    printf("Stack trace:\n");
 
     for (uint32_t i = 0; i < depth && fp != 0; i++) {
         uint32_t return_addr = ((uint32_t*)fp)[1];
         uint32_t prev_fp = ((uint32_t*)fp)[0];
 
-        printf("  #%u: LR=0x%08X FP=0x%08X SP=0x%08X\\n",
+        printf("  #%u: LR=0x%08X FP=0x%08X SP=0x%08X\n",
                i, return_addr, fp, sp);
 
         fp = prev_fp;
@@ -51,30 +51,30 @@ void print_stack_trace(uint32_t depth) {
 
 void func_c(int depth) {
     uint32_t local_var = 0xCCCCCCCC + depth;
-    printf("\\nfunc_c(depth=%d): local=0x%08X, SP=0x%08X\\n",
+    printf("\nfunc_c(depth=%d): local=0x%08X, SP=0x%08X\n",
            depth, local_var, get_sp());
     print_stack_trace(5);
 }
 
 void func_b(int depth) {
     uint32_t local_b = 0xBBBBBBBB;
-    printf("func_b: local=0x%08X, SP=0x%08X\\n", local_b, get_sp());
+    printf("func_b: local=0x%08X, SP=0x%08X\n", local_b, get_sp());
     func_c(depth + 1);
 }
 
 void func_a(void) {
     uint32_t local_a = 0xAAAAAAAA;
-    printf("func_a: local=0x%08X, SP=0x%08X\\n", local_a, get_sp());
+    printf("func_a: local=0x%08X, SP=0x%08X\n", local_a, get_sp());
     func_b(1);
 }
 
 int main(void) {
-    printf("Stack Frame Analysis\\n\\n");
-    printf("Initial SP=0x%08X\\n", get_sp());
+    printf("Stack Frame Analysis\n\n");
+    printf("Initial SP=0x%08X\n", get_sp());
 
     func_a();
 
-    printf("\\nFinal SP=0x%08X (should match initial)\\n", get_sp());
+    printf("\nFinal SP=0x%08X (should match initial)\n", get_sp());
 
     return 0;
 }

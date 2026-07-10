@@ -34,11 +34,11 @@ void ldm_block(uint32_t *addr, uint32_t *a, uint32_t *b,
 
 void memcpy_word(uint32_t *dst, uint32_t *src, uint32_t count) {
     __asm volatile(
-        "LOOP:                  \\n\\t"
-        "LDMIA %0!, {R0-R3}    \\n\\t"
-        "STMIA %1!, {R0-R3}    \\n\\t"
-        "SUBS %2, %2, #4       \\n\\t"
-        "BNE LOOP               \\n\\t"
+        "LOOP:                  \n\\t"
+        "LDMIA %0!, {R0-R3}    \n\\t"
+        "STMIA %1!, {R0-R3}    \n\\t"
+        "SUBS %2, %2, #4       \n\\t"
+        "BNE LOOP               \n\\t"
         : "+r" (src), "+r" (dst), "+r" (count)
         :
         : "r0", "r1", "r2", "r3", "memory"
@@ -49,21 +49,21 @@ int main(void) {
     uint32_t buffer[8] = {0};
 
     stm_block(buffer, 0xAAAA, 0xBBBB, 0xCCCC, 0xDDDD);
-    printf("After STM:\\n");
+    printf("After STM:\n");
     for (int i = 0; i < 4; i++) {
-        printf("  [%d] = 0x%08X\\n", i, buffer[i]);
+        printf("  [%d] = 0x%08X\n", i, buffer[i]);
     }
 
     uint32_t a, b, c, d;
     ldm_block(buffer, &a, &b, &c, &d);
-    printf("\\nAfter LDM: 0x%08X 0x%08X 0x%08X 0x%08X\\n", a, b, c, d);
+    printf("\nAfter LDM: 0x%08X 0x%08X 0x%08X 0x%08X\n", a, b, c, d);
 
     uint32_t src[8] = {1, 2, 3, 4, 5, 6, 7, 8};
     uint32_t dst[8] = {0};
     memcpy_word(dst, src, 8);
-    printf("\\nmemcpy result: ");
+    printf("\nmemcpy result: ");
     for (int i = 0; i < 8; i++) printf("%u ", dst[i]);
-    printf("\\n");
+    printf("\n");
 
     return 0;
 }

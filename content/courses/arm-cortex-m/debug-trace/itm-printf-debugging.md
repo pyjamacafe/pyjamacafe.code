@@ -50,19 +50,19 @@ void itm_printf(const char *fmt, ...) {
 int main(void) {
     itm_init();
 
-    printf("ITM Printf Debugging\\n\\n");
+    printf("ITM Printf Debugging\n\n");
 
-    itm_write_string("Hello from ITM!\\n");
+    itm_write_string("Hello from ITM!\n");
 
-    printf("ITM TCR:  0x%08X\\n", ITM_TCR);
-    printf("ITM TER:  0x%08X\\n", ITM_TER);
-    printf("ITM LSR:  0x%08X\\n\\n", ITM_LSR);
+    printf("ITM TCR:  0x%08X\n", ITM_TCR);
+    printf("ITM TER:  0x%08X\n", ITM_TER);
+    printf("ITM LSR:  0x%08X\n\n", ITM_LSR);
 
-    printf("ITM features:\\n");
-    printf("  - 32 stimulus ports (SWO) / 256 (serial wire)\\n");
-    printf("  - Non-blocking writes to debugger\\n");
-    printf("  - Zero overhead when no debugger attached\\n");
-    printf("  - Works with SWO pin and debuggers (JLink, STLink)\\n");
+    printf("ITM features:\n");
+    printf("  - 32 stimulus ports (SWO) / 256 (serial wire)\n");
+    printf("  - Non-blocking writes to debugger\n");
+    printf("  - Zero overhead when no debugger attached\n");
+    printf("  - Works with SWO pin and debuggers (JLink, STLink)\n");
 
     return 0;
 }

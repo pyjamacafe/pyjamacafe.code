@@ -18,25 +18,25 @@ volatile uint32_t event_flag = 0;
 
 void send_event(void) {
     __asm volatile("SEV" ::: "memory");
-    printf("Event sent via SEV\\n");
+    printf("Event sent via SEV\n");
 }
 
 void wait_for_event(void) {
-    printf("Waiting for event (WFE)...\\n");
+    printf("Waiting for event (WFE)...\n");
     __asm volatile(
-        "DSB          \\n\\t"
-        "WFE          \\n\\t"
-        "ISB          \\n\\t"
+        "DSB          \n\\t"
+        "WFE          \n\\t"
+        "ISB          \n\\t"
     : : : "memory");
-    printf("Woke from WFE\\n");
+    printf("Woke from WFE\n");
 }
 
 void poll_with_wfe(void) {
     while (event_flag == 0) {
         __asm volatile(
-            "DSB          \\n\\t"
-            "WFE          \\n\\t"
-            "ISB          \\n\\t"
+            "DSB          \n\\t"
+            "WFE          \n\\t"
+            "ISB          \n\\t"
         : : : "memory");
     }
     event_flag = 0;
@@ -44,7 +44,7 @@ void poll_with_wfe(void) {
 
 void enable_sevonpend(void) {
     SCB_SCR |= SCB_SCR_SEVONPEND;
-    printf("SEVONPEND enabled: interrupts will wake WFE\\n");
+    printf("SEVONPEND enabled: interrupts will wake WFE\n");
 }
 
 void send_event_from_interrupt(void) {
@@ -52,24 +52,24 @@ void send_event_from_interrupt(void) {
 }
 
 int main(void) {
-    printf("SEV and SEVONPEND Event Communication\\n\\n");
+    printf("SEV and SEVONPEND Event Communication\n\n");
 
     enable_sevonpend();
 
-    printf("\\nTest 1: Direct SEV -> WFE pair\\n");
+    printf("\nTest 1: Direct SEV -> WFE pair\n");
     send_event();
     wait_for_event();
 
-    printf("\\nTest 2: WFE polling loop with event flag\\n");
+    printf("\nTest 2: WFE polling loop with event flag\n");
     send_event_from_interrupt();
     poll_with_wfe();
-    printf("Event flag consumed\\n");
+    printf("Event flag consumed\n");
 
-    printf("\\nEvent register behavior:\\n");
-    printf("  - SEV sets the event register for all cores\\n");
-    printf("  - WFE clears the event register and sleeps\\n");
-    printf("  - If event register was set, WFE does NOT sleep\\n");
-    printf("  - SEVONPEND: interrupt pending also sets event reg\\n");
+    printf("\nEvent register behavior:\n");
+    printf("  - SEV sets the event register for all cores\n");
+    printf("  - WFE clears the event register and sleeps\n");
+    printf("  - If event register was set, WFE does NOT sleep\n");
+    printf("  - SEVONPEND: interrupt pending also sets event reg\n");
 
     return 0;
 }

@@ -16,8 +16,8 @@ int main(void) {
     uint count = 100;
     real temperature = 36.5f;
 
-    printf("Count: %u\\n", count);
-    printf("Temperature: %.1f\\n", temperature);
+    printf("Count: %u\n", count);
+    printf("Temperature: %.1f\n", temperature);
 
     return 0;
 }

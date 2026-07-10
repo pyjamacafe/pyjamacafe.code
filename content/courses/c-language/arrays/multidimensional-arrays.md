@@ -20,7 +20,7 @@ int main(void) {
         for (int j = 0; j < 4; j++) {
             printf("%3d ", matrix[i][j]);
         }
-        printf("\\n");
+        printf("\n");
     }
 
     return 0;

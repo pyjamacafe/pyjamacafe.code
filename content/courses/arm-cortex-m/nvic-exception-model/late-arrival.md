@@ -30,51 +30,51 @@ void simulate_late_arrival(void) {
     irq_channel_t irq_high = {1, 0, 0, 1};
     cpu_state_t state = IDLE;
 
-    printf("=== Late Arrival Simulation ===\\n");
-    printf("IRQ0 priority=2, IRQ1 priority=1 (higher)\\n\\n");
+    printf("=== Late Arrival Simulation ===\n");
+    printf("IRQ0 priority=2, IRQ1 priority=1 (higher)\n\n");
 
-    printf("1. IRQ0 fires\\n");
+    printf("1. IRQ0 fires\n");
     irq_low.pending = 1;
     state = STACKING;
 
-    printf("2. Starting stack sequence for IRQ0...\\n");
+    printf("2. Starting stack sequence for IRQ0...\n");
 
-    printf("3. IRQ1 (high priority) arrives DURING stacking!\\n");
+    printf("3. IRQ1 (high priority) arrives DURING stacking!\n");
     irq_high.pending = 1;
 
     if (irq_high.priority < irq_low.priority) {
-        printf("4. Late arrival: IRQ1 starts before IRQ0 handler\\n");
-        printf("   Stack frame now belongs to IRQ1\\n");
-        printf("   IRQ0 remains pending for later\\n");
+        printf("4. Late arrival: IRQ1 starts before IRQ0 handler\n");
+        printf("   Stack frame now belongs to IRQ1\n");
+        printf("   IRQ0 remains pending for later\n");
         irq_low.pending = 0;
         irq_high.pending = 0;
         irq_high.active = 1;
         state = HANDLER_RUNNING;
     } else {
-        printf("4. No late arrival (IRQ1 priority not higher)\\n");
+        printf("4. No late arrival (IRQ1 priority not higher)\n");
     }
 
-    printf("\\n5. IRQ1 handler finishes\\n");
+    printf("\n5. IRQ1 handler finishes\n");
     irq_high.active = 0;
-    printf("6. Return to pending IRQ0 via tail-chaining\\n");
+    printf("6. Return to pending IRQ0 via tail-chaining\n");
     irq_low.active = 1;
     state = HANDLER_RUNNING;
 
-    printf("\\nResult: Late arrival avoided wasting %u cycles\\n", (uint32_t)12);
+    printf("\nResult: Late arrival avoided wasting %u cycles\n", (uint32_t)12);
 }
 
 int main(void) {
     simulate_late_arrival();
 
-    printf("\\n=== Without Late Arrival ===\\n");
-    printf("IRQ0 stacks -> IRQ0 handler -> IRQ0 unstack\\n");
-    printf("Then IRQ1 stacks -> IRQ1 handler -> IRQ1 unstack\\n");
-    printf("Total: 58 cycles\\n\\n");
+    printf("\n=== Without Late Arrival ===\n");
+    printf("IRQ0 stacks -> IRQ0 handler -> IRQ0 unstack\n");
+    printf("Then IRQ1 stacks -> IRQ1 handler -> IRQ1 unstack\n");
+    printf("Total: 58 cycles\n\n");
 
-    printf("=== With Late Arrival + Tail-Chaining ===\\n");
-    printf("IRQ0 stacking interrupted for IRQ1 -> IRQ1 handler\\n");
-    printf("-> IRQ0 handler via tail-chain -> unstack\\n");
-    printf("Total: 34 cycles (saves ~24)\\n");
+    printf("=== With Late Arrival + Tail-Chaining ===\n");
+    printf("IRQ0 stacking interrupted for IRQ1 -> IRQ1 handler\n");
+    printf("-> IRQ0 handler via tail-chain -> unstack\n");
+    printf("Total: 34 cycles (saves ~24)\n");
 
     return 0;
 }

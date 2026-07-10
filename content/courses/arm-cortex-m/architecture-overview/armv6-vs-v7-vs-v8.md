@@ -11,17 +11,17 @@ initial_code = '''// Compare ARMv6-M, ARMv7-M, ARMv8-M features
 #include <stdio.h>
 
 int main(void) {
-    printf("ARM architecture version comparison:\\n\\n");
-    printf("Feature          v6-M      v7-M      v8-M\\n");
-    printf("------------------------------------------\\n");
-    printf("Thumb-2          No        Yes       Yes\\n");
-    printf("Hardware divide  No        Yes       Yes\\n");
-    printf("MPU              No        Opt       Yes\\n");
-    printf("FPU              No        Opt       Opt\\n");
-    printf("TrustZone        No        No        Opt\\n");
-    printf("Bit-banding      No        Opt       No\\n");
-    printf("IT blocks        Limited   Full      Full\\n");
-    printf("Saturation insns No        Yes       Yes\\n");
+    printf("ARM architecture version comparison:\n\n");
+    printf("Feature          v6-M      v7-M      v8-M\n");
+    printf("------------------------------------------\n");
+    printf("Thumb-2          No        Yes       Yes\n");
+    printf("Hardware divide  No        Yes       Yes\n");
+    printf("MPU              No        Opt       Yes\n");
+    printf("FPU              No        Opt       Opt\n");
+    printf("TrustZone        No        No        Opt\n");
+    printf("Bit-banding      No        Opt       No\n");
+    printf("IT blocks        Limited   Full      Full\n");
+    printf("Saturation insns No        Yes       Yes\n");
 
     // Write a table and determine which arch this core is
     // Provide advice on migration from v7-M to v8-M

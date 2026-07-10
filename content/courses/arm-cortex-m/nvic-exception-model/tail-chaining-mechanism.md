@@ -23,22 +23,22 @@ void simulate_tail_chain(void) {
 
 void simulate_irq_0(void) {
     irq_count[0]++;
-    printf("IRQ 0 handler (count=%u)\\n", irq_count[0]);
+    printf("IRQ 0 handler (count=%u)\n", irq_count[0]);
 }
 
 void simulate_irq_1(void) {
     irq_count[1]++;
-    printf("IRQ 1 handler (count=%u)\\n", irq_count[1]);
+    printf("IRQ 1 handler (count=%u)\n", irq_count[1]);
 }
 
 void simulate_irq_2(void) {
     irq_count[2]++;
-    printf("IRQ 2 handler (count=%u)\\n", irq_count[2]);
+    printf("IRQ 2 handler (count=%u)\n", irq_count[2]);
 }
 
 void test_tail_chaining(void) {
-    printf("\\n=== Tail-Chaining Test ===\\n");
-    printf("Scenario: IRQ0 triggers, IRQ1 pending during IRQ0\\n");
+    printf("\n=== Tail-Chaining Test ===\n");
+    printf("Scenario: IRQ0 triggers, IRQ1 pending during IRQ0\n");
 
     irq_count[0] = 0;
     irq_count[1] = 0;
@@ -46,22 +46,22 @@ void test_tail_chaining(void) {
     simulate_irq_0();
     simulate_irq_1();
 
-    printf("\\nWithout tail-chaining: 2 complete stack/unstack cycles\\n");
-    printf("With tail-chaining: IRQ1 starts without unstacking/restacking\\n");
-    printf("Saved %u cycles\\n", (uint32_t)26);
+    printf("\nWithout tail-chaining: 2 complete stack/unstack cycles\n");
+    printf("With tail-chaining: IRQ1 starts without unstacking/restacking\n");
+    printf("Saved %u cycles\n", (uint32_t)26);
 }
 
 int main(void) {
-    printf("Cortex-M Exception Tail-Chaining\\n");
+    printf("Cortex-M Exception Tail-Chaining\n");
     test_tail_chaining();
 
-    printf("\\n=== Multiple Pending Test ===\\n");
+    printf("\n=== Multiple Pending Test ===\n");
 
     for (int i = 0; i < 3; i++) {
         simulate_irq_0();
     }
 
-    printf("IRQ counts: %u, %u, %u\\n",
+    printf("IRQ counts: %u, %u, %u\n",
            irq_count[0], irq_count[1], irq_count[2]);
 
     return 0;

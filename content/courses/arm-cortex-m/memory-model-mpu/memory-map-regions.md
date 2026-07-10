@@ -36,12 +36,12 @@ int main(void) {
     };
     int num_addrs = sizeof(test_addrs) / sizeof(test_addrs[0]);
 
-    printf("Memory Region Classification:\\n");
-    printf("Address      Region\\n");
-    printf("----------------------------\\n");
+    printf("Memory Region Classification:\n");
+    printf("Address      Region\n");
+    printf("----------------------------\n");
 
     for (int i = 0; i < num_addrs; i++) {
-        printf("0x%08X  %s\\n",
+        printf("0x%08X  %s\n",
                test_addrs[i], get_memory_region_name(test_addrs[i]));
     }
 

@@ -29,8 +29,8 @@ const char *state_name(enum state s) {
 
 int main(void) {
     enum state current = STATE_RUNNING;
-    printf("Current state: %s (%d)\\n", state_name(current), current);
-    printf("Number of states: %d\\n", STATE_COUNT);
+    printf("Current state: %s (%d)\n", state_name(current), current);
+    printf("Number of states: %d\n", STATE_COUNT);
     return 0;
 }
 '''

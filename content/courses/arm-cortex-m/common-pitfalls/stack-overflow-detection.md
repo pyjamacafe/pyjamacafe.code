@@ -16,7 +16,7 @@ extern unsigned int _estack;  // Top of stack
 void check_stack(void) {
     volatile unsigned int *canary = &_estack - 1;
     if (*canary != STACK_CANARY) {
-        printf("Stack overflow detected!\\n");
+        printf("Stack overflow detected!\n");
         while (1);
     }
 }
@@ -35,11 +35,11 @@ int main(void) {
 
     // Test with safe depth
     recurse(5);
-    printf("Safe depth passed\\n");
+    printf("Safe depth passed\n");
 
     // Uncomment to test overflow:
     // recurse(1000);
-    // printf("Will not reach here\\n");
+    // printf("Will not reach here\n");
 
     return 0;
 }

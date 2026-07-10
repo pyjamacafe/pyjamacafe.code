@@ -22,11 +22,11 @@ int main(void) {
     while (status_register == 0) {
         // Wait for hardware to set the register
         // volatile ensures the compiler re-reads the variable each time
-        printf("Waiting...\\n");
+        printf("Waiting...\n");
         break;  // To avoid infinite loop in simulation
     }
 
-    printf("Status changed!\\n");
+    printf("Status changed!\n");
     return 0;
 }
 '''

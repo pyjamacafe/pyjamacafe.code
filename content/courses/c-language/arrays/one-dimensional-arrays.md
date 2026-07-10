@@ -18,7 +18,7 @@ int main(void) {
     }
 
     double average = (double)sum / 5;
-    printf("Average: %.1f\\n", average);
+    printf("Average: %.1f\n", average);
 
     return 0;
 }

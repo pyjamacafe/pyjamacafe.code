@@ -35,13 +35,13 @@ cortex_m_info_t cortex_m_parts[] = {
 };
 
 void print_selection_table(void) {
-    printf("%-12s %-10s %-7s %-4s %-4s %-5s %s\\n",
+    printf("%-12s %-10s %-7s %-4s %-4s %-5s %s\n",
            "Core", "Part No", "Arch", "MPU",
            "FPU", "TZ", "Best for");
-    printf("------------------------------------------------------------\\n");
+    printf("------------------------------------------------------------\n");
 
     for (int i = 0; cortex_m_parts[i].name != NULL; i++) {
-        printf("%-12s 0x%04X   %-7s %-4s %-4s %-5s %s\\n",
+        printf("%-12s 0x%04X   %-7s %-4s %-4s %-5s %s\n",
                cortex_m_parts[i].name,
                cortex_m_parts[i].part_no,
                cortex_m_parts[i].arch,
@@ -53,15 +53,15 @@ void print_selection_table(void) {
 }
 
 int main(void) {
-    printf("Cortex-M Family Selection Guide\\n\\n");
+    printf("Cortex-M Family Selection Guide\n\n");
     print_selection_table();
 
-    printf("\\nSelection criteria:\\n");
-    printf("  - Need TrustZone? Choose M23/M33/M55\\n");
-    printf("  - Need FPU? Choose M4/M7/M33/M55\\n");
-    printf("  - Need DSP? Choose M4/M7/M33/M55\\n");
-    printf("  - Lowest power? Choose M0+/M23\\n");
-    printf("  - Maximum perf? Choose M7/M55\\n");
+    printf("\nSelection criteria:\n");
+    printf("  - Need TrustZone? Choose M23/M33/M55\n");
+    printf("  - Need FPU? Choose M4/M7/M33/M55\n");
+    printf("  - Need DSP? Choose M4/M7/M33/M55\n");
+    printf("  - Lowest power? Choose M0+/M23\n");
+    printf("  - Maximum perf? Choose M7/M55\n");
 
     return 0;
 }

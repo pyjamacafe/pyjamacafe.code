@@ -46,11 +46,11 @@ void print_clz_info(uint32_t val) {
 
     int ffs = find_first_set(val);
     if (ffs >= 0) printf(", highest_bit=%d", ffs);
-    printf("\\n");
+    printf("\n");
 }
 
 int main(void) {
-    printf("Count Leading Zeros with CLZ\\n\\n");
+    printf("Count Leading Zeros with CLZ\n\n");
 
     print_clz_info(0x00000000);
     print_clz_info(0x00000001);
@@ -59,17 +59,17 @@ int main(void) {
     print_clz_info(0x12345678);
     print_clz_info(0xFFFFFFF0);
 
-    printf("\\nApplications:\\n");
-    printf("  - Bit width of integers (32 - CLZ)\\n");
-    printf("  - Round up to next power of 2\\n");
-    printf("  - Find highest set bit (log2)\\n");
-    printf("  - Normalize values for division\\n");
-    printf("  - Priority encoder emulation\\n");
+    printf("\nApplications:\n");
+    printf("  - Bit width of integers (32 - CLZ)\n");
+    printf("  - Round up to next power of 2\n");
+    printf("  - Find highest set bit (log2)\n");
+    printf("  - Normalize values for division\n");
+    printf("  - Priority encoder emulation\n");
 
     uint32_t test = 0x00001234;
-    printf("\\nExample: normalize 0x%04X for division\\n", test);
+    printf("\nExample: normalize 0x%04X for division\n", test);
     uint32_t shift = clz(test);
-    printf("  CLZ=%u, shift left by %u -> 0x%08X\\n",
+    printf("  CLZ=%u, shift left by %u -> 0x%08X\n",
            shift, shift, test << shift);
 
     return 0;

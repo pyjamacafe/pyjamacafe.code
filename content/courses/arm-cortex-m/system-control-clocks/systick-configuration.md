@@ -49,16 +49,16 @@ int main(void) {
 
     systick_init(reload, 1);
 
-    printf("SysTick initialized: reload=%u, freq=%u Hz\\n", reload, cpu_freq);
-    printf("Calibration value: 0x%08X\\n", STK_CALIB);
-    printf("STK_CSR: 0x%08X\\n", STK_CSR);
+    printf("SysTick initialized: reload=%u, freq=%u Hz\n", reload, cpu_freq);
+    printf("Calibration value: 0x%08X\n", STK_CALIB);
+    printf("STK_CSR: 0x%08X\n", STK_CSR);
 
     for (volatile int i = 0; i < 100000; i++);
 
-    printf("Elapsed ms (approx): %u\\n", systick_get_milliseconds());
+    printf("Elapsed ms (approx): %u\n", systick_get_milliseconds());
 
     STK_CSR = 0;
-    printf("SysTick disabled\\n");
+    printf("SysTick disabled\n");
 
     return 0;
 }

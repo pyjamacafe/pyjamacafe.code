@@ -15,13 +15,13 @@ int main(void) {
     int n = sizeof(arr) / sizeof(arr[0]);
 
     for (int i = 0; i < n; i++) {
-        printf("*(p + %d) = %d, p[%d] = %d\\n", i, *(p + i), i, p[i]);
+        printf("*(p + %d) = %d, p[%d] = %d\n", i, *(p + i), i, p[i]);
     }
 
     // Pointer difference
     int *start = &arr[0];
     int *end = &arr[4];
-    printf("Elements between: %td\\n", end - start);
+    printf("Elements between: %td\n", end - start);
 
     return 0;
 }

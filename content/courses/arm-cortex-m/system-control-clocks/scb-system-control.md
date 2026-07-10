@@ -20,14 +20,14 @@ initial_code = '''// Configure System Control Block registers
 #define SCB_SHCSR   (*((volatile uint32_t *)0xE000ED24))
 
 void print_scb_state(void) {
-    printf("SCB State:\\n");
-    printf("  CPUID:  0x%08X\\n", SCB_CPUID);
-    printf("  ICSR:   0x%08X\\n", SCB_ICSR);
-    printf("  VTOR:   0x%08X\\n", SCB_VTOR);
-    printf("  AIRCR:  0x%08X\\n", SCB_AIRCR);
-    printf("  SCR:    0x%08X\\n", SCB_SCR);
-    printf("  CCR:    0x%08X\\n", SCB_CCR);
-    printf("  SHCSR:  0x%08X\\n", SCB_SHCSR);
+    printf("SCB State:\n");
+    printf("  CPUID:  0x%08X\n", SCB_CPUID);
+    printf("  ICSR:   0x%08X\n", SCB_ICSR);
+    printf("  VTOR:   0x%08X\n", SCB_VTOR);
+    printf("  AIRCR:  0x%08X\n", SCB_AIRCR);
+    printf("  SCR:    0x%08X\n", SCB_SCR);
+    printf("  CCR:    0x%08X\n", SCB_CCR);
+    printf("  SHCSR:  0x%08X\n", SCB_SHCSR);
 }
 
 void set_vector_table_offset(uint32_t offset) {
@@ -44,22 +44,22 @@ void enable_usagefault_handler(void) {
 }
 
 int main(void) {
-    printf("System Control Block (SCB) Configuration\\n\\n");
+    printf("System Control Block (SCB) Configuration\n\n");
 
     print_scb_state();
 
-    printf("\\nEnabling BusFault and UsageFault handlers...\\n");
+    printf("\nEnabling BusFault and UsageFault handlers...\n");
     enable_busfault_handler();
     enable_usagefault_handler();
 
-    printf("SHCSR after enable: 0x%08X\\n", SCB_SHCSR);
+    printf("SHCSR after enable: 0x%08X\n", SCB_SHCSR);
 
     uint32_t icsr = SCB_ICSR;
     uint32_t pending_vector = icsr & 0x1FF;
-    printf("\\nPending exception: %u\\n", pending_vector);
+    printf("\nPending exception: %u\n", pending_vector);
 
     uint32_t ipsr = icsr & 0xFF;
-    printf("Current exception: %u\\n", ipsr);
+    printf("Current exception: %u\n", ipsr);
 
     return 0;
 }

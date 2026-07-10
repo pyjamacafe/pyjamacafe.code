@@ -18,12 +18,12 @@ void enable_debug(void) {
     // Enable debug by writing the debug key
     DHCSR = DBGKEY | (1 << 0);  // C_DEBUGEN
     DEMCR |= (1 << 24);         // TRCENA
-    printf("Debug enabled\\n");
+    printf("Debug enabled\n");
 }
 
 void disable_debug(void) {
     DHCSR = DBGKEY;  // Clear C_DEBUGEN, disable debug
-    printf("Debug disabled\\n");
+    printf("Debug disabled\n");
 }
 
 int main(void) {

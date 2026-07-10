@@ -28,7 +28,7 @@ int main(void) {
         unsigned int component_base = ROM_TABLE_BASE + (entry & 0xFFFFF000);
         unsigned int present = entry >> 31;
 
-        printf("ROM entry %d: base=0x%08X present=%d\\n",
+        printf("ROM entry %d: base=0x%08X present=%d\n",
                idx, component_base, present);
 
         // Check component ID registers to identify it

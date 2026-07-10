@@ -17,34 +17,34 @@ void secure_call_non_secure(ns_func_ptr_t ns_func) {
     uint32_t lr_value;
 
     __asm volatile(
-        "MOV %0, LR       \\n\\t"
-        "PUSH {%0}        \\n\\t"
-        "MOV R12, %1      \\n\\t"
-        "BXNS R12         \\n\\t"
-        "POP {%0}         \\n\\t"
-        "MOV LR, %0       \\n\\t"
+        "MOV %0, LR       \n\\t"
+        "PUSH {%0}        \n\\t"
+        "MOV R12, %1      \n\\t"
+        "BXNS R12         \n\\t"
+        "POP {%0}         \n\\t"
+        "MOV LR, %0       \n\\t"
         : "=r" (lr_value)
         : "r" (ns_func)
         : "r12"
     );
 
-    printf("Returned from non-secure call\\n");
+    printf("Returned from non-secure call\n");
 }
 
 __attribute__((section(".nsc_func")))
 void secure_entry_point(void) {
     __asm volatile("SG" ::: "memory");
 
-    printf("In secure entry point\\n");
+    printf("In secure entry point\n");
 
     nsc_func_ptr_t ns_print = (nsc_func_ptr_t)0x00201000;
     secure_call_non_secure(ns_print);
 
-    printf("Back in secure state\\n");
+    printf("Back in secure state\n");
 }
 
 void non_secure_callback(void) {
-    printf("Executing in non-secure state\\n");
+    printf("Executing in non-secure state\n");
 }
 
 int main(void) {

@@ -11,15 +11,15 @@ initial_code = '''#include <stdio.h>
 
 int main(void) {
     char ch = 'A';
-    char newline = '\\n';
+    char newline = '\n';
     char tab = '\\t';
 
     // Print character constants
-    printf("Character: %c, code: %d\\n", ch, ch);
+    printf("Character: %c, code: %d\n", ch, ch);
 
     // String literal
     char *str = "Hello, C!";
-    printf("String: %s\\n", str);
+    printf("String: %s\n", str);
 
     // Print size of string vs character
 

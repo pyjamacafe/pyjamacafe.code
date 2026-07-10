@@ -25,12 +25,12 @@ void SystemInit(void) {
     // Configure MPU (optional)
     // Configure SAU for TrustZone (optional)
 
-    printf("SystemInit complete\\n");
+    printf("SystemInit complete\n");
 }
 
 int main(void) {
     SystemInit();
-    printf("Main running\\n");
+    printf("Main running\n");
     return 0;
 }
 '''

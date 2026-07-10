@@ -15,7 +15,7 @@ typedef void (*handler_t)(void);
 
 __attribute__((weak))
 void Default_Handler(void) {
-    printf("Default handler called for unhandled interrupt\\n");
+    printf("Default handler called for unhandled interrupt\n");
     while (1);
 }
 
@@ -37,7 +37,7 @@ UART1_IRQHandler(void);
 void Reset_Handler(void);
 
 void override_handler(const char *name, const char *override) {
-    printf("  %-20s -> %s\\n", name, override);
+    printf("  %-20s -> %s\n", name, override);
 }
 
 __attribute__((used))
@@ -57,9 +57,9 @@ handler_t __isr_vector[16 + 2] __attribute__((section(".isr_vector"))) = {
 };
 
 int main(void) {
-    printf("Custom Vector Table with Weak Aliases\\n\\n");
+    printf("Custom Vector Table with Weak Aliases\n\n");
 
-    printf("Weak alias mappings:\\n");
+    printf("Weak alias mappings:\n");
     override_handler("NMI_Handler", "Default_Handler");
     override_handler("HardFault_Handler", "Default_Handler");
     override_handler("MemManage_Handler", "Default_Handler");
@@ -71,20 +71,20 @@ int main(void) {
     override_handler("TIM2_IRQHandler", "Default_Handler");
     override_handler("UART1_IRQHandler", "Default_Handler");
 
-    printf("\\nWhen a strong definition exists, it overrides\\n");
-    printf("the weak default. This allows applications to\\n");
-    printf("define only the handlers they need.\\n");
+    printf("\nWhen a strong definition exists, it overrides\n");
+    printf("the weak default. This allows applications to\n");
+    printf("define only the handlers they need.\n");
 
-    printf("\\nVector table entries:\\n");
+    printf("\nVector table entries:\n");
     for (int i = 0; i < 18; i++) {
-        printf("  [%2u] 0x%08X\\n", i, (uint32_t)__isr_vector[i]);
+        printf("  [%2u] 0x%08X\n", i, (uint32_t)__isr_vector[i]);
     }
 
     return 0;
 }
 
 void Reset_Handler(void) {
-    printf("Reset_Handler (strong definition)\\n");
+    printf("Reset_Handler (strong definition)\n");
 }
 '''
 

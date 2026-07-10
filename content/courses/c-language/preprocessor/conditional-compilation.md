@@ -14,17 +14,17 @@ initial_code = '''#include <stdio.h>
 
 int main(void) {
 #if DEBUG
-    printf("Debug mode enabled\\n");
+    printf("Debug mode enabled\n");
 #endif
 
 #if defined(PLATFORM)
-    printf("Platform: %s\\n", PLATFORM);
+    printf("Platform: %s\n", PLATFORM);
 #else
-    printf("No platform defined\\n");
+    printf("No platform defined\n");
 #endif
 
 #ifdef __STDC__
-    printf("ANSI C compliant\\n");
+    printf("ANSI C compliant\n");
 #endif
 
     return 0;

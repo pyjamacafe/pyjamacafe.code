@@ -24,8 +24,8 @@ int main(void) {
     int arr[10] = {[0] = 100, [5] = 200, [9] = 300};
 
     // Print
-    printf("%d: %s ($%.2f)\\n", w1.id, w1.name, w1.price);
-    printf("arr[0]=%d, arr[5]=%d, arr[9]=%d\\n", arr[0], arr[5], arr[9]);
+    printf("%d: %s ($%.2f)\n", w1.id, w1.name, w1.price);
+    printf("arr[0]=%d, arr[5]=%d, arr[9]=%d\n", arr[0], arr[5], arr[9]);
 
     return 0;
 }

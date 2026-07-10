@@ -23,12 +23,12 @@ void SysTick_Handler(void) {
 
 void enable_sleep_on_exit(void) {
     SCB_SCR |= SCB_SCR_SLEEPONEXIT;
-    printf("Sleep-on-exit enabled\\n");
+    printf("Sleep-on-exit enabled\n");
 }
 
 void disable_sleep_on_exit(void) {
     SCB_SCR &= ~SCB_SCR_SLEEPONEXIT;
-    printf("Sleep-on-exit disabled\\n");
+    printf("Sleep-on-exit disabled\n");
 }
 
 void setup_systick(void) {
@@ -38,28 +38,28 @@ void setup_systick(void) {
 }
 
 int main(void) {
-    printf("Sleep-on-Exit Mode\\n\\n");
+    printf("Sleep-on-Exit Mode\n\n");
 
-    printf("Normal mode: main() runs after each interrupt\\n");
-    printf("Sleep-on-exit: CPU sleeps after ISR, skips main()\\n\\n");
+    printf("Normal mode: main() runs after each interrupt\n");
+    printf("Sleep-on-exit: CPU sleeps after ISR, skips main()\n\n");
 
     enable_sleep_on_exit();
 
-    printf("SCB_SCR: 0x%08X\\n", SCB_SCR);
+    printf("SCB_SCR: 0x%08X\n", SCB_SCR);
 
-    printf("\\nBehavior:\\n");
-    printf("  Interrupt occurs -> Handler executes\\n");
-    printf("  -> Sleep-on-exit: CPU sleeps immediately\\n");
-    printf("  (main loop never runs between interrupts)\\n\\n");
+    printf("\nBehavior:\n");
+    printf("  Interrupt occurs -> Handler executes\n");
+    printf("  -> Sleep-on-exit: CPU sleeps immediately\n");
+    printf("  (main loop never runs between interrupts)\n\n");
 
-    printf("Power savings:\\n");
-    printf("  Thread mode execution eliminated\\n");
-    printf("  Only handler mode + sleep mode\\n");
-    printf("  Ideal for purely interrupt-driven designs\\n\\n");
+    printf("Power savings:\n");
+    printf("  Thread mode execution eliminated\n");
+    printf("  Only handler mode + sleep mode\n");
+    printf("  Ideal for purely interrupt-driven designs\n\n");
 
     disable_sleep_on_exit();
 
-    printf("After disable: SCB_SCR = 0x%08X\\n", SCB_SCR);
+    printf("After disable: SCB_SCR = 0x%08X\n", SCB_SCR);
 
     return 0;
 }

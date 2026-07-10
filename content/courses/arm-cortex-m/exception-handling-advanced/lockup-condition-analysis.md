@@ -46,46 +46,46 @@ lockup_cause_t analyze_lockup_risk(uint32_t current_mode, uint32_t hfsr) {
 }
 
 void check_lockup_prevention(void) {
-    printf("Lockup Prevention Strategies:\\n\\n");
+    printf("Lockup Prevention Strategies:\n\n");
 
     printf("1. Fault handler guard:\n");
-    printf("   - Never allow faults in fault handlers\\n");
-    printf("   - Use simple, verified code in handlers\\n");
-    printf("   - Avoid complex operations (printf, malloc)\\n\\n");
+    printf("   - Never allow faults in fault handlers\n");
+    printf("   - Use simple, verified code in handlers\n");
+    printf("   - Avoid complex operations (printf, malloc)\n\n");
 
     printf("2. Stack integrity:\n");
-    printf("   - Ensure fault handlers have sufficient stack\\n");
-    printf("   - Use MSP exclusively in handler mode\\n");
-    printf("   - Consider a separate 'fault stack'\\n\\n");
+    printf("   - Ensure fault handlers have sufficient stack\n");
+    printf("   - Use MSP exclusively in handler mode\n");
+    printf("   - Consider a separate 'fault stack'\n\n");
 
     printf("3. Vector table protection:\n");
-    printf("   - Place vector table in ROM or protected RAM\\n");
-    printf("   - Use VTOR to relocate if needed\\n\\n");
+    printf("   - Place vector table in ROM or protected RAM\n");
+    printf("   - Use VTOR to relocate if needed\n\n");
 
     printf("4. NMI watchdog:\n");
-    printf("   - Use NMI as last resort for lockup recovery\\n");
-    printf("   - Configure an external watchdog\\n");
+    printf("   - Use NMI as last resort for lockup recovery\n");
+    printf("   - Configure an external watchdog\n");
     printf("   - Reset on lockup detection (WDOG)");
 }
 
 int main(void) {
-    printf("Cortex-M Lockup Condition Analysis\\n\\n");
+    printf("Cortex-M Lockup Condition Analysis\n\n");
 
-    printf("Lockup is a state where the CPU stops executing\\n");
-    printf("instructions due to an unrecoverable fault.\\n\\n");
+    printf("Lockup is a state where the CPU stops executing\n");
+    printf("instructions due to an unrecoverable fault.\n\n");
 
-    printf("Lockup triggers:\\n");
-    printf("  1. HardFaultHandler causes another fault\\n");
-    printf("  2. BusFault during vector fetch\\n");
-    printf("  3. NMI handler causes a fault\\n\n");
+    printf("Lockup triggers:\n");
+    printf("  1. HardFaultHandler causes another fault\n");
+    printf("  2. BusFault during vector fetch\n");
+    printf("  3. NMI handler causes a fault\n\n");
 
     uint32_t test_hfsr = (1UL << 30) | (1UL << 1);
     lockup_cause_t cause = analyze_lockup_risk(1, test_hfsr);
-    printf("Analysis: %s\\n\\n", lockup_cause_name(cause));
+    printf("Analysis: %s\n\n", lockup_cause_name(cause));
 
     check_lockup_prevention();
 
-    printf("\\n\\nDebug status (DFSR): 0x%08X\\n", SCB_DFSR);
+    printf("\n\nDebug status (DFSR): 0x%08X\n", SCB_DFSR);
 
     return 0;
 }

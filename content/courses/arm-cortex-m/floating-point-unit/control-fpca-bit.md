@@ -20,9 +20,9 @@ int main(void) {
     unsigned int control = get_control();
 
     if (control & (1 << 2)) {
-        printf("FPCA set: FPU context is active\\n");
+        printf("FPCA set: FPU context is active\n");
     } else {
-        printf("FPCA clear: FPU context is inactive\\n");
+        printf("FPCA clear: FPU context is inactive\n");
     }
 
     // The FPCA bit is set automatically when any FPU instruction executes

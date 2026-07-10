@@ -19,11 +19,11 @@ void demo(void) {
     s_local++;
     auto_local++;
 
-    printf("auto=%d, static=%d\\n", auto_local, s_local);
+    printf("auto=%d, static=%d\n", auto_local, s_local);
 }
 
 int main(void) {
-    printf("global=%d, sglobal=%d\\n", global, sglobal);
+    printf("global=%d, sglobal=%d\n", global, sglobal);
 
     demo();
     demo();

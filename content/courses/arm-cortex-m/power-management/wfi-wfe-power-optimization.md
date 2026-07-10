@@ -17,18 +17,18 @@ volatile uint32_t wfe_count = 0;
 
 void idle_wfi(void) {
     __asm volatile(
-        "DSB          \\n\\t"
-        "WFI          \\n\\t"
-        "ISB          \\n\\t"
+        "DSB          \n\\t"
+        "WFI          \n\\t"
+        "ISB          \n\\t"
     : : : "memory");
     wfi_count++;
 }
 
 void idle_wfe(void) {
     __asm volatile(
-        "DSB          \\n\\t"
-        "WFE          \\n\\t"
-        "ISB          \\n\\t"
+        "DSB          \n\\t"
+        "WFE          \n\\t"
+        "ISB          \n\\t"
     : : : "memory");
     wfe_count++;
 }
@@ -37,9 +37,9 @@ void poll_with_wfe(volatile uint32_t *flag) {
     while (*flag == 0) {
         __asm volatile("SEV" ::: "memory");
         __asm volatile(
-            "DSB          \\n\\t"
-            "WFE          \\n\\t"
-            "ISB          \\n\\t"
+            "DSB          \n\\t"
+            "WFE          \n\\t"
+            "ISB          \n\\t"
         : : : "memory");
     }
 }
@@ -49,37 +49,37 @@ void busy_wait(uint32_t count) {
 }
 
 int main(void) {
-    printf("WFI/WFE Power Optimization Strategies\\n\\n");
+    printf("WFI/WFE Power Optimization Strategies\n\n");
 
-    printf("Method 1: Busy-wait (worst power)\\n");
-    printf("  CPU at 100%%, current draw = active current\\n");
+    printf("Method 1: Busy-wait (worst power)\n");
+    printf("  CPU at 100%%, current draw = active current\n");
     busy_wait(1000);
 
-    printf("Method 2: WFI (better power)\\n");
-    printf("  CPU clock gated, wakes on interrupt\\n");
-    printf("  Draw: ~10%% of active current\\n");
+    printf("Method 2: WFI (better power)\n");
+    printf("  CPU clock gated, wakes on interrupt\n");
+    printf("  Draw: ~10%% of active current\n");
     idle_wfi();
 
-    printf("Method 3: WFE (best for polling)\\n");
-    printf("  CPU clock gated, wakes on event\\n");
-    printf("  No interrupt needed for wakeup\\n");
+    printf("Method 3: WFE (best for polling)\n");
+    printf("  CPU clock gated, wakes on event\n");
+    printf("  No interrupt needed for wakeup\n");
     idle_wfe();
 
-    printf("\\nIdle statistics:\\n");
-    printf("  WFI calls: %u\\n", wfi_count);
-    printf("  WFE calls: %u\\n", wfe_count);
+    printf("\nIdle statistics:\n");
+    printf("  WFI calls: %u\n", wfi_count);
+    printf("  WFE calls: %u\n", wfe_count);
 
-    printf("\\nStrategy selection guide:\\n");
-    printf("  - WFI when waiting for any interrupt\\n");
-    printf("  - WFE when polling a flag/semaphore\\n");
-    printf("  - WFI + SLEEPONEXIT for ISR-only apps\\n");
-    printf("  - WFE + SEVONPEND for event-driven sync\\n");
+    printf("\nStrategy selection guide:\n");
+    printf("  - WFI when waiting for any interrupt\n");
+    printf("  - WFE when polling a flag/semaphore\n");
+    printf("  - WFI + SLEEPONEXIT for ISR-only apps\n");
+    printf("  - WFE + SEVONPEND for event-driven sync\n");
 
-    printf("\\nPower savings hierarchy:\\n");
-    printf("  Busy-wait:  1x power\\n");
-    printf("  WFI:        0.1x power\\n");
-    printf("  WFE:        0.1x power (wakes faster)\\n");
-    printf("  Deep WFI:   0.01x power\\n");
+    printf("\nPower savings hierarchy:\n");
+    printf("  Busy-wait:  1x power\n");
+    printf("  WFI:        0.1x power\n");
+    printf("  WFE:        0.1x power (wakes faster)\n");
+    printf("  Deep WFI:   0.01x power\n");
 
     return 0;
 }

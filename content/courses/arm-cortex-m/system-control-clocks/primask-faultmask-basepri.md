@@ -13,21 +13,21 @@ initial_code = '''// Use PRIMASK, FAULTMASK, and BASEPRI for interrupt masking
 
 void disable_interrupts(void) {
     __asm volatile(
-        "CPSID I \\n\\t"
+        "CPSID I \n\\t"
         : : : "memory"
     );
 }
 
 void enable_interrupts(void) {
     __asm volatile(
-        "CPSIE I \\n\\t"
+        "CPSIE I \n\\t"
         : : : "memory"
     );
 }
 
 void set_basepri(uint32_t priority) {
     __asm volatile(
-        "MSR BASEPRI, %0 \\n\\t"
+        "MSR BASEPRI, %0 \n\\t"
         : : "r" (priority & 0xFF) : "memory"
     );
 }
@@ -48,33 +48,33 @@ void set_primask(uint32_t mask) {
 
 void disable_faults(void) {
     __asm volatile(
-        "CPSID F \\n\\t"
+        "CPSID F \n\\t"
         : : : "memory"
     );
 }
 
 int main(void) {
-    printf("Interrupt Masking: PRIMASK, FAULTMASK, BASEPRI\\n\\n");
+    printf("Interrupt Masking: PRIMASK, FAULTMASK, BASEPRI\n\n");
 
     disable_interrupts();
-    printf("PRIMASK set: interrupts disabled\\n");
+    printf("PRIMASK set: interrupts disabled\n");
     enable_interrupts();
 
     set_basepri(0x80);
-    printf("BASEPRI = 0x%02X: interrupts with priority >= 0x80 masked\\n",
+    printf("BASEPRI = 0x%02X: interrupts with priority >= 0x80 masked\n",
            get_basepri());
 
     set_basepri(0);
-    printf("BASEPRI cleared (0x%02X): all interrupts enabled\\n", get_basepri());
+    printf("BASEPRI cleared (0x%02X): all interrupts enabled\n", get_basepri());
 
     disable_faults();
-    printf("FAULTMASK set: all faults and interrupts disabled\\n");
+    printf("FAULTMASK set: all faults and interrupts disabled\n");
     enable_interrupts();
 
-    printf("\\nMasking levels:\\n");
-    printf("  PRIMASK:   masks all configurable exceptions\\n");
-    printf("  FAULTMASK: masks all configurable exceptions + HardFault\\n");
-    printf("  BASEPRI:   masks exceptions below threshold\\n");
+    printf("\nMasking levels:\n");
+    printf("  PRIMASK:   masks all configurable exceptions\n");
+    printf("  FAULTMASK: masks all configurable exceptions + HardFault\n");
+    printf("  BASEPRI:   masks exceptions below threshold\n");
 
     return 0;
 }

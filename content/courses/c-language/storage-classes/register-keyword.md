@@ -15,7 +15,7 @@ int main(void) {
     for (i = 0; i < 1000000; i++) {
         // Tight loop where register hint may help
     }
-    printf("Done\\n");
+    printf("Done\n");
 
     // Cannot take address of register variable:
     // int *p = &i;  // Would cause compilation error

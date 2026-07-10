@@ -23,9 +23,9 @@ int main(void) {
     const char *c = "apples";
     const char *d = "banana";
 
-    printf("cmp(apple, apple): %d\\n", my_strcmp(a, b));
-    printf("cmp(apple, apples): %d\\n", my_strcmp(a, c));
-    printf("cmp(apple, banana): %d\\n", my_strcmp(a, d));
+    printf("cmp(apple, apple): %d\n", my_strcmp(a, b));
+    printf("cmp(apple, apples): %d\n", my_strcmp(a, c));
+    printf("cmp(apple, banana): %d\n", my_strcmp(a, d));
 
     return 0;
 }

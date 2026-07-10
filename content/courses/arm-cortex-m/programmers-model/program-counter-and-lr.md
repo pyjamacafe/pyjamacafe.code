@@ -18,10 +18,10 @@ void print_return_address(const char *func_name) {
 
     __asm volatile("MOV %0, LR" : "=r" (lr_value));
 
-    printf("%s: return address = 0x%08X\\n", func_name, lr_value);
+    printf("%s: return address = 0x%08X\n", func_name, lr_value);
 
     if (lr_value & 1) {
-        printf("  -> Thumb mode (bit 0 set)\\n");
+        printf("  -> Thumb mode (bit 0 set)\n");
     }
 }
 
@@ -35,7 +35,7 @@ void func_b(void) {
 }
 
 int main(void) {
-    printf("Call stack trace:\\n");
+    printf("Call stack trace:\n");
     func_b();
     return 0;
 }

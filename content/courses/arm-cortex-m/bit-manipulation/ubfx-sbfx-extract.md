@@ -35,31 +35,31 @@ typedef struct {
 } packed_reg_t;
 
 int main(void) {
-    printf("UBFX and SBFX Bit Field Extract\\n\\n");
+    printf("UBFX and SBFX Bit Field Extract\n\n");
 
     uint32_t reg = 0xA5A5A5A5;
-    printf("Register value: 0x%08X\\n", reg);
+    printf("Register value: 0x%08X\n", reg);
 
     uint32_t field1 = ubfx(reg, 0, 8);
     uint32_t field2 = ubfx(reg, 8, 8);
     uint32_t field3 = ubfx(reg, 16, 8);
     uint32_t field4 = ubfx(reg, 24, 8);
 
-    printf("UBFX extracts (8-bit fields):\\n");
-    printf("  [7:0]   = 0x%02X\\n", field1);
-    printf("  [15:8]  = 0x%02X\\n", field2);
-    printf("  [23:16] = 0x%02X\\n", field3);
-    printf("  [31:24] = 0x%02X\\n\\n", field4);
+    printf("UBFX extracts (8-bit fields):\n");
+    printf("  [7:0]   = 0x%02X\n", field1);
+    printf("  [15:8]  = 0x%02X\n", field2);
+    printf("  [23:16] = 0x%02X\n", field3);
+    printf("  [31:24] = 0x%02X\n\n", field4);
 
     int32_t neg = -128;
-    printf("SBFX sign extension:\\n");
-    printf("  Original: %d (0x%08X)\\n", neg, neg);
+    printf("SBFX sign extension:\n");
+    printf("  Original: %d (0x%08X)\n", neg, neg);
 
     int32_t ext8 = sbfx(neg, 0, 8);
-    printf("  SBFX(0,8): %d (sign-extended from 8 bits)\\n", ext8);
+    printf("  SBFX(0,8): %d (sign-extended from 8 bits)\n", ext8);
 
     int32_t ext4 = sbfx(neg, 0, 4);
-    printf("  SBFX(0,4): %d (sign-extended from 4 bits)\\n\\n", ext4);
+    printf("  SBFX(0,4): %d (sign-extended from 4 bits)\n\n", ext4);
 
     packed_reg_t packed;
     packed.field_a = 0xA;
@@ -68,7 +68,7 @@ int main(void) {
     packed.field_d = 0x5;
 
     uint32_t *raw = (uint32_t *)&packed;
-    printf("C bitfield access: 0x%08X\\n", *raw);
+    printf("C bitfield access: 0x%08X\n", *raw);
 
     return 0;
 }

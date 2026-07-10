@@ -22,28 +22,28 @@ initial_code = '''// Set up and register fault handlers
 
 void __attribute__((naked)) HardFault_Handler(void) {
     __asm volatile(
-        "TST LR, #4         \\n\\t"
-        "ITE EQ              \\n\\t"
-        "MRSEQ R0, MSP      \\n\\t"
-        "MRSNE R0, PSP      \\n\\t"
-        "B hardfault_c_handler \\n\\t"
+        "TST LR, #4         \n\\t"
+        "ITE EQ              \n\\t"
+        "MRSEQ R0, MSP      \n\\t"
+        "MRSNE R0, PSP      \n\\t"
+        "B hardfault_c_handler \n\\t"
     );
 }
 
 void hardfault_c_handler(uint32_t *stacked_frame) {
-    printf("=== HARD FAULT ===\\n");
-    printf("Stacked PC: 0x%08X\\n", stacked_frame[6]);
-    printf("Stacked LR: 0x%08X\\n", stacked_frame[5]);
-    printf("Stacked xPSR: 0x%08X\\n", stacked_frame[7]);
+    printf("=== HARD FAULT ===\n");
+    printf("Stacked PC: 0x%08X\n", stacked_frame[6]);
+    printf("Stacked LR: 0x%08X\n", stacked_frame[5]);
+    printf("Stacked xPSR: 0x%08X\n", stacked_frame[7]);
 
     uint32_t hfsr = SCB_HFSR;
     uint32_t cfsr = SCB_CFSR;
 
-    if (hfsr & (1UL << 30)) printf("  Forced HardFault (escalated)\\n");
-    if (hfsr & (1UL << 1))  printf("  Vector table read fault\\n");
-    if (cfsr & 0xFF)        printf("  MemManage fault active\\n");
-    if (cfsr & 0xFF00)      printf("  BusFault active\\n");
-    if (cfsr & 0xFF0000)    printf("  UsageFault active\\n");
+    if (hfsr & (1UL << 30)) printf("  Forced HardFault (escalated)\n");
+    if (hfsr & (1UL << 1))  printf("  Vector table read fault\n");
+    if (cfsr & 0xFF)        printf("  MemManage fault active\n");
+    if (cfsr & 0xFF00)      printf("  BusFault active\n");
+    if (cfsr & 0xFF0000)    printf("  UsageFault active\n");
 
     SCB_CFSR = cfsr;
     SCB_HFSR = hfsr;
@@ -52,16 +52,16 @@ void hardfault_c_handler(uint32_t *stacked_frame) {
 }
 
 int main(void) {
-    printf("Cortex-M Fault Handler Setup\\n\\n");
+    printf("Cortex-M Fault Handler Setup\n\n");
 
     SCB_SHCSR |= SHCSR_MEMFAULTENA | SHCSR_BUSFAULTENA | SHCSR_USGFAULTENA;
-    printf("Fault handlers enabled (SHCSR: 0x%08X)\\n", SCB_SHCSR);
+    printf("Fault handlers enabled (SHCSR: 0x%08X)\n", SCB_SHCSR);
 
-    printf("\\nFault types:\\n");
-    printf("  HardFault   - Escalated faults, vector fetch errors\\n");
-    printf("  MemManage   - MPU violations\\n");
-    printf("  BusFault    - Memory access errors\\n");
-    printf("  UsageFault  - Undefined instructions, unaligned access\\n");
+    printf("\nFault types:\n");
+    printf("  HardFault   - Escalated faults, vector fetch errors\n");
+    printf("  MemManage   - MPU violations\n");
+    printf("  BusFault    - Memory access errors\n");
+    printf("  UsageFault  - Undefined instructions, unaligned access\n");
 
     volatile uint32_t *bad_ptr = (uint32_t *)0xFFFFFFFF;
     uint32_t val = *bad_ptr;

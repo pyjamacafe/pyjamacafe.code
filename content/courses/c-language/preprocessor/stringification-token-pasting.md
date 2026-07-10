@@ -14,14 +14,14 @@ initial_code = '''#include <stdio.h>
 #define MAKE_VAR(name) int var_ ## name = (name)
 
 int main(void) {
-    printf("%s\\n", STRINGIFY(hello world));
-    printf("%s\\n", STRINGIFY(42));
+    printf("%s\n", STRINGIFY(hello world));
+    printf("%s\n", STRINGIFY(42));
 
     int xy = 100;
-    printf("xy = %d\\n", TOKEN_PASTE(x, y));
+    printf("xy = %d\n", TOKEN_PASTE(x, y));
 
     MAKE_VAR(42);
-    printf("var_42 = %d\\n", var_42);
+    printf("var_42 = %d\n", var_42);
 
     return 0;
 }

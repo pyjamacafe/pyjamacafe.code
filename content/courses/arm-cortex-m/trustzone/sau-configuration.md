@@ -26,7 +26,7 @@ typedef struct {
 void sau_init(const sau_region_t *regions, uint32_t count) {
     uint32_t num_regions = SAU_TYPE & 0xFF;
 
-    printf("SAU supports %u regions\\n", num_regions);
+    printf("SAU supports %u regions\n", num_regions);
 
     SAU_CTRL = 0;
     __asm volatile("DSB" ::: "memory");
@@ -51,11 +51,11 @@ int main(void) {
     };
     uint32_t num_config = sizeof(config) / sizeof(config[0]);
 
-    printf("Initializing SAU with %u regions\\n", num_config);
+    printf("Initializing SAU with %u regions\n", num_config);
     sau_init(config, num_config);
 
     uint32_t sau_ctrl = SAU_CTRL;
-    printf("SAU enabled: %s\\n", (sau_ctrl & 1) ? "YES" : "NO");
+    printf("SAU enabled: %s\n", (sau_ctrl & 1) ? "YES" : "NO");
 
     return 0;
 }

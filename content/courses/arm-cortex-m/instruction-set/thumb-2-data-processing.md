@@ -36,26 +36,26 @@ int32_t test_sbfx(int32_t value, uint32_t width, uint32_t lsb) {
 }
 
 int main(void) {
-    printf("Thumb-2 Data Processing Instructions\\n\\n");
+    printf("Thumb-2 Data Processing Instructions\n\n");
 
     uint32_t val = 0x12345678;
 
     uint32_t extracted = test_ubfx(val, 8, 8);
-    printf("UBFX(0x%08X, width=8, lsb=8) = 0x%02X\\n", val, extracted);
+    printf("UBFX(0x%08X, width=8, lsb=8) = 0x%02X\n", val, extracted);
 
     uint32_t patched = test_bfi(0xFFFF0000, 0x00AB, 8, 8);
-    printf("BFI(0xFFFF0000, 0x00AB, 8, 8) = 0x%08X\\n", patched);
+    printf("BFI(0xFFFF0000, 0x00AB, 8, 8) = 0x%08X\n", patched);
 
     int32_t neg = -1000;
     int32_t sign_ext = test_sbfx(neg, 8, 0);
-    printf("SBFX(%d, width=8, lsb=0) = %d\\n", neg, sign_ext);
+    printf("SBFX(%d, width=8, lsb=0) = %d\n", neg, sign_ext);
 
-    printf("\\nOther Thumb-2 data processing:\\n");
-    printf("  CLZ   - Count Leading Zeros\\n");
-    printf("  RBIT  - Reverse Bits\\n");
-    printf("  REV   - Reverse byte order\\n");
-    printf("  SXTB  - Sign extend byte\\n");
-    printf("  UXTH  - Zero extend halfword\\n");
+    printf("\nOther Thumb-2 data processing:\n");
+    printf("  CLZ   - Count Leading Zeros\n");
+    printf("  RBIT  - Reverse Bits\n");
+    printf("  REV   - Reverse byte order\n");
+    printf("  SXTB  - Sign extend byte\n");
+    printf("  UXTH  - Zero extend halfword\n");
 
     return 0;
 }

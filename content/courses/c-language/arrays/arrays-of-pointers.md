@@ -14,7 +14,7 @@ int main(void) {
     int n = sizeof(fruits) / sizeof(fruits[0]);
 
     for (int i = 0; i < n; i++) {
-        printf("fruits[%d] = %s (address: %p)\\n", i, fruits[i], (void *)fruits[i]);
+        printf("fruits[%d] = %s (address: %p)\n", i, fruits[i], (void *)fruits[i]);
     }
 
     // 2D array vs array of pointers to strings

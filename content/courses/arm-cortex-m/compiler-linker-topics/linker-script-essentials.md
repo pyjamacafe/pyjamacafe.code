@@ -21,11 +21,11 @@ initial_code = '''// Linker script example (GCC LD script syntax)
 // _ebss    = ADDR(.bss) + SIZEOF(.bss);
 
 int main(void) {
-    printf("In a linker script you define:\\n");
-    printf("  - Memory regions: flash (0x08000000), ram (0x20000000)\\n");
-    printf("  - Section placement: .text in flash, .data in RAM\\n");
-    printf("  - Entry point: Reset_Handler\\n");
-    printf("  - Heap and stack sizes\\n");
+    printf("In a linker script you define:\n");
+    printf("  - Memory regions: flash (0x08000000), ram (0x20000000)\n");
+    printf("  - Section placement: .text in flash, .data in RAM\n");
+    printf("  - Entry point: Reset_Handler\n");
+    printf("  - Heap and stack sizes\n");
     return 0;
 }
 '''

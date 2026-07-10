@@ -23,9 +23,9 @@ struct ordered_struct {
 };
 
 int main(void) {
-    printf("Packed struct size: %zu\\n", sizeof(struct packed_struct));
-    printf("Ordered struct size: %zu\\n", sizeof(struct ordered_struct));
-    printf("Offsets: a=%zu, b=%zu, c=%zu\\n",
+    printf("Packed struct size: %zu\n", sizeof(struct packed_struct));
+    printf("Ordered struct size: %zu\n", sizeof(struct ordered_struct));
+    printf("Offsets: a=%zu, b=%zu, c=%zu\n",
            offsetof(struct packed_struct, a),
            offsetof(struct packed_struct, b),
            offsetof(struct packed_struct, c));

@@ -15,19 +15,19 @@ static uint32_t saved_regs[13];
 
 void save_registers(void) {
     __asm volatile(
-        "STR R0, [%0, #0]  \\n\\t"
-        "STR R1, [%0, #4]  \\n\\t"
-        "STR R2, [%0, #8]  \\n\\t"
-        "STR R3, [%0, #12] \\n\\t"
-        "STR R4, [%0, #16] \\n\\t"
-        "STR R5, [%0, #20] \\n\\t"
-        "STR R6, [%0, #24] \\n\\t"
-        "STR R7, [%0, #28] \\n\\t"
-        "STR R8, [%0, #32] \\n\\t"
-        "STR R9, [%0, #36] \\n\\t"
-        "STR R10, [%0, #40] \\n\\t"
-        "STR R11, [%0, #44] \\n\\t"
-        "STR R12, [%0, #48] \\n\\t"
+        "STR R0, [%0, #0]  \n\\t"
+        "STR R1, [%0, #4]  \n\\t"
+        "STR R2, [%0, #8]  \n\\t"
+        "STR R3, [%0, #12] \n\\t"
+        "STR R4, [%0, #16] \n\\t"
+        "STR R5, [%0, #20] \n\\t"
+        "STR R6, [%0, #24] \n\\t"
+        "STR R7, [%0, #28] \n\\t"
+        "STR R8, [%0, #32] \n\\t"
+        "STR R9, [%0, #36] \n\\t"
+        "STR R10, [%0, #40] \n\\t"
+        "STR R11, [%0, #44] \n\\t"
+        "STR R12, [%0, #48] \n\\t"
         : : "r" (saved_regs) : "memory"
     );
 }
@@ -39,15 +39,15 @@ int main(void) {
 
     save_registers();
 
-    printf("R0 = 0x%08X\\n", saved_regs[0]);
-    printf("All registers saved successfully\\n");
+    printf("R0 = 0x%08X\n", saved_regs[0]);
+    printf("All registers saved successfully\n");
     return 0;
 }
 '''
 
 [[test_cases]]
 input = ''
-expected = 'R0 = 0xDEADBEEF\\nAll registers saved successfully'
+expected = 'R0 = 0xDEADBEEF\nAll registers saved successfully'
 +++
 
 ## Problem Statement

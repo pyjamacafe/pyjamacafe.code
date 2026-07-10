@@ -25,7 +25,7 @@ int main(void) {
 
     // Now any uninitialised global would be zero
     volatile int *test = (volatile int *)0x20000000;
-    printf("First BSS word: %d\\n", *test);
+    printf("First BSS word: %d\n", *test);
 
     return 0;
 }

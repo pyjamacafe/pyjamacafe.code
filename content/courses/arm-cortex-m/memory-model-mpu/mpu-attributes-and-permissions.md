@@ -53,7 +53,7 @@ uint32_t build_rasr(uint32_t size, mem_type_t type,
 }
 
 int main(void) {
-    printf("Configuring multiple MPU regions with different attributes\\n");
+    printf("Configuring multiple MPU regions with different attributes\n");
 
     MPU_RNR = 0;
     MPU_RBAR = 0x00000000;
@@ -63,14 +63,14 @@ int main(void) {
     MPU_RBAR = 0x40000000;
     MPU_RASR = build_rasr(SIZE_4KB, MEM_DEVICE, 3, 0);
 
-    printf("Region 0: Flash (Normal WB-WA, R/W, sharable)\\n");
-    printf("Region 1: UART (Device, R/W, non-sharable)\\n");
+    printf("Region 0: Flash (Normal WB-WA, R/W, sharable)\n");
+    printf("Region 1: UART (Device, R/W, non-sharable)\n");
 
     MPU_CTRL = 1;
     __asm volatile("DSB" ::: "memory");
     __asm volatile("ISB" ::: "memory");
 
-    printf("MPU enabled with 2 regions\\n");
+    printf("MPU enabled with 2 regions\n");
     return 0;
 }
 '''

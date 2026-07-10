@@ -23,12 +23,12 @@ void configure_fpu_stacking(void) {
 
 int main(void) {
     configure_fpu_stacking();
-    printf("FPU lazy stacking configured\\n");
+    printf("FPU lazy stacking configured\n");
 
     // Perform some FPU operations
     float a = 3.0f, b = 4.0f;
     float c = a * a + b * b;
-    printf("Result: %f\\n", c);
+    printf("Result: %f\n", c);
 
     return 0;
 }

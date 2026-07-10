@@ -14,7 +14,7 @@ int count_words(const char *str) {
     int in_word = 0;
 
     while (*str) {
-        if (*str == ' ' || *str == '\\t' || *str == '\\n') {
+        if (*str == ' ' || *str == '\\t' || *str == '\n') {
             in_word = 0;
         } else if (!in_word) {
             in_word = 1;
@@ -27,7 +27,7 @@ int count_words(const char *str) {
 
 int main(void) {
     const char *sentence = "The quick brown fox jumps";
-    printf("Words: %d\\n", count_words(sentence));
+    printf("Words: %d\n", count_words(sentence));
     return 0;
 }
 '''

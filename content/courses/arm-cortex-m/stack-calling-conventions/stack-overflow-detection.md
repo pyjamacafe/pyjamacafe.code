@@ -30,26 +30,26 @@ void stack_init(void) {
     psp_addr &= ~7;
 
     __asm volatile(
-        "MSR PSP, %0     \\n\\t"
-        "MRS R0, CONTROL \\n\\t"
-        "ORR R0, R0, #2  \\n\\t"
-        "MSR CONTROL, R0 \\n\\t"
-        "ISB             \\n\\t"
+        "MSR PSP, %0     \n\\t"
+        "MRS R0, CONTROL \n\\t"
+        "ORR R0, R0, #2  \n\\t"
+        "MSR CONTROL, R0 \n\\t"
+        "ISB             \n\\t"
         : : "r" (psp_addr) : "r0"
     );
 
-    printf("PSP initialized to 0x%08X\\n", psp_addr);
+    printf("PSP initialized to 0x%08X\n", psp_addr);
 }
 
 uint32_t check_stack_overflow(void) {
     uint32_t stack_bottom = (uint32_t)&stack[0];
 
     if (stack[0] != STACK_CANARY) {
-        printf("STACK OVERFLOW! Bottom canary corrupted\\n");
+        printf("STACK OVERFLOW! Bottom canary corrupted\n");
         return 1;
     }
     if (stack[STACK_SIZE / 4 - 1] != STACK_CANARY) {
-        printf("STACK UNDERFLOW! Top canary corrupted\\n");
+        printf("STACK UNDERFLOW! Top canary corrupted\n");
         return 1;
     }
 
@@ -63,7 +63,7 @@ uint32_t check_stack_overflow(void) {
         stack_high_watermark = usage;
     }
 
-    printf("Stack usage: %u/%u bytes (%u%%)  Peak: %u bytes\\n",
+    printf("Stack usage: %u/%u bytes (%u%%)  Peak: %u bytes\n",
            usage, STACK_SIZE, pct, stack_high_watermark);
 
     return 0;
@@ -75,7 +75,7 @@ void recursive_func(int depth) {
 
     if (depth % 10 == 0) {
         if (check_stack_overflow()) {
-            printf("Overflow at depth %d\\n", depth);
+            printf("Overflow at depth %d\n", depth);
             while (1);
         }
     }
@@ -86,13 +86,13 @@ void recursive_func(int depth) {
 }
 
 int main(void) {
-    printf("Stack Overflow Detection\\n\\n");
+    printf("Stack Overflow Detection\n\n");
 
     stack_init();
 
     recursive_func(0);
 
-    printf("\\nStack peak usage: %u bytes\\n", stack_high_watermark);
+    printf("\nStack peak usage: %u bytes\n", stack_high_watermark);
 
     return 0;
 }

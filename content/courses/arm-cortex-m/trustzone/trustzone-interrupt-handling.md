@@ -24,18 +24,18 @@ void set_interrupt_secure(uint32_t irq_num, uint32_t secure) {
         NVIC_ITNS0 |= (1UL << irq_num);
     }
 
-    printf("IRQ %u configured as %s\\n",
+    printf("IRQ %u configured as %s\n",
            irq_num, secure ? "Secure" : "Non-Secure");
 }
 
 void enable_interrupt(uint32_t irq_num) {
     NVIC_ISER0 = (1UL << irq_num);
-    printf("IRQ %u enabled\\n", irq_num);
+    printf("IRQ %u enabled\n", irq_num);
 }
 
 void disable_interrupt(uint32_t irq_num) {
     NVIC_ICER0 = (1UL << irq_num);
-    printf("IRQ %u disabled\\n", irq_num);
+    printf("IRQ %u disabled\n", irq_num);
 }
 
 int main(void) {
@@ -47,11 +47,11 @@ int main(void) {
     enable_interrupt(0);
     enable_interrupt(1);
 
-    printf("\\nSecure interrupts (ITNS=0): IRQ 0, IRQ 3\\n");
-    printf("Non-Secure interrupts (ITNS=1): IRQ 1, IRQ 2\\n");
+    printf("\nSecure interrupts (ITNS=0): IRQ 0, IRQ 3\n");
+    printf("Non-Secure interrupts (ITNS=1): IRQ 1, IRQ 2\n");
 
     uint32_t itns = NVIC_ITNS0;
-    printf("ITNS0 register: 0x%08X\\n", itns);
+    printf("ITNS0 register: 0x%08X\n", itns);
 
     return 0;
 }

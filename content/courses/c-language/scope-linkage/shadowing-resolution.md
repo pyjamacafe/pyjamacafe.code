@@ -16,20 +16,20 @@ void outer_function(void) {
 
     {
         int value = 300;  // Shadows outer block
-        printf("Innermost: %d\\n", value);
+        printf("Innermost: %d\n", value);
     }
 
-    printf("Outer block: %d\\n", value);
+    printf("Outer block: %d\n", value);
 }
 
 int main(void) {
     outer_function();
-    printf("Global: %d\\n", value);
+    printf("Global: %d\n", value);
 
     // To access the shadowed global (not possible from within the function)
     // Use a trick: create a pointer to the global before it gets shadowed
     extern int value;  // Refers to the global
-    printf("Global (extern): %d\\n", value);
+    printf("Global (extern): %d\n", value);
 
     return 0;
 }

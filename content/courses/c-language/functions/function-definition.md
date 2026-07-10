@@ -14,12 +14,12 @@ int add(int x, int y) {
 }
 
 void greet(const char *name) {
-    printf("Hello, %s!\\n", name);
+    printf("Hello, %s!\n", name);
 }
 
 int main(void) {
     int sum = add(3, 7);
-    printf("Sum: %d\\n", sum);
+    printf("Sum: %d\n", sum);
     greet("Alice");
 
     return 0;
@@ -28,7 +28,7 @@ int main(void) {
 
 [[test_cases]]
 input = ''
-expected = 'Sum: 10\\nHello, Alice!'
+expected = 'Sum: 10\nHello, Alice!'
 +++
 
 ## Problem Statement

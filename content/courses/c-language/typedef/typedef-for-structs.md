@@ -23,8 +23,8 @@ int main(void) {
     Point p1 = {10, 20};
     Rectangle rect = {{0, 0}, {100, 50}};
 
-    printf("Point: (%d, %d)\\n", p1.x, p1.y);
-    printf("Rectangle: (%d,%d)-(%d,%d)\\n",
+    printf("Point: (%d, %d)\n", p1.x, p1.y);
+    printf("Rectangle: (%d,%d)-(%d,%d)\n",
            rect.top_left.x, rect.top_left.y,
            rect.bottom_right.x, rect.bottom_right.y);
 

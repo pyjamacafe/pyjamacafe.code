@@ -45,12 +45,12 @@ void ldrex_strex_set_bit(volatile uint32_t *addr, uint32_t bit) {
     uint32_t mask = (1UL << bit);
     uint32_t old, new, success;
     __asm volatile(
-        "TRY_SET:              \\n\\t"
-        "LDREX %0, [%3]       \\n\\t"
-        "ORR %1, %0, %4       \\n\\t"
-        "STREX %2, %1, [%3]   \\n\\t"
-        "CMP %2, #0           \\n\\t"
-        "BNE TRY_SET           \\n\\t"
+        "TRY_SET:              \n\\t"
+        "LDREX %0, [%3]       \n\\t"
+        "ORR %1, %0, %4       \n\\t"
+        "STREX %2, %1, [%3]   \n\\t"
+        "CMP %2, #0           \n\\t"
+        "BNE TRY_SET           \n\\t"
         : "=&r" (old), "=&r" (new), "=&r" (success)
         : "r" (addr), "r" (mask)
         : "memory", "cc"
@@ -58,27 +58,27 @@ void ldrex_strex_set_bit(volatile uint32_t *addr, uint32_t bit) {
 }
 
 int main(void) {
-    printf("Bit-Banding Replacement Techniques\\n\\n");
+    printf("Bit-Banding Replacement Techniques\n\n");
 
-    printf("Bit-banding exists on: Cortex-M3, M4, M7\\n");
-    printf("Bit-banding absent on: Cortex-M0, M0+, M23, M33, M55\\n\\n");
+    printf("Bit-banding exists on: Cortex-M3, M4, M7\n");
+    printf("Bit-banding absent on: Cortex-M0, M0+, M23, M33, M55\n\n");
 
     sram_var = 0;
 
     rmw_set_bit(&sram_var, 3);
-    printf("RMW set bit 3: 0x%08X\\n", sram_var);
+    printf("RMW set bit 3: 0x%08X\n", sram_var);
 
     rmw_clear_bit(&sram_var, 3);
-    printf("RMW clear bit 3: 0x%08X\\n", sram_var);
+    printf("RMW clear bit 3: 0x%08X\n", sram_var);
 
     ldrex_strex_set_bit(&sram_var, 5);
-    printf("LDREX/STREX set bit 5: 0x%08X\\n\\n", sram_var);
+    printf("LDREX/STREX set bit 5: 0x%08X\n\n", sram_var);
 
-    printf("Method comparison:\\n");
-    printf("  1. Bit-banding:  alias accessible, atomic, no RMW loop\\n");
-    printf("  2. RMW:          simple, non-atomic, needs IRQ disable\\n");
-    printf("  3. LDREX/STREX:  atomic, works on all Cortex-M3+\\n");
-    printf("  4. BFI/BFC:      register only, best for field modify\\n");
+    printf("Method comparison:\n");
+    printf("  1. Bit-banding:  alias accessible, atomic, no RMW loop\n");
+    printf("  2. RMW:          simple, non-atomic, needs IRQ disable\n");
+    printf("  3. LDREX/STREX:  atomic, works on all Cortex-M3+\n");
+    printf("  4. BFI/BFC:      register only, best for field modify\n");
 
     return 0;
 }

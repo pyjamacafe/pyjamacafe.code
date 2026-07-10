@@ -34,8 +34,8 @@ int main(void) {
     enable_secure_interrupt(10);
     enable_nonsecure_interrupt(15);
 
-    printf("Secure interrupt 10 enabled\\n");
-    printf("Non-secure interrupt 15 enabled\\n");
+    printf("Secure interrupt 10 enabled\n");
+    printf("Non-secure interrupt 15 enabled\n");
     return 0;
 }
 '''

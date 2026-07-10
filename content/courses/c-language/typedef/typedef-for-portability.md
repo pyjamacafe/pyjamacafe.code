@@ -24,9 +24,9 @@ int main(void) {
     u8 byte = 0xFF;
     i32 temperature = -25;
 
-    printf("u32: %u (size: %zu)\\n", counter, sizeof(u32));
-    printf("u8: %u (size: %zu)\\n", byte, sizeof(u8));
-    printf("i32: %d (size: %zu)\\n", temperature, sizeof(i32));
+    printf("u32: %u (size: %zu)\n", counter, sizeof(u32));
+    printf("u8: %u (size: %zu)\n", byte, sizeof(u8));
+    printf("i32: %d (size: %zu)\n", temperature, sizeof(i32));
 
     return 0;
 }

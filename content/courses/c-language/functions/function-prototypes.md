@@ -14,7 +14,7 @@ float celsius_to_fahrenheit(float celsius);
 
 int main(void) {
     float temp = celsius_to_fahrenheit(100.0f);
-    printf("100 C = %.1f F\\n", temp);
+    printf("100 C = %.1f F\n", temp);
     return 0;
 }
 

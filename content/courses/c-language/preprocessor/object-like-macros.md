@@ -14,9 +14,9 @@ initial_code = '''#include <stdio.h>
 #define ERROR_CODE -1
 
 int main(void) {
-    printf("PI = %f\\n", PI);
-    printf("MAX_BUFFER = %d\\n", MAX_BUFFER);
-    printf("ERROR_CODE = %d\\n", ERROR_CODE);
+    printf("PI = %f\n", PI);
+    printf("MAX_BUFFER = %d\n", MAX_BUFFER);
+    printf("ERROR_CODE = %d\n", ERROR_CODE);
     return 0;
 }
 '''

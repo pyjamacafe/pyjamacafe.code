@@ -32,11 +32,11 @@ void configure_mpu_region(uint32_t region_num, uint32_t base_addr,
     MPU_RBAR = base_addr;
     MPU_RASR = size_attr | access_attr | REGION_ENABLE;
 
-    printf("MPU region %u configured: base=0x%08X\\n", region_num, base_addr);
+    printf("MPU region %u configured: base=0x%08X\n", region_num, base_addr);
 }
 
 int main(void) {
-    printf("Configuring MPU for SRAM region 0x20000000\\n");
+    printf("Configuring MPU for SRAM region 0x20000000\n");
 
     configure_mpu_region(0, 0x20000000,
         REGION_SIZE_32KB,
@@ -46,7 +46,7 @@ int main(void) {
     __asm volatile("DSB" ::: "memory");
     __asm volatile("ISB" ::: "memory");
 
-    printf("MPU enabled. Region 0 covers 32KB of SRAM\\n");
+    printf("MPU enabled. Region 0 covers 32KB of SRAM\n");
     return 0;
 }
 '''

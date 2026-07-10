@@ -21,15 +21,15 @@ int fibonacci(int n) {
 }
 
 int main(void) {
-    printf("Factorial 5: %d\\n", factorial(5));
-    printf("Fibonacci 10: %d\\n", fibonacci(10));
+    printf("Factorial 5: %d\n", factorial(5));
+    printf("Fibonacci 10: %d\n", fibonacci(10));
     return 0;
 }
 '''
 
 [[test_cases]]
 input = ''
-expected = 'Factorial 5: 120\\nFibonacci 10: 55'
+expected = 'Factorial 5: 120\nFibonacci 10: 55'
 +++
 
 ## Problem Statement

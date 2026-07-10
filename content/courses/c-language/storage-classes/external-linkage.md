@@ -19,7 +19,7 @@ int main(void) {
     increment();
     increment();
     increment();
-    printf("Counter: %d\\n", shared_counter);
+    printf("Counter: %d\n", shared_counter);
     return 0;
 }
 '''

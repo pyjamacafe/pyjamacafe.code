@@ -24,14 +24,14 @@ struct packed {
 
 int main(void) {
     struct flags f = {1, 0, 1, 0};
-    printf("Visible: %d, Enabled: %d, Readonly: %d\\n",
+    printf("Visible: %d, Enabled: %d, Readonly: %d\n",
            f.visible, f.enabled, f.readonly);
 
     struct packed date = {15, 7, 2026};
-    printf("Date: %d/%d/%d\\n", date.day, date.month, date.year);
+    printf("Date: %d/%d/%d\n", date.day, date.month, date.year);
 
-    printf("Size of flags: %zu bytes\\n", sizeof(struct flags));
-    printf("Size of packed: %zu bytes\\n", sizeof(struct packed));
+    printf("Size of flags: %zu bytes\n", sizeof(struct flags));
+    printf("Size of packed: %zu bytes\n", sizeof(struct packed));
 
     return 0;
 }

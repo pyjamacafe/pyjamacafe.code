@@ -36,7 +36,7 @@ int main(void) {
     }
 
     unsigned int elapsed = dwt_get_cycles() - start;
-    printf("Elapsed cycles: %u\\n", elapsed);
+    printf("Elapsed cycles: %u\n", elapsed);
     return 0;
 }
 '''

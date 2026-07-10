@@ -28,7 +28,7 @@ int main(void) {
     enable_lazy_stacking();
 
     float result = compute_heavy(3.0f, 4.0f);
-    printf("Result: %.1f\\n", result);
+    printf("Result: %.1f\n", result);
 
     // FPU context is only saved on exception entry if FPU was actually used
     // This reduces interrupt latency when FPU is not in use

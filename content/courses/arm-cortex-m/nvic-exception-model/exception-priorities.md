@@ -49,10 +49,10 @@ int main(void) {
 
     set_system_handler_priority(3, 0xE0);
 
-    printf("IRQ0 priority: 0x%02X\\n", get_irq_priority(0));
-    printf("IRQ1 priority: 0x%02X\\n", get_irq_priority(1));
+    printf("IRQ0 priority: 0x%02X\n", get_irq_priority(0));
+    printf("IRQ1 priority: 0x%02X\n", get_irq_priority(1));
 
-    printf("SHPR3: 0x%08X\\n", SCB_SHPR3);
+    printf("SHPR3: 0x%08X\n", SCB_SHPR3);
 
     return 0;
 }

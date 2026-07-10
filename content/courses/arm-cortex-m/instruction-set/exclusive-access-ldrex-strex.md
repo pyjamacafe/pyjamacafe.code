@@ -16,17 +16,17 @@ uint32_t atomic_exchange(volatile uint32_t *ptr, uint32_t new_value) {
     uint32_t success;
 
     __asm volatile(
-        "LDREX %0, [%3]     \\n\\t"
-        "STREX %1, %2, [%3] \\n\\t"
+        "LDREX %0, [%3]     \n\\t"
+        "STREX %1, %2, [%3] \n\\t"
         : "=r" (old_value), "=r" (success)
         : "r" (new_value), "r" (ptr)
         : "memory"
     );
 
     if (success) {
-        printf("STREX succeeded\\n");
+        printf("STREX succeeded\n");
     } else {
-        printf("STREX failed (concurrent access detected)\\n");
+        printf("STREX failed (concurrent access detected)\n");
     }
 
     return old_value;
@@ -36,12 +36,12 @@ uint32_t atomic_add(volatile uint32_t *ptr, uint32_t delta) {
     uint32_t old_value, new_value, success;
 
     __asm volatile(
-        "TRY_ADD:              \\n\\t"
-        "LDREX %0, [%3]       \\n\\t"
-        "ADD %1, %0, %4       \\n\\t"
-        "STREX %2, %1, [%3]   \\n\\t"
-        "CMP %2, #0           \\n\\t"
-        "BNE TRY_ADD           \\n\\t"
+        "TRY_ADD:              \n\\t"
+        "LDREX %0, [%3]       \n\\t"
+        "ADD %1, %0, %4       \n\\t"
+        "STREX %2, %1, [%3]   \n\\t"
+        "CMP %2, #0           \n\\t"
+        "BNE TRY_ADD           \n\\t"
         : "=&r" (old_value), "=&r" (new_value), "=&r" (success)
         : "r" (ptr), "r" (delta)
         : "memory", "cc"
@@ -53,21 +53,21 @@ uint32_t atomic_add(volatile uint32_t *ptr, uint32_t delta) {
 int main(void) {
     volatile uint32_t shared = 0x12345678;
 
-    printf("Exclusive Access: LDREX/STREX\\n\\n");
+    printf("Exclusive Access: LDREX/STREX\n\n");
 
     uint32_t old = atomic_exchange(&shared, 0xAABBCCDD);
-    printf("atomic_exchange: old=0x%08X, new=0x%08X\\n\\n", old, shared);
+    printf("atomic_exchange: old=0x%08X, new=0x%08X\n\n", old, shared);
 
     shared = 100;
-    printf("Before atomic_add: %u\\n", shared);
+    printf("Before atomic_add: %u\n", shared);
     old = atomic_add(&shared, 50);
-    printf("After atomic_add: %u (old=%u)\\n\\n", shared, old);
+    printf("After atomic_add: %u (old=%u)\n\n", shared, old);
 
-    printf("Key points:\\n");
-    printf("  - LDREX marks address for exclusive access\\n");
-    printf("  - STREX succeeds only if no other write occurred\\n");
-    printf("  - Write collision causes STREX to return 1 (fail)\\n");
-    printf("  - Loop retries until STREX succeeds\\n");
+    printf("Key points:\n");
+    printf("  - LDREX marks address for exclusive access\n");
+    printf("  - STREX succeeds only if no other write occurred\n");
+    printf("  - Write collision causes STREX to return 1 (fail)\n");
+    printf("  - Loop retries until STREX succeeds\n");
 
     return 0;
 }

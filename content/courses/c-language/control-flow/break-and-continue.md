@@ -15,12 +15,12 @@ int main(void) {
         if (i % 2 == 0) continue;
         printf("%d ", i);
     }
-    printf("\\n");
+    printf("\n");
 
     // Find first number divisible by 7 between 1 and 50
     for (int j = 1; j <= 50; j++) {
         if (j % 7 == 0) {
-            printf("Found: %d\\n", j);
+            printf("Found: %d\n", j);
             break;
         }
     }
@@ -31,7 +31,7 @@ int main(void) {
 
 [[test_cases]]
 input = ''
-expected = '1 3 5 7 9 \\n Found: 7'
+expected = '1 3 5 7 9 \n Found: 7'
 +++
 
 ## Problem Statement

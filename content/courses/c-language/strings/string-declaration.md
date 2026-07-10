@@ -16,15 +16,15 @@ int main(void) {
     const char *s3 = "Hello";
 
     // Print each
-    printf("s1: %s (sizeof: %zu)\\n", s1, sizeof(s1));
-    printf("s2: %s (sizeof: %zu)\\n", s2, sizeof(s2));
-    printf("s3: %s\\n", s3);
+    printf("s1: %s (sizeof: %zu)\n", s1, sizeof(s1));
+    printf("s2: %s (sizeof: %zu)\n", s2, sizeof(s2));
+    printf("s3: %s\n", s3);
 
     // Character by character
     for (int i = 0; s1[i] != '\\0'; i++) {
         printf("%c ", s1[i]);
     }
-    printf("\\n");
+    printf("\n");
 
     return 0;
 }

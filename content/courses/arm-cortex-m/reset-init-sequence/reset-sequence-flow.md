@@ -28,11 +28,11 @@ void Reset_Handler(void) {
     // Zero-initialize .bss
     // Call constructors (if any)
     // Call main()
-    printf("Reset sequence complete\\n");
+    printf("Reset sequence complete\n");
 }
 
 int main(void) {
-    printf("Hello from main!\\n");
+    printf("Hello from main!\n");
     return 0;
 }
 '''

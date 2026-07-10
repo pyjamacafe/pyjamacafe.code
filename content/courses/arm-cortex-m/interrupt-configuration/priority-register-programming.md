@@ -38,25 +38,25 @@ void set_irq_priority(uint32_t irq_num, uint32_t preempt, uint32_t sub) {
     reg_val |= (priority << shift);
     *ipr = reg_val;
 
-    printf("IRQ%u: preempt=%u, sub=%u, raw=0x%02X\\n",
+    printf("IRQ%u: preempt=%u, sub=%u, raw=0x%02X\n",
            irq_num, preempt, sub, (uint32_t)(priority & 0xFF));
 }
 
 int main(void) {
-    printf("NVIC Priority Configuration\\n\\n");
+    printf("NVIC Priority Configuration\n\n");
 
     set_priority_grouping(3);
 
-    printf("Priority grouping: %u (8 groups, 8 sub-priorities)\\n",
+    printf("Priority grouping: %u (8 groups, 8 sub-priorities)\n",
            get_priority_grouping());
 
     set_irq_priority(0, 1, 0);
     set_irq_priority(1, 1, 1);
     set_irq_priority(2, 2, 0);
 
-    printf("\\nVerification:\\n");
+    printf("\nVerification:\n");
     volatile uint32_t *ipr0 = (uint32_t *)NVIC_IPR_BASE;
-    printf("IPR0: 0x%08X\\n", *ipr0);
+    printf("IPR0: 0x%08X\n", *ipr0);
 
     return 0;
 }

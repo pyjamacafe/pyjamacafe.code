@@ -21,7 +21,7 @@ int main(void) {
     int (*operations[])(int, int) = {add, subtract, multiply};
 
     for (int i = 0; i < 3; i++) {
-        printf("Result %d: %d\\n", i + 1, compute(operations[i], 20, 5));
+        printf("Result %d: %d\n", i + 1, compute(operations[i], 20, 5));
     }
 
     return 0;
@@ -30,7 +30,7 @@ int main(void) {
 
 [[test_cases]]
 input = ''
-expected = 'Result 1: 25\\nResult 2: 15\\nResult 3: 100'
+expected = 'Result 1: 25\nResult 2: 15\nResult 3: 100'
 +++
 
 ## Problem Statement

@@ -54,23 +54,23 @@ uint32_t nvic_is_active(uint32_t irq_num) {
 }
 
 int main(void) {
-    printf("NVIC Interrupt Control\\n\\n");
+    printf("NVIC Interrupt Control\n\n");
 
     nvic_enable_irq(0);
     nvic_enable_irq(1);
     nvic_enable_irq(10);
 
-    printf("ISER0: 0x%08X\\n", NVIC_ISER0);
-    printf("Interrupts 0, 1, 10 enabled\\n\\n");
+    printf("ISER0: 0x%08X\n", NVIC_ISER0);
+    printf("Interrupts 0, 1, 10 enabled\n\n");
 
     nvic_disable_irq(1);
-    printf("After disabling IRQ1:\\n");
-    printf("ISER0: 0x%08X\\n", NVIC_ISER0);
+    printf("After disabling IRQ1:\n");
+    printf("ISER0: 0x%08X\n", NVIC_ISER0);
 
     nvic_set_pending(20);
-    printf("\\nPending for IRQ20 set\\n");
+    printf("\nPending for IRQ20 set\n");
 
-    printf("Active IRQ0: %u\\n", nvic_is_active(0));
+    printf("Active IRQ0: %u\n", nvic_is_active(0));
 
     return 0;
 }

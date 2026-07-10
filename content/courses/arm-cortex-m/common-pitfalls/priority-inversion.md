@@ -33,17 +33,17 @@ void low_priority_isr(void) {
 void high_priority_isr(void) {
     // Needs shared_resource — may be blocked by low-priority ISR
     if (shared_resource == 1) {
-        printf("Priority inversion: high-priority waiting for low\\n");
+        printf("Priority inversion: high-priority waiting for low\n");
     }
 }
 
 int main(void) {
-    printf("Priority inversion scenario:\\n");
-    printf("Low-priority ISR acquires resource\\n");
-    printf("Medium-priority ISR preempts low\\n");
-    printf("High-priority ISR needs resource, blocked by low\\n");
-    printf("Low can't run because medium is running\\n");
-    printf("-> High-priority ISR delayed indefinitely\\n");
+    printf("Priority inversion scenario:\n");
+    printf("Low-priority ISR acquires resource\n");
+    printf("Medium-priority ISR preempts low\n");
+    printf("High-priority ISR needs resource, blocked by low\n");
+    printf("Low can't run because medium is running\n");
+    printf("-> High-priority ISR delayed indefinitely\n");
     return 0;
 }
 '''

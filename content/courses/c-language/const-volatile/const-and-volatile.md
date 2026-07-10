@@ -21,10 +21,10 @@ void simulate_interrupt(void) {
 }
 
 int main(void) {
-    printf("Initial: %d\\n", hardware_status);
+    printf("Initial: %d\n", hardware_status);
 
     simulate_interrupt();
-    printf("After interrupt: %d\\n", hardware_status);
+    printf("After interrupt: %d\n", hardware_status);
 
     // Read-only from software perspective
     // hardware_status = 5;  // ERROR: const

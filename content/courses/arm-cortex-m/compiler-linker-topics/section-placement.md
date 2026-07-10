@@ -12,7 +12,7 @@ initial_code = '''#include <stdio.h>
 // Place variables in specific sections
 __attribute__((section(".noinit"))) int retained_data;
 __attribute__((section(".ram_func"))) void fast_function(void) {
-    printf("Running from RAM\\n");
+    printf("Running from RAM\n");
 }
 
 // Vector table placed at a specific address
@@ -24,7 +24,7 @@ const unsigned int vector_table[] = {
 
 int main(void) {
     retained_data = 42;
-    printf("Section placement demonstrated\\n");
+    printf("Section placement demonstrated\n");
     return 0;
 }
 '''

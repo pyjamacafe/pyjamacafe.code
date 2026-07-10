@@ -16,8 +16,8 @@ static int file_static = 99;  // File scope, internal linkage
 
 void demo_file_scope(void) {
     // Can access both variables
-    printf("Global: %d\\n", file_global);
-    printf("Static: %d\\n", file_static);
+    printf("Global: %d\n", file_global);
+    printf("Static: %d\n", file_static);
 }
 
 int main(void) {
@@ -28,7 +28,7 @@ int main(void) {
 
 [[test_cases]]
 input = ''
-expected = 'Global: 42\\nStatic: 99'
+expected = 'Global: 42\nStatic: 99'
 +++
 
 ## Problem Statement

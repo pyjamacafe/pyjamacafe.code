@@ -25,7 +25,7 @@ double average(int count, ...) {
 
 int main(void) {
     double avg = average(4, 10.0, 20.0, 30.0, 40.0);
-    printf("Average: %.1f\\n", avg);
+    printf("Average: %.1f\n", avg);
     return 0;
 }
 '''

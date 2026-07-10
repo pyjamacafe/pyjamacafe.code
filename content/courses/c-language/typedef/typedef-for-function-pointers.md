@@ -21,7 +21,7 @@ int main(void) {
     const char *names[] = {"sin", "cos", "sqrt"};
 
     for (int i = 0; i < 3; i++) {
-        printf("%s(0.5) = %.4f\\n", names[i], compute(funcs[i], 0.5));
+        printf("%s(0.5) = %.4f\n", names[i], compute(funcs[i], 0.5));
     }
 
     return 0;

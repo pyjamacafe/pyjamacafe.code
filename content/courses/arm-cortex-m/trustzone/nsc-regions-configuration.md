@@ -26,13 +26,13 @@ void sau_configure_region(uint32_t region, uint32_t base,
     SAU_RBAR = base;
     SAU_RLAR = (limit & 0xFFFFFFC0) | SAU_REGION_ENABLE | attrs;
 
-    printf("SAU Region %u: 0x%08X - 0x%08X [%s]\\n",
+    printf("SAU Region %u: 0x%08X - 0x%08X [%s]\n",
            region, base, limit,
            (attrs & SAU_REGION_NSC) ? "NSC" : "NS");
 }
 
 int main(void) {
-    printf("Configuring SAU with NSC region\\n");
+    printf("Configuring SAU with NSC region\n");
 
     sau_configure_region(0, 0x00000000, 0x001FFFFF, 0);
     sau_configure_region(1, 0x00200000, 0x00200FFF, SAU_REGION_NSC);
@@ -43,7 +43,7 @@ int main(void) {
     __asm volatile("DSB" ::: "memory");
     __asm volatile("ISB" ::: "memory");
 
-    printf("SAU enabled: Region 0=Secure, 1=NSC, 2=Non-Secure\\n");
+    printf("SAU enabled: Region 0=Secure, 1=NSC, 2=Non-Secure\n");
     return 0;
 }
 '''

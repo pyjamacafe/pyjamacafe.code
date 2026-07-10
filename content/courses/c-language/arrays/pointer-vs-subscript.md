@@ -13,17 +13,17 @@ int main(void) {
     int arr[5] = {1, 2, 3, 4, 5};
 
     // Both are equivalent
-    printf("arr[2] = %d\\n", arr[2]);
-    printf("2[arr] = %d\\n", 2[arr]);  // Equivalent!
-    printf("*(arr + 2) = %d\\n", *(arr + 2));
+    printf("arr[2] = %d\n", arr[2]);
+    printf("2[arr] = %d\n", 2[arr]);  // Equivalent!
+    printf("*(arr + 2) = %d\n", *(arr + 2));
 
     // Pointer version (mutable)
     int *p = arr;
-    printf("p[2] = %d\\n", p[2]);
+    printf("p[2] = %d\n", p[2]);
 
     // But p can be reassigned
     p = &arr[2];
-    printf("Now p[0] = %d (arr[2])\\n", p[0]);
+    printf("Now p[0] = %d (arr[2])\n", p[0]);
 
     // arr cannot be reassigned
     // arr = &arr[2];  // ERROR: array type not assignable

@@ -16,17 +16,17 @@ static int internal_var = 10;
 int external_var = 20;
 
 static void internal_func(void) {
-    printf("Internal function called\\n");
+    printf("Internal function called\n");
 }
 
 void external_func(void) {
-    printf("External function called\\n");
+    printf("External function called\n");
     internal_func();  // Can call internal functions within the same file
 }
 
 int main(void) {
-    printf("Internal: %d\\n", internal_var);
-    printf("External: %d\\n", external_var);
+    printf("Internal: %d\n", internal_var);
+    printf("External: %d\n", external_var);
     external_func();
     return 0;
 }

@@ -32,7 +32,7 @@ void (* const g_pfnVectors[])(void) = {
 };
 
 int main(void) {
-    printf("Startup file structure demonstrated\\n");
+    printf("Startup file structure demonstrated\n");
     return 0;
 }
 '''

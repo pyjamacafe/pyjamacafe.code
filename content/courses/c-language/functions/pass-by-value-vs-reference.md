@@ -20,10 +20,10 @@ void increment_good(int *x) {
 int main(void) {
     int a = 5;
     increment_bad(a);
-    printf("After bad: %d\\n", a);
+    printf("After bad: %d\n", a);
 
     increment_good(&a);
-    printf("After good: %d\\n", a);
+    printf("After good: %d\n", a);
 
     return 0;
 }
@@ -31,7 +31,7 @@ int main(void) {
 
 [[test_cases]]
 input = ''
-expected = 'After bad: 5\\nAfter good: 6'
+expected = 'After bad: 5\nAfter good: 6'
 +++
 
 ## Problem Statement

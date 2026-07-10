@@ -22,7 +22,7 @@ int main(void) {
     }
     copy[i] = '\\0';
 
-    printf("Copy: %s\\n", copy);
+    printf("Copy: %s\n", copy);
 
     // String concatenation (manual)
     char result[50] = "Hello";
@@ -32,7 +32,7 @@ int main(void) {
         result[len + j + 1] = '\\0';
     }
 
-    printf("Concatenated: %s\\n", result);
+    printf("Concatenated: %s\n", result);
 
     return 0;
 }

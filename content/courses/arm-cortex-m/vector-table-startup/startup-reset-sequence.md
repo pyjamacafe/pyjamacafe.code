@@ -19,7 +19,7 @@ extern uint32_t _ebss;
 
 void __attribute__((section(".after_vectors")))
 SystemInit(void) {
-    printf("SystemInit: Configure system clock, PLL, etc.\\n");
+    printf("SystemInit: Configure system clock, PLL, etc.\n");
 }
 
 void __attribute__((section(".after_vectors")))
@@ -30,7 +30,7 @@ __data_init(void) {
     while (dst < &_edata) {
         *dst++ = *src++;
     }
-    printf("Data section initialized: .data copied from flash to SRAM\\n");
+    printf("Data section initialized: .data copied from flash to SRAM\n");
 }
 
 void __attribute__((section(".after_vectors")))
@@ -40,7 +40,7 @@ __bss_init(void) {
     while (dst < &_ebss) {
         *dst++ = 0;
     }
-    printf("BSS section zeroed\\n");
+    printf("BSS section zeroed\n");
 }
 
 typedef void (*init_func_t)(void);
@@ -59,11 +59,11 @@ void Reset_Handler(void) {
     __data_init();
     __bss_init();
     __libc_init_array();
-    printf("\\nStartup complete, calling main()\\n");
+    printf("\nStartup complete, calling main()\n");
 }
 
 int main(void) {
-    printf("Main application running\\n");
+    printf("Main application running\n");
     return 0;
 }
 '''

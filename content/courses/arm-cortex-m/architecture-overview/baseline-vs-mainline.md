@@ -21,8 +21,8 @@ int main(void) {
     // Part number: 0xC20 = M0, 0xC60 = M0+, 0xD20 = M3, 0xD24 = M4,
     //              0xD21 = M33, 0xD22 = M23, 0xD23 = M55
 
-    printf("Architecture: 0x%X\\n", arch);
-    printf("Part number: 0x%X\\n", part);
+    printf("Architecture: 0x%X\n", arch);
+    printf("Part number: 0x%X\n", part);
 
     // Determine Baseline vs Mainline based on features
     // (Baseline has no MPU, no FPU, limited instruction set)

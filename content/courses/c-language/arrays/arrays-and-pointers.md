@@ -15,13 +15,13 @@ int main(void) {
 
     // Array indexing vs pointer arithmetic
     for (int i = 0; i < 5; i++) {
-        printf("arr[%d] = %d, *(arr + %d) = %d, p[%d] = %d\\n",
+        printf("arr[%d] = %d, *(arr + %d) = %d, p[%d] = %d\n",
                i, arr[i], i, *(arr + i), i, p[i]);
     }
 
     // sizeof array vs sizeof pointer
-    printf("sizeof(arr) = %zu\\n", sizeof(arr));
-    printf("sizeof(p) = %zu\\n", sizeof(p));
+    printf("sizeof(arr) = %zu\n", sizeof(arr));
+    printf("sizeof(p) = %zu\n", sizeof(p));
 
     return 0;
 }

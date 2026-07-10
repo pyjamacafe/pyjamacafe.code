@@ -18,13 +18,13 @@ uint32_t callee_saved_demo(uint32_t a, uint32_t b) {
     uint32_t tmp4 = tmp3 / 2;
 
     __asm volatile(
-        "PUSH {R4-R7}          \\n\\t"
-        "MOV R4, %0            \\n\\t"
-        "MOV R5, %1            \\n\\t"
-        "ADD R6, R4, R5        \\n\\t"
-        "LSL R7, R6, #2        \\n\\t"
-        "MOV %0, R7            \\n\\t"
-        "POP {R4-R7}           \\n\\t"
+        "PUSH {R4-R7}          \n\\t"
+        "MOV R4, %0            \n\\t"
+        "MOV R5, %1            \n\\t"
+        "ADD R6, R4, R5        \n\\t"
+        "LSL R7, R6, #2        \n\\t"
+        "MOV %0, R7            \n\\t"
+        "POP {R4-R7}           \n\\t"
         : "+r" (a)
         : "r" (b)
         : "r4", "r5", "r6", "r7"
@@ -42,31 +42,31 @@ int use_scratch_registers(int x) {
 }
 
 int main(void) {
-    printf("Callee-Saved vs Caller-Saved Registers\\n\\n");
+    printf("Callee-Saved vs Caller-Saved Registers\n\n");
 
-    printf("Caller-saved (R0-R3, R12):\\n");
-    printf("  - Saved by the CALLER before function call\\n");
-    printf("  - Used for arguments and scratch values\\n");
-    printf("  - Compiler saves them if values needed after call\\n\\n");
+    printf("Caller-saved (R0-R3, R12):\n");
+    printf("  - Saved by the CALLER before function call\n");
+    printf("  - Used for arguments and scratch values\n");
+    printf("  - Compiler saves them if values needed after call\n\n");
 
     int result = use_scratch_registers(10);
-    printf("  use_scratch_registers(10) = %d\\n\\n", result);
+    printf("  use_scratch_registers(10) = %d\n\n", result);
 
-    printf("Callee-saved (R4-R11):\\n");
-    printf("  - Saved by the CALLEE if modified\\n");
-    printf("  - Preserved across function calls\\n");
-    printf("  - Used for local variables and temporaries\\n\n");
+    printf("Callee-saved (R4-R11):\n");
+    printf("  - Saved by the CALLEE if modified\n");
+    printf("  - Preserved across function calls\n");
+    printf("  - Used for local variables and temporaries\n\n");
 
     uint32_t calc = callee_saved_demo(5, 7);
-    printf("  callee_saved_demo(5, 7) = %u\\n\\n", calc);
+    printf("  callee_saved_demo(5, 7) = %u\n\n", calc);
 
-    printf("Register classification:\\n");
-    printf("  R0-R3:    Argument/scratch (caller-saved)\\n");
-    printf("  R4-R11:   Variable (callee-saved)\\n");
-    printf("  R12 (IP): Intra-call scratch (caller-saved)\\n");
-    printf("  R13 (SP): Stack pointer (callee-saved)\\n");
-    printf("  R14 (LR): Link register (caller-saved)\\n");
-    printf("  R15 (PC): Program counter\\n");
+    printf("Register classification:\n");
+    printf("  R0-R3:    Argument/scratch (caller-saved)\n");
+    printf("  R4-R11:   Variable (callee-saved)\n");
+    printf("  R12 (IP): Intra-call scratch (caller-saved)\n");
+    printf("  R13 (SP): Stack pointer (callee-saved)\n");
+    printf("  R14 (LR): Link register (caller-saved)\n");
+    printf("  R15 (PC): Program counter\n");
 
     return 0;
 }

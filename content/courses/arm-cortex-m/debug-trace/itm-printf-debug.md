@@ -37,7 +37,7 @@ void itm_printf(const char *str) {
 
 int main(void) {
     itm_init();
-    itm_printf("Hello from ITM!\\n");
+    itm_printf("Hello from ITM!\n");
     return 0;
 }
 '''

@@ -22,7 +22,7 @@ int compute_squares(int a, int b) {
 
 int main(void) {
     int result = compute_squares(3, 4);
-    printf("3^2 + 4^2 = %d\\n", result);
+    printf("3^2 + 4^2 = %d\n", result);
 
     // square() cannot be called here if it were in another file
     // (because it's static)

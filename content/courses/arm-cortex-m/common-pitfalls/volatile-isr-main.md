@@ -28,7 +28,7 @@ int main(void) {
         break;  // Prevent infinite loop in simulation
     }
 
-    printf("Flag detected!\\n");
+    printf("Flag detected!\n");
     return 0;
 }
 '''

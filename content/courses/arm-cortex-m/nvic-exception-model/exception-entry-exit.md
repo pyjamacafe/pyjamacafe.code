@@ -23,28 +23,28 @@ typedef struct {
 } exception_stack_frame_t;
 
 void print_stack_frame(const exception_stack_frame_t *frame) {
-    printf("Exception Stack Frame:\\n");
-    printf("  R0  = 0x%08X\\n", frame->r0);
-    printf("  R1  = 0x%08X\\n", frame->r1);
-    printf("  R2  = 0x%08X\\n", frame->r2);
-    printf("  R3  = 0x%08X\\n", frame->r3);
-    printf("  R12 = 0x%08X\\n", frame->r12);
-    printf("  LR  = 0x%08X\\n", frame->lr);
-    printf("  PC  = 0x%08X\\n", frame->return_address);
-    printf("  xPSR= 0x%08X\\n", frame->xpsr);
+    printf("Exception Stack Frame:\n");
+    printf("  R0  = 0x%08X\n", frame->r0);
+    printf("  R1  = 0x%08X\n", frame->r1);
+    printf("  R2  = 0x%08X\n", frame->r2);
+    printf("  R3  = 0x%08X\n", frame->r3);
+    printf("  R12 = 0x%08X\n", frame->r12);
+    printf("  LR  = 0x%08X\n", frame->lr);
+    printf("  PC  = 0x%08X\n", frame->return_address);
+    printf("  xPSR= 0x%08X\n", frame->xpsr);
 }
 
 void analyze_lr_value(uint32_t exc_return) {
-    printf("\\nEXC_RETURN analysis (0x%08X):\\n", exc_return);
-    printf("  Bit 31 (must be 1): %lu\\n", (exc_return >> 31) & 1);
-    printf("  Bit 4  (mode):     %lu  (%s)\\n",
+    printf("\nEXC_RETURN analysis (0x%08X):\n", exc_return);
+    printf("  Bit 31 (must be 1): %lu\n", (exc_return >> 31) & 1);
+    printf("  Bit 4  (mode):     %lu  (%s)\n",
            (exc_return >> 4) & 1,
            ((exc_return >> 4) & 1) ? "Handler" : "Thread");
-    printf("  Bit 3  (SP):       %lu  (%s)\\n",
+    printf("  Bit 3  (SP):       %lu  (%s)\n",
            (exc_return >> 3) & 1,
            ((exc_return >> 3) & 1) ? "PSP" : "MSP");
-    printf("  Bit 2  (FPCA):     %lu\\n", (exc_return >> 2) & 1);
-    printf("  Bit 0  (must be 1): %lu\\n", exc_return & 1);
+    printf("  Bit 2  (FPCA):     %lu\n", (exc_return >> 2) & 1);
+    printf("  Bit 0  (must be 1): %lu\n", exc_return & 1);
 }
 
 int main(void) {

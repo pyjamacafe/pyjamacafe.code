@@ -28,7 +28,7 @@ vector_entry_t const vector_table[16 + 2] __attribute__((section(".isr_vector"))
 
 void map_irq_to_handler(uint32_t irq_num, const char *handler) {
     uint32_t vector_offset = 16 + irq_num;
-    printf("IRQ%u -> VT[%u] -> %s\\n", irq_num, vector_offset, handler);
+    printf("IRQ%u -> VT[%u] -> %s\n", irq_num, vector_offset, handler);
 }
 
 const char* irq_handlers[32];
@@ -40,16 +40,16 @@ void register_handler(uint32_t irq_num, const char *name) {
 }
 
 void print_vector_mappings(void) {
-    printf("\\nSystem exception vectors:\\n");
-    printf("  [0]  Initial SP value\\n");
-    printf("  [1]  Reset\\n");
-    printf("  [2]  NMI\\n");
-    printf("  [3]  HardFault\\n");
-    printf("  [11] SVCall\\n");
-    printf("  [14] PendSV\\n");
-    printf("  [15] SysTick\\n");
+    printf("\nSystem exception vectors:\n");
+    printf("  [0]  Initial SP value\n");
+    printf("  [1]  Reset\n");
+    printf("  [2]  NMI\n");
+    printf("  [3]  HardFault\n");
+    printf("  [11] SVCall\n");
+    printf("  [14] PendSV\n");
+    printf("  [15] SysTick\n");
 
-    printf("\\nExternal interrupt vectors (offset 16):\\n");
+    printf("\nExternal interrupt vectors (offset 16):\n");
     for (int i = 0; i < 32; i++) {
         if (irq_handlers[i] != NULL) {
             map_irq_to_handler(i, irq_handlers[i]);
@@ -64,18 +64,18 @@ int main(void) {
 
     print_vector_mappings();
 
-    printf("\\nTotal IRQs mapped: ");
+    printf("\nTotal IRQs mapped: ");
     int count = 0;
     for (int i = 0; i < 32; i++) {
         if (irq_handlers[i]) count++;
     }
-    printf("%d\\n", count);
+    printf("%d\n", count);
 
     return 0;
 }
 
-void IRQ0_Handler(void) { printf("IRQ0 handled\\n"); }
-void IRQ1_Handler(void) { printf("IRQ1 handled\\n"); }
+void IRQ0_Handler(void) { printf("IRQ0 handled\n"); }
+void IRQ1_Handler(void) { printf("IRQ1 handled\n"); }
 void Default_Handler(void) { while (1); }
 '''
 

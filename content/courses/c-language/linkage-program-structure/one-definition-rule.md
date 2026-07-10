@@ -21,10 +21,10 @@ void increment(void) {
 }
 
 int main(void) {
-    printf("Before: %d\\n", shared_value);
+    printf("Before: %d\n", shared_value);
     increment();
     increment();
-    printf("After: %d\\n", shared_value);
+    printf("After: %d\n", shared_value);
     return 0;
 }
 '''

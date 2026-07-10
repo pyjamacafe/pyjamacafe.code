@@ -20,14 +20,14 @@ void show_scopes(void) {
 
     {
         int inner = 5;  // Innermost block scope
-        printf("Inner block: %d\\n", inner);
+        printf("Inner block: %d\n", inner);
     }
 
-    printf("Auto: %d, Static local: %d\\n", auto_var, static_local);
+    printf("Auto: %d, Static local: %d\n", auto_var, static_local);
 }
 
 int main(void) {
-    printf("Global: %d, File static: %d\\n", global, file_static);
+    printf("Global: %d, File static: %d\n", global, file_static);
     show_scopes();
     return 0;
 }

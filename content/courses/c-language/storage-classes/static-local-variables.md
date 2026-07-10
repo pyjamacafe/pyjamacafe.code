@@ -17,7 +17,7 @@ int counter(void) {
 
 int main(void) {
     for (int i = 0; i < 5; i++) {
-        printf("Call %d: %d\\n", i + 1, counter());
+        printf("Call %d: %d\n", i + 1, counter());
     }
     return 0;
 }

@@ -28,7 +28,7 @@ void config_sau_region(uint32_t num, uint32_t base, uint32_t limit) {
     SAU_RNR = num;
     SAU_RBAR = base;
     SAU_RLAR = limit | 1;
-    printf("SAU region %u: 0x%08X - 0x%08X\\n", num, base, limit);
+    printf("SAU region %u: 0x%08X - 0x%08X\n", num, base, limit);
 }
 
 void setup_secure_mpu(void) {
@@ -44,7 +44,7 @@ void setup_nonsecure_mpu(void) {
 }
 
 int main(void) {
-    printf("SAU: Defining non-secure callable and non-secure regions\\n");
+    printf("SAU: Defining non-secure callable and non-secure regions\n");
     config_sau_region(0, 0x00200000, 0x00200FFF);
     config_sau_region(1, 0x20000000, 0x2000FFFF);
 
@@ -55,7 +55,7 @@ int main(void) {
     __asm volatile("DSB" ::: "memory");
     __asm volatile("ISB" ::: "memory");
 
-    printf("Secure and Non-Secure MPU configured\\n");
+    printf("Secure and Non-Secure MPU configured\n");
     return 0;
 }
 '''

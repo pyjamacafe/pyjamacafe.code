@@ -36,7 +36,7 @@ void relocate_vector_table(uint32_t new_base) {
     __asm volatile("DSB" ::: "memory");
     __asm volatile("ISB" ::: "memory");
 
-    printf("Vector table relocated from 0x%08X to 0x%08X\\n",
+    printf("Vector table relocated from 0x%08X to 0x%08X\n",
            old_base, (uint32_t)relocated_vector_table & 0xFFFFFF80);
 }
 
@@ -53,24 +53,24 @@ handler_t read_vector_entry(uint32_t index) {
 int main(void) {
     uint32_t original_vtor = get_vector_table_address();
 
-    printf("VTOR Vector Table Relocation\\n\\n");
-    printf("Original vector table at: 0x%08X\\n", original_vtor);
+    printf("VTOR Vector Table Relocation\n\n");
+    printf("Original vector table at: 0x%08X\n", original_vtor);
 
     for (int i = 0; i < 4; i++) {
-        printf("  Entry %u: 0x%08X\\n", i,
+        printf("  Entry %u: 0x%08X\n", i,
                (uint32_t)read_vector_entry(i));
     }
 
     relocate_vector_table(0x20000000);
-    printf("\\nAfter relocation:\\n");
-    printf("  VTOR: 0x%08X\\n", SCB_VTOR);
+    printf("\nAfter relocation:\n");
+    printf("  VTOR: 0x%08X\n", SCB_VTOR);
 
     for (int i = 0; i < 4; i++) {
-        printf("  Entry %u: 0x%08X\\n", i,
+        printf("  Entry %u: 0x%08X\n", i,
                (uint32_t)read_vector_entry(i));
     }
 
-    printf("\\nVTOR is %s aligned\\n",
+    printf("\nVTOR is %s aligned\n",
            (SCB_VTOR & 0x7F) ? "NOT" : "128-byte");
 
     return 0;

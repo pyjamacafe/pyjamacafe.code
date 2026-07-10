@@ -23,8 +23,8 @@ int multiply(int a, int b) {
 #endif  // MY_HEADER_H
 
 int main(void) {
-    printf("Version: %d\\n", VERSION);
-    printf("5 * 7 = %d\\n", multiply(5, 7));
+    printf("Version: %d\n", VERSION);
+    printf("5 * 7 = %d\n", multiply(5, 7));
 
     // If this header were included a second time,
     // the #ifndef guard would prevent redefinition.

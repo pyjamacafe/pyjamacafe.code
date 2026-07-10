@@ -22,7 +22,7 @@ void write_fpscr(unsigned int value) {
 int main(void) {
     // Default FPSCR
     unsigned int fpscr = read_fpscr();
-    printf("FPSCR = 0x%08X\\n", fpscr);
+    printf("FPSCR = 0x%08X\n", fpscr);
 
     // Set rounding mode to round towards zero (bits 23-22 = 01)
     fpscr = (fpscr & ~(3 << 22)) | (1 << 22);
@@ -30,12 +30,12 @@ int main(void) {
 
     // Trigger an inexact exception
     float result = 1.0f / 3.0f;
-    printf("Result = %f\\n", result);
+    printf("Result = %f\n", result);
 
     // Check cumulative exception flags (bits 0-4)
     fpscr = read_fpscr();
     if (fpscr & (1 << 3)) {
-        printf("Inexact exception flag set\\n");
+        printf("Inexact exception flag set\n");
     }
 
     return 0;

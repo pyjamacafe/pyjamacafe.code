@@ -19,7 +19,7 @@ void demo_scope(void) {
     local++;
     global++;
 
-    printf("local=%d, persist=%d, global=%d\\n", local, persist, global);
+    printf("local=%d, persist=%d, global=%d\n", local, persist, global);
 }
 
 int main(void) {

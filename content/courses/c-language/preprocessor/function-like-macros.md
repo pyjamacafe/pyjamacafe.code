@@ -16,12 +16,12 @@ initial_code = '''#include <stdio.h>
 int main(void) {
     int a = 5, b = 8;
 
-    printf("SQUARE(%d) = %d\\n", a, SQUARE(a));
-    printf("MAX(%d, %d) = %d\\n", a, b, MAX(a, b));
-    printf("MIN(%d, %d) = %d\\n", a, b, MIN(a, b));
+    printf("SQUARE(%d) = %d\n", a, SQUARE(a));
+    printf("MAX(%d, %d) = %d\n", a, b, MAX(a, b));
+    printf("MIN(%d, %d) = %d\n", a, b, MIN(a, b));
 
     // Demonstrate the risk: SQUARE(a + 1) without parentheses
-    printf("SQUARE(%d + %d) = %d\\n", a, 1, SQUARE(a + 1));
+    printf("SQUARE(%d + %d) = %d\n", a, 1, SQUARE(a + 1));
 
     return 0;
 }

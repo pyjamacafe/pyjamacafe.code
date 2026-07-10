@@ -14,13 +14,13 @@ int main(void) {
     for (int i = 1; i <= 10; i++) {
         printf("%d ", i);
     }
-    printf("\\n");
+    printf("\n");
 
     // Count down from 10 to 1
     for (int j = 10; j >= 1; j--) {
         printf("%d ", j);
     }
-    printf("\\n");
+    printf("\n");
 
     return 0;
 }
@@ -28,7 +28,7 @@ int main(void) {
 
 [[test_cases]]
 input = ''
-expected = '1 2 3 4 5 6 7 8 9 10 \\n 10 9 8 7 6 5 4 3 2 1'
+expected = '1 2 3 4 5 6 7 8 9 10 \n 10 9 8 7 6 5 4 3 2 1'
 +++
 
 ## Problem Statement

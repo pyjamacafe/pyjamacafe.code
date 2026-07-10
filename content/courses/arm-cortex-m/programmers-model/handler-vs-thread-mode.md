@@ -16,8 +16,8 @@ void svcall_handler(void) {
     uint32_t xpsr;
 
     __asm volatile(
-        "MRS %0, CONTROL \\n\\t"
-        "MRS %1, xPSR    \\n\\t"
+        "MRS %0, CONTROL \n\\t"
+        "MRS %1, xPSR    \n\\t"
         : "=r" (control), "=r" (xpsr)
     );
 
@@ -25,23 +25,23 @@ void svcall_handler(void) {
     uint32_t npriv = control & 1;
     uint32_t spsel = (control >> 1) & 1;
 
-    printf("  Inside handler - Exception: %u\\n", exception_num);
-    printf("  CONTROL: nPRIV=%u, SPSEL=%u\\n", npriv, spsel);
-    printf("  Privileged: %s\\n", npriv ? "NO (unprivileged)" : "YES (privileged)");
+    printf("  Inside handler - Exception: %u\n", exception_num);
+    printf("  CONTROL: nPRIV=%u, SPSEL=%u\n", npriv, spsel);
+    printf("  Privileged: %s\n", npriv ? "NO (unprivileged)" : "YES (privileged)");
 }
 
 __attribute__((naked)) void SVC_Handler(void) {
     __asm volatile(
-        "TST LR, #4        \\n\\t"
-        "ITE EQ             \\n\\t"
-        "MRSEQ R0, MSP      \\n\\t"
-        "MRSNE R0, PSP      \\n\\t"
-        "B svcall_handler   \\n\\t"
+        "TST LR, #4        \n\\t"
+        "ITE EQ             \n\\t"
+        "MRSEQ R0, MSP      \n\\t"
+        "MRSNE R0, PSP      \n\\t"
+        "B svcall_handler   \n\\t"
     );
 }
 
 void trigger_svc(void) {
-    printf("Before SVC:\\n");
+    printf("Before SVC:\n");
 
     __asm volatile("SVC 0");
 }

@@ -22,7 +22,7 @@ int main(void) {
 
 cleanup:
     // Cleanup code runs whether or not goto was taken
-    printf("Cleanup executed\\n");
+    printf("Cleanup executed\n");
 
     return 0;
 }

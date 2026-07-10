@@ -41,14 +41,14 @@ uint32_t is_active(uint32_t irq) {
 }
 
 void print_nvic_state(const char *label, uint32_t irq) {
-    printf("%s IRQ%u: pending=%u active=%u\\n",
+    printf("%s IRQ%u: pending=%u active=%u\n",
            label, irq, is_pending(irq), is_active(irq));
 }
 
 int main(void) {
-    printf("NVIC Pending and Active State Management\\n\\n");
+    printf("NVIC Pending and Active State Management\n\n");
 
-    printf("Test: Pend IRQ5, then clear it\\n\\n");
+    printf("Test: Pend IRQ5, then clear it\n\n");
 
     print_nvic_state("Before:", 5);
 
@@ -58,17 +58,17 @@ int main(void) {
     clear_pending(5);
     print_nvic_state("After clear_pending:", 5);
 
-    printf("\\nTest: Multiple pends\\n");
+    printf("\nTest: Multiple pends\n");
     set_pending(0);
     set_pending(1);
     set_pending(2);
-    printf("ISPR0 after pending 0,1,2: 0x%08X\\n", NVIC_ISPR0);
+    printf("ISPR0 after pending 0,1,2: 0x%08X\n", NVIC_ISPR0);
 
     clear_pending(1);
-    printf("ISPR0 after clearing IRQ1: 0x%08X\\n", NVIC_ISPR0);
+    printf("ISPR0 after clearing IRQ1: 0x%08X\n", NVIC_ISPR0);
 
-    printf("\\nActive status should be 0 in thread mode:\\n");
-    printf("IABR0: 0x%08X\\n", NVIC_IABR0);
+    printf("\nActive status should be 0 in thread mode:\n");
+    printf("IABR0: 0x%08X\n", NVIC_IABR0);
 
     return 0;
 }

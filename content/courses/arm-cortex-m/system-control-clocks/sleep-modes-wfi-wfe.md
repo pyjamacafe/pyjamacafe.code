@@ -17,9 +17,9 @@ initial_code = '''// Implement sleep modes using WFI and WFE
 
 void sleep_now(uint32_t use_wfe) {
     __asm volatile(
-        "DSB          \\n\\t"
-        "WFI          \\n\\t"
-        "ISB          \\n\\t"
+        "DSB          \n\\t"
+        "WFI          \n\\t"
+        "ISB          \n\\t"
         : : : "memory"
     );
 }
@@ -27,9 +27,9 @@ void sleep_now(uint32_t use_wfe) {
 void deep_sleep(void) {
     SCB_SCR |= SCB_SCR_SLEEPDEEP;
     __asm volatile(
-        "DSB          \\n\\t"
-        "WFI          \\n\\t"
-        "ISB          \\n\\t"
+        "DSB          \n\\t"
+        "WFI          \n\\t"
+        "ISB          \n\\t"
     : : : "memory");
 }
 
@@ -42,28 +42,28 @@ void sleep_on_exit_disable(void) {
 }
 
 int main(void) {
-    printf("Cortex-M Sleep Mode Control\\n\\n");
+    printf("Cortex-M Sleep Mode Control\n\n");
 
-    printf("SCB_SCR default: 0x%08X\\n", SCB_SCR);
+    printf("SCB_SCR default: 0x%08X\n", SCB_SCR);
 
-    printf("\\nSleep modes:\\n");
-    printf("  Normal sleep:  CPU clock gated, fast wakeup\\n");
-    printf("  Deep sleep:    Entire chip power-gated, slow wakeup\\n");
-    printf("  Sleep-on-exit: MCU sleeps after ISR (no thread mode exec)\\n");
+    printf("\nSleep modes:\n");
+    printf("  Normal sleep:  CPU clock gated, fast wakeup\n");
+    printf("  Deep sleep:    Entire chip power-gated, slow wakeup\n");
+    printf("  Sleep-on-exit: MCU sleeps after ISR (no thread mode exec)\n");
 
     sleep_on_exit_enable();
-    printf("\\nSleep-on-exit enabled\\n");
+    printf("\nSleep-on-exit enabled\n");
 
     sleep_now(0);
-    printf("Woke from WFI (event/interrupt)\\n");
+    printf("Woke from WFI (event/interrupt)\n");
 
     deep_sleep();
-    printf("Woke from deep sleep\\n");
+    printf("Woke from deep sleep\n");
 
     sleep_on_exit_disable();
-    printf("Sleep-on-exit disabled\\n");
+    printf("Sleep-on-exit disabled\n");
 
-    printf("\\nSCB_SCR: 0x%08X\\n", SCB_SCR);
+    printf("\nSCB_SCR: 0x%08X\n", SCB_SCR);
     return 0;
 }
 '''

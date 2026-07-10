@@ -15,13 +15,13 @@ int main(void) {
 
     // Compare signed with unsigned
     if (s < u) {
-        printf("s is less than u\\n");
+        printf("s is less than u\n");
     } else {
-        printf("s is NOT less than u (surprising!)\\n");
+        printf("s is NOT less than u (surprising!)\n");
     }
 
     // Print s as unsigned
-    printf("s as unsigned: %u\\n", s);
+    printf("s as unsigned: %u\n", s);
 
     return 0;
 }

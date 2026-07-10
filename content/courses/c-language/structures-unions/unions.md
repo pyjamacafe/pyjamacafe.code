@@ -19,13 +19,13 @@ int main(void) {
     union data d;
 
     d.i = 42;
-    printf("As int: %d\\n", d.i);
+    printf("As int: %d\n", d.i);
 
     d.f = 3.14f;  // Overwrites the same memory
-    printf("As float: %f\\n", d.f);
-    printf("As int after write: %d\\n", d.i);  // Garbage — bytes reinterpreted
+    printf("As float: %f\n", d.f);
+    printf("As int after write: %d\n", d.i);  // Garbage — bytes reinterpreted
 
-    printf("Size of union: %zu\\n", sizeof(union data));
+    printf("Size of union: %zu\n", sizeof(union data));
 
     return 0;
 }

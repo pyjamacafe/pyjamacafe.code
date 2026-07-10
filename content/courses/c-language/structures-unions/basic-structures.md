@@ -24,8 +24,8 @@ int main(void) {
 
     struct student s2 = {1002, "Bob", 3.5f};
 
-    printf("Student 1: %d, %s, %.1f\\n", s1.id, s1.name, s1.gpa);
-    printf("Student 2: %d, %s, %.1f\\n", s2.id, s2.name, s2.gpa);
+    printf("Student 1: %d, %s, %.1f\n", s1.id, s1.name, s1.gpa);
+    printf("Student 2: %d, %s, %.1f\n", s2.id, s2.name, s2.gpa);
 
     return 0;
 }

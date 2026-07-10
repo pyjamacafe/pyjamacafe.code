@@ -16,20 +16,20 @@ __attribute__((naked)) void SVC_Handler(void) {
     // Extract the SVC number from the stacked PC
     // The SVC instruction is 2 bytes: 0xDFxx where xx is the number
     __asm(
-        "TST LR, #4\\n"       // Check which stack was used
-        "ITE EQ\\n"
-        "MRSEQ R0, MSP\\n"
-        "MRSNE R0, PSP\\n"
-        "LDR R0, [R0, #24]\\n" // Load stacked PC
-        "LDRB R0, [R0, #-2]\\n" // Load SVC number
-        "BX LR\\n"
+        "TST LR, #4\n"       // Check which stack was used
+        "ITE EQ\n"
+        "MRSEQ R0, MSP\n"
+        "MRSNE R0, PSP\n"
+        "LDR R0, [R0, #24]\n" // Load stacked PC
+        "LDRB R0, [R0, #-2]\n" // Load SVC number
+        "BX LR\n"
     );
 }
 
 int main(void) {
-    printf("Triggering SVC...\\n");
+    printf("Triggering SVC...\n");
     __asm("SVC #1");
-    printf("Returned from SVC\\n");
+    printf("Returned from SVC\n");
     return 0;
 }
 '''

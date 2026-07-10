@@ -17,7 +17,7 @@ void sw_trigger_irq(uint32_t irq_num) {
     NVIC_STIR = irq_num & 0x1FF;
     __asm volatile("DSB" ::: "memory");
 
-    printf("Software-triggered IRQ%u\\n", irq_num);
+    printf("Software-triggered IRQ%u\n", irq_num);
 }
 
 void nvic_set_pending(uint32_t irq_num) {
@@ -27,23 +27,23 @@ void nvic_set_pending(uint32_t irq_num) {
 }
 
 int main(void) {
-    printf("Software Trigger Interrupt Register (STIR)\\n\\n");
+    printf("Software Trigger Interrupt Register (STIR)\n\n");
 
-    printf("Method 1: Writing to ISPR (Set Pending Register)\\n");
+    printf("Method 1: Writing to ISPR (Set Pending Register)\n");
     nvic_set_pending(0);
-    printf("  IRQ0 pended via ISPR\\n\\n");
+    printf("  IRQ0 pended via ISPR\n\n");
 
-    printf("Method 2: Writing to STIR (more efficient)\\n");
+    printf("Method 2: Writing to STIR (more efficient)\n");
     sw_trigger_irq(5);
     sw_trigger_irq(10);
 
-    printf("\\nComparison:\\n");
-    printf("  ISPR: requires bitmask calculation per IRQ\\n");
-    printf("  STIR: accepts IRQ number directly (0-479)\\n");
-    printf("  STIR is single-register, single-write operation\\n");
+    printf("\nComparison:\n");
+    printf("  ISPR: requires bitmask calculation per IRQ\n");
+    printf("  STIR: accepts IRQ number directly (0-479)\n");
+    printf("  STIR is single-register, single-write operation\n");
 
     volatile uint32_t ispr0 = *((volatile uint32_t *)0xE000E200);
-    printf("\\nISPR0: 0x%08X\\n", ispr0);
+    printf("\nISPR0: 0x%08X\n", ispr0);
 
     return 0;
 }

@@ -26,11 +26,11 @@ int main(void) {
 
     // Reverse bits in a 32-bit word
     unsigned int reversed = __RBIT(0xF0F0F0F0);
-    printf("RBIT(0xF0F0F0F0) = 0x%08X\\n", reversed);
+    printf("RBIT(0xF0F0F0F0) = 0x%08X\n", reversed);
 
     // Count leading zeros
     unsigned int leading = __CLZ(0x00FFFFFF);
-    printf("CLZ(0x00FFFFFF) = %u\\n", leading);
+    printf("CLZ(0x00FFFFFF) = %u\n", leading);
 
     return 0;
 }

@@ -17,7 +17,7 @@ int main(void) {
     float radius = 5.0f;
     float area = PI * radius * radius;
 
-    printf("Area: %.2f\\n", area);
+    printf("Area: %.2f\n", area);
 
     // Pointer to const data
     const int data[] = {1, 2, 3};

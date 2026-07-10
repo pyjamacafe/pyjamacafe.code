@@ -24,7 +24,7 @@ int main(void) {
     for (int i = 0; i < 5; i++) {
         printf("%d ", data[i]);
     }
-    printf("\\n");
+    printf("\n");
 
     free(data);
     return 0;

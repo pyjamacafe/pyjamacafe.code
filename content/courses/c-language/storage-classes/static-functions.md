@@ -20,7 +20,7 @@ int compute(int a, int b) {
 }
 
 int main(void) {
-    printf("Result: %d\\n", compute(3, 4));
+    printf("Result: %d\n", compute(3, 4));
     return 0;
 }
 '''

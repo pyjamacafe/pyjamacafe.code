@@ -35,7 +35,7 @@ void perform_dma_transfer(void) {
 
 int main(void) {
     configure_system();
-    printf("Memory barriers used\\n");
+    printf("Memory barriers used\n");
 
     // DMB: ensures all memory accesses before the barrier are observed before those after
     // DSB: waits until all memory accesses complete (used before WFI/WFE)

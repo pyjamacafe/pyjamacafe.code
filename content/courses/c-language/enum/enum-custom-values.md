@@ -20,10 +20,10 @@ enum error_code {
 int main(void) {
     enum error_code ec = ERR_TIMEOUT;
 
-    printf("Error code: %d\\n", ec);
+    printf("Error code: %d\n", ec);
 
     // Enums can have negative values too
-    printf("All codes: %d, %d, %d, %d, %d\\n",
+    printf("All codes: %d, %d, %d, %d, %d\n",
            SUCCESS, ERR_TIMEOUT, ERR_BUSY, ERR_INVALID, ERR_UNKNOWN);
 
     return 0;

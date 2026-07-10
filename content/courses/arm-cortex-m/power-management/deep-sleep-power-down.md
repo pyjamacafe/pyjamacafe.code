@@ -23,18 +23,18 @@ typedef enum {
 void enter_sleep(void) {
     SCB_SCR &= ~SCB_SCR_SLEEPDEEP;
     __asm volatile(
-        "DSB          \\n\\t"
-        "WFI          \\n\\t"
-        "ISB          \\n\\t"
+        "DSB          \n\\t"
+        "WFI          \n\\t"
+        "ISB          \n\\t"
     : : : "memory");
 }
 
 void enter_deep_sleep(void) {
     SCB_SCR |= SCB_SCR_SLEEPDEEP;
     __asm volatile(
-        "DSB          \\n\\t"
-        "WFI          \\n\\t"
-        "ISB          \\n\\t"
+        "DSB          \n\\t"
+        "WFI          \n\\t"
+        "ISB          \n\\t"
     : : : "memory");
 }
 
@@ -44,35 +44,35 @@ void print_power_mode(power_mode_t mode) {
         "Deep sleep (main regulator off, ~10uA)",
         "Standby (backup domain only, ~1uA)"
     };
-    printf("  %s\\n", names[mode]);
+    printf("  %s\n", names[mode]);
 }
 
 int main(void) {
-    printf("Deep Sleep and Power-Down Modes\\n\\n");
+    printf("Deep Sleep and Power-Down Modes\n\n");
 
-    printf("Cortex-M power modes:\\n");
+    printf("Cortex-M power modes:\n");
     print_power_mode(SLEEP_MODE);
     print_power_mode(DEEP_SLEEP_MODE);
     print_power_mode(STANDBY_MODE);
 
-    printf("\\nDeep sleep configuration:\\n");
-    printf("  1. Set SLEEPDEEP in SCB_SCR\\n");
-    printf("  2. Configure PWR register for regulator mode\\n");
-    printf("  3. Execute DSB then WFI/WFE\\n\\n");
+    printf("\nDeep sleep configuration:\n");
+    printf("  1. Set SLEEPDEEP in SCB_SCR\n");
+    printf("  2. Configure PWR register for regulator mode\n");
+    printf("  3. Execute DSB then WFI/WFE\n\n");
 
-    printf("Wakeup sources from deep sleep:\\n");
-    printf("  - Any enabled interrupt (if clock still running)\\n");
-    printf("  - External interrupts (EXTI)\\n");
-    printf("  - RTC alarm / wakeup timer\\n");
-    printf("  - NMI (always available)\\n\\n");
+    printf("Wakeup sources from deep sleep:\n");
+    printf("  - Any enabled interrupt (if clock still running)\n");
+    printf("  - External interrupts (EXTI)\n");
+    printf("  - RTC alarm / wakeup timer\n");
+    printf("  - NMI (always available)\n\n");
 
-    printf("Testing deep sleep entry (will immediately wake):\\n");
+    printf("Testing deep sleep entry (will immediately wake):\n");
     enter_sleep();
-    printf("Woke from sleep\\n\\n");
+    printf("Woke from sleep\n\n");
 
-    printf("Entering deep sleep (MCU-dependent):\\n");
+    printf("Entering deep sleep (MCU-dependent):\n");
     enter_deep_sleep();
-    printf("Woke from deep sleep\\n");
+    printf("Woke from deep sleep\n");
 
     return 0;
 }

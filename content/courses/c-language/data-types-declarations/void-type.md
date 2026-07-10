@@ -10,7 +10,7 @@ weight = 5
 initial_code = '''#include <stdio.h>
 
 void say_hello(void) {
-    printf("Hello, world!\\n");
+    printf("Hello, world!\n");
 }
 
 int main(void) {
@@ -19,7 +19,7 @@ int main(void) {
     int x = 42;
     void *ptr = &x;
     int *ip = (int *)ptr;
-    printf("Value via void pointer: %d\\n", *ip);
+    printf("Value via void pointer: %d\n", *ip);
 
     return 0;
 }

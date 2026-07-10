@@ -28,7 +28,7 @@ void secure_memcpy(uint32_t *dst, uint32_t *src, uint32_t len) {
 
 int main(void) {
     uint32_t sum = secure_add(10, 20);
-    printf("secure_add(10, 20) = %u\\n", sum);
+    printf("secure_add(10, 20) = %u\n", sum);
 
     uint32_t src[] = {1, 2, 3, 4};
     uint32_t dst[4];
@@ -38,7 +38,7 @@ int main(void) {
     for (int i = 0; i < 4; i++) {
         printf("%u ", dst[i]);
     }
-    printf("\\n");
+    printf("\n");
 
     return 0;
 }

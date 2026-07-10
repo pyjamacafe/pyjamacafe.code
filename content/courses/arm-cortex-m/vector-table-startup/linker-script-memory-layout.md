@@ -45,43 +45,43 @@ section_t sections[] = {
 };
 
 void print_memory_map(void) {
-    printf("Memory Map:\\n");
-    printf("%-15s Origin    End       Size\\n", "Region");
-    printf("----------------------------------------\\n");
-    printf("%-15s 0x%08X 0x%08X %u KB\\n",
+    printf("Memory Map:\n");
+    printf("%-15s Origin    End       Size\n", "Region");
+    printf("----------------------------------------\n");
+    printf("%-15s 0x%08X 0x%08X %u KB\n",
            flash.name, flash.origin, flash.origin + flash.size,
            flash.size / 1024);
-    printf("%-15s 0x%08X 0x%08X %u KB\\n",
+    printf("%-15s 0x%08X 0x%08X %u KB\n",
            sram.name, sram.origin, sram.origin + sram.size,
            sram.size / 1024);
-    printf("\\nSection Layout:\\n");
-    printf("%-15s VMA        LMA        Size      Region\\n", "Section");
-    printf("----------------------------------------\\n");
+    printf("\nSection Layout:\n");
+    printf("%-15s VMA        LMA        Size      Region\n", "Section");
+    printf("----------------------------------------\n");
 
     for (int i = 0; i < 7; i++) {
         section_t *s = &sections[i];
-        printf("%-15s 0x%08X 0x%08X %-9u %s\\n",
+        printf("%-15s 0x%08X 0x%08X %-9u %s\n",
                s->name, s->vma, s->lma, s->size, s->region);
         if (s->region[0] == 'F') flash.used += s->size;
         else sram.used += s->size;
     }
 
-    printf("\\nMemory Usage:\\n");
-    printf("  FLASH: %u / %u bytes (%u%%)\\n",
+    printf("\nMemory Usage:\n");
+    printf("  FLASH: %u / %u bytes (%u%%)\n",
            flash.used, flash.size, (flash.used * 100) / flash.size);
-    printf("  SRAM:  %u / %u bytes (%u%%)\\n",
+    printf("  SRAM:  %u / %u bytes (%u%%)\n",
            sram.used, sram.size, (sram.used * 100) / sram.size);
 }
 
 int main(void) {
-    printf("Linker Script Memory Layout\\n\\n");
+    printf("Linker Script Memory Layout\n\n");
     print_memory_map();
 
-    printf("\\nKey concepts:\\n");
-    printf("  VMA = Virtual Memory Address (runtime address)\\n");
-    printf("  LMA = Load Memory Address (flash storage address)\\n");
-    printf("  .data is copied from LMA (flash) to VMA (SRAM)\\n");
-    printf("  .bss is zero-initialized at startup\\n");
+    printf("\nKey concepts:\n");
+    printf("  VMA = Virtual Memory Address (runtime address)\n");
+    printf("  LMA = Load Memory Address (flash storage address)\n");
+    printf("  .data is copied from LMA (flash) to VMA (SRAM)\n");
+    printf("  .bss is zero-initialized at startup\n");
 
     return 0;
 }

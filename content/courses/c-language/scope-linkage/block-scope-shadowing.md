@@ -16,10 +16,10 @@ int main(void) {
 
     {
         int x = 20;  // Inner block scope, shadows outer
-        printf("Inner block: %d\\n", x);
+        printf("Inner block: %d\n", x);
     }
 
-    printf("Outer block: %d\\n", x);
+    printf("Outer block: %d\n", x);
     // Access the global x using extern (not possible inside function)
     // Here, the global x is shadowed
 
@@ -29,7 +29,7 @@ int main(void) {
 
 [[test_cases]]
 input = ''
-expected = 'Inner block: 20\\nOuter block: 10'
+expected = 'Inner block: 20\nOuter block: 10'
 +++
 
 ## Problem Statement

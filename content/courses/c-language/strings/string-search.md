@@ -22,9 +22,9 @@ int main(void) {
 
     int pos = find_char(text, target);
     if (pos >= 0) {
-        printf("Found '%c' at position %d\\n", target, pos);
+        printf("Found '%c' at position %d\n", target, pos);
     } else {
-        printf("'%c' not found\\n", target);
+        printf("'%c' not found\n", target);
     }
 
     // Find second occurrence
@@ -32,7 +32,7 @@ int main(void) {
     for (int i = 0; text[i]; i++) {
         if (text[i] == target) count++;
     }
-    printf("'%c' appears %d times\\n", target, count);
+    printf("'%c' appears %d times\n", target, count);
 
     return 0;
 }

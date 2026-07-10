@@ -19,8 +19,8 @@ int main(void) {
 
     __asm("VMOV.F64 %0, D0" : "=w" (d0_value));
 
-    printf("S0 = %f\\n", s0_value);
-    printf("D0 = %lf\\n", d0_value);
+    printf("S0 = %f\n", s0_value);
+    printf("D0 = %lf\n", d0_value);
 
     return 0;
 }

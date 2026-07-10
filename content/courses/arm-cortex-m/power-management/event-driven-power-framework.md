@@ -37,7 +37,7 @@ void pm_register_hook(pm_hook_t hook) {
 }
 
 void pm_transition(pm_state_t new_state) {
-    printf("Power transition: %d -> %d\\n", current_state, new_state);
+    printf("Power transition: %d -> %d\n", current_state, new_state);
 
     current_state = new_state;
 
@@ -48,18 +48,18 @@ void pm_transition(pm_state_t new_state) {
     switch (new_state) {
         case PM_IDLE_SLEEP:
             SCB_SCR &= ~SCB_SCR_SLEEPDEEP;
-            __asm volatile("DSB \\n\\t WFI \\n\\t ISB" ::: "memory");
+            __asm volatile("DSB \n\\t WFI \n\\t ISB" ::: "memory");
             break;
 
         case PM_IDLE_DEEPSLEEP:
             SCB_SCR |= SCB_SCR_SLEEPDEEP;
-            __asm volatile("DSB \\n\\t WFI \\n\\t ISB" ::: "memory");
+            __asm volatile("DSB \n\\t WFI \n\\t ISB" ::: "memory");
             break;
 
         case PM_STOP:
         case PM_STANDBY:
             SCB_SCR |= SCB_SCR_SLEEPDEEP;
-            __asm volatile("DSB \\n\\t WFI \\n\\t ISB" ::: "memory");
+            __asm volatile("DSB \n\\t WFI \n\\t ISB" ::: "memory");
             break;
 
         default:
@@ -74,16 +74,16 @@ void pm_transition(pm_state_t new_state) {
 }
 
 uint32_t uart_pre_sleep(void *arg) {
-    printf("  Pre-sleep: UART TX complete check\\n");
+    printf("  Pre-sleep: UART TX complete check\n");
     return 0;
 }
 
 void uart_post_wake(void *arg) {
-    printf("  Post-wake: UART clocks restored\\n");
+    printf("  Post-wake: UART clocks restored\n");
 }
 
 int main(void) {
-    printf("Event-Driven Power Management Framework\\n\\n");
+    printf("Event-Driven Power Management Framework\n\n");
 
     pm_hook_t uart_hook = {
         .pre_sleep = uart_pre_sleep,
@@ -92,17 +92,17 @@ int main(void) {
     };
     pm_register_hook(uart_hook);
 
-    printf("Transition to idle sleep:\\n");
+    printf("Transition to idle sleep:\n");
     pm_transition(PM_IDLE_SLEEP);
-    printf("\\n");
+    printf("\n");
 
-    printf("Transition to deep sleep:\\n");
+    printf("Transition to deep sleep:\n");
     pm_transition(PM_IDLE_DEEPSLEEP);
 
-    printf("\\nFramework features:\\n");
-    printf("  - State machine with pre/post sleep hooks\\n");
-    printf("  - Peripheral-specific power callbacks\\n");
-    printf("  - Automatic WFI with mode selection\\n");
+    printf("\nFramework features:\n");
+    printf("  - State machine with pre/post sleep hooks\n");
+    printf("  - Peripheral-specific power callbacks\n");
+    printf("  - Automatic WFI with mode selection\n");
 
     return 0;
 }
