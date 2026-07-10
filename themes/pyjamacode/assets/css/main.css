@@ -1283,7 +1283,6 @@ body.sidebar-collapsed #editorPane {
   color: var(--editor-fg);
   white-space: pre-wrap;
   background-color: transparent;
-  border-bottom: 1px solid var(--border-color);
 }
 
 .terminal-input-line {
