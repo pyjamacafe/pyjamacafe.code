@@ -5,9 +5,15 @@ title = 'History of Computing'
 difficulty = 'easy'
 language = 'c'
 topic_weight = -20
-subtopic_weight = 0
+subtopic_weight = 1
 weight = 1
-initial_code = '''#include <stdio.h>
+initial_code = '''/*
+ * Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+ * All Rights Reserved.
+ *
+ * Description: Simple Hello World program demonstrating C basics.
+ */
+#include <stdio.h>
 
 int main(void) {
     printf("Hello from 2026\n");
@@ -35,21 +41,58 @@ Every modern embedded device is a direct descendant of these inventions. Your ca
 
 ===EXPLANATION===
 
-![C Origin](/images/embedded-101/mental-models/c-origin.jpeg)
-
-![1970s Computer Documentary](/images/embedded-101/mental-models/1970s-comp-documentary.jpeg)
+## Origins of C
 
 The history of computing is not a smooth linear progression — it is a series of discontinuous leaps driven by physics, war, and business. The mechanical era ended not because Babbage's designs were wrong (they were brilliant) but because精密 machining couldn't reliably produce gears to the required tolerance. The electromechanical era died when it became clear that relays would never be fast enough for complex calculations. Each era created a bottleneck that the next era's invention shattered. The transistor didn't just make computers smaller — it made them cheaper by a factor of millions, which is what made embedded systems economically viable. A vacuum-tube computer controlling a toaster would cost $200,000; a microcontroller costs $0.50.
 
 The key insight is that embedded systems are not simplifications of desktop computers — they are a return to the original computing model. The Analytical Engine was a dedicated machine designed to solve specific mathematical problems. The ENIAC was built to calculate artillery tables. The earliest computers were all "embedded" in the sense that they were built for a single purpose, housed in a single room. The general-purpose, stored-program computer (the von Neumann architecture) was the detour — it allowed one machine to do anything, but at the cost of efficiency. Embedded systems reverse this: they optimize for a single task (control a motor, read a sensor, send a packet) and strip away everything unnecessary. A modern microcontroller is closer in spirit to Babbage's mill than to a desktop CPU.
 
-References: Patterson & Hennessy, "Computer Organization and Design" RISC-V Edition, Ch. 1; Ceruzzi, "A History of Modern Computing" (MIT Press, 2003); Intel 4004 datasheet (1971); Zuse Z3 documentation (Deutsches Museum). For the mechanical era, "The Analytical Engine" by Charles Babbage (1864, reprinted by Pickering & Chatto).
+The C programming language itself has a rich history tied to this computing evolution. Developed by Dennis Ritchie at Bell Labs in the early 1970s, C originated as a successor to the B programming language (which itself descended from BCPL). C was designed with simplicity and portability in mind — providing a concise set of features and a small standard library that allowed programs to be easily transferred between different hardware platforms. Its significance cannot be overstated: the UNIX operating system was rewritten in C, and UNIX's adoption by academia and industry catapulted C to worldwide prominence. C introduced structured programming constructs — functions, loops, and conditional statements — that promoted code organization and modularity. At the same time, it provided direct memory access and manual control over hardware resources, making it uniquely suited for system-level programming, embedded systems, and operating system development. For a deeper dive, Brian Kernighan (one of Unix's inventors) discusses the history of C in the Computerphile video linked in Figure 1.
+
+<figure id="fig-1" class="fig-right">
+  <img src="/images/embedded-101/mental-models/c-origin.jpeg" alt="C Origin">
+  <figcaption><a href="#fig-1" class="fig-link">Figure 1:</a> Origin of the C programming language in computing history</figcaption>
+</figure>
+
+<figure id="fig-2" class="fig-right">
+  <img src="/images/embedded-101/mental-models/qr-comp-history-1.png" alt="QR Code for Computer History Video 1">
+  <figcaption><a href="#fig-2" class="fig-link">Figure 2:</a> QR code link to computer history documentary — https://youtu.be/qundvme1Tik</figcaption>
+</figure>
+
+<figure id="fig-3" class="fig-right">
+  <img src="/images/embedded-101/mental-models/qr-comp-history-2.png" alt="QR Code for Computer History Video 2">
+  <figcaption><a href="#fig-3" class="fig-link">Figure 3:</a> QR code link to computer history documentary — https://youtu.be/wsirYCAocZk</figcaption>
+</figure>
+
+## Influence
+
+C's influence extends far beyond its own ecosystem. Modern programming languages including C++, Java, and Python have borrowed syntax and concepts from C, making it a foundational language in computer science education. C continues to be the backbone of operating systems (Windows, macOS, Linux are largely written in C), firmware for smartphones and routers, embedded systems in automotive and medical devices, telecommunications protocols (Ethernet, TCP/IP), and game engines (Unity, Unreal Engine).
+
+<figure id="fig-4" class="fig-right">
+  <img src="/images/embedded-101/mental-models/1970s-comp-documentary.jpeg" alt="1970s Computer Documentary">
+  <figcaption><a href="#fig-4" class="fig-link">Figure 4:</a> 1970s computer systems documentary reference</figcaption>
+</figure>
+
+## Computers in 1970s
+
+The key to understanding C is learning to think like an engineer from the 1970s — someone who understood the hardware at a deep level and could look at code and infer what the CPU would do at each step. Figure 5 shows this worldview: storage has code and data that the CPU can access via address and data buses. Following instructions and manipulating stored data, the CPU performs calculations and influences the external world. This mental model is the foundation for everything that follows in embedded systems programming.
+
+## Relevence
+
+C remains an integral part of our technological landscape. Its versatility, performance, and widespread usage across various industries continue to make it a foundational language for software development, powering the technology that shapes our everyday experiences.
+
+<figure id="fig-5" class="fig-center">
+  <img src="/images/embedded-101/mental-models/1970s-world-view.jpeg" alt="1970s World View">
+  <figcaption><a href="#fig-5" class="fig-link">Figure 5:</a> How engineers in the 1970s thought about computer systems — storage containing code and data that the CPU can access</figcaption>
+</figure>
+
+References: Patterson & Hennessy, "Computer Organization and Design" RISC-V Edition, Ch. 1; Ceruzzi, "A History of Modern Computing" (MIT Press, 2003); Intel 4004 datasheet (1971); Zuse Z3 documentation (Deutsches Museum). For the mechanical era, "The Analytical Engine" by Charles Babbage (1864, reprinted by Pickering & Chatto). For C language history: "The C Programming Language" by Kernighan & Ritchie (Prentice Hall, 1978); Brian Kernighan's Computerphile interview (youtube.com/watch?v=de2Hsvxaf8M).
 
 ===QUIZ===
 
 ## Who is credited with designing the first general-purpose mechanical computer — the Analytical Engine — which included a separate processing unit (the "mill") and memory (the "store")?
 - [ ] Alan Turing
-- [ ] Charles Babbage
+- [x] Charles Babbage
 - [ ] John von Neumann
 - [ ] Konrad Zuse
 Correct: B
@@ -57,8 +100,40 @@ Explanation: Charles Babbage designed the Analytical Engine in 1837. It was neve
 
 ## What invention is widely considered the single most critical enabler of modern embedded systems?
 - [ ] The vacuum tube
-- [ ] The integrated circuit
+- [x] The integrated circuit
 - [ ] The hard disk drive
 - [ ] The graphical user interface
 Correct: B
 Explanation: The integrated circuit (invented 1958 by Jack Kilby and Robert Noyce) allowed all components of a computer — CPU, memory, I/O — to be fabricated on a single silicon die. This made it possible to manufacture complete computing systems for pennies, leading directly to the microcontroller (CPU + RAM + ROM + peripherals on one chip) and the explosion of embedded devices.
+
+## Who developed the C programming language and at which organization?
+- [ ] Brian Kernighan at MIT
+- [x] Dennis Ritchie at Bell Labs
+- [ ] Ken Thompson at Xerox PARC
+- [ ] Linus Torvalds at University of Helsinki
+Correct: B
+Explanation: Dennis Ritchie developed C at Bell Labs in the early 1970s as a successor to the B programming language. It was designed for simplicity and portability, and its development was closely tied to the UNIX operating system.
+
+## What was the significance of the Intel 4004 microprocessor released in 1971?
+- [ ] It was the first computer to use vacuum tubes
+- [ ] It was the first integrated circuit
+- [x] It was the first microprocessor — packing 2,300 transistors on a single chip at 740 kHz
+- [ ] It introduced the Harvard architecture
+Correct: C
+Explanation: The Intel 4004 was the world's first commercially available microprocessor, integrating the entire CPU onto a single chip with 2,300 transistors. This milestone paved the way for affordable computing and eventually embedded systems.
+
+## C remains relevant today because it is used in which of the following areas?
+- [ ] Only in web development
+- [x] Operating systems, firmware, embedded systems, and game engines
+- [ ] Only in academic research
+- [ ] Only in mobile app development
+Correct: B
+Explanation: C remains foundational across many industries — operating systems (Windows, macOS, Linux), firmware for smartphones and routers, embedded systems in automotive and medical devices, and game engines like Unity and Unreal Engine are all built largely in C.
+
+## What key insight about embedded systems does the chapter emphasize regarding the evolution of computing?
+- [ ] Embedded systems are simplified versions of desktop computers
+- [x] Embedded systems return to the original computing model — dedicated machines for specific tasks
+- [ ] Embedded systems were invented after desktop computers
+- [ ] Embedded systems require an operating system to function
+Correct: B
+Explanation: The chapter argues that early computers (Analytical Engine, ENIAC) were dedicated single-purpose machines — essentially "embedded" in their design. The general-purpose stored-program computer was the historical detour, and modern embedded systems reverse this by optimizing for a single task, making them closer in spirit to Babbage's mill than to a desktop CPU.

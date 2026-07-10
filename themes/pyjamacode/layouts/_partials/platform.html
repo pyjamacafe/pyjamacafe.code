@@ -10,45 +10,36 @@
   {{ $topic := index $parts 1 }}
   {{ $subtopic := index $parts 2 }}
   {{ $raw := .RawContent }}
-  {{ $hasExplanation := in $raw "===EXPLANATION===" }}
-  {{ $hasCode := in $raw "===CODE===" }}
-  {{ $hasQuiz := in $raw "===QUIZ===" }}
   {{ $challengeMarkdown := $raw }}
   {{ $explanationMarkdown := "" }}
   {{ $codesMarkdown := "" }}
   {{ $quizMarkdown := "" }}
-  {{ if and $hasExplanation $hasCode $hasQuiz }}
-    {{ $parts := split $raw "===EXPLANATION===" }}
-    {{ $challengeMarkdown = index $parts 0 }}
-    {{ $rest := index $parts 1 }}
-    {{ $codeParts := split $rest "===CODE===" }}
-    {{ $explanationMarkdown = index $codeParts 0 }}
-    {{ $quizRest := index $codeParts 1 }}
-    {{ $quizParts := split $quizRest "===QUIZ===" }}
-    {{ $codesMarkdown = index $quizParts 0 }}
-    {{ $quizMarkdown = index $quizParts 1 }}
-  {{ else if and $hasExplanation $hasCode }}
-    {{ $parts := split $raw "===EXPLANATION===" }}
-    {{ $challengeMarkdown = index $parts 0 }}
-    {{ $rest := index $parts 1 }}
-    {{ $codeParts := split $rest "===CODE===" }}
-    {{ $explanationMarkdown = index $codeParts 0 }}
-    {{ $codesMarkdown = index $codeParts 1 }}
-  {{ else if $hasExplanation }}
+  {{ if in $raw "===EXPLANATION===" }}
     {{ $parts := split $raw "===EXPLANATION===" }}
     {{ $challengeMarkdown = index $parts 0 }}
     {{ $explanationMarkdown = index $parts 1 }}
-  {{ else if $hasCode }}
-    {{ $parts := split $raw "===CODE===" }}
+  {{ end }}
+  {{ if in $challengeMarkdown "===CODE===" }}
+    {{ $parts := split $challengeMarkdown "===CODE===" }}
     {{ $challengeMarkdown = index $parts 0 }}
     {{ $codesMarkdown = index $parts 1 }}
+  {{ else if in $explanationMarkdown "===CODE===" }}
+    {{ $parts := split $explanationMarkdown "===CODE===" }}
+    {{ $explanationMarkdown = index $parts 0 }}
+    {{ $codesMarkdown = index $parts 1 }}
   {{ end }}
-  {{ if $hasQuiz }}
-    {{ if not (or $hasExplanation $hasCode) }}
-      {{ $parts := split $raw "===QUIZ===" }}
-      {{ $challengeMarkdown = index $parts 0 }}
-      {{ $quizMarkdown = index $parts 1 }}
-    {{ end }}
+  {{ if in $challengeMarkdown "===QUIZ===" }}
+    {{ $parts := split $challengeMarkdown "===QUIZ===" }}
+    {{ $challengeMarkdown = index $parts 0 }}
+    {{ $quizMarkdown = index $parts 1 }}
+  {{ else if in $explanationMarkdown "===QUIZ===" }}
+    {{ $parts := split $explanationMarkdown "===QUIZ===" }}
+    {{ $explanationMarkdown = index $parts 0 }}
+    {{ $quizMarkdown = index $parts 1 }}
+  {{ else if in $codesMarkdown "===QUIZ===" }}
+    {{ $parts := split $codesMarkdown "===QUIZ===" }}
+    {{ $codesMarkdown = index $parts 0 }}
+    {{ $quizMarkdown = index $parts 1 }}
   {{ end }}
   {{ $item := dict
     "id" .File.ContentBaseName
@@ -60,6 +51,7 @@
     "article" ($explanationMarkdown | .RenderString)
     "codes" ($codesMarkdown | .RenderString)
     "quiz" $quizMarkdown
+    "quiz2" .RawContent
     "initial_code" .Params.initial_code
     "test_cases" .Params.test_cases
     "topic" $topic
@@ -226,3 +218,9 @@
     <button id="resetConfirmNo" class="btn btn-outline-secondary w-100" value="cancel">Cancel</button>
   </form>
 </dialog>
+
+<!-- Image zoom modal -->
+<div id="imageZoomOverlay" class="img-zoom-overlay" style="display:none" onclick="document.getElementById('imageZoomOverlay').style.display='none'">
+  <span class="img-zoom-close" onclick="document.getElementById('imageZoomOverlay').style.display='none'">&times;</span>
+  <img id="imageZoomImg" class="img-zoom-img" src="" alt="">
+</div>

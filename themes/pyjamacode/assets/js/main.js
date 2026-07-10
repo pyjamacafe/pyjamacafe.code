@@ -78,6 +78,7 @@ let submissions = {};
 let notes = {};
 let bookmarks = {};
 let unsavedFiles = {};
+let quizResults = {};
 let codeMirror = null;
 let notesCodeMirror = null;
 let saveTimeout = null;
@@ -110,6 +111,13 @@ function init() {
 
   try {
     questions = JSON.parse(problemDataEl.textContent);
+    questions.forEach((q) => {
+      if ((!q.quiz || !q.quiz.trim()) && q.quiz2) {
+        const m = q.quiz2.match(/===QUIZ===\n([\s\S]*)$/);
+        if (m) q.quiz = m[1].trim();
+      }
+      delete q.quiz2;
+    });
   } catch (e) {
     console.error('Failed to parse problem data:', e);
     questions = [];
@@ -121,6 +129,7 @@ function init() {
   loadSubmissions();
   loadNotes();
   loadBookmarks();
+  try { const qr = localStorage.getItem('pyjamacode-quiz-results'); if (qr) quizResults = JSON.parse(qr) || {}; } catch (e) {}
   initCodeMirror();
   initNotesCodeMirror();
   renderQuestionList();
@@ -1021,7 +1030,11 @@ function selectQuestion(id) {
 
   // Set up tabs
   const hasArticle = question.article && question.article.trim().length > 0;
-  const hasQuiz = question.quiz && question.quiz.trim().length > 0;
+  let quizRaw = question.quiz;
+  if (!quizRaw || !quizRaw.trim()) {
+    quizRaw = question._raw_quiz;
+  }
+  const hasQuiz = quizRaw && quizRaw.trim().length > 0;
   if (tabArticle) {
     tabArticle.classList.toggle('d-none', !hasArticle);
   }
@@ -1034,10 +1047,14 @@ function selectQuestion(id) {
 
   questionContentEl.innerHTML = question.content;
   enhanceCodeBlocks(questionContentEl);
+  initImageZoom(questionContentEl);
+  embedYouTubeLinks(questionContentEl);
   initVimeoPlayers(questionContentEl);
   if (articleContentEl) {
     articleContentEl.innerHTML = hasArticle ? question.article : '';
     enhanceCodeBlocks(articleContentEl);
+    initImageZoom(articleContentEl);
+    embedYouTubeLinks(articleContentEl);
     initVimeoPlayers(articleContentEl);
   }
 
@@ -1412,7 +1429,8 @@ function parseQuizData(raw) {
       if (/^-\s*\[.\]/.test(line)) {
         const marker = line[3];
         const text = line.slice(5).trim();
-        options.push({ letter: marker, text });
+        const letters = 'ABCDEFGH';
+        options.push({ letter: letters[optIdx] || '', text });
         if (marker.toUpperCase() === 'X') correct = optIdx;
         optIdx++;
       } else if (/^Correct:\s*([A-D])/i.test(line)) {
@@ -1429,29 +1447,54 @@ function parseQuizData(raw) {
 function renderQuiz() {
   if (!quizContentEl) return;
   const question = questions.find((q) => q.id === activeQuestionId);
-  if (!question || !question.quiz) {
+  let quizRaw = question && question.quiz;
+  if (!quizRaw || !quizRaw.trim()) {
+    quizRaw = question && question._raw_quiz;
+  }
+  if (!quizRaw || !quizRaw.trim()) {
     quizContentEl.innerHTML = '<p class="text-muted">No quiz available for this lesson.</p>';
     return;
   }
-  const items = parseQuizData(question.quiz);
+  const items = parseQuizData(quizRaw);
   if (items.length === 0) {
     quizContentEl.innerHTML = '<p class="text-muted">No quiz available for this lesson.</p>';
     return;
   }
-  quizContentEl.innerHTML = items.map((item, qi) => `
-    <div class="quiz-question mb-4" data-q="${qi}">
-      <p class="fw-semibold mb-2">${escapeHtml(item.question)}</p>
-      <div class="quiz-options">
-        ${item.options.map((opt, oi) => `
-          <label class="quiz-option d-block py-1 px-2 mb-1" data-qi="${qi}" data-oi="${oi}">
-            <input type="radio" name="quiz-${qi}" value="${oi}" class="me-2">
-            <span class="option-letter">${opt.letter}.</span> ${escapeHtml(opt.text)}
-          </label>
-        `).join('')}
-      </div>
-      <div class="quiz-feedback mt-1 small d-none"></div>
+  const quizId = activeQuestionId || 'quiz-unknown';
+  const savedResults = quizResults[quizId] || {};
+
+  quizContentEl.innerHTML = `
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <span class="small text-muted">Quiz: ${escapeHtml(question.title)}</span>
+      <button id="resetQuizBtn" class="btn btn-sm btn-outline-secondary">Reset Quiz</button>
     </div>
-  `).join('');
+    ${items.map((item, qi) => `
+      <div class="quiz-question mb-4" data-q="${qi}" data-solved="${savedResults[qi] === true ? 'true' : ''}">
+        <p class="fw-semibold mb-2">${escapeHtml(item.question)}</p>
+        <div class="quiz-options">
+          ${item.options.map((opt, oi) => {
+            const wasCorrect = savedResults[qi] === true;
+            const isSelected = savedResults[qi] === true && oi === item.correct;
+            return `
+              <label class="quiz-option d-block py-1 px-2 mb-1" data-qi="${qi}" data-oi="${oi}"
+                ${wasCorrect && isSelected ? 'style="border-color:var(--bs-success);background:var(--bs-success-bg-subtle)"' : ''}>
+                <input type="radio" name="quiz-${qi}" value="${oi}" class="me-2"
+                  ${wasCorrect ? 'disabled' : ''}
+                  ${wasCorrect && isSelected ? 'checked' : ''}>
+                <span class="option-letter">${opt.letter}.</span> ${escapeHtml(opt.text)}
+              </label>
+            `;
+          }).join('')}
+        </div>
+        <div class="quiz-feedback mt-1 small ${savedResults[qi] === true ? '' : 'd-none'}">
+          ${savedResults[qi] === true ? '<span class="fw-semibold text-pass">&#10003; Correct!</span> ' + escapeHtml(item.explanation) : ''}
+        </div>
+      </div>
+    `).join('')}`;
+
+  function saveQuizResults() {
+    try { localStorage.setItem('pyjamacode-quiz-results', JSON.stringify(quizResults)); } catch (e) {}
+  }
 
   quizContentEl.querySelectorAll('.quiz-option input[type="radio"]').forEach((input) => {
     input.addEventListener('change', (e) => {
@@ -1459,32 +1502,52 @@ function renderQuiz() {
       const qi = parseInt(label.dataset.qi);
       const oi = parseInt(label.dataset.oi);
       const item = items[qi];
-      const feedback = quizContentEl.querySelector(`.quiz-question[data-q="${qi}"] .quiz-feedback`);
-      const allLabels = quizContentEl.querySelectorAll(`.quiz-question[data-q="${qi}"] .quiz-option`);
-      allLabels.forEach((l) => {
-        l.style.borderColor = '';
-        l.querySelector('input').disabled = true;
-      });
+      const qDiv = quizContentEl.querySelector(`.quiz-question[data-q="${qi}"]`);
+      const feedback = qDiv.querySelector('.quiz-feedback');
+      const allLabels = qDiv.querySelectorAll('.quiz-option');
+
+      if (qDiv.dataset.solved === 'true') return;
+
+      allLabels.forEach((l) => { l.style.borderColor = ''; l.style.background = ''; });
+      feedback.classList.add('d-none');
+
       if (oi === item.correct) {
         label.style.borderColor = 'var(--bs-success)';
         label.style.background = 'var(--bs-success-bg-subtle)';
+        allLabels.forEach((l) => l.querySelector('input').disabled = true);
+        qDiv.dataset.solved = 'true';
+        if (!quizResults[quizId]) quizResults[quizId] = {};
+        quizResults[quizId][qi] = true;
+        saveQuizResults();
         feedback.className = 'quiz-feedback mt-1 small text-pass';
         feedback.innerHTML = '<span class="fw-semibold">&#10003; Correct!</span> ' + escapeHtml(item.explanation);
+        feedback.classList.remove('d-none');
       } else {
         label.style.borderColor = 'var(--bs-danger)';
         label.style.background = 'var(--bs-danger-bg-subtle)';
-        const correctLabel = allLabels[item.correct];
-        if (correctLabel) {
-          correctLabel.style.borderColor = 'var(--bs-success)';
-          correctLabel.style.background = 'var(--bs-success-bg-subtle)';
-        }
+        const nudges = [
+          'Not quite. Look at each option carefully — which one matches the definition we explored?',
+          'Close, but not right. Compare the options against what you know about this concept.',
+          'Almost there. Think about which option best fits the description from the lesson.',
+          'Not this one. Try eliminating the options you know are wrong first.',
+          'Hmm, not quite. Re-read the question and consider each choice on its own merits.',
+          'Good attempt! Now think about why your choice doesn\'t fit — what would need to be true for it to be correct?',
+        ];
         feedback.className = 'quiz-feedback mt-1 small text-fail';
-        const nudges = ['Not quite. Think about what the CPU actually does.', 'Almost! Try considering the key function of this component.', 'Not correct. Review the theory section and try again.'];
-        feedback.innerHTML = '<span class="fw-semibold">&#10007; Incorrect.</span> ' + nudges[qi % nudges.length];
+        feedback.innerHTML = '<span class="fw-semibold">&#10007;</span> ' + nudges[qi % nudges.length];
+        feedback.classList.remove('d-none');
       }
-      feedback.classList.remove('d-none');
     });
   });
+
+  const resetBtn = document.getElementById('resetQuizBtn');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      delete quizResults[quizId];
+      saveQuizResults();
+      renderQuiz();
+    });
+  }
 }
 
 function setActiveTab(tab) {
@@ -1531,6 +1594,36 @@ function initTypedTitle() {
     loop: false,
     showCursor: true,
     cursorChar: '_',
+  });
+}
+
+function initImageZoom(root) {
+  if (!root) return;
+  root.querySelectorAll('figure img').forEach((img) => {
+    img.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const overlay = document.getElementById('imageZoomOverlay');
+      const zoomImg = document.getElementById('imageZoomImg');
+      zoomImg.src = img.src;
+      zoomImg.alt = img.alt;
+      overlay.style.display = 'flex';
+    });
+  });
+}
+
+function embedYouTubeLinks(root) {
+  if (!root) return;
+  root.querySelectorAll('p, div, li').forEach((el) => {
+    el.childNodes.forEach((node) => {
+      if (node.nodeType === 3 && node.textContent) {
+        const m = node.textContent.match(/https?:\/\/(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/);
+        if (m) {
+          const span = document.createElement('span');
+          span.innerHTML = '<br><div class="ratio ratio-16x9 my-3"><iframe src="https://www.youtube.com/embed/' + m[1] + '" allowfullscreen></iframe></div><br>';
+          node.parentNode.replaceChild(span, node);
+        }
+      }
+    });
   });
 }
 
@@ -2282,6 +2375,7 @@ function setupAuth() {
           localStorage.removeItem('pyjamacode-notes');
           localStorage.removeItem('pyjamacode-theme');
           localStorage.removeItem('pyjamacode-bookmarks');
+          localStorage.removeItem('pyjamacode-quiz-results');
           localStorage.removeItem('lastProblemUrl');
           window.location.href = '/dashboard/';
         }).catch((e) => {
@@ -2290,6 +2384,7 @@ function setupAuth() {
           localStorage.removeItem('pyjamacode-notes');
           localStorage.removeItem('pyjamacode-theme');
           localStorage.removeItem('pyjamacode-bookmarks');
+          localStorage.removeItem('pyjamacode-quiz-results');
           localStorage.removeItem('lastProblemUrl');
           window.location.href = '/dashboard/';
         });
@@ -2298,6 +2393,7 @@ function setupAuth() {
         localStorage.removeItem('pyjamacode-notes');
         localStorage.removeItem('pyjamacode-theme');
         localStorage.removeItem('pyjamacode-bookmarks');
+          localStorage.removeItem('pyjamacode-quiz-results');
         localStorage.removeItem('lastProblemUrl');
         window.location.href = '/dashboard/';
       }
