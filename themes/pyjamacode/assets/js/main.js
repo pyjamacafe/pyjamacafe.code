@@ -79,17 +79,21 @@ let notes = {};
 let bookmarks = {};
 let unsavedFiles = {};
 let quizResults = {};
-let _freeUseCounts = {};
+let _freeUsed = (function() { try { return localStorage.getItem('pyjamacode-free-used') === 'true'; } catch(e) { return false; } })();
 
-function checkFreeUse(feature) {
+function persistFreeUsed() {
+  try { localStorage.setItem('pyjamacode-free-used', 'true'); } catch(e) {}
+}
+
+function checkFreeUse() {
   if (typeof isAuthenticated !== 'function' || isAuthenticated()) return true;
-  if (!_freeUseCounts[feature]) _freeUseCounts[feature] = 0;
-  _freeUseCounts[feature]++;
-  if (_freeUseCounts[feature] > 1) {
-    if (typeof openAuthModal === 'function') openAuthModal('signin');
-    return false;
+  if (!_freeUsed) {
+    _freeUsed = true;
+    persistFreeUsed();
+    return true;
   }
-  return true;
+  if (typeof openAuthModal === 'function') openAuthModal('signin');
+  return false;
 }
 let codeMirror = null;
 let notesCodeMirror = null;
@@ -180,7 +184,7 @@ function init() {
   if (terminalInput) {
     terminalInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
-        if (!checkFreeUse('terminal')) {
+        if (!checkFreeUse()) {
           terminalInput.value = '';
           terminalInput.placeholder = 'Sign in to use the terminal';
           terminalInput.disabled = true;
@@ -556,7 +560,7 @@ function initNotesCodeMirror() {
       notesEditorEl.value = notesCodeMirror.getValue();
     }
     if (!isSettingNotesValue) {
-      if (!checkFreeUse('notes')) {
+      if (!checkFreeUse()) {
         notesCodeMirror.setValue(notes[activeQuestionId] || '');
         return;
       }
@@ -653,7 +657,10 @@ function renderBookmarksList(filter) {
     </div>
   `).join('');
   el.querySelectorAll('.tree-leaf').forEach((item) => {
-    item.addEventListener('click', () => selectQuestion(item.dataset.id));
+    item.addEventListener('click', () => {
+      if (!checkFreeUse()) return;
+      selectQuestion(item.dataset.id);
+    });
   });
 }
 
@@ -995,6 +1002,7 @@ function renderQuestionList(filter = '') {
 
         item.addEventListener('click', (e) => {
           e.stopPropagation();
+          if (!checkFreeUse()) return;
           selectQuestion(q.id);
         });
         questionListEl.appendChild(item);
@@ -1069,12 +1077,8 @@ function selectQuestion(id) {
   if (tabQuiz) {
     tabQuiz.classList.toggle('d-none', !hasQuiz);
   }
-  // Remember tab before resetting URL — only if it's valid for this lesson
-  const prevTabRaw = new URL(window.location).searchParams.get('tab') || 'challenge';
-  let prevTab = 'challenge';
-  if (prevTabRaw === 'explanation' && hasArticle) prevTab = 'explanation';
-  else if (prevTabRaw === 'quiz' && hasQuiz) prevTab = 'quiz';
-  setActiveTab('challenge');
+  // When navigating to a new problem, start on the Lecture tab if available
+  setActiveTab(hasArticle ? 'explanation' : 'challenge');
 
   questionContentEl.innerHTML = question.content;
   applyAuthGates(questionContentEl);
@@ -1139,21 +1143,12 @@ function selectQuestion(id) {
   }
   renderQuestionList(questionSearchEl ? questionSearchEl.value : '');
   try {
-    // Preserve tab and hash when updating URL
     let url = question.permalink;
-    if (prevTab && prevTab !== 'challenge') {
-      url += (url.includes('?') ? '&' : '?') + 'tab=' + encodeURIComponent(prevTab);
-    }
     url += window.location.hash;
     history.replaceState(null, '', url);
     maybeSaveProblemUrl(url);
   } catch (e) {
     // History API may be restricted on file:// origins.
-  }
-
-  // Restore tab (prevTab is already validated against available tabs)
-  if (prevTab && prevTab !== 'challenge') {
-    setActiveTab(prevTab);
   }
 
   // Scroll to hash if present (e.g. #listing-1)
@@ -1327,7 +1322,7 @@ function execCommand(cmd) {
 }
 
 function submitCode() {
-  if (!checkFreeUse('check')) {
+  if (!checkFreeUse()) {
     consoleOutputEl.textContent = 'Sign in to continue checking solutions.';
     return;
   }
@@ -1535,7 +1530,7 @@ function renderQuiz() {
 
   quizContentEl.querySelectorAll('.quiz-option input[type="radio"]').forEach((input) => {
     input.addEventListener('change', (e) => {
-      if (!checkFreeUse('quiz')) {
+      if (!checkFreeUse()) {
         e.target.checked = false;
         return;
       }
@@ -1888,14 +1883,67 @@ function initProblemNav() {
     return w;
   }
 
+  function getAvailableTabs() {
+    const tabs = ['explanation', 'quiz', 'challenge'];
+    return tabs.filter((t) => {
+      if (t === 'explanation') return hasArticleForId(activeQuestionId);
+      if (t === 'quiz') return hasQuizForId(activeQuestionId);
+      return true;
+    });
+  }
+
+  function hasArticleForId(id) {
+    const q = questions.find((x) => x.id === id);
+    return q && q.article && q.article.trim().length > 0;
+  }
+
+  function hasQuizForId(id) {
+    const q = questions.find((x) => x.id === id);
+    if (!q || !q.quiz) return false;
+    let raw = q.quiz;
+    if ((!raw || !raw.trim()) && q.quiz2) {
+      const m = q.quiz2.match(/===QUIZ===\n([\s\S]*)$/);
+      if (m) raw = m[1].trim();
+    }
+    return raw && raw.trim().length > 0;
+  }
+
   const navigate = (dir) => {
     const flat = getFlatTree();
     const idx = flat.findIndex((q) => q.id === activeQuestionId);
     if (idx < 0) return;
-    const target = idx + dir;
-    if (target < 0 || target >= flat.length) return;
-    selectQuestion(flat[target].id);
+
+    // Get current tab index
+    const currentTab = getActiveTabName();
+    const available = getAvailableTabs();
+    const currentTabIdx = available.indexOf(currentTab);
+
+    if (currentTabIdx === -1) {
+      // Fallback: navigate to next/prev problem
+      const target = idx + dir;
+      if (target < 0 || target >= flat.length) return;
+      selectQuestion(flat[target].id);
+      return;
+    }
+
+    const nextTabIdx = currentTabIdx + dir;
+
+    if (nextTabIdx >= 0 && nextTabIdx < available.length) {
+      // Same chapter, different tab
+      setActiveTab(available[nextTabIdx]);
+    } else {
+      // Move to next/prev chapter
+      const target = idx + dir;
+      if (target < 0 || target >= flat.length) return;
+      selectQuestion(flat[target].id);
+    }
   };
+
+  function getActiveTabName() {
+    if (articleContentEl && !articleContentEl.classList.contains('d-none')) return 'explanation';
+    if (quizContentEl && !quizContentEl.classList.contains('d-none')) return 'quiz';
+    return 'challenge';
+  }
 
   prevBtn.addEventListener('click', () => navigate(-1));
   nextBtn.addEventListener('click', () => navigate(1));
@@ -2383,15 +2431,9 @@ function hideNotesUnsavedDot() {
 /* ─── Auth ─── */
 let authMode = 'signin';
 const authOverlay = document.getElementById('authOverlay');
-const authModal = document.getElementById('authModal');
-const authModalTitle = document.getElementById('authModalTitle');
-const authEmail = document.getElementById('authEmail');
-const authPassword = document.getElementById('authPassword');
-const authActionBtn = document.getElementById('authActionBtn');
-const authError = document.getElementById('authError');
-const authToggleLink = document.getElementById('authToggleLink');
-const authToggleText = document.getElementById('authToggleText');
-const authCloseLink = document.getElementById('authCloseLink');
+let authModal, authModalTitle, authEmail, authPassword, authActionBtn;
+let authError, authToggleLink, authToggleText, authGoogleBtn;
+const authCloseLink = null;
 const authShowBtn = document.getElementById('authShowBtn');
 const authLoginBtn = document.getElementById('authLoginBtn');
 const authUserMenu = document.getElementById('authUserMenu');
@@ -2401,7 +2443,69 @@ const authUserEmail = document.getElementById('authUserEmail');
 const authLogoutLink = document.getElementById('authLogoutLink');
 const themeToggleDropdown = document.getElementById('themeToggleDropdown');
 const resetProfileLink = document.getElementById('resetProfileLink');
-const authGoogleBtn = document.getElementById('authGoogleBtn');
+
+function injectAuthModal() {
+  if (authModal && document.body.contains(authModal)) return;
+  authModal = null;
+  // Watch for removal and re-inject immediately
+  if (!window._authModalObserver) {
+    window._authModalObserver = new MutationObserver(() => {
+      const el = document.getElementById('authModal');
+      if (!el && typeof openAuthModal === 'function') {
+        // Re-inject and re-show if the user was mid-auth
+        injectAuthModal();
+        if (authModal && authModal.classList.contains('show')) {
+          authModal.classList.add('show');
+        }
+      }
+    });
+    window._authModalObserver.observe(document.body, { childList: true });
+  }
+  const backdrop = document.createElement('div');
+  backdrop.id = 'authModal';
+  backdrop.className = 'auth-modal-backdrop';
+  backdrop.innerHTML = `
+    <div class="auth-modal">
+      <h3 id="authModalTitle">Sign In</h3>
+      <div id="authError" class="auth-error"></div>
+      <button id="authGoogleBtn" class="btn btn-outline-secondary w-100" style="margin-bottom:0.75rem">
+        <i class="bi bi-google"></i> Sign in with Google
+      </button>
+      <hr style="margin:0.5rem 0;color:var(--border-color)">
+      <input id="authEmail" type="email" class="form-control" placeholder="Email">
+      <input id="authPassword" type="password" class="form-control" placeholder="Password">
+      <button id="authActionBtn" class="btn btn-primary w-100">Sign In</button>
+      <div class="auth-toggle">
+        <span id="authToggleText">Don't have an account? </span>
+        <a id="authToggleLink">Sign Up</a>
+      </div>
+    </div>`;
+  document.body.appendChild(backdrop);
+  authModal = document.getElementById('authModal');
+  authModalTitle = document.getElementById('authModalTitle');
+  authEmail = document.getElementById('authEmail');
+  authPassword = document.getElementById('authPassword');
+  authActionBtn = document.getElementById('authActionBtn');
+  authError = document.getElementById('authError');
+  authToggleLink = document.getElementById('authToggleLink');
+  authToggleText = document.getElementById('authToggleText');
+  authGoogleBtn = document.getElementById('authGoogleBtn');
+
+  // Attach listeners
+  if (authGoogleBtn) authGoogleBtn.addEventListener('click', () => {
+    signInWithGoogle().then(() => { closeAuthModal(); }).catch((err) => {
+      showAuthError(err.message || 'Google sign-in failed.');
+    });
+  });
+  if (authActionBtn) authActionBtn.addEventListener('click', handleAuthAction);
+  if (authPassword) authPassword.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleAuthAction(); });
+  if (authToggleLink) authToggleLink.addEventListener('click', toggleAuthMode);
+  if (authModal) authModal.addEventListener('click', (e) => { if (e.target === authModal && authModal._backdropClose) closeAuthModal(); });
+}
+function toggleAuthMode() {
+  injectAuthModal();
+  openAuthModal(authMode === 'signin' ? 'signup' : 'signin');
+}
 /* ─── Resume (track last problem URL) ─── */
 function maybeSaveProblemUrl(url) {
   if (url && url.includes('/courses/')) {
@@ -2447,7 +2551,7 @@ function setupAuth() {
 
   // One-time button listeners
   if (authLoginBtn) authLoginBtn.addEventListener('click', () => openAuthModal('signin'));
-  if (authLogoutLink) authLogoutLink.addEventListener('click', () => { signOut().catch(() => {}); });
+  if (authLogoutLink) authLogoutLink.addEventListener('click', () => { signOut().then(() => { window.location.href = '/'; }).catch(() => {}); });
   if (themeToggleDropdown) themeToggleDropdown.addEventListener('click', () => { toggleTheme(); });
   const resetDialog = document.getElementById('resetConfirmModal');
   if (resetProfileLink) {
@@ -2480,6 +2584,7 @@ function setupAuth() {
           localStorage.removeItem('pyjamacode-theme');
           localStorage.removeItem('pyjamacode-bookmarks');
           localStorage.removeItem('pyjamacode-quiz-results');
+          localStorage.removeItem('pyjamacode-free-used');
           localStorage.removeItem('lastProblemUrl');
           window.location.href = '/dashboard/';
         }).catch((e) => {
@@ -2489,6 +2594,7 @@ function setupAuth() {
           localStorage.removeItem('pyjamacode-theme');
           localStorage.removeItem('pyjamacode-bookmarks');
           localStorage.removeItem('pyjamacode-quiz-results');
+          localStorage.removeItem('pyjamacode-free-used');
           localStorage.removeItem('lastProblemUrl');
           window.location.href = '/dashboard/';
         });
@@ -2498,6 +2604,7 @@ function setupAuth() {
         localStorage.removeItem('pyjamacode-theme');
         localStorage.removeItem('pyjamacode-bookmarks');
           localStorage.removeItem('pyjamacode-quiz-results');
+          localStorage.removeItem('pyjamacode-free-used');
         localStorage.removeItem('lastProblemUrl');
         window.location.href = '/dashboard/';
       }
@@ -2520,6 +2627,8 @@ function setupAuth() {
       if (authModal) authModal._backdropClose = false;
       clearTimeout(window._authNudgeTimer);
       localStorage.removeItem('authForced');
+      localStorage.removeItem('pyjamacode-free-used');
+      _freeUsed = false;
       _viewCount = 0;
       _authNudged = false;
 
@@ -2548,6 +2657,11 @@ function setupAuth() {
     }
 
     updateAuthBlur();
+
+    // If free use was already consumed on a previous visit, force auth
+    if (!isAuthed && _freeUsed) {
+      setTimeout(() => openAuthModal('signin'), 300);
+    }
   });
 
   // Auth overlay button → open modal
@@ -2563,7 +2677,7 @@ function setupAuth() {
 
   // Close modal
   if (authCloseLink) authCloseLink.addEventListener('click', closeAuthModal);
-  if (authModal) authModal.addEventListener('click', (e) => { if (e.target === authModal && !authModal._backdropClose) closeAuthModal(); });
+  if (authModal) authModal.addEventListener('click', (e) => { if (e.target === authModal && authModal._backdropClose) closeAuthModal(); });
 
   // Action button
   if (authActionBtn) authActionBtn.addEventListener('click', handleAuthAction);
@@ -2573,6 +2687,8 @@ function setupAuth() {
 }
 
 function openAuthModal(mode) {
+  injectAuthModal();
+  if (authModal && authModal.classList.contains('show')) return;
   authMode = mode;
   if (authModalTitle) authModalTitle.textContent = mode === 'signin' ? 'Sign In' : 'Sign Up';
   if (authActionBtn) authActionBtn.textContent = mode === 'signin' ? 'Sign In' : 'Sign Up';
@@ -2583,12 +2699,32 @@ function openAuthModal(mode) {
   if (authPassword) authPassword.value = '';
   if (authModal) authModal.classList.add('show');
   if (authEmail) setTimeout(() => authEmail.focus(), 100);
+  // Lock the modal — prevent all dismissals
+  if (authModal) {
+    authModal._backdropClose = false;
+    // Force modal to stay visible by re-showing if hidden
+    if (!window._authModalGuard) {
+      window._authModalGuard = setInterval(() => {
+        if (authModal && !authModal.classList.contains('show') && _freeUsed && !isAuthenticated()) {
+          authModal.classList.add('show');
+        }
+      }, 100);
+    }
+  }
 }
 window.openAuthModal = openAuthModal;
+
+function clearAuthGuard() {
+  if (window._authModalGuard) {
+    clearInterval(window._authModalGuard);
+    window._authModalGuard = null;
+  }
+}
 
 function closeAuthModal() {
   if (authModal) authModal.classList.remove('show');
   if (authError) authError.style.display = 'none';
+  clearAuthGuard();
   // If force auth is active, dismiss and start timer
   if (questionContentEl && questionContentEl.classList.contains('content-blurred-force')) {
     if (typeof window._dismissForceAuth === 'function') window._dismissForceAuth();
