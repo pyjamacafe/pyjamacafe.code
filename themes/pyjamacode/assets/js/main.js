@@ -2699,7 +2699,7 @@ function injectAuthModal() {
       <input id="authEmail" type="email" class="form-control" placeholder="Email">
       <input id="authPassword" type="password" class="form-control" placeholder="Password">
       <button id="authActionBtn" class="btn btn-primary w-100">Sign In</button>
-      <div class="auth-toggle">
+      <div class="auth-toggle" style="margin-top:0.5rem">
         <span id="authToggleText">Don't have an account? </span>
         <a id="authToggleLink">Sign Up</a>
       </div>
@@ -2717,7 +2717,7 @@ function injectAuthModal() {
 
   // Attach listeners
   if (authGoogleBtn) authGoogleBtn.addEventListener('click', () => {
-    signInWithGoogle().then(() => { closeAuthModal(); }).catch((err) => {
+    signInWithGoogle().then(() => { window.location.reload(); }).catch((err) => {
       showAuthError(err.message || 'Google sign-in failed.');
     });
   });
@@ -2835,7 +2835,7 @@ function setupAuth() {
     });
   }
   if (authGoogleBtn) authGoogleBtn.addEventListener('click', () => {
-    signInWithGoogle().then(() => { closeAuthModal(); }).catch((err) => {
+    signInWithGoogle().then(() => { window.location.reload(); }).catch((err) => {
       showAuthError(err.message || 'Google sign-in failed.');
     });
   });
@@ -2891,18 +2891,6 @@ function setupAuth() {
   // Auth overlay button → open modal
   if (authShowBtn) authShowBtn.addEventListener('click', () => openAuthModal('signin'));
 
-  // Auth modal toggle (Sign In ↔ Sign Up)
-  if (authToggleLink) {
-    authToggleLink.addEventListener('click', () => {
-      if (authMode === 'signin') openAuthModal('signup');
-      else openAuthModal('signin');
-    });
-  }
-
-  // Close modal
-  if (authCloseLink) authCloseLink.addEventListener('click', closeAuthModal);
-  if (authModal) authModal.addEventListener('click', (e) => { if (e.target === authModal && authModal._backdropClose) closeAuthModal(); });
-
   // Action button
   if (authActionBtn) authActionBtn.addEventListener('click', handleAuthAction);
 
@@ -2912,7 +2900,6 @@ function setupAuth() {
 
 function openAuthModal(mode) {
   injectAuthModal();
-  if (authModal && authModal.classList.contains('show')) return;
   authMode = mode;
   if (authModalTitle) authModalTitle.textContent = mode === 'signin' ? 'Sign In' : 'Sign Up';
   if (authActionBtn) authActionBtn.textContent = mode === 'signin' ? 'Sign In' : 'Sign Up';
@@ -3191,7 +3178,7 @@ function initSync() {
   var bp = window.__APP_CONFIG__ && window.__APP_CONFIG__.mobileBreakpoint;
   if (bp && typeof bp === 'number') {
     var style = document.createElement('style');
-    style.textContent = '@media (max-width:' + bp + 'px){.console-resizer{display:none!important}#resizerCasesCase{display:none!important}#questionPane{width:100%!important;flex:1}#sidebarPane{position:fixed;top:56px;left:0;bottom:0;z-index:1040;width:320px!important;max-width:85vw;background:var(--bs-body-bg);border-right:1px solid var(--border-color);transform:translateX(-100%);transition:transform 0.25s ease;overflow-y:auto;box-shadow:4px 0 12px rgba(0,0,0,0.15)}#sidebarPane.sidebar-open{transform:translateX(0)}#sidebarPane .sidebar-close{display:flex!important}.sidebar-backdrop{display:none;position:fixed;inset:0;z-index:1039;background:rgba(0,0,0,0.4)}.sidebar-backdrop.show{display:block}#editorPane{position:fixed;top:56px;left:0;bottom:0;z-index:1040;width:100vw;background:var(--bs-body-bg);border-left:1px solid var(--border-color);transform:translateX(100%);transition:transform 0.25s ease;box-shadow:-4px 0 12px rgba(0,0,0,0.15);display:flex!important;flex-direction:column}#editorPane.editor-open{transform:translateX(0)}#editorPane .editor-close{display:flex!important}.editor-backdrop{display:none;position:fixed;inset:0;z-index:1039;background:rgba(0,0,0,0.4)}.editor-backdrop.show{display:block}}';
+    style.textContent = '@media (max-width:' + bp + 'px){.console-resizer{display:none!important}#resizerCasesCase{display:none!important}#questionPane{width:100%!important;flex:1}#sidebarPane{position:fixed;top:56px;left:0;bottom:0;z-index:1040;width:320px!important;max-width:85vw;background:var(--bs-body-bg);border-right:1px solid var(--border-color);transform:translateX(-100%);transition:transform 0.25s ease;overflow-y:auto;box-shadow:4px 0 12px rgba(0,0,0,0.15)}#sidebarPane.sidebar-open{transform:translateX(0)}#sidebarPane .sidebar-close{display:flex!important}.sidebar-backdrop{display:none;position:fixed;inset:0;z-index:1039;background:rgba(0,0,0,0.4)}.sidebar-backdrop.show{display:block}#editorPane{position:fixed;top:56px;left:0;bottom:0;z-index:1040;width:100vw;background:var(--bs-body-bg);border-left:1px solid var(--border-color);transform:translateX(100%);transition:transform 0.25s ease;box-shadow:-4px 0 12px rgba(0,0,0,0.15);display:flex!important;flex-direction:column}#statusText{text-align:center}#editorPane.editor-open{transform:translateX(0)}#editorPane .editor-close{display:flex!important}.editor-backdrop{display:none;position:fixed;inset:0;z-index:1039;background:rgba(0,0,0,0.4)}.editor-backdrop.show{display:block}}';
     document.head.appendChild(style);
   }
 })();
