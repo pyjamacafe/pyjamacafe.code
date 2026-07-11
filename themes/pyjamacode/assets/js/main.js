@@ -1041,8 +1041,11 @@ function selectQuestion(id) {
   if (tabQuiz) {
     tabQuiz.classList.toggle('d-none', !hasQuiz);
   }
-  // Remember tab before resetting URL
-  const prevTab = new URL(window.location).searchParams.get('tab') || 'challenge';
+  // Remember tab before resetting URL — only if it's valid for this lesson
+  const prevTabRaw = new URL(window.location).searchParams.get('tab') || 'challenge';
+  let prevTab = 'challenge';
+  if (prevTabRaw === 'explanation' && hasArticle) prevTab = 'explanation';
+  else if (prevTabRaw === 'quiz' && hasQuiz) prevTab = 'quiz';
   setActiveTab('challenge');
 
   questionContentEl.innerHTML = question.content;
@@ -1118,8 +1121,8 @@ function selectQuestion(id) {
     // History API may be restricted on file:// origins.
   }
 
-  // Restore tab
-  if (prevTab && prevTab !== 'challenge' && tabArticle && !tabArticle.classList.contains('d-none')) {
+  // Restore tab (prevTab is already validated against available tabs)
+  if (prevTab && prevTab !== 'challenge') {
     setActiveTab(prevTab);
   }
 
