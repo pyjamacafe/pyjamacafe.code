@@ -113,7 +113,19 @@ let treeExpanded = {};
 
 function init() {
   if (!problemDataEl || !activeProblemInput) {
-    // Not on a platform page (e.g. /courses/ list page).
+    return;
+  }
+
+  // Dashboard page — skip full platform init but keep sidebar functional
+  if (window.location.pathname === '/dashboard/' || window.location.pathname === '/dashboard') {
+    try { questions = JSON.parse(problemDataEl.textContent) || []; } catch (e) { questions = []; }
+    loadTheme();
+    initFirebase();
+    initTypedTitle();
+    setupAuth();
+    initSidebarToggle();
+    initSidebarTabs();
+    renderQuestionList();
     return;
   }
 
@@ -141,6 +153,24 @@ function init() {
 
   activeQuestionId = activeProblemInput.value || (questions[0] && questions[0].id);
 
+  // Detect course landing page — select the intro question and expand tree
+  const courseMatch = window.location.pathname.match(/^\/courses\/([^\/]+)\/?$/);
+  if (courseMatch) {
+    const introQ = questions.find((q) => q.isIntro && q.topic === courseMatch[1]);
+    if (introQ) {
+      activeQuestionId = introQ.id;
+      treeExpanded[courseMatch[1]] = true;
+    }
+    // Wire the next button to go to the first lesson
+    const nextBtn = document.getElementById('nextProblemBtn');
+    if (nextBtn) {
+      nextBtn.addEventListener('click', (e) => {
+        const firstLesson = questions.find((q) => !q.isIntro && q.topic === courseMatch[1]);
+        if (firstLesson) window.location.href = firstLesson.permalink;
+      });
+    }
+  }
+
   loadTheme();
   loadSubmissions();
   loadNotes();
@@ -149,8 +179,9 @@ function init() {
   initCodeMirror();
   initNotesCodeMirror();
   renderQuestionList();
-  // On landing page (no content pane), don't call selectQuestion which would redirect
-  if (questionContentEl) selectQuestion(activeQuestionId);
+  // Skip selectQuestion for intro questions (landing page content is already rendered)
+  const _q = questions.find((q) => q.id === activeQuestionId);
+  if (questionContentEl && (!_q || !_q.isIntro)) selectQuestion(activeQuestionId);
   setNotesPreviewMode(true);
   initTypedTitle();
   notesSavedHeight = notesArea ? notesArea.offsetHeight : 200;
@@ -858,6 +889,7 @@ function setEditorValue(value) {
 function buildQuestionTree() {
   const tree = {};
   questions.forEach((q) => {
+    if (q.isIntro) return;
     const topic = q.topic || '';
     const subtopic = q.subtopic || '';
     if (!tree[topic]) tree[topic] = {};
@@ -868,8 +900,12 @@ function buildQuestionTree() {
 }
 
 function toggleTopic(topic) {
-  treeExpanded[topic] = !treeExpanded[topic];
+  const wasExpanded = treeExpanded[topic];
+  treeExpanded[topic] = !wasExpanded;
   renderQuestionList(questionSearchEl ? questionSearchEl.value : '');
+  if (!wasExpanded) {
+    window.location.href = '/courses/' + topic + '/';
+  }
 }
 
 function toggleSubtopic(topic, subtopic) {
@@ -911,6 +947,9 @@ function renderQuestionList(filter = '') {
     const isTopicExpanded = treeExpanded[topic] || filter.length > 0;
 
     let hasVisibleChildren = false;
+    // Check if there are intro questions for this topic
+    const topicIntroQs = questions.filter((q) => q.isIntro && q.topic === topic);
+    if (topicIntroQs.length > 0) hasVisibleChildren = true;
     Object.keys(subtopics).forEach((subtopic) => {
       const questions = subtopics[subtopic];
       const visibleQ = filter.length > 0
@@ -940,6 +979,30 @@ function renderQuestionList(filter = '') {
       toggleTopic(topic);
     });
     questionListEl.appendChild(topicDiv);
+
+    // Introduction leaf nodes (right under the course, above all subtopics)
+    if (treeExpanded[topic] || filter.length > 0) {
+      const introQs = questions.filter((q) => q.isIntro && q.topic === topic);
+      introQs.sort((a, b) => (getWeight(a, 'weight', 99) - getWeight(b, 'weight', 99)));
+      introQs.forEach((q) => {
+        if (filter.length > 0 && !q.title.toLowerCase().includes(filterLower)) return;
+        const item = document.createElement('div');
+        item.className = 'tree-leaf';
+        item.dataset.id = q.id;
+        item.dataset.topicIndex = topicIndex;
+        if (q.id === activeQuestionId) item.classList.add('active');
+        item.innerHTML = `
+          <div class="question-title">${escapeHtml(q.title)}</div>
+          <div class="question-meta">Course Overview</div>
+        `;
+        item.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (!checkFreeUse()) return;
+          window.location.href = q.permalink || ('/courses/' + q.topic + '/');
+        });
+        questionListEl.appendChild(item);
+      });
+    }
 
     // Subtopic containers
     if (!treeExpanded[topic] && filter.length === 0) return;
@@ -986,6 +1049,7 @@ function renderQuestionList(filter = '') {
       );
 
       sortedQuestions.forEach((q) => {
+        if (q.isIntro) return;
         if (filter.length > 0 && !q.title.toLowerCase().includes(filterLower)) return;
 
         const item = document.createElement('div');
@@ -1023,13 +1087,33 @@ function updateTreeItemStatus(id, status) {
 }
 
 function selectQuestion(id) {
-  activeQuestionId = id;
   const question = questions.find((q) => q.id === id);
   if (!question) return;
 
+  // Course intro question — navigate to the course landing page
+  if (question.isIntro) {
+    window.location.href = question.permalink || ('/courses/' + question.topic + '/');
+    return;
+  }
+
+  // If the full platform isn't loaded (no editor), redirect to the lesson URL
+  if (!document.getElementById('editorArea') || !document.getElementById('consoleArea')) {
+    window.location.href = question.permalink;
+    return;
+  }
+
+  activeQuestionId = id;
+
+  // Restore full platform elements (hidden by intro or landing page)
+  if (editorArea) editorArea.classList.remove('d-none');
+  if (consoleArea) consoleArea.classList.remove('d-none');
+  if (notesArea) notesArea.classList.remove('d-none');
+  if (fileTabs) fileTabs.classList.remove('d-none');
+  const ct = document.getElementById('centerTabs');
+  if (ct) ct.classList.remove('d-none');
+
   // On landing page (no question content element), just expand tree and update URL
   if (!questionContentEl) {
-    // Landing page — redirect to the problem page
     window.location.href = question.permalink;
     return;
   }
@@ -1623,14 +1707,19 @@ function initTypedTitle() {
   const typedEl = document.getElementById('typedTitle');
   if (!typedEl || typeof Typed === 'undefined') return;
   const title = typedEl.textContent || '';
-  typedEl.textContent = '';
-  new Typed('#typedTitle', {
-    strings: [title],
-    typeSpeed: 60,
-    loop: false,
-    showCursor: true,
-    cursorChar: '_',
-  });
+  if (window.location.pathname === '/' || window.location.pathname === '') {
+    typedEl.textContent = '';
+    new Typed('#typedTitle', {
+      strings: [title],
+      typeSpeed: 60,
+      loop: false,
+      showCursor: true,
+      cursorChar: '_',
+    });
+  } else {
+    typedEl.textContent = title;
+    typedEl.innerHTML = title + '<span class="typed-cursor typed-cursor--blink" aria-hidden="true">_</span>';
+  }
 }
 
 function initImageZoom(root) {
@@ -2896,7 +2985,8 @@ function initSync() {
   function refreshUI() {
     loadSubmissions();
     loadNotes();
-    if (activeQuestionId && questionContentEl) selectQuestion(activeQuestionId);
+    const _q = questions.find((q) => q.id === activeQuestionId);
+    if (activeQuestionId && questionContentEl && (!_q || !_q.isIntro)) selectQuestion(activeQuestionId);
     else renderQuestionList(questionSearchEl ? questionSearchEl.value : '');
   }
 

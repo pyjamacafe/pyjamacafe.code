@@ -1816,6 +1816,22 @@ footer {
   border-radius: 6px;
 }
 
+/* Course landing page */
+.course-landing-content {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--bs-body-color);
+}
+.course-landing-content h1 { font-size: 1.5rem; font-weight: 700; margin: 0 0 0.75rem; }
+.course-landing-content h2 { font-size: 1.15rem; font-weight: 600; margin: 1.25rem 0 0.5rem; }
+.course-landing-content h3 { font-size: 1rem; font-weight: 600; margin: 1rem 0 0.4rem; }
+.course-landing-content p { margin-bottom: 0.75rem; text-align: justify; }
+.course-landing-content ul, .course-landing-content ol { margin-bottom: 0.75rem; padding-left: 1.5rem; }
+.course-landing-content li { margin-bottom: 0.25rem; }
+.course-landing-content code { background-color: var(--code-bg); padding: 0.1em 0.3em; border-radius: 3px; font-size: 0.9em; }
+.course-landing-content pre { background-color: var(--code-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 1rem; overflow-x: auto; margin-bottom: 1rem; }
+.course-landing-content img { max-width: 100%; height: auto; border: 1px solid var(--border-color); border-radius: 4px; margin: 1rem 0; }
+
 .fig-link {
   text-decoration: none;
   color: var(--bs-body-color);

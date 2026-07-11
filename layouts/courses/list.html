@@ -1,0 +1,139 @@
+{{ define "main" }}
+{{ $problems := where site.RegularPages "Section" "courses" }}
+{{ $sections := slice }}{{ range site.Pages }}{{ if and (eq .Section "courses") (eq .Kind "section") .File }}{{ $sections = $sections | append . }}{{ end }}{{ end }}
+{{ $active := index $problems 0 }}{{ if reflect.IsMap . }}{{ with .activeProblem }}{{ $active = . }}{{ end }}{{ end }}
+{{ $activeId := "" }}{{ with $active }}{{ if .File }}{{ $activeId = .File.ContentBaseName }}{{ end }}{{ end }}
+
+<script id="problem-data" type="application/json">
+{{ $data := slice }}
+{{ range $sections }}
+  {{ $topic := .File.ContentBaseName }}
+  {{ $item := dict
+    "id" (printf "intro-%s" $topic)
+    "title" "Introduction"
+    "difficulty" "easy"
+    "language" "c"
+    "permalink" .RelPermalink
+    "content" (.RawContent | .RenderString)
+    "article" ""
+    "codes" ""
+    "quiz" ""
+    "quiz2" ""
+    "initial_code" ""
+    "test_cases" ""
+    "topic" $topic
+    "subtopic" ""
+    "topic_weight" -100
+    "subtopic_weight" 99
+    "weight" 0
+    "isIntro" true
+  }}
+  {{ $data = $data | append $item }}
+{{ end }}
+{{ range $problems }}
+  {{ $parts := split (strings.TrimSuffix "/" .File.Dir) "/" }}
+  {{ $topic := index $parts 1 }}
+  {{ $subtopic := index $parts 2 }}
+  {{ $raw := .RawContent }}
+  {{ $challengeMarkdown := $raw }}
+  {{ $explanationMarkdown := "" }}
+  {{ $codesMarkdown := "" }}
+  {{ $quizMarkdown := "" }}
+  {{ if in $raw "===EXPLANATION===" }}
+    {{ $parts := split $raw "===EXPLANATION===" }}{{ $challengeMarkdown = index $parts 0 }}{{ $explanationMarkdown = index $parts 1 }}
+  {{ end }}
+  {{ if in $challengeMarkdown "===CODE===" }}
+    {{ $parts := split $challengeMarkdown "===CODE===" }}{{ $challengeMarkdown = index $parts 0 }}{{ $codesMarkdown = index $parts 1 }}
+  {{ else if in $explanationMarkdown "===CODE===" }}
+    {{ $parts := split $explanationMarkdown "===CODE===" }}{{ $explanationMarkdown = index $parts 0 }}{{ $codesMarkdown = index $parts 1 }}
+  {{ end }}
+  {{ if in $challengeMarkdown "===QUIZ===" }}
+    {{ $parts := split $challengeMarkdown "===QUIZ===" }}{{ $challengeMarkdown = index $parts 0 }}{{ $quizMarkdown = index $parts 1 }}
+  {{ else if in $explanationMarkdown "===QUIZ===" }}
+    {{ $parts := split $explanationMarkdown "===QUIZ===" }}{{ $explanationMarkdown = index $parts 0 }}{{ $quizMarkdown = index $parts 1 }}
+  {{ else if in $codesMarkdown "===QUIZ===" }}
+    {{ $parts := split $codesMarkdown "===QUIZ===" }}{{ $codesMarkdown = index $parts 0 }}{{ $quizMarkdown = index $parts 1 }}
+  {{ end }}
+  {{ $item := dict
+    "id" .File.ContentBaseName
+    "title" .Title
+    "difficulty" .Params.difficulty
+    "language" .Params.language
+    "permalink" .RelPermalink
+    "content" ($challengeMarkdown | .RenderString)
+    "article" ($explanationMarkdown | .RenderString)
+    "codes" ($codesMarkdown | .RenderString)
+    "quiz" $quizMarkdown
+    "quiz2" .RawContent
+    "initial_code" .Params.initial_code
+    "test_cases" .Params.test_cases
+    "topic" $topic
+    "subtopic" $subtopic
+    "topic_weight" (cond (isset .Params "topic_weight") (.Params.topic_weight | int) 99)
+    "subtopic_weight" (cond (isset .Params "subtopic_weight") (.Params.subtopic_weight | int) 99)
+    "weight" (cond (isset .Params "weight") (.Params.weight | int) 99)
+  }}
+  {{ $data = $data | append $item }}
+{{ end }}
+{{ $data | jsonify | safeJS }}
+</script>
+<input type="hidden" id="active-problem-id" value="{{ $activeId }}">
+
+<div class="platform-layout" id="platformLayout">
+  <!-- Sidebar -->
+  <aside class="platform-pane sidebar-pane" id="sidebarPane">
+    <div class="pane-header border-bottom d-flex align-items-center gap-2" style="min-height:36px">
+      <input type="text" id="questionSearch" class="form-control form-control-sm" placeholder="Search..." style="flex:1" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-1p-ignore data-lpignore="true" data-form-type="other">
+    </div>
+    <div class="sidebar-tabs">
+      <div class="sidebar-tab active" id="tabLessons"><i class="bi bi-easel2-fill"></i> Courses</div>
+      <div class="sidebar-tab" id="tabBookmarks"><i class="bi bi-bookmarks-fill"></i> Bookmarks</div>
+    </div>
+    <div class="pane-body overflow-auto p-2">
+      <div class="tree-container" id="questionList"></div>
+      <div id="bookmarksList" class="d-none"></div>
+    </div>
+  </aside>
+
+  <div class="pane-resizer" id="resizerCasesCase" aria-label="Resize cases pane"></div>
+
+  <!-- Center: Course Introduction -->
+  <aside class="platform-pane question-pane" id="questionPane">
+    <div class="pane-header border-bottom d-flex align-items-center" style="justify-content:space-between">
+      <span class="d-flex gap-1" style="flex-shrink:0">
+        <button id="sidebarShowBtn" class="btn btn-sm py-0 btn-link text-decoration-none d-none" data-bs-toggle="tooltip" title="Show sidebar" style="font-size:0.9rem;color:var(--bs-body-color);padding:0 0.15rem"><i class="bi bi-arrow-bar-right"></i></button>
+        <button id="sidebarHideBtn" class="btn btn-sm py-0 btn-link text-decoration-none" data-bs-toggle="tooltip" title="Collapse sidebar" style="font-size:0.9rem;color:var(--bs-body-color);padding:0 0.15rem"><i class="bi bi-arrow-bar-left"></i></button>
+      </span>
+      <span id="caseTitle" class="small fw-semibold" style="flex:1;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ .Title }}</span>
+      <span class="d-flex gap-1" style="flex-shrink:0">
+        <button id="nextProblemBtn" class="btn btn-sm py-0 btn-link text-decoration-none" data-bs-toggle="tooltip" title="Start first lesson" style="font-size:0.9rem;color:var(--bs-body-color);padding:0 0.15rem"><i class="bi bi-chevron-right"></i></button>
+      </span>
+    </div>
+    <div class="center-tabs" id="centerTabs">
+      <div class="center-tab active" id="tabIntro">Introduction</div>
+    </div>
+    <div class="question-pane-body" id="questionPaneBody">
+      <div class="pane-body question-content overflow-auto p-3 course-landing-content" id="questionContent">
+        {{ .Content }}
+      </div>
+    </div>
+  </aside>
+</div>
+
+<!-- Reset confirmation modal -->
+<dialog id="resetConfirmModal" class="reset-dialog">
+  <h3>Reset Profile</h3>
+  <p>This will delete all your saved data (submissions, notes, theme, preferences) from both local storage and the cloud. This cannot be undone.</p>
+  <p class="text-danger fw-semibold">Are you sure you want to continue?</p>
+  <form method="dialog" class="d-flex flex-column gap-2 mt-3">
+    <button id="resetConfirmYes" class="btn btn-danger w-100">Yes, Reset Everything</button>
+    <button id="resetConfirmNo" class="btn btn-outline-secondary w-100" value="cancel">Cancel</button>
+  </form>
+</dialog>
+
+<!-- Image zoom modal -->
+<div id="imageZoomOverlay" class="img-zoom-overlay" style="display:none" onclick="document.getElementById('imageZoomOverlay').style.display='none'">
+  <span class="img-zoom-close" onclick="document.getElementById('imageZoomOverlay').style.display='none'">&times;</span>
+  <img id="imageZoomImg" class="img-zoom-img" src="" alt="">
+</div>
+{{ end }}

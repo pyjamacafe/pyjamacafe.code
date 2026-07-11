@@ -33,50 +33,49 @@
 <input type="hidden" id="active-problem-id" value="{{ $activeId }}">
 
 <div class="platform-layout" id="platformLayout">
-  <!-- Sidebar: Cases -->
-  <aside class="platform-pane sidebar-pane" id="sidebarPane" style="width:25%">
-    <div class="pane-header border-bottom">
-      <input type="text" id="questionSearch" class="form-control form-control-sm" placeholder="Search cases...">
+  <!-- Sidebar -->
+  <aside class="platform-pane sidebar-pane" id="sidebarPane">
+    <div class="pane-header border-bottom d-flex align-items-center gap-2" style="min-height:36px">
+      <input type="text" id="questionSearch" class="form-control form-control-sm" placeholder="Search..." style="flex:1" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-1p-ignore data-lpignore="true" data-form-type="other">
+    </div>
+    <div class="sidebar-tabs">
+      <div class="sidebar-tab active" id="tabLessons"><i class="bi bi-easel2-fill"></i> Courses</div>
+      <div class="sidebar-tab" id="tabBookmarks"><i class="bi bi-bookmarks-fill"></i> Bookmarks</div>
     </div>
     <div class="pane-body overflow-auto p-2">
       <div class="tree-container" id="questionList"></div>
+      <div id="bookmarksList" class="d-none"></div>
     </div>
   </aside>
 
   <div class="pane-resizer" id="resizerCasesCase" aria-label="Resize cases pane"></div>
 
-  <!-- Dashboard content -->
-  <div class="landing-content" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bs-body-bg);overflow:hidden">
-    <div id="dashboardContent" style="display:none;text-align:center">
-      <h1 id="dashboardGreeting" style="font-size:2rem;font-weight:700;margin:0;color:var(--bs-body-color)">Welcome</h1>
-      <p style="margin-top:0.5rem;font-size:1rem;color:var(--bs-secondary-color)">Your learning dashboard</p>
-      <button id="dashboardResumeBtn" class="btn btn-primary btn-sm mt-3" style="display:none">Resume</button>
+  <!-- Center: Dashboard -->
+  <aside class="platform-pane question-pane" id="questionPane">
+    <div class="pane-header border-bottom d-flex align-items-center" style="justify-content:space-between">
+      <span class="d-flex gap-1" style="flex-shrink:0">
+        <button id="sidebarShowBtn" class="btn btn-sm py-0 btn-link text-decoration-none d-none" data-bs-toggle="tooltip" title="Show sidebar" style="font-size:0.9rem;color:var(--bs-body-color);padding:0 0.15rem"><i class="bi bi-arrow-bar-right"></i></button>
+        <button id="sidebarHideBtn" class="btn btn-sm py-0 btn-link text-decoration-none" data-bs-toggle="tooltip" title="Collapse sidebar" style="font-size:0.9rem;color:var(--bs-body-color);padding:0 0.15rem"><i class="bi bi-arrow-bar-left"></i></button>
+      </span>
+      <span id="caseTitle" class="small fw-semibold" style="flex:1;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Dashboard</span>
+      <span class="d-flex gap-1" style="flex-shrink:0">&nbsp;</span>
     </div>
-    <div id="dashboardLoading" style="text-align:center">
-      <div class="spinner-border text-secondary" role="status" style="width:2rem;height:2rem"><span class="visually-hidden">Loading...</span></div>
+    <div class="center-tabs" id="centerTabs">
+      <div class="center-tab active" id="tabDashboard">Dashboard</div>
     </div>
-  </div>
-</div>
-
-<div id="authModal" class="auth-modal-backdrop">
-  <div class="auth-modal">
-    <h3 id="authModalTitle">Sign In</h3>
-    <div id="authError" class="auth-error"></div>
-    <button id="authGoogleBtn" class="btn btn-outline-secondary w-100" style="margin-bottom:0.75rem">
-      <i class="bi bi-google"></i> Sign in with Google
-    </button>
-    <hr style="margin:0.5rem 0;color:var(--border-color)">
-    <input id="authEmail" type="email" class="form-control" placeholder="Email">
-    <input id="authPassword" type="password" class="form-control" placeholder="Password">
-    <button id="authActionBtn" class="btn btn-primary w-100">Sign In</button>
-    <div class="auth-toggle">
-      <span id="authToggleText">Don't have an account? </span>
-      <a id="authToggleLink">Sign Up</a>
+    <div class="question-pane-body" id="questionPaneBody">
+      <div class="pane-body question-content overflow-auto p-3" id="questionContent">
+        <div id="dashboardContent" style="display:none;text-align:center;padding:3rem 1rem">
+          <h1 id="dashboardGreeting" style="font-size:1.5rem;font-weight:700;margin:0 0 0.5rem;color:var(--bs-body-color)">Welcome</h1>
+          <p style="margin:0 0 1rem;font-size:0.9rem;color:var(--bs-secondary-color)">Your learning dashboard</p>
+          <button id="dashboardResumeBtn" class="btn btn-sm btn-primary" style="display:none">Resume</button>
+        </div>
+        <div id="dashboardLoading" style="text-align:center;padding:3rem">
+          <div class="spinner-border text-secondary" role="status" style="width:2rem;height:2rem"><span class="visually-hidden">Loading...</span></div>
+        </div>
+      </div>
     </div>
-    <div class="auth-toggle" style="margin-top:0.5rem">
-      <a id="authCloseLink" style="color:var(--bs-secondary-color)">Close</a>
-    </div>
-  </div>
+  </aside>
 </div>
 
 <script>
@@ -87,11 +86,12 @@
         var name = user.displayName || user.email || 'User';
         var el = document.getElementById('dashboardGreeting');
         if (el) el.textContent = 'Welcome, ' + name;
+        var titleEl = document.getElementById('caseTitle');
+        if (titleEl) titleEl.textContent = name;
         var content = document.getElementById('dashboardContent');
         var loading = document.getElementById('dashboardLoading');
         if (content) content.style.display = 'block';
         if (loading) loading.style.display = 'none';
-        // Show resume button if there's a saved problem
         var resumeBtn = document.getElementById('dashboardResumeBtn');
         var saved = localStorage.getItem('lastProblemUrl');
         if (resumeBtn && saved && saved.includes('/courses/')) {
