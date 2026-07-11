@@ -1491,12 +1491,20 @@ function updateThemeIcon(theme) {
   themeIcon.className = theme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
 }
 
+function getSystemTheme() {
+  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) return 'light';
+  return 'dark';
+}
+
 function loadTheme() {
   let savedTheme = 'dark';
   try {
-    savedTheme = localStorage.getItem('pyjamacode-theme') || 'dark';
-  } catch (e) {
-    // localStorage may be unavailable (e.g. file:// origins).
+    savedTheme = localStorage.getItem('pyjamacode-theme');
+  } catch (e) {}
+  if (!savedTheme && (typeof isAuthenticated !== 'function' || !isAuthenticated())) {
+    savedTheme = getSystemTheme();
+  } else if (!savedTheme) {
+    savedTheme = 'dark';
   }
   htmlEl.setAttribute('data-bs-theme', savedTheme);
   updateThemeIcon(savedTheme);
@@ -2865,7 +2873,7 @@ function setupAuth() {
 
     if (authLoginBtn) authLoginBtn.classList.toggle('d-none', isAuthed);
     if (authUserMenu) authUserMenu.classList.toggle('d-none', !isAuthed);
-    if (themeToggle) themeToggle.classList.toggle('d-none', isAuthed);
+    if (themeToggle) themeToggle.classList.toggle('d-none', !isAuthed);
     if (user) {
       const name = user.displayName || user.email || '';
       const initial = (user.displayName || user.email || '?').charAt(0).toUpperCase();
