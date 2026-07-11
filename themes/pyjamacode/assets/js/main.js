@@ -79,6 +79,18 @@ let notes = {};
 let bookmarks = {};
 let unsavedFiles = {};
 let quizResults = {};
+let _freeUseCounts = {};
+
+function checkFreeUse(feature) {
+  if (typeof isAuthenticated !== 'function' || isAuthenticated()) return true;
+  if (!_freeUseCounts[feature]) _freeUseCounts[feature] = 0;
+  _freeUseCounts[feature]++;
+  if (_freeUseCounts[feature] > 1) {
+    if (typeof openAuthModal === 'function') openAuthModal('signin');
+    return false;
+  }
+  return true;
+}
 let codeMirror = null;
 let notesCodeMirror = null;
 let saveTimeout = null;
@@ -138,6 +150,17 @@ function init() {
   setNotesPreviewMode(true);
   initTypedTitle();
   notesSavedHeight = notesArea ? notesArea.offsetHeight : 200;
+  // Start with notes minimized
+  setTimeout(() => minimizeNotes(), 50);
+
+  // Double-click notes header to toggle minimize/restore
+  const notesHeader = notesArea ? notesArea.querySelector('.notes-header') : null;
+  if (notesHeader) {
+    notesHeader.addEventListener('dblclick', () => {
+      if (notesViewState === 'minimized') restoreNotes();
+      else minimizeNotes();
+    });
+  }
 
   if (questionSearchEl) {
     questionSearchEl.addEventListener('input', (e) => {
@@ -157,6 +180,13 @@ function init() {
   if (terminalInput) {
     terminalInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
+        if (!checkFreeUse('terminal')) {
+          terminalInput.value = '';
+          terminalInput.placeholder = 'Sign in to use the terminal';
+          terminalInput.disabled = true;
+          setTimeout(() => { terminalInput.disabled = false; terminalInput.placeholder = 'type a command...'; }, 3000);
+          return;
+        }
         const cmd = terminalInput.value.trim();
         if (!cmd) return;
         consoleOutputEl.textContent += '\n$ ' + cmd + '\n';
@@ -201,8 +231,6 @@ function init() {
       if (!isAuthenticated() && questionContentEl) {
         if (authCloseLink) authCloseLink.style.display = 'none';
         if (authModal) authModal._backdropClose = true;
-        questionContentEl.classList.add('content-blurred-force');
-        if (editorArea) editorArea.classList.add('content-blurred-force');
         if (typeof openAuthModal === 'function') openAuthModal('signin');
       }
     }, nudgeDelay);
@@ -528,6 +556,10 @@ function initNotesCodeMirror() {
       notesEditorEl.value = notesCodeMirror.getValue();
     }
     if (!isSettingNotesValue) {
+      if (!checkFreeUse('notes')) {
+        notesCodeMirror.setValue(notes[activeQuestionId] || '');
+        return;
+      }
       showNotesUnsavedDot();
       if (notesPreviewMode) {
         renderNotesPreview();
@@ -1002,30 +1034,26 @@ function selectQuestion(id) {
     // Check if user is already in forced state (persisted across refreshes)
     const isForced = localStorage.getItem('authForced') === 'true';
 
-    if (isForced) {
-      // Let content load first, then show auth modal
-      requestAnimationFrame(() => {
-        if (authCloseLink) authCloseLink.style.display = 'none';
-        if (authModal) authModal._backdropClose = true;
-        questionContentEl.classList.add('content-blurred-force');
-        if (editorArea) editorArea.classList.add('content-blurred-force');
-        if (typeof openAuthModal === 'function') openAuthModal('signin');
-      });
-      // Do NOT return — let content load normally
-    }
-
-    // Free views counter (in-memory only, resets on page refresh)
-    if (!_authNudged) {
-      _viewCount++;
-      if (_viewCount > freeViews) {
-        _authNudged = true;
-        questionContentEl.classList.add('content-blurred-force');
-        if (editorArea) editorArea.classList.add('content-blurred-force');
-        if (authCloseLink) authCloseLink.style.display = '';
-        if (authModal) authModal._backdropClose = false;
-        if (typeof openAuthModal === 'function') openAuthModal('signin');
+      if (isForced) {
+        // Let content load first, then show auth modal
+        requestAnimationFrame(() => {
+          if (authCloseLink) authCloseLink.style.display = 'none';
+          if (authModal) authModal._backdropClose = true;
+          if (typeof openAuthModal === 'function') openAuthModal('signin');
+        });
+        // Do NOT return — let content load normally
       }
-    }
+
+      // Free views counter (in-memory only, resets on page refresh)
+      if (!_authNudged) {
+        _viewCount++;
+        if (_viewCount > freeViews) {
+          _authNudged = true;
+          if (authCloseLink) authCloseLink.style.display = '';
+          if (authModal) authModal._backdropClose = false;
+          if (typeof openAuthModal === 'function') openAuthModal('signin');
+        }
+      }
   }
 
   // Set up tabs
@@ -1049,12 +1077,14 @@ function selectQuestion(id) {
   setActiveTab('challenge');
 
   questionContentEl.innerHTML = question.content;
+  applyAuthGates(questionContentEl);
   enhanceCodeBlocks(questionContentEl);
   initImageZoom(questionContentEl);
   embedYouTubeLinks(questionContentEl);
   initVimeoPlayers(questionContentEl);
   if (articleContentEl) {
     articleContentEl.innerHTML = hasArticle ? question.article : '';
+    applyAuthGates(articleContentEl);
     enhanceCodeBlocks(articleContentEl);
     initImageZoom(articleContentEl);
     embedYouTubeLinks(articleContentEl);
@@ -1297,6 +1327,10 @@ function execCommand(cmd) {
 }
 
 function submitCode() {
+  if (!checkFreeUse('check')) {
+    consoleOutputEl.textContent = 'Sign in to continue checking solutions.';
+    return;
+  }
   if (!activeQuestionId) {
     consoleOutputEl.textContent = 'Please select a case first.';
     return;
@@ -1501,6 +1535,10 @@ function renderQuiz() {
 
   quizContentEl.querySelectorAll('.quiz-option input[type="radio"]').forEach((input) => {
     input.addEventListener('change', (e) => {
+      if (!checkFreeUse('quiz')) {
+        e.target.checked = false;
+        return;
+      }
       const label = e.target.closest('.quiz-option');
       const qi = parseInt(label.dataset.qi);
       const oi = parseInt(label.dataset.oi);
@@ -1612,6 +1650,63 @@ function initImageZoom(root) {
       overlay.style.display = 'flex';
     });
   });
+}
+
+function applyAuthGates(container) {
+  if (!container) return false;
+  const html = container.innerHTML;
+  const openTag = '<!--auth-->';
+  const closeTag = '<!--/auth-->';
+  if (html.indexOf(openTag) === -1) return false;
+
+  container.innerHTML = '';
+  let remaining = html;
+  let lastEnd = 0;
+  const authed = isAuthenticated();
+
+  const addFragment = (text) => {
+    if (!text) return;
+    const div = document.createElement('div');
+    div.innerHTML = text;
+    while (div.firstChild) container.appendChild(div.firstChild);
+  };
+
+  while (true) {
+    const start = remaining.indexOf(openTag, lastEnd);
+    if (start === -1) break;
+    const end = remaining.indexOf(closeTag, start + openTag.length);
+    if (end === -1) break;
+
+    // Content before this gate pair — always visible
+    addFragment(remaining.slice(lastEnd, start));
+
+    // Gated content
+    const gatedContent = remaining.slice(start + openTag.length, end);
+
+    const gatedDiv = document.createElement('div');
+    gatedDiv.style.position = 'relative';
+
+    const blurInner = document.createElement('div');
+    blurInner.className = 'auth-gated';
+    blurInner.innerHTML = gatedContent;
+    gatedDiv.appendChild(blurInner);
+
+    const overlay = document.createElement('div');
+    overlay.className = 'gated-overlay';
+    overlay.innerHTML = '<p>Sign in to access the content, save progress and execute code.</p><button class="btn btn-sm btn-primary" onclick="if(typeof openAuthModal===\'function\')openAuthModal(\'signin\')">Sign in</button>';
+    gatedDiv.appendChild(overlay);
+
+    container.appendChild(gatedDiv);
+
+    blurInner.classList.toggle('content-blurred-force', !authed);
+    overlay.classList.toggle('show', !authed);
+
+    lastEnd = end + closeTag.length;
+  }
+
+  // Content after the last gate pair
+  addFragment(remaining.slice(lastEnd));
+  return true;
 }
 
 function embedYouTubeLinks(root) {
@@ -2326,19 +2421,25 @@ function maybeSaveProblemUrl(url) {
   });
 })();
 
-function updateAuthBlur() {
+function getCurrentQuestion() {
+  return questions.find((q) => q.id === activeQuestionId);
+}
+
+function updateAuthGates() {
   const authed = isAuthenticated();
+  document.querySelectorAll('.gated-overlay').forEach((overlay) => {
+    const gatedDiv = overlay.closest('[style*="position: relative"]');
+    const blurInner = gatedDiv ? gatedDiv.querySelector('.auth-gated') : null;
+    if (!gatedDiv || !blurInner) return;
+    blurInner.classList.toggle('content-blurred-force', !authed);
+    overlay.classList.toggle('show', !authed);
+  });
+}
+
+function updateAuthBlur() {
   const ready = typeof isAuthReady === 'undefined' ? true : isAuthReady();
-  const onLectureTab = articleContentEl && !articleContentEl.classList.contains('d-none');
-  if (articleContentEl && authOverlay) {
-    if (authed || !onLectureTab || !ready) {
-      articleContentEl.classList.remove('article-content-blurred');
-      authOverlay.classList.remove('show');
-    } else {
-      articleContentEl.classList.add('article-content-blurred');
-      authOverlay.classList.add('show');
-    }
-  }
+  if (!ready) return;
+  updateAuthGates();
 }
 
 function setupAuth() {

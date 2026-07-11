@@ -485,6 +485,7 @@ body.sidebar-collapsed #editorPane {
 
 /* Question pane vertical split: case content + notes */
 .question-pane-body {
+  position: relative;
   flex: 1 1 auto;
   display: grid;
   grid-template-rows: 1fr 8px auto;
@@ -835,33 +836,35 @@ body.sidebar-collapsed #editorPane {
   z-index: 1;
 }
 
-.auth-overlay {
+.gated-overlay {
   display: none;
   position: absolute;
   inset: 0;
-  z-index: 2;
+  z-index: 5;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
+  padding: 2rem;
+  text-align: center;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(2px);
   pointer-events: auto;
   cursor: pointer;
 }
 
-.auth-overlay.show {
+.gated-overlay.show {
   display: flex;
 }
 
-.auth-overlay p {
+.gated-overlay p {
+  color: #fff;
   font-size: 1rem;
-  color: var(--bs-body-color);
   margin: 0;
-  text-align: center;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  line-height: 1.4;
 }
 
-.auth-overlay .btn {
-  min-width: 180px;
-}
 
 .reset-dialog {
   background: var(--bs-body-bg);
@@ -1678,6 +1681,14 @@ body.sidebar-collapsed #editorPane {
   color: #ffffff !important;
 }
 
+#notesMinimizeBtn, #notesMaximizeBtn, #notesRestoreBtn, #notesModeBtn, #exportNotesBtn {
+  background: none;
+  border: none;
+}
+#notesMinimizeBtn:hover, #notesMaximizeBtn:hover, #notesRestoreBtn:hover, #notesModeBtn:hover, #exportNotesBtn:hover {
+  background-color: var(--btn-default-hover);
+}
+
 .btn-outline-secondary {
   background-color: var(--btn-default-bg);
   border: 1px solid var(--btn-default-border);
@@ -1778,6 +1789,7 @@ footer {
   border-radius: 6px;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
+  font-size: 0.8rem;
 }
 
 .quiz-option:hover {

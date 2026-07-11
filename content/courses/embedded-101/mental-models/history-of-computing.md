@@ -26,6 +26,8 @@ int main(void) {
 
 Let's make you familiar with running code on this platform.
 
+---
+
 # Basics
 - On the right, is the code editor. We will use this to write code.
 - Right bottom is the Terminal. The output from code execution will be seen here.
@@ -88,7 +90,7 @@ C introduced structured programming constructs — functions, loops, and conditi
 {{< youtube id="de2Hsvxaf8M" title="Origins of the C Programming Language — from Bell Labs to Modern Systems" >}}
 
 # Computers in 1970s
-
+<!--auth-->
 The key to understanding C is learning to think like an engineer from the 1970s — someone who understood the hardware at a deep level and could look at code and infer what the CPU would do at each step. Figure 1 shows this worldview: storage has code and data that the CPU can access via address and data buses. Following instructions and manipulating stored data, the CPU performs calculations and influences the external world. This mental model is the foundation for everything that follows in embedded systems programming.
 
 <figure id="fig-1" class="fig-center">
@@ -100,11 +102,12 @@ The key to understanding C is learning to think like an engineer from the 1970s 
 
 C's influence extends far beyond its own ecosystem. Modern programming languages including C++, Java, and Python have borrowed syntax and concepts from C, making it a foundational language in computer science education. C continues to be the backbone of operating systems (Windows, macOS, Linux are largely written in C), firmware for smartphones and routers, embedded systems in automotive and medical devices, telecommunications protocols (Ethernet, TCP/IP), and game engines (Unity, Unreal Engine).
 
-# Relevence in today's World
+# Relevance in today's World
 
 Every modern embedded device is a direct descendant of these inventions. Your car contains 50–100 microcontrollers (ECUs) managing everything from engine timing to window motors. The Fitbit on your wrist runs an ARM Cortex-M processor — descendents of the 1985 Acorn RISC Machine. The Intel 4004's 2,300 transistors have become the 16 billion transistors in an Apple M3 Ultra — a ratio of nearly 7 million to one. The critical path: transistors → ICs → microprocessors → microcontrollers → systems-on-chip (SoCs).
 
 C remains an integral part of our technological landscape. Its versatility, performance, and widespread usage across various industries continue to make it a foundational language for software development, powering the technology that shapes our everyday experiences.
+<!--/auth-->
 
 ===QUIZ===
 
@@ -155,3 +158,4 @@ Explanation: C remains foundational across many industries — operating systems
 - [ ] Embedded systems require an operating system to function
 Correct: B
 Explanation: The chapter argues that early computers (Analytical Engine, ENIAC) were dedicated single-purpose machines — essentially "embedded" in their design. The general-purpose stored-program computer was the historical detour, and modern embedded systems reverse this by optimizing for a single task, making them closer in spirit to Babbage's mill than to a desktop CPU.
+

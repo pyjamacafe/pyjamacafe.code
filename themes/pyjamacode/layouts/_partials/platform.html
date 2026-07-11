@@ -111,11 +111,6 @@
         <div style="position:relative;flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column">
           <div class="pane-body article-content overflow-auto p-3 d-none" id="articleContent"></div>
           <div class="pane-body quiz-content overflow-auto p-3 d-none" id="quizContent"></div>
-          <!-- Auth overlay prompt (shown over article content when not logged in) -->
-          <div id="authOverlay" class="auth-overlay">
-            <p>Sign in to view Lecture &amp; Notes</p>
-            <button id="authShowBtn" class="btn btn-sm btn-primary">Sign in</button>
-          </div>
         </div>
       </div>
 
@@ -136,7 +131,7 @@
         </div>
         <div class="notes-body" id="notesBody">
           <div id="notesEditorWrapper" class="notes-editor-wrapper"></div>
-          <textarea id="notesEditor" class="notes-editor w-100 h-100 p-3" spellcheck="false" placeholder="Take notes here..." autocomplete="off" data-1p-ignore></textarea>
+          <textarea id="notesEditor" class="notes-editor w-100 h-100 p-3" spellcheck="false" placeholder="Type your notes here" autocomplete="off" data-1p-ignore></textarea>
           <div id="notesPreview" class="notes-preview overflow-auto p-3 d-none"></div>
         </div>
       </div>
@@ -178,12 +173,6 @@
       </div>
     </div>
   </section>
-
-  <!-- Auth overlay prompt (shown over article content when not logged in) -->
-  <div id="authOverlay" class="auth-overlay">
-    <p>Sign in to view Lecture &amp; Notes</p>
-    <button id="authShowBtn" class="btn btn-sm btn-primary">Sign In / Sign Up</button>
-  </div>
 </div>
 
 <!-- Auth modal -->
