@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T14:17:00+05:30'
-draft = false
+draft = true
 title = 'Declaration vs Definition'
 difficulty = 'medium'
 language = 'c'

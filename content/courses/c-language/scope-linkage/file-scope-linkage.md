@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T13:38:00+05:30'
-draft = false
+draft = true
 title = 'File Scope and External Linkage'
 difficulty = 'medium'
 language = 'c'

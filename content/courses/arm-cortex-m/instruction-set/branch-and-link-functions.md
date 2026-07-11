@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T10:35:00+05:30'
-draft = false
+draft = true
 title = 'Branch Instructions and Function Calls'
 difficulty = 'hard'
 language = 'c'

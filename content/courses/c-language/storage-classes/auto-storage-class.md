@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T14:32:00+05:30'
-draft = false
+draft = true
 title = 'auto Storage Class'
 difficulty = 'easy'
 language = 'c'

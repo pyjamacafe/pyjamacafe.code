@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T13:56:00+05:30'
-draft = false
+draft = true
 title = 'String Copy and Concatenation'
 difficulty = 'easy'
 language = 'c'

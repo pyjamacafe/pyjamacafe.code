@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T13:28:00+05:30'
-draft = false
+draft = true
 title = 'Function Prototypes and Scope'
 difficulty = 'easy'
 language = 'c'

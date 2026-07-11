@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T18:22:00+05:30'
-draft = false
+draft = true
 title = 'FPU Exception Handling'
 difficulty = 'hard'
 language = 'c'

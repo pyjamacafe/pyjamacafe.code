@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T14:23:00+05:30'
-draft = false
+draft = true
 title = 'String Search'
 difficulty = 'medium'
 language = 'c'

@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T14:16:00+05:30'
-draft = false
+draft = true
 title = 'Separate Compilation and Header Files'
 difficulty = 'hard'
 language = 'c'

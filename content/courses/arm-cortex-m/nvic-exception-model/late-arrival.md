@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T10:18:00+05:30'
-draft = false
+draft = true
 title = 'Late Arrival in Exception Handling'
 difficulty = 'hard'
 language = 'c'

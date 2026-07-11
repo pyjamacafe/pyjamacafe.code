@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T10:38:00+05:30'
-draft = false
+draft = true
 title = 'BusFault Analysis and Recovery'
 difficulty = 'medium'
 language = 'c'

@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T13:46:00+05:30'
-draft = false
+draft = true
 title = 'Pointer Arithmetic'
 difficulty = 'medium'
 language = 'c'

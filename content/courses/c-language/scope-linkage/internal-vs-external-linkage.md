@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T14:25:00+05:30'
-draft = false
+draft = true
 title = 'Internal vs External Linkage'
 difficulty = 'medium'
 language = 'c'

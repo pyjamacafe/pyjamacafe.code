@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T13:02:00+05:30'
-draft = false
+draft = true
 title = 'Character Type and _Bool'
 difficulty = 'easy'
 language = 'c'

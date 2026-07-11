@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T11:02:00+05:30'
-draft = false
+draft = true
 title = 'ITM Printf Debugging'
 difficulty = 'easy'
 language = 'c'

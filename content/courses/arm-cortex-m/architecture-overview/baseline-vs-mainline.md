@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T15:01:00+05:30'
-draft = false
+draft = true
 title = 'Baseline vs Mainline Feature Detection'
 difficulty = 'medium'
 language = 'c'

@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T10:11:00+05:30'
-draft = false
+draft = true
 title = 'NSC Region Configuration with SAU'
 difficulty = 'medium'
 language = 'c'

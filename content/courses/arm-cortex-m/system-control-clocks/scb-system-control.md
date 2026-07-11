@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T10:28:00+05:30'
-draft = false
+draft = true
 title = 'System Control Block Configuration'
 difficulty = 'medium'
 language = 'c'

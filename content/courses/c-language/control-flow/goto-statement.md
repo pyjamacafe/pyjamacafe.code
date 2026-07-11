@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T13:26:00+05:30'
-draft = false
+draft = true
 title = 'Goto Statement'
 difficulty = 'medium'
 language = 'c'

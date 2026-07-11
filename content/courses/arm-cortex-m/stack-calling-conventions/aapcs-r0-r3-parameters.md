@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T10:46:00+05:30'
-draft = false
+draft = true
 title = 'AAPCS: R0-R3 Parameter Passing'
 difficulty = 'easy'
 language = 'c'

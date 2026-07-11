@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T18:07:00+05:30'
-draft = false
+draft = true
 title = 'Lazy Floating-Point Stacking'
 difficulty = 'hard'
 language = 'c'

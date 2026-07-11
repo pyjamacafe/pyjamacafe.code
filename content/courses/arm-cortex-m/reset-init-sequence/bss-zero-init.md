@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T18:11:00+05:30'
-draft = false
+draft = true
 title = '.bss Zero-initialisation'
 difficulty = 'easy'
 language = 'c'

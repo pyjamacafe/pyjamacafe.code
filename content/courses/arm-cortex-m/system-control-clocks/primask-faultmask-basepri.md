@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T10:29:00+05:30'
-draft = false
+draft = true
 title = 'PRIMASK, FAULTMASK, and BASEPRI'
 difficulty = 'medium'
 language = 'c'

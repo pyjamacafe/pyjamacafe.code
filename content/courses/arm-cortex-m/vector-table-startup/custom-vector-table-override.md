@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T10:45:00+05:30'
-draft = false
+draft = true
 title = 'Custom Vector Table Override and Weak Aliases'
 difficulty = 'hard'
 language = 'c'

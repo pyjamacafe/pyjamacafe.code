@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T14:26:00+05:30'
-draft = false
+draft = true
 title = 'Name Shadowing and Resolution'
 difficulty = 'medium'
 language = 'c'

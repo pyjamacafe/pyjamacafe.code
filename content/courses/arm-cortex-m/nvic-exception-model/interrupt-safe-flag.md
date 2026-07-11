@@ -1,6 +1,6 @@
 +++
 date = '2026-07-05T22:00:00+05:30'
-draft = false
+draft = true
 title = 'Interrupt-safe Flag'
 difficulty = 'hard'
 language = 'c'

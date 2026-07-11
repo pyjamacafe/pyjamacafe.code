@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T10:25:00+05:30'
-draft = false
+draft = true
 title = 'NVIC Pending Status and Clear'
 difficulty = 'hard'
 language = 'c'

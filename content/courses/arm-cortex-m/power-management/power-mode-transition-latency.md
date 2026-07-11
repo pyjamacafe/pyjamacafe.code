@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T10:59:00+05:30'
-draft = false
+draft = true
 title = 'Power Mode Transition Latency'
 difficulty = 'medium'
 language = 'c'

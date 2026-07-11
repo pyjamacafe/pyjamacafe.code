@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T10:04:00+05:30'
-draft = false
+draft = true
 title = 'Handler Mode vs Thread Mode and Privilege Levels'
 difficulty = 'hard'
 language = 'c'

@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T10:01:00+05:30'
-draft = false
+draft = true
 title = 'Program Counter and Link Register'
 difficulty = 'easy'
 language = 'c'

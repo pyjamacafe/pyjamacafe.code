@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T13:19:00+05:30'
-draft = false
+draft = true
 title = 'Float to Int Conversion'
 difficulty = 'easy'
 language = 'c'

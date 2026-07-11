@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T13:51:00+05:30'
-draft = false
+draft = true
 title = 'Multidimensional Arrays'
 difficulty = 'medium'
 language = 'c'

@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T10:00:00+05:30'
-draft = false
+draft = true
 title = 'R0-R12 General-Purpose Registers'
 difficulty = 'easy'
 language = 'c'

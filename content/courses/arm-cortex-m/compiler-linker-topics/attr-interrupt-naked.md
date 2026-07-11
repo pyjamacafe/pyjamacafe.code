@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T18:23:00+05:30'
-draft = false
+draft = true
 title = 'Interrupt and Naked Function Attributes'
 difficulty = 'medium'
 language = 'c'

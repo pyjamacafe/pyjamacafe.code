@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T14:27:00+05:30'
-draft = false
+draft = true
 title = 'Enum for State Machines'
 difficulty = 'medium'
 language = 'c'

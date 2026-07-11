@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T13:42:00+05:30'
-draft = false
+draft = true
 title = 'Stringification and Token Pasting'
 difficulty = 'hard'
 language = 'c'

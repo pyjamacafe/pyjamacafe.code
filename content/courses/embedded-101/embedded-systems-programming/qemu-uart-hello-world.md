@@ -1,6 +1,6 @@
 +++
 date = '2026-07-10T10:00:00+05:30'
-draft = false
+draft = true
 title = 'QEMU UART Hello World'
 difficulty = 'hard'
 language = 'c'

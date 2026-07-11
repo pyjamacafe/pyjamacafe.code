@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T10:06:00+05:30'
-draft = false
+draft = true
 title = 'MPU Region Configuration'
 difficulty = 'medium'
 language = 'c'

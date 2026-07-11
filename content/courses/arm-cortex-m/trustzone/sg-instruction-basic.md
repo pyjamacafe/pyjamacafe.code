@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T10:10:00+05:30'
-draft = false
+draft = true
 title = 'SG Instruction and Security Gateway Entry'
 difficulty = 'easy'
 language = 'c'

@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T14:24:00+05:30'
-draft = false
+draft = true
 title = 'File Scope vs Block Scope'
 difficulty = 'medium'
 language = 'c'

@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T18:00:00+05:30'
-draft = false
+draft = true
 title = 'DWT Cycle Counter for Profiling'
 difficulty = 'medium'
 language = 'c'

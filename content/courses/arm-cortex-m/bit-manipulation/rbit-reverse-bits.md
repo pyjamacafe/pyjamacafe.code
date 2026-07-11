@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T10:54:00+05:30'
-draft = false
+draft = true
 title = 'RBIT and Bit Reverse Operations'
 difficulty = 'medium'
 language = 'c'

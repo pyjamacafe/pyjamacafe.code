@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T10:51:00+05:30'
-draft = false
+draft = true
 title = 'Bit Field Clear and Insert Operations'
 difficulty = 'easy'
 language = 'c'

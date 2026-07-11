@@ -1,6 +1,6 @@
 +++
 date = '2026-07-10T10:00:00+05:30'
-draft = false
+draft = true
 title = 'Assembly Language: Mnemonics and Instruction Formats'
 difficulty = 'easy'
 language = 'c'

@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T10:13:00+05:30'
-draft = false
+draft = true
 title = 'Secure to Non-Secure Function Call Transitions'
 difficulty = 'hard'
 language = 'c'

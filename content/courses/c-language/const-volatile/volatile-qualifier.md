@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T14:14:00+05:30'
-draft = false
+draft = true
 title = 'Volatile Type Qualifier'
 difficulty = 'hard'
 language = 'c'

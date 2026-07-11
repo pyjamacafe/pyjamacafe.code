@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T18:14:00+05:30'
-draft = false
+draft = true
 title = 'Secure-only Interrupts and Banked NVIC'
 difficulty = 'hard'
 language = 'c'

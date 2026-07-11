@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T13:30:00+05:30'
-draft = false
+draft = true
 title = 'Pass by Value vs Pass by Reference'
 difficulty = 'medium'
 language = 'c'

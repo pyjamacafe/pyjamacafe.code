@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T10:36:00+05:30'
-draft = false
+draft = true
 title = 'Fault Handler Setup and Registration'
 difficulty = 'easy'
 language = 'c'

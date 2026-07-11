@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T14:19:00+05:30'
-draft = false
+draft = true
 title = 'Static Functions in Multi-file Projects'
 difficulty = 'hard'
 language = 'c'

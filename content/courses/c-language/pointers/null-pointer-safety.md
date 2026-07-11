@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T13:49:00+05:30'
-draft = false
+draft = true
 title = 'NULL Pointer Safety'
 difficulty = 'easy'
 language = 'c'

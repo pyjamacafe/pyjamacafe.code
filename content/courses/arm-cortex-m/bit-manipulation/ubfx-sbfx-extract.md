@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T10:52:00+05:30'
-draft = false
+draft = true
 title = 'UBFX and SBFX Bit Field Extract'
 difficulty = 'easy'
 language = 'c'

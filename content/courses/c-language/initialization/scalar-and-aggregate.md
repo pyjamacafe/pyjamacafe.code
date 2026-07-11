@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T14:09:00+05:30'
-draft = false
+draft = true
 title = 'Scalar and Aggregate Initialization'
 difficulty = 'easy'
 language = 'c'

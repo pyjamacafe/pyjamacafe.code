@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T13:59:00+05:30'
-draft = false
+draft = true
 title = 'Self-referential Structures (Linked List)'
 difficulty = 'hard'
 language = 'c'

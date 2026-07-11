@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T13:40:00+05:30'
-draft = false
+draft = true
 title = 'Function-like Macros'
 difficulty = 'medium'
 language = 'c'

@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T18:28:00+05:30'
-draft = false
+draft = true
 title = 'Unaligned Access and Faults'
 difficulty = 'medium'
 language = 'c'

@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T18:16:00+05:30'
-draft = false
+draft = true
 title = 'SAU and IDAU Configuration'
 difficulty = 'hard'
 language = 'c'

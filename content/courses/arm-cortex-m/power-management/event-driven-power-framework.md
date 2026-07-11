@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T11:00:00+05:30'
-draft = false
+draft = true
 title = 'Event-Driven Power Management Framework'
 difficulty = 'hard'
 language = 'c'

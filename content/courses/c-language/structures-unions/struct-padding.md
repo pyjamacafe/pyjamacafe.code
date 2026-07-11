@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T14:02:00+05:30'
-draft = false
+draft = true
 title = 'sizeof and Structure Padding'
 difficulty = 'medium'
 language = 'c'

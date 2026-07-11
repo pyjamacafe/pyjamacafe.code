@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T18:08:00+05:30'
-draft = false
+draft = true
 title = 'Reset Sequence and Vector Fetch'
 difficulty = 'medium'
 language = 'c'

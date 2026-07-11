@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T14:13:00+05:30'
-draft = false
+draft = true
 title = 'const Pointers and Pointer to const'
 difficulty = 'medium'
 language = 'c'

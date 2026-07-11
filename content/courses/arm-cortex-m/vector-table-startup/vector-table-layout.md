@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T10:41:00+05:30'
-draft = false
+draft = true
 title = 'Vector Table Layout and Initialization'
 difficulty = 'easy'
 language = 'c'

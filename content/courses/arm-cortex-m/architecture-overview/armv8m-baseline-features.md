@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T10:19:00+05:30'
-draft = false
+draft = true
 title = 'ARMv8-M Baseline Feature Set'
 difficulty = 'easy'
 language = 'c'

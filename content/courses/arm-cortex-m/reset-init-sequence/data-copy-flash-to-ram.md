@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T18:12:00+05:30'
-draft = false
+draft = true
 title = '.data Copy from Flash to RAM'
 difficulty = 'medium'
 language = 'c'

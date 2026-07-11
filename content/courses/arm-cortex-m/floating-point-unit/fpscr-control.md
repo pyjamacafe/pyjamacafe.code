@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T18:19:00+05:30'
-draft = false
+draft = true
 title = 'FPSCR Control and Status'
 difficulty = 'medium'
 language = 'c'

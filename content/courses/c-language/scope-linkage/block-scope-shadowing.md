@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T13:37:00+05:30'
-draft = false
+draft = true
 title = 'Block Scope and Shadowing'
 difficulty = 'easy'
 language = 'c'

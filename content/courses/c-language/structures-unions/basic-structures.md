@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T13:57:00+05:30'
-draft = false
+draft = true
 title = 'Basic Structures'
 difficulty = 'easy'
 language = 'c'

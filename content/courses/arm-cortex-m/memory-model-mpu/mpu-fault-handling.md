@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T10:09:00+05:30'
-draft = false
+draft = true
 title = 'MPU Fault Handling and Analysis'
 difficulty = 'hard'
 language = 'c'

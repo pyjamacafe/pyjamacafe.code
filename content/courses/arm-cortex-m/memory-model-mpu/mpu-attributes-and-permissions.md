@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T10:07:00+05:30'
-draft = false
+draft = true
 title = 'MPU Attributes and Access Permissions'
 difficulty = 'medium'
 language = 'c'

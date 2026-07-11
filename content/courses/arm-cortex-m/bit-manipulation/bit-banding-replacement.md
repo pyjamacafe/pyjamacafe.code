@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T10:55:00+05:30'
-draft = false
+draft = true
 title = 'Bit-Banding Replacement Techniques'
 difficulty = 'hard'
 language = 'c'

@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T13:27:00+05:30'
-draft = false
+draft = true
 title = 'Function Definition and Call'
 difficulty = 'easy'
 language = 'c'

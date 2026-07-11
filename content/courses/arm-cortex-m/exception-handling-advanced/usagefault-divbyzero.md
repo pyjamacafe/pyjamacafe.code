@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T10:39:00+05:30'
-draft = false
+draft = true
 title = 'UsageFault: Division by Zero and Undefined Instructions'
 difficulty = 'hard'
 language = 'c'

@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T10:53:00+05:30'
-draft = false
+draft = true
 title = 'CLZ and Leading Zero Count'
 difficulty = 'medium'
 language = 'c'

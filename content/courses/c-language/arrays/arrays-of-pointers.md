@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T13:53:00+05:30'
-draft = false
+draft = true
 title = 'Arrays of Pointers'
 difficulty = 'medium'
 language = 'c'

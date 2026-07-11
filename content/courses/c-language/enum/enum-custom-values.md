@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T14:08:00+05:30'
-draft = false
+draft = true
 title = 'Enum with Custom Values'
 difficulty = 'easy'
 language = 'c'

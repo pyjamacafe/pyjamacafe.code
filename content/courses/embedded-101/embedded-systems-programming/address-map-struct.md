@@ -1,6 +1,6 @@
 +++
 date = '2026-07-10T10:00:00+05:30'
-draft = false
+draft = true
 title = 'Address Map and Struct Mapping for Memory-Mapped I/O'
 difficulty = 'hard'
 language = 'c'

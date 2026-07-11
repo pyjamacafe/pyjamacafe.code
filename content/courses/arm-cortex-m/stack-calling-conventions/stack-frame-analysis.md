@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T10:48:00+05:30'
-draft = false
+draft = true
 title = 'Stack Frame Analysis'
 difficulty = 'medium'
 language = 'c'

@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T13:16:00+05:30'
-draft = false
+draft = true
 title = 'Implicit Type Conversion'
 difficulty = 'easy'
 language = 'c'

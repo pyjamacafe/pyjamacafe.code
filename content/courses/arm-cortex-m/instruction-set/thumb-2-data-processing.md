@@ -1,6 +1,6 @@
 +++
 date = '2026-07-06T10:31:00+05:30'
-draft = false
+draft = true
 title = 'Thumb-2 Data Processing Instructions'
 difficulty = 'easy'
 language = 'c'
