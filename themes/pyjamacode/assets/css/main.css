@@ -1107,7 +1107,7 @@ body.sidebar-collapsed #editorPane {
 .code-editor-wrapper .CodeMirror {
   height: 100%;
   font-family: var(--font-mono);
-  font-size: 0.95rem;
+  font-size: 0.875rem;
   line-height: 1.5;
   border: none;
   font-variant-ligatures: none;
