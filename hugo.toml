@@ -9,6 +9,7 @@ theme = 'pyjamacode'
   freeViews = 3
   nudgeDelay = 5000
   judgeUrl = 'https://checker.pyjamacafe.com'
+  mobileBreakpoint = 1280
 
   [params.firebase]
     apiKey = 'AIzaSyC3rYp82RGSZVJrHwq-WrGX-UUgBneAcDo'

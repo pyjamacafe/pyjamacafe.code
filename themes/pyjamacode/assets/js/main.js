@@ -124,6 +124,7 @@ function init() {
     initTypedTitle();
     setupAuth();
     initSidebarToggle();
+    initEditorToggle();
     initSidebarTabs();
     renderQuestionList();
     return;
@@ -208,6 +209,7 @@ function init() {
   if (resetBtn) resetBtn.addEventListener('click', resetCase);
   if (resetAllBtn) resetAllBtn.addEventListener('click', resetAllFiles);
   initSidebarToggle();
+  initEditorToggle();
   initSidebarTabs();
   initBookmarkBtn();
   initProblemNav();
@@ -2041,26 +2043,55 @@ function initProblemNav() {
 function initSidebarToggle() {
   const hideBtn = document.getElementById('sidebarHideBtn');
   const showBtn = document.getElementById('sidebarShowBtn');
+  const closeBtn = document.getElementById('sidebarCloseBtn');
   const sidebar = document.getElementById('sidebarPane');
   const body = document.body;
   if (!hideBtn || !showBtn || !sidebar) return;
 
-  function updateUI(collapsed) {
-    body.classList.toggle('sidebar-collapsed', collapsed);
-    hideBtn.classList.toggle('d-none', collapsed);
-    showBtn.classList.toggle('d-none', !collapsed);
-    hideBtn.setAttribute('title', collapsed ? 'Show sidebar' : 'Collapse sidebar');
-    showBtn.setAttribute('title', collapsed ? 'Show sidebar' : 'Collapse sidebar');
-    sidebar.style.width = '';
+  // Create backdrop for mobile overlay
+  let backdrop = document.querySelector('.sidebar-backdrop');
+  if (!backdrop) {
+    backdrop = document.createElement('div');
+    backdrop.className = 'sidebar-backdrop';
+    document.body.appendChild(backdrop);
   }
 
-  const collapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-  if (collapsed) updateUI(true);
+  function isMobile() {
+    const bp = (window.__APP_CONFIG__ && window.__APP_CONFIG__.mobileBreakpoint) || 800;
+    return window.innerWidth <= bp;
+  }
+
+  function updateUI(collapsed) {
+    if (isMobile()) {
+      sidebar.classList.toggle('sidebar-open', !collapsed);
+      backdrop.classList.toggle('show', !collapsed);
+      showBtn.classList.toggle('d-none', !collapsed);
+      hideBtn.classList.add('d-none');
+      if (closeBtn) closeBtn.classList.toggle('d-none', collapsed);
+    } else {
+      body.classList.toggle('sidebar-collapsed', collapsed);
+      hideBtn.classList.toggle('d-none', collapsed);
+      showBtn.classList.toggle('d-none', !collapsed);
+      sidebar.style.width = '';
+      sidebar.classList.remove('sidebar-open');
+      backdrop.classList.remove('show');
+      if (closeBtn) closeBtn.classList.add('d-none');
+    }
+    hideBtn.setAttribute('title', collapsed ? 'Show sidebar' : 'Collapse sidebar');
+    showBtn.setAttribute('title', collapsed ? 'Show sidebar' : 'Collapse sidebar');
+  }
+
+  // Restore saved state (only for desktop collapse)
+  if (!isMobile() && localStorage.getItem('sidebarCollapsed') === 'true') {
+    updateUI(true);
+  }
 
   function toggle() {
-    const isCollapsed = !body.classList.contains('sidebar-collapsed');
-    updateUI(isCollapsed);
-    localStorage.setItem('sidebarCollapsed', isCollapsed);
+    const isCollapsed = isMobile()
+      ? !sidebar.classList.contains('sidebar-open')
+      : body.classList.contains('sidebar-collapsed');
+    updateUI(!isCollapsed);
+    if (!isMobile()) localStorage.setItem('sidebarCollapsed', !isCollapsed);
     [hideBtn, showBtn].forEach((btn) => {
       if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
         const tp = bootstrap.Tooltip.getInstance(btn);
@@ -2072,6 +2103,110 @@ function initSidebarToggle() {
 
   hideBtn.addEventListener('click', toggle);
   showBtn.addEventListener('click', toggle);
+  if (closeBtn) closeBtn.addEventListener('click', toggle);
+  backdrop.addEventListener('click', () => {
+    if (isMobile()) {
+      sidebar.classList.remove('sidebar-open');
+      backdrop.classList.remove('show');
+      showBtn.classList.remove('d-none');
+    }
+  });
+
+  // Listen for resize to switch between mobile/desktop modes
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      if (isMobile()) {
+        sidebar.classList.remove('sidebar-open');
+        backdrop.classList.remove('show');
+        hideBtn.classList.add('d-none');
+        showBtn.classList.remove('d-none');
+      } else {
+        sidebar.classList.remove('sidebar-open');
+        backdrop.classList.remove('show');
+        const wasCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+        if (wasCollapsed) {
+          body.classList.add('sidebar-collapsed');
+          hideBtn.classList.add('d-none');
+          showBtn.classList.remove('d-none');
+        } else {
+          body.classList.remove('sidebar-collapsed');
+          hideBtn.classList.remove('d-none');
+          showBtn.classList.add('d-none');
+        }
+      }
+      if (closeBtn) closeBtn.classList.toggle('d-none', !isMobile());
+    }, 200);
+  });
+
+  // Initial state on page load
+  if (isMobile()) {
+    sidebar.classList.remove('sidebar-open');
+    backdrop.classList.remove('show');
+    hideBtn.classList.add('d-none');
+    showBtn.classList.remove('d-none');
+    if (closeBtn) closeBtn.classList.remove('d-none');
+  }
+}
+
+function initEditorToggle() {
+  const showBtn = document.getElementById('editorShowBtn');
+  const closeBtn = document.getElementById('editorCloseBtn');
+  const editor = document.getElementById('editorPane');
+  if (!showBtn || !closeBtn || !editor) return;
+
+  let backdrop = document.querySelector('.editor-backdrop');
+  if (!backdrop) {
+    backdrop = document.createElement('div');
+    backdrop.className = 'editor-backdrop';
+    document.body.appendChild(backdrop);
+  }
+
+  function isMobile() {
+    const bp = (window.__APP_CONFIG__ && window.__APP_CONFIG__.mobileBreakpoint) || 800;
+    return window.innerWidth <= bp;
+  }
+
+  function updateUI(open) {
+    editor.classList.toggle('editor-open', open);
+    backdrop.classList.toggle('show', open);
+    showBtn.classList.toggle('d-none', open);
+    closeBtn.classList.toggle('d-none', !open);
+  }
+
+  function openEditor() { if (isMobile()) updateUI(true); }
+  function closeEditor() { if (isMobile()) { updateUI(false); showBtn.classList.remove('d-none'); } }
+
+  showBtn.addEventListener('click', openEditor);
+  closeBtn.addEventListener('click', closeEditor);
+  backdrop.addEventListener('click', closeEditor);
+
+  // Hide everything on desktop resize
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      if (!isMobile()) {
+        editor.classList.remove('editor-open');
+        backdrop.classList.remove('show');
+        showBtn.classList.add('d-none');
+        closeBtn.classList.add('d-none');
+      } else {
+        showBtn.classList.remove('d-none');
+        closeBtn.classList.add('d-none');
+        editor.classList.remove('editor-open');
+        backdrop.classList.remove('show');
+      }
+    }, 200);
+  });
+
+  // Initial state
+  if (isMobile()) {
+    showBtn.classList.remove('d-none');
+    closeBtn.classList.add('d-none');
+    editor.classList.remove('editor-open');
+  }
 }
 
 function initVimeoPlayers(root) {
@@ -3050,6 +3185,16 @@ function initSync() {
     origPersistNotes();
   };
 }
+
+// Inline responsive breakpoint — applied before any render
+(function() {
+  var bp = window.__APP_CONFIG__ && window.__APP_CONFIG__.mobileBreakpoint;
+  if (bp && typeof bp === 'number') {
+    var style = document.createElement('style');
+    style.textContent = '@media (max-width:' + bp + 'px){.console-resizer{display:none!important}#resizerCasesCase{display:none!important}#questionPane{width:100%!important;flex:1}#sidebarPane{position:fixed;top:56px;left:0;bottom:0;z-index:1040;width:320px!important;max-width:85vw;background:var(--bs-body-bg);border-right:1px solid var(--border-color);transform:translateX(-100%);transition:transform 0.25s ease;overflow-y:auto;box-shadow:4px 0 12px rgba(0,0,0,0.15)}#sidebarPane.sidebar-open{transform:translateX(0)}#sidebarPane .sidebar-close{display:flex!important}.sidebar-backdrop{display:none;position:fixed;inset:0;z-index:1039;background:rgba(0,0,0,0.4)}.sidebar-backdrop.show{display:block}#editorPane{position:fixed;top:56px;left:0;bottom:0;z-index:1040;width:100vw;background:var(--bs-body-bg);border-left:1px solid var(--border-color);transform:translateX(100%);transition:transform 0.25s ease;box-shadow:-4px 0 12px rgba(0,0,0,0.15);display:flex!important;flex-direction:column}#editorPane.editor-open{transform:translateX(0)}#editorPane .editor-close{display:flex!important}.editor-backdrop{display:none;position:fixed;inset:0;z-index:1039;background:rgba(0,0,0,0.4)}.editor-backdrop.show{display:block}}';
+    document.head.appendChild(style);
+  }
+})();
 
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', init);
