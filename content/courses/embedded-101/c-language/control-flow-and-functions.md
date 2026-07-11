@@ -8,7 +8,7 @@ topic_weight = -18
 subtopic_weight = 3
 weight = 4
 initial_code = '''/*
- * Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+ * Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
  * All Rights Reserved.
  *
  * Description: Demonstrates function calls and if-else control flow in C.

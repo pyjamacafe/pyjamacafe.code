@@ -8,7 +8,7 @@ topic_weight = -19
 subtopic_weight = 2
 weight = 1
 initial_code = '''/*
- * Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+ * Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
  * All Rights Reserved.
  *
  * Description: RISC-V RV32I assembly program demonstrating add/addi
@@ -226,7 +226,7 @@ Full compilable example with annotated binary encodings.
 
 ```asm {title="add.s"}
 /*
- * Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+ * Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
  * All Rights Reserved.
  *
  * Description: RISC-V assembly with annotated binary encodings.
@@ -242,7 +242,7 @@ _start:
 ```
 
 ```makefile {title="Makefile"}
-# Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+# Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
 # All Rights Reserved.
 #
 # Description: Makefile for assembling RISC-V assembly into an ELF binary.

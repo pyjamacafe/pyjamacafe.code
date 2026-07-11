@@ -8,7 +8,7 @@ topic_weight = -17
 subtopic_weight = 4
 weight = 1
 initial_code = '''/*
- * Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+ * Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
  * All Rights Reserved.
  *
  * Description: Calls an assembly add function from C and writes result to memory.
@@ -266,7 +266,7 @@ a2             0xc      12
 
 ```c {title="main.c"}
 /*
- * Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+ * Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
  * All Rights Reserved.
  */
 extern int add(int a, int b);
@@ -281,7 +281,7 @@ int main(void) {
 
 ```asm {title="add.S"}
 /*
- * Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+ * Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
  * All Rights Reserved.
  *
  * Description: Assembly implementation of add() and _start entry point.
@@ -300,7 +300,7 @@ add:
 ```
 
 ```makefile {title="Makefile"}
-# Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+# Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
 # All Rights Reserved.
 #
 # Description: Build system for mixed C and assembly RISC-V project.

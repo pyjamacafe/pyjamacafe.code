@@ -8,7 +8,7 @@ topic_weight = -19
 subtopic_weight = 2
 weight = 2
 initial_code = '''/*
- * Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+ * Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
  * All Rights Reserved.
  *
  * Description: RISC-V RV32I assembly program that adds two values using
@@ -200,7 +200,7 @@ Example RISC-V program that adds two numbers using temporary registers.
 
 ```asm {title="add.s"}
 /*
- * Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+ * Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
  * All Rights Reserved.
  *
  * Description: RISC-V assembly that adds two numbers using temp registers.
@@ -216,7 +216,7 @@ _start:
 ```
 
 ```makefile {title="Makefile"}
-# Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+# Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
 # All Rights Reserved.
 #
 # Description: Makefile for assembling RISC-V assembly into an ELF binary.

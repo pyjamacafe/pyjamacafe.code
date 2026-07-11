@@ -8,7 +8,7 @@ topic_weight = -20
 subtopic_weight = 1
 weight = 4
 initial_code = '''/*
- * Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+ * Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
  * All Rights Reserved.
  *
  * Description: RV32I example — compute (a + b) - c and return the result.

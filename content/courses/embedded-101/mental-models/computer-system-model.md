@@ -8,7 +8,7 @@ topic_weight = -20
 subtopic_weight = 1
 weight = 2
 initial_code = '''/*
- * Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+ * Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
  * All Rights Reserved.
  *
  * Description: Demonstrates load-store model — memory read, ALU operation, and peripheral output.

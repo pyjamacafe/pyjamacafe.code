@@ -8,7 +8,7 @@ topic_weight = -20
 subtopic_weight = 1
 weight = 3
 initial_code = '''/*
- * Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+ * Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
  * All Rights Reserved.
  *
  * Description: Demonstrates function call and return — a simple add procedure.

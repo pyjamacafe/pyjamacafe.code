@@ -8,7 +8,7 @@ topic_weight = -20
 subtopic_weight = 1
 weight = 5
 initial_code = '''/*
- * Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+ * Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
  * All Rights Reserved.
  *
  * Description: Hello World program for RISC-V target, compiled with cross-toolchain.
@@ -43,7 +43,7 @@ This exact toolchain setup is used by SiFive, Microchip (PolarFire SoC), and the
 ===CODE===
 
 ```makefile {title="Makefile"}
-# Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+# Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
 # All Rights Reserved.
 #
 # Description: Build automation for bare-metal RISC-V firmware using cross-compilation toolchain.
@@ -71,7 +71,7 @@ clean:
 
 ```c {title="main.c"}
 /*
- * Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+ * Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
  * All Rights Reserved.
  *
  * Description: Hello World for RISC-V QEMU virt machine.
@@ -86,7 +86,7 @@ int main(void) {
 
 ```ld {title="linker.ld"}
 /*
- * Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+ * Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
  * All Rights Reserved.
  *
  * Description: Linker script defining memory layout for RISC-V QEMU virt machine.

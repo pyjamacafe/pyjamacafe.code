@@ -8,7 +8,7 @@ topic_weight = -18
 subtopic_weight = 3
 weight = 1
 initial_code = '''/*
- * Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+ * Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
  * All Rights Reserved.
  *
  * Description: Prints the sizes of C fundamental data types using sizeof.

@@ -8,7 +8,7 @@ topic_weight = -19
 subtopic_weight = 2
 weight = 3
 initial_code = '''/*
- * Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+ * Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
  * All Rights Reserved.
  *
  * Description: RISC-V assembly demonstrating use of .equ directive for
@@ -213,7 +213,7 @@ Example demonstrating various assembler directives with annotations.
 
 ```asm {title="directives.s"}
 /*
- * Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+ * Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
  * All Rights Reserved.
  *
  * Description: RISC-V assembly demonstrating .equ, .section, .rodata,
@@ -246,7 +246,7 @@ _start:
 ```
 
 ```makefile {title="Makefile"}
-# Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+# Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
 # All Rights Reserved.
 #
 # Description: Makefile for assembling the directives example into an ELF.

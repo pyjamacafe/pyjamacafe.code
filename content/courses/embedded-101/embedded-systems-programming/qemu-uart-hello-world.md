@@ -8,7 +8,7 @@ topic_weight = -17
 subtopic_weight = 4
 weight = 5
 initial_code = '''/*
- * Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+ * Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
  * All Rights Reserved.
  *
  * Description: Bare-metal UART "Hello, World!" for QEMU RISC-V virt machine.
@@ -228,7 +228,7 @@ The UART driver polls the Line Status Register's THR empty bit before writing ea
 
 ```asm {title="start.S"}
 /*
- * Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+ * Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
  * All Rights Reserved.
  *
  * Description: Minimal startup code — sets sp and jumps to main().
@@ -244,7 +244,7 @@ loop:
 
 ```c {title="main.c"}
 /*
- * Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+ * Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
  * All Rights Reserved.
  *
  * Description: Bare-metal UART echo program for QEMU RISC-V virt machine.
@@ -287,7 +287,7 @@ int main(void) {
 ```
 
 ```makefile {title="Makefile"}
-# Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+# Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
 # All Rights Reserved.
 #
 # Description: Build system for bare-metal UART hello world.
@@ -315,7 +315,7 @@ run: program.elf
 
 ```ld {title="link.ld"}
 /*
- * Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+ * Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
  * All Rights Reserved.
  *
  * Description: Linker script for bare-metal UART project on QEMU virt.

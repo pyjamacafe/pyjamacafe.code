@@ -8,7 +8,7 @@ topic_weight = -19
 subtopic_weight = 2
 weight = 4
 initial_code = '''/*
- * Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+ * Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
  * All Rights Reserved.
  *
  * Description: RISC-V assembly demonstrating multi-file linking with a
@@ -206,7 +206,7 @@ Multi-file example demonstrating separate compilation and linking.
 
 ```asm {title="main.s"}
 /*
- * Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+ * Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
  * All Rights Reserved.
  *
  * Description: RISC-V main module that calls an external add_numbers function.
@@ -223,7 +223,7 @@ _start:
 
 ```asm {title="math.s"}
 /*
- * Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+ * Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
  * All Rights Reserved.
  *
  * Description: RISC-V math module providing add_numbers for external linking.
@@ -237,7 +237,7 @@ add_numbers:
 
 ```ld {title="link.ld"}
 /*
- * Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+ * Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
  * All Rights Reserved.
  *
  * Description: Linker script placing .text at 0x80000000 for RISC-V QEMU.
@@ -255,7 +255,7 @@ SECTIONS
 ```
 
 ```makefile {title="Makefile"}
-# Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+# Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
 # All Rights Reserved.
 #
 # Description: Makefile for multi-file linking with a custom linker script.

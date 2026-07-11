@@ -8,7 +8,7 @@ topic_weight = -20
 subtopic_weight = 1
 weight = 1
 initial_code = '''/*
- * Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+ * Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
  * All Rights Reserved.
  *
  * Description: Simple Hello World program demonstrating C basics.
@@ -16,17 +16,53 @@ initial_code = '''/*
 #include <stdio.h>
 
 int main(void) {
-    printf("Hello from 2026\n");
+    printf("Welcome to PyjamaCafe!\n");
     return 0;
 }
 '''
 +++
 
-## Problem Statement
+## Warm up!!
 
-Trace how computing evolved from mechanical calculators to modern embedded systems. What key inventions made embedded systems possible? Identify the breakthrough that transformed room-sized mainframes into the tiny microcontrollers found in billions of everyday devices.
+Let's make you familiar with running code on this platform.
 
-## Theory and Concepts
+# Basics
+- On the right, is the code editor. We will use this to write code.
+- Right bottom is the Terminal. The output from code execution will be seen here.
+- You can type basic linux commands at the `$` prompt in the terminal.
+- The code editor has files with the names tab on the top. `main.c` in this case.
+- Clicking the `Check` button will compile and run the code in the code editor. The `Reset` button restores the code.
+
+# You Try:
+1. Hit the `Check` button. You should see the output in the terminal like:
+    ```shell
+    All test cases passed.
+    Welcome to PyjamaCafe!
+
+    Exit code: 0
+    ```
+    - Line #2 from above is the output as a result of #10 in `main.c`
+    - Line #1 and #4 are outputs appended by us to convey the state of the tests and the exit code of the program.
+1. Modify the `Hello from 2026` line to something else and execute the code again. Check the output.
+1. Type `uname` at the `$` in the terminal and hit the Return/Enter key. You should see an output like so
+    ```shell
+    $ uname
+    Linux
+    ```
+
+# For later
+
+You are not expected to understand the code in the Code editor. This is something we will discover and learn in the chapters to come.
+
+===EXPLANATION===
+
+The history of computing is not a smooth linear progression — it is a series of discontinuous leaps driven by physics, war, and business. The mechanical era ended not because Babbage's designs were wrong (they were brilliant) but because machining couldn't reliably produce gears to the required tolerance. The electromechanical era died when it became clear that relays would never be fast enough for complex calculations.
+
+Each era created a bottleneck that the next era's invention shattered. The transistor didn't just make computers smaller — it made them cheaper by a factor of millions, which is what made embedded systems economically viable. A vacuum-tube computer controlling a toaster would cost $200,000; a microcontroller costs $0.50.
+
+# Timeline
+
+{{< youtube id="qundvme1Tik" title="Computer History Documentary — From Mechanical to Modern" >}}
 
 - **Mechanical era (1600s–1930s)**: Pascal's Pascaline (1642), Leibniz's Step Reckoner, and Babbage's Difference Engine (1822) and Analytical Engine (1837) — the first general-purpose computer design with separate "mill" (CPU) and "store" (memory), programmed via punched cards inspired by Jacquard looms.
 - **Electromechanical era (1930s–1940s)**: Zuse's Z3 (1941, Germany) — first working programmable electromechanical computer. Howard Aiken's Harvard Mark I (1944) — 51 feet long, 5 tons, 765,000 components.
@@ -35,58 +71,40 @@ Trace how computing evolved from mechanical calculators to modern embedded syste
 - **Integrated Circuit (1958–1970s)**: Jack Kilby (TI) and Robert Noyce (Fairchild) independently invented the IC. The first microprocessor — Intel 4004 (1971) — had 2,300 transistors at 740 kHz. Intel 8080 (1974) powered the Altair 8800. The 8051 microcontroller (1980) integrated CPU, RAM, ROM, and I/O on one chip — the birth of the embedded system.
 - **Modern era (1990s–present)**: ARM architecture (1985, Acorn), RISC-V (2010, UC Berkeley). Today's microcontrollers pack millions of transistors, multiple cores, and wireless radios on a single chip costing pennies. The Raspberry Pi Pico RP2040 (2021) — dual-core Cortex-M0+, 264 KB SRAM, for $1.
 
-## Real World Application
+{{< youtube id="wsirYCAocZk" title="Computer History Documentary — The Electronic Era" >}}
 
-Every modern embedded device is a direct descendant of these inventions. Your car contains 50–100 microcontrollers (ECUs) managing everything from engine timing to window motors. The Fitbit on your wrist runs an ARM Cortex-M processor — descendents of the 1985 Acorn RISC Machine. The Intel 4004's 2,300 transistors have become the 16 billion transistors in an Apple M3 Ultra — a ratio of nearly 7 million to one. The critical path: transistors → ICs → microprocessors → microcontrollers → systems-on-chip (SoCs).
+# Embedded Computer?
 
-===EXPLANATION===
+The key insight is that embedded systems are not simplifications of desktop computers — they are a return to the original computing model. The Analytical Engine was a dedicated machine designed to solve specific mathematical problems. The ENIAC was built to calculate artillery tables. The earliest computers were all "embedded" in the sense that they were built for a single purpose, housed in a single room. The general-purpose, stored-program computer (the von Neumann architecture) was the detour — it allowed one machine to do anything, but at the cost of efficiency.
 
-## Origins of C
+Embedded systems reverse this: they optimize for a single task (control a motor, read a sensor, send a packet) and strip away everything unnecessary. A modern microcontroller is closer in spirit to Babbage's mill than to a desktop CPU.
 
-The history of computing is not a smooth linear progression — it is a series of discontinuous leaps driven by physics, war, and business. The mechanical era ended not because Babbage's designs were wrong (they were brilliant) but because精密 machining couldn't reliably produce gears to the required tolerance. The electromechanical era died when it became clear that relays would never be fast enough for complex calculations. Each era created a bottleneck that the next era's invention shattered. The transistor didn't just make computers smaller — it made them cheaper by a factor of millions, which is what made embedded systems economically viable. A vacuum-tube computer controlling a toaster would cost $200,000; a microcontroller costs $0.50.
+# The C Language
 
-The key insight is that embedded systems are not simplifications of desktop computers — they are a return to the original computing model. The Analytical Engine was a dedicated machine designed to solve specific mathematical problems. The ENIAC was built to calculate artillery tables. The earliest computers were all "embedded" in the sense that they were built for a single purpose, housed in a single room. The general-purpose, stored-program computer (the von Neumann architecture) was the detour — it allowed one machine to do anything, but at the cost of efficiency. Embedded systems reverse this: they optimize for a single task (control a motor, read a sensor, send a packet) and strip away everything unnecessary. A modern microcontroller is closer in spirit to Babbage's mill than to a desktop CPU.
+The C programming language itself has a rich history tied to this computing evolution. Developed by Dennis Ritchie at Bell Labs in the early 1970s, C originated as a successor to the B programming language (which itself descended from BCPL). C was designed with simplicity and portability in mind — providing a concise set of features and a small standard library that allowed programs to be easily transferred between different hardware platforms. Its significance cannot be overstated: the UNIX operating system was rewritten in C, and UNIX's adoption by academia and industry catapulted C to worldwide prominence.
 
-The C programming language itself has a rich history tied to this computing evolution. Developed by Dennis Ritchie at Bell Labs in the early 1970s, C originated as a successor to the B programming language (which itself descended from BCPL). C was designed with simplicity and portability in mind — providing a concise set of features and a small standard library that allowed programs to be easily transferred between different hardware platforms. Its significance cannot be overstated: the UNIX operating system was rewritten in C, and UNIX's adoption by academia and industry catapulted C to worldwide prominence. C introduced structured programming constructs — functions, loops, and conditional statements — that promoted code organization and modularity. At the same time, it provided direct memory access and manual control over hardware resources, making it uniquely suited for system-level programming, embedded systems, and operating system development. For a deeper dive, Brian Kernighan (one of Unix's inventors) discusses the history of C in the Computerphile video linked in Figure 1.
+C introduced structured programming constructs — functions, loops, and conditional statements — that promoted code organization and modularity. At the same time, it provided direct memory access and manual control over hardware resources, making it uniquely suited for system-level programming, embedded systems, and operating system development. For a deeper dive, Brian Kernighan (one of Unix's inventors) discusses the history of C in the Computerphile video below.
 
-<figure id="fig-1" class="fig-right">
-  <img src="/images/embedded-101/mental-models/c-origin.jpeg" alt="C Origin">
-  <figcaption><a href="#fig-1" class="fig-link">Figure 1:</a> Origin of the C programming language in computing history</figcaption>
+{{< youtube id="de2Hsvxaf8M" title="Origins of the C Programming Language — from Bell Labs to Modern Systems" >}}
+
+# Computers in 1970s
+
+The key to understanding C is learning to think like an engineer from the 1970s — someone who understood the hardware at a deep level and could look at code and infer what the CPU would do at each step. Figure 1 shows this worldview: storage has code and data that the CPU can access via address and data buses. Following instructions and manipulating stored data, the CPU performs calculations and influences the external world. This mental model is the foundation for everything that follows in embedded systems programming.
+
+<figure id="fig-1" class="fig-center">
+  <img src="/images/embedded-101/mental-models/1970s-world-view.jpeg" alt="1970s World View">
+  <figcaption><a href="#fig-1" class="fig-link">Figure 1:</a> How engineers in the 1970s thought about computer systems — storage containing code and data that the CPU can access</figcaption>
 </figure>
 
-<figure id="fig-2" class="fig-right">
-  <img src="/images/embedded-101/mental-models/qr-comp-history-1.png" alt="QR Code for Computer History Video 1">
-  <figcaption><a href="#fig-2" class="fig-link">Figure 2:</a> QR code link to computer history documentary — https://youtu.be/qundvme1Tik</figcaption>
-</figure>
-
-<figure id="fig-3" class="fig-right">
-  <img src="/images/embedded-101/mental-models/qr-comp-history-2.png" alt="QR Code for Computer History Video 2">
-  <figcaption><a href="#fig-3" class="fig-link">Figure 3:</a> QR code link to computer history documentary — https://youtu.be/wsirYCAocZk</figcaption>
-</figure>
-
-## Influence
+# Influence
 
 C's influence extends far beyond its own ecosystem. Modern programming languages including C++, Java, and Python have borrowed syntax and concepts from C, making it a foundational language in computer science education. C continues to be the backbone of operating systems (Windows, macOS, Linux are largely written in C), firmware for smartphones and routers, embedded systems in automotive and medical devices, telecommunications protocols (Ethernet, TCP/IP), and game engines (Unity, Unreal Engine).
 
-<figure id="fig-4" class="fig-right">
-  <img src="/images/embedded-101/mental-models/1970s-comp-documentary.jpeg" alt="1970s Computer Documentary">
-  <figcaption><a href="#fig-4" class="fig-link">Figure 4:</a> 1970s computer systems documentary reference</figcaption>
-</figure>
+# Relevence in today's World
 
-## Computers in 1970s
-
-The key to understanding C is learning to think like an engineer from the 1970s — someone who understood the hardware at a deep level and could look at code and infer what the CPU would do at each step. Figure 5 shows this worldview: storage has code and data that the CPU can access via address and data buses. Following instructions and manipulating stored data, the CPU performs calculations and influences the external world. This mental model is the foundation for everything that follows in embedded systems programming.
-
-## Relevence
+Every modern embedded device is a direct descendant of these inventions. Your car contains 50–100 microcontrollers (ECUs) managing everything from engine timing to window motors. The Fitbit on your wrist runs an ARM Cortex-M processor — descendents of the 1985 Acorn RISC Machine. The Intel 4004's 2,300 transistors have become the 16 billion transistors in an Apple M3 Ultra — a ratio of nearly 7 million to one. The critical path: transistors → ICs → microprocessors → microcontrollers → systems-on-chip (SoCs).
 
 C remains an integral part of our technological landscape. Its versatility, performance, and widespread usage across various industries continue to make it a foundational language for software development, powering the technology that shapes our everyday experiences.
-
-<figure id="fig-5" class="fig-center">
-  <img src="/images/embedded-101/mental-models/1970s-world-view.jpeg" alt="1970s World View">
-  <figcaption><a href="#fig-5" class="fig-link">Figure 5:</a> How engineers in the 1970s thought about computer systems — storage containing code and data that the CPU can access</figcaption>
-</figure>
-
-References: Patterson & Hennessy, "Computer Organization and Design" RISC-V Edition, Ch. 1; Ceruzzi, "A History of Modern Computing" (MIT Press, 2003); Intel 4004 datasheet (1971); Zuse Z3 documentation (Deutsches Museum). For the mechanical era, "The Analytical Engine" by Charles Babbage (1864, reprinted by Pickering & Chatto). For C language history: "The C Programming Language" by Kernighan & Ritchie (Prentice Hall, 1978); Brian Kernighan's Computerphile interview (youtube.com/watch?v=de2Hsvxaf8M).
 
 ===QUIZ===
 

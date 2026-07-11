@@ -8,7 +8,7 @@ topic_weight = -17
 subtopic_weight = 4
 weight = 3
 initial_code = '''/*
- * Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+ * Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
  * All Rights Reserved.
  *
  * Description: Minimal linker script placing code in FLASH and data in RAM.
@@ -132,7 +132,7 @@ The startup code uses these symbols to copy .data from flash to RAM (using `_sda
 
 ```asm {title="start.S"}
 /*
- * Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+ * Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
  * All Rights Reserved.
  *
  * Description: Startup code that copies .data, clears .bss, then jumps to main().
@@ -167,7 +167,7 @@ loop:
 
 ```c {title="main.c"}
 /*
- * Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+ * Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
  * All Rights Reserved.
  *
  * Description: Tests initialized and zero-initialized global variables.
@@ -184,7 +184,7 @@ int main(void) {
 ```
 
 ```makefile {title="Makefile"}
-# Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+# Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
 # All Rights Reserved.
 #
 # Description: Build system for bare-metal RISC-V project with linker script.
@@ -215,7 +215,7 @@ run: program.elf
 
 ```ld {title="link.ld"}
 /*
- * Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+ * Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
  * All Rights Reserved.
  *
  * Description: Linker script with FLASH and RAM regions, .data copy support.

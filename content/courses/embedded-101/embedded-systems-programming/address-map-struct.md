@@ -8,7 +8,7 @@ topic_weight = -17
 subtopic_weight = 4
 weight = 4
 initial_code = '''/*
- * Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+ * Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
  * All Rights Reserved.
  *
  * Description: UART register map struct for 16550-compatible UART on QEMU virt.
@@ -227,7 +227,7 @@ Every embedded C codebase that interacts with hardware uses MMIO struct mapping.
 
 ```c {title="uart.h"}
 /*
- * Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+ * Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
  * All Rights Reserved.
  *
  * Description: UART register map and driver header for 16550 UART on QEMU virt.
@@ -264,7 +264,7 @@ void uart_init(void);
 
 ```c {title="uart.c"}
 /*
- * Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+ * Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
  * All Rights Reserved.
  *
  * Description: UART driver implementation for 16550 UART.
@@ -293,7 +293,7 @@ void uart_putc(char c) {
 
 ```asm {title="start.S"}
 /*
- * Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+ * Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
  * All Rights Reserved.
  *
  * Description: Minimal startup code for bare-metal RISC-V.
@@ -308,7 +308,7 @@ loop:
 ```
 
 ```makefile {title="Makefile"}
-# Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+# Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
 # All Rights Reserved.
 #
 # Description: Build system for UART driver project.
@@ -336,7 +336,7 @@ run: program.elf
 
 ```ld {title="link.ld"}
 /*
- * Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+ * Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
  * All Rights Reserved.
  *
  * Description: Linker script for bare-metal RISC-V QEMU virt machine.

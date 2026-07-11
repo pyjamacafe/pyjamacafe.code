@@ -8,7 +8,7 @@ topic_weight = -17
 subtopic_weight = 4
 weight = 2
 initial_code = '''/*
- * Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+ * Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
  * All Rights Reserved.
  *
  * Description: Minimal RISC-V startup code — sets stack pointer and jumps to main().
@@ -162,7 +162,7 @@ There are a few more housekeeping items that well-formed startup code handles: i
 
 ```asm {title="start.S"}
 /*
- * Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+ * Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
  * All Rights Reserved.
  *
  * Description: Minimal RISC-V startup code — sets sp and jumps to main().
@@ -178,7 +178,7 @@ loop:
 
 ```c {title="main.c"}
 /*
- * Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+ * Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
  * All Rights Reserved.
  *
  * Description: Blinks a GPIO LED with a busy-wait delay.
@@ -198,7 +198,7 @@ int main(void) {
 ```
 
 ```makefile {title="Makefile"}
-# Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+# Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
 # All Rights Reserved.
 #
 # Description: Build system for bare-metal RISC-V project.
@@ -226,7 +226,7 @@ run: program.elf
 
 ```ld {title="link.ld"}
 /*
- * Copyright © 2025 Typobrahe Education LLP (pyjamacafe.com)
+ * Copyright © 2026 Typobrahe Education LLP (pyjamacafe.com)
  * All Rights Reserved.
  *
  * Description: Linker script for bare-metal RISC-V QEMU virt machine.
