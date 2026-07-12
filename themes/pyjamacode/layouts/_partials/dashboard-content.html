@@ -95,9 +95,32 @@
         if (loading) loading.style.display = 'none';
         var resumeBtn = document.getElementById('dashboardResumeBtn');
         var saved = localStorage.getItem('lastProblemUrl');
-        if (resumeBtn && saved && saved.includes('/courses/')) {
+        if (resumeBtn) {
           resumeBtn.style.display = '';
-          resumeBtn.onclick = function() { window.location.href = saved; };
+          if (saved && saved.includes('/courses/')) {
+            resumeBtn.textContent = 'Resume';
+            resumeBtn.onclick = function() {
+              var tab = localStorage.getItem('lastProblemTab');
+              var url = saved;
+              if (tab && tab !== 'challenge') url += (url.indexOf('?') === -1 ? '?' : '&') + 'tab=' + tab;
+              window.location.href = url;
+            };
+          } else {
+            resumeBtn.textContent = 'Start Learning';
+            resumeBtn.onclick = function() {
+              try {
+                var data = document.getElementById('problem-data');
+                if (data) {
+                  var qs = JSON.parse(data.textContent);
+                  var topics = {};
+                  qs.forEach(function(q) { if (!q.isIntro && q.topic && !topics[q.topic]) topics[q.topic] = q.topic_weight || 99; });
+                  var sorted = Object.keys(topics).sort(function(a, b) { return (topics[a] || 99) - (topics[b] || 99); });
+                  if (sorted.length) { window.location.href = '/courses/' + sorted[0] + '/'; return; }
+                }
+              } catch (e) {}
+              window.location.href = '/dashboard/';
+            };
+          }
         }
       } else if (typeof isAuthReady === 'undefined' || !isAuthReady()) {
         setTimeout(checkUser, 200);

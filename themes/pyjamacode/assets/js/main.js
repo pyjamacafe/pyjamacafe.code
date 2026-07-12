@@ -102,8 +102,6 @@ function authNudgeEnabled() {
 
 let codeMirror = null;
 let notesCodeMirror = null;
-let saveTimeout = null;
-let notesSaveTimeout = null;
 let isSettingValue = false;
 let isSettingNotesValue = false;
 let notesPreviewMode = true;
@@ -277,17 +275,39 @@ function init() {
     }, nudgeDelay);
   };
 
-  // Resume button in dropdown — navigate to last saved problem
-  const resumeLink = document.getElementById('resumeLink');
-  if (resumeLink) {
-    resumeLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      const saved = localStorage.getItem('lastProblemUrl');
-      if (saved && saved.includes('/courses/')) {
-        window.location.href = saved;
-      }
-    });
+  // Resume button in dropdown — navigate to last saved problem + tab
+  function setupResumeLink(link) {
+    if (!link) return;
+    var saved = localStorage.getItem('lastProblemUrl');
+    if (saved && saved.includes('/courses/')) {
+      link.textContent = 'Resume';
+      link.onclick = function(e) {
+        e.preventDefault();
+        var tab = localStorage.getItem('lastProblemTab');
+        var url = saved;
+        if (tab && tab !== 'challenge') url += (url.indexOf('?') === -1 ? '?' : '&') + 'tab=' + tab;
+        window.location.href = url;
+      };
+    } else {
+      link.textContent = 'Start Learning';
+      link.onclick = function(e) {
+        e.preventDefault();
+        // Navigate to the first course landing page
+        if (questions.length) {
+          var topics = {};
+          questions.forEach(function(q) {
+            if (!q.isIntro && q.topic && !topics[q.topic]) topics[q.topic] = q.topic_weight || 99;
+          });
+          var sorted = Object.keys(topics).sort(function(a, b) { return (topics[a] || 99) - (topics[b] || 99); });
+          if (sorted.length) window.location.href = '/courses/' + sorted[0] + '/';
+          else window.location.href = '/dashboard/';
+        } else {
+          window.location.href = '/dashboard/';
+        }
+      };
+    }
   }
+  setupResumeLink(resumeLink);
   if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
   if (notesModeBtn) notesModeBtn.addEventListener('click', toggleNotesMode);
   if (exportNotesBtn) exportNotesBtn.addEventListener('click', exportNotes);
@@ -607,6 +627,24 @@ function initNotesCodeMirror() {
       }
     }
   });
+
+  notesCodeMirror.on('blur', function() {
+    if (activeQuestionId && getNotesEditorValue() !== notes[activeQuestionId]) {
+      saveCurrentNotes();
+      try {
+        var user = firebase.auth().currentUser;
+        if (user) {
+          window._isPushingLocally = true;
+          firebase.firestore().collection('users').doc(user.uid).collection('notes').doc(activeQuestionId).set({
+            content: notes[activeQuestionId] || '',
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          }).then(function() {
+            setTimeout(function() { window._isPushingLocally = false; }, 2000);
+          }).catch(function() { window._isPushingLocally = false; });
+        }
+      } catch (e) {}
+    }
+  });
 }
 
 function getNotesEditorValue() {
@@ -745,19 +783,25 @@ function saveCurrentNotes() {
   persistNotes();
 }
 
-function debounceSaveCurrentNotes() {
-  if (notesSaveTimeout) {
-    clearTimeout(notesSaveTimeout);
-  }
-  notesSaveTimeout = setTimeout(() => {
-    saveCurrentNotes();
-  }, 500);
-}
-
 function setNotesPreviewMode(preview, approximateLine = null) {
   notesPreviewMode = preview;
   if (notesPreviewMode) {
     saveCurrentNotes();
+    // Push notes to cloud when switching to preview mode
+    if (activeQuestionId && notes[activeQuestionId]) {
+      try {
+        var user = firebase.auth().currentUser;
+        if (user) {
+          window._isPushingLocally = true;
+          firebase.firestore().collection('users').doc(user.uid).collection('notes').doc(activeQuestionId).set({
+            content: notes[activeQuestionId] || '',
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          }).then(function() {
+            setTimeout(function() { window._isPushingLocally = false; }, 2000);
+          }).catch(function() { window._isPushingLocally = false; });
+        }
+      } catch (e) {}
+    }
     renderNotesPreview();
     if (notesEditorWrapper) notesEditorWrapper.classList.add('d-none');
     if (notesEditorEl) notesEditorEl.style.display = 'none';
@@ -1165,8 +1209,13 @@ function selectQuestion(id) {
   if (tabQuiz) {
     tabQuiz.classList.toggle('d-none', !hasQuiz);
   }
-  // When navigating to a new problem, start on the Lecture tab if available
-  setActiveTab(hasArticle ? 'explanation' : 'challenge');
+  // Restore last tab for this problem, or default to Lecture if available
+  var savedTab = getSavedTab(id);
+  if (savedTab && (savedTab === 'explanation' ? hasArticle : savedTab === 'quiz' ? hasQuiz : true)) {
+    setActiveTab(savedTab);
+  } else {
+    setActiveTab(hasArticle ? 'explanation' : 'challenge');
+  }
 
   questionContentEl.innerHTML = question.content;
   applyAuthGates(questionContentEl);
@@ -1219,8 +1268,9 @@ function selectQuestion(id) {
     renderNotesPreview();
   }
 
-  consoleOutputEl.textContent = 'When ready, hit Check to compile and run the code.';
-  updateStatus('Unattempted');
+  // Restore saved console output or show default
+  consoleOutputEl.innerHTML = submissions[id] && submissions[id].output ? submissions[id].output : 'When ready, hit Check to compile and run the code.';
+  updateStatus(submissions[id] && submissions[id].status ? submissions[id].status : 'Unattempted');
 
   // Expand the tree to show the active problem
   if (question.topic) {
@@ -1309,6 +1359,19 @@ function resetCase() {
   submissions[activeQuestionId].status = 'Unattempted';
   updateStatus('Unattempted');
   persistSubmissions();
+  // Push reset to cloud
+  try {
+    var user = firebase.auth().currentUser;
+    if (user) {
+      firebase.firestore().collection('users').doc(user.uid).collection('codes').doc(activeQuestionId).delete();
+      var smap = {};
+      for (var k in submissions) { var s = submissions[k]; if (s && s.status && s.status !== 'Unattempted') smap[k] = s.status; }
+      firebase.firestore().collection('users').doc(user.uid).collection('meta').doc('profile').set({
+        status: smap,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+    }
+  } catch (e) {}
   // Clear unsaved dot for the reset file
   if (fileList.length > 0) {
     const file = fileList[activeFileIndex];
@@ -1338,6 +1401,24 @@ function resetAllFiles() {
   unsavedFiles = {};
   hideAllUnsavedDots();
   persistSubmissions();
+  // Push reset to cloud
+  try {
+    var user = firebase.auth().currentUser;
+    if (user) {
+      firebase.firestore().collection('users').doc(user.uid).collection('codes').doc(activeQuestionId).set({
+        code: '',
+        files: submissions[activeQuestionId].files || null,
+        status: 'Unattempted',
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      var smap = {};
+      for (var k in submissions) { var s = submissions[k]; if (s && s.status && s.status !== 'Unattempted') smap[k] = s.status; }
+      firebase.firestore().collection('users').doc(user.uid).collection('meta').doc('profile').set({
+        status: smap,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+    }
+  } catch (e) {}
   renderQuestionList(questionSearchEl ? questionSearchEl.value : '');
 }
 
@@ -1362,15 +1443,6 @@ function saveCurrentCode() {
   }
   hideFileUnsavedDot();
   persistSubmissions();
-}
-
-function debounceSaveCurrentCode() {
-  if (saveTimeout) {
-    clearTimeout(saveTimeout);
-  }
-  saveTimeout = setTimeout(() => {
-    saveCurrentCode();
-  }, 500);
 }
 
 function runCode() {
@@ -1459,6 +1531,32 @@ function submitCode() {
     consoleOutputEl.innerHTML = outputHtml;
     consoleOutputEl.scrollTop = consoleOutputEl.scrollHeight;
     updateStatus(status);
+    if (!submissions[activeQuestionId]) submissions[activeQuestionId] = {};
+    submissions[activeQuestionId].status = status;
+    submissions[activeQuestionId].output = outputHtml;
+    persistSubmissions();
+    // Push to cloud on Check — batch meta + codes to keep _isPushingLocally atomic
+    try {
+      var user = firebase.auth().currentUser;
+      if (user) {
+        window._isPushingLocally = true;
+        var batch = firebase.firestore().batch();
+        batch.set(firebase.firestore().collection('users').doc(user.uid).collection('meta').doc('profile'), {
+          status: (function() { var m = {}; for (var k in submissions) { var s = submissions[k]; if (s && s.status && s.status !== 'Unattempted') m[k] = s.status; } return m; })(),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+        batch.set(firebase.firestore().collection('users').doc(user.uid).collection('codes').doc(activeQuestionId), {
+          code: submissions[activeQuestionId].code || '',
+          files: submissions[activeQuestionId].files || null,
+          status: status,
+          output: outputHtml,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        batch.commit().then(function() {
+          setTimeout(function() { window._isPushingLocally = false; }, 2000);
+        }).catch(function() { window._isPushingLocally = false; });
+      }
+    } catch (e) { window._isPushingLocally = false; }
     renderQuestionList(questionSearchEl ? questionSearchEl.value : '');
   })
   .catch((err) => {
@@ -1622,6 +1720,19 @@ function renderQuiz() {
 
   function saveQuizResults() {
     try { localStorage.setItem('pyjamacode-quiz-results', JSON.stringify(quizResults)); } catch (e) {}
+    // Push to cloud
+    try {
+      var user = firebase.auth().currentUser;
+      if (user) {
+        window._isPushingLocally = true;
+        firebase.firestore().collection('users').doc(user.uid).collection('quizzes').doc(quizId).set({
+          results: quizResults[quizId] || {},
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }).then(function() {
+          setTimeout(function() { window._isPushingLocally = false; }, 2000);
+        }).catch(function() { window._isPushingLocally = false; });
+      }
+    } catch (e) {}
   }
 
   quizContentEl.querySelectorAll('.quiz-option input[type="radio"]').forEach((input) => {
@@ -1677,9 +1788,53 @@ function renderQuiz() {
     resetBtn.addEventListener('click', () => {
       delete quizResults[quizId];
       saveQuizResults();
+      // Also delete from cloud
+      try {
+        var user = firebase.auth().currentUser;
+        if (user) {
+          firebase.firestore().collection('users').doc(user.uid).collection('quizzes').doc(quizId).delete();
+        }
+      } catch (e) {}
       renderQuiz();
     });
   }
+}
+
+// Per-problem tab persistence
+function saveActiveTab(pid, tab) {
+  if (!pid) return;
+  var tabs = {};
+  try { tabs = JSON.parse(localStorage.getItem('pyjamacode-tabs') || '{}'); } catch (e) { tabs = {}; }
+  if (tabs[pid] === tab) return; // No change — skip cloud write
+  tabs[pid] = tab;
+  localStorage.setItem('pyjamacode-tabs', JSON.stringify(tabs));
+  // Push to cloud immediately
+  try {
+    var user = firebase.auth().currentUser;
+    if (user && !window._isPushingLocally) {
+      window._isPushingLocally = true;
+      firebase.firestore().collection('users').doc(user.uid).collection('meta').doc('profile').set({
+        tabs: tabs,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true }).then(function() {
+        setTimeout(function() { window._isPushingLocally = false; }, 2000);
+      }).catch(function() { window._isPushingLocally = false; });
+    }
+  } catch (e) { window._isPushingLocally = false; }
+}
+
+function getSavedTab(pid) {
+  if (!pid) return null;
+  try {
+    var tabs = JSON.parse(localStorage.getItem('pyjamacode-tabs') || '{}');
+    return tabs[pid] || null;
+  } catch (e) { return null; }
+}
+
+function buildTabsMap() {
+  var tabs = {};
+  try { tabs = JSON.parse(localStorage.getItem('pyjamacode-tabs') || '{}'); } catch (e) { tabs = {}; }
+  return tabs;
 }
 
 function setActiveTab(tab) {
@@ -1705,6 +1860,9 @@ function setActiveTab(tab) {
   try {
     history.replaceState(null, '', url.toString());
   } catch (e) {}
+
+  // Save per-problem tab state
+  saveActiveTab(activeQuestionId, tab);
 
   // Scroll to hash after tab switch
   setTimeout(() => {
@@ -2766,6 +2924,7 @@ function toggleAuthMode() {
 function maybeSaveProblemUrl(url) {
   if (url && url.includes('/courses/')) {
     localStorage.setItem('lastProblemUrl', url);
+    if (activeQuestionId) localStorage.setItem('lastProblemTab', getSavedTab(activeQuestionId) || '');
   }
 }
 
@@ -2809,63 +2968,87 @@ function setupAuth() {
   if (authLoginBtn) authLoginBtn.addEventListener('click', () => openAuthModal('signin'));
   if (authLogoutLink) authLogoutLink.addEventListener('click', () => { signOut().then(() => { window.location.href = '/'; }).catch(() => {}); });
   if (themeToggleDropdown) themeToggleDropdown.addEventListener('click', () => { toggleTheme(); });
-  const resetDialog = document.getElementById('resetConfirmModal');
+  var resetDialog = document.getElementById('resetConfirmModal');
+  var resetCodeEl = document.getElementById('resetConfirmCode');
+  var resetInput = document.getElementById('resetConfirmInput');
+  var resetConfirmYes = document.getElementById('resetConfirmYes');
+  var resetConfirmNo = document.getElementById('resetConfirmNo');
+
+  function generateResetCode() {
+    return String(Math.floor(100000 + Math.random() * 900000));
+  }
+
+  function clearLocalProfile() {
+    localStorage.removeItem('pyjamacode-submissions');
+    localStorage.removeItem('pyjamacode-notes');
+    localStorage.removeItem('pyjamacode-theme');
+    localStorage.removeItem('pyjamacode-bookmarks');
+    localStorage.removeItem('pyjamacode-quiz-results');
+    localStorage.removeItem('pyjamacode-free-used');
+    localStorage.removeItem('pyjamacode-tabs');
+    localStorage.removeItem('lastProblemUrl');
+  }
+
   if (resetProfileLink) {
-    resetProfileLink.addEventListener('click', () => {
-      if (resetDialog) resetDialog.showModal();
+    resetProfileLink.addEventListener('click', function() {
+      if (!resetDialog || !resetCodeEl || !resetInput || !resetConfirmYes) return;
+      var code = generateResetCode();
+      resetCodeEl.textContent = code;
+      resetInput.value = '';
+      resetConfirmYes.disabled = true;
+      resetDialog.showModal();
     });
   }
-  const resetConfirmYes = document.getElementById('resetConfirmYes');
-  const resetConfirmNo = document.getElementById('resetConfirmNo');
-  if (resetConfirmNo) resetConfirmNo.addEventListener('click', () => {
-    if (resetDialog) resetDialog.close();
-  });
-  if (resetConfirmYes) {
-    resetConfirmYes.addEventListener('click', () => {
+  if (resetConfirmNo) {
+    resetConfirmNo.addEventListener('click', function() {
       if (resetDialog) resetDialog.close();
-      // Use firebase.auth().currentUser directly — always up to date
-      let uid = null;
+    });
+  }
+  if (resetDialog) {
+    resetDialog.addEventListener('close', function() {
+      if (resetInput) resetInput.value = '';
+    });
+  }
+  if (resetInput) {
+    resetInput.addEventListener('input', function() {
+      if (!resetConfirmYes || !resetCodeEl) return;
+      resetConfirmYes.disabled = resetInput.value !== resetCodeEl.textContent;
+    });
+  }
+  if (resetConfirmYes) {
+    resetConfirmYes.addEventListener('click', function() {
+      if (resetConfirmYes.disabled) return;
+      if (resetDialog) resetDialog.close();
+      var uid = null;
       try {
         if (typeof firebase !== 'undefined' && firebase.apps.length && firebase.auth().currentUser) {
           uid = firebase.auth().currentUser.uid;
         }
       } catch (e) {}
-      const deletePromise = uid
-        ? firebase.firestore().collection('userData').doc(uid).delete()
-        : Promise.resolve();
+      var deletePromise = uid ? deleteUserData(uid) : Promise.resolve();
       if (uid) {
-        deletePromise.then(() => {
-          localStorage.removeItem('pyjamacode-submissions');
-          localStorage.removeItem('pyjamacode-notes');
-          localStorage.removeItem('pyjamacode-theme');
-          localStorage.removeItem('pyjamacode-bookmarks');
-          localStorage.removeItem('pyjamacode-quiz-results');
-          localStorage.removeItem('pyjamacode-free-used');
-          localStorage.removeItem('lastProblemUrl');
+        localStorage.setItem('pyjamacode-wiped-at', Date.now().toString());
+        deletePromise.then(function() {
+          clearLocalProfile();
           window.location.href = '/dashboard/';
-        }).catch((e) => {
+        }).catch(function(e) {
           console.error('Failed to delete cloud data:', e);
-          localStorage.removeItem('pyjamacode-submissions');
-          localStorage.removeItem('pyjamacode-notes');
-          localStorage.removeItem('pyjamacode-theme');
-          localStorage.removeItem('pyjamacode-bookmarks');
-          localStorage.removeItem('pyjamacode-quiz-results');
-          localStorage.removeItem('pyjamacode-free-used');
-          localStorage.removeItem('lastProblemUrl');
+          clearLocalProfile();
           window.location.href = '/dashboard/';
         });
       } else {
-        localStorage.removeItem('pyjamacode-submissions');
-        localStorage.removeItem('pyjamacode-notes');
-        localStorage.removeItem('pyjamacode-theme');
-        localStorage.removeItem('pyjamacode-bookmarks');
-          localStorage.removeItem('pyjamacode-quiz-results');
-          localStorage.removeItem('pyjamacode-free-used');
-        localStorage.removeItem('lastProblemUrl');
+        clearLocalProfile();
         window.location.href = '/dashboard/';
       }
     });
   }
+  // Cross-session wipe detection — other tabs clear data when this tab wipes
+  window.addEventListener('storage', function(e) {
+    if (e.key === 'pyjamacode-wiped-at' && e.newValue) {
+      clearLocalProfile();
+      window.location.href = '/dashboard/';
+    }
+  });
   if (authGoogleBtn) authGoogleBtn.addEventListener('click', () => {
     signInWithGoogle().then(() => { window.location.reload(); }).catch((err) => {
       showAuthError(err.message || 'Google sign-in failed.');
@@ -3009,151 +3192,359 @@ function showAuthError(msg) {
 }
 
 /* ─── Cloud Sync ─── */
+
+// Recursively delete all docs in a collection (client-side batch pattern)
+function deleteCollection(db, collectionRef, batchSize) {
+  batchSize = batchSize || 20;
+  return collectionRef.limit(batchSize).get().then(function(snapshot) {
+    if (snapshot.size === 0) return Promise.resolve();
+    var batch = db.batch();
+    snapshot.forEach(function(doc) { batch.delete(doc.ref); });
+    return batch.commit().then(function() {
+      return deleteCollection(db, collectionRef, batchSize);
+    });
+  });
+}
+
+function deleteUserData(uid) {
+  var db = firebase.firestore();
+  var promises = [];
+  promises.push(deleteCollection(db, db.collection('users').doc(uid).collection('codes')));
+  promises.push(deleteCollection(db, db.collection('users').doc(uid).collection('notes')));
+  promises.push(db.collection('users').doc(uid).collection('meta').doc('profile').delete());
+  promises.push(db.collection('userData').doc(uid).delete());
+  return Promise.all(promises).then(function() {});
+}
+
 function initSync() {
   if (typeof firebase === 'undefined' || !firebase.apps.length) return;
   const db = firebase.firestore();
   let syncUid = null;
-  let syncTimer = null;
 
-  function getData() {
-    return {
-      submissions: localStorage.getItem('pyjamacode-submissions') || '{}',
-      notes: localStorage.getItem('pyjamacode-notes') || '{}',
+  // Build a status map from the in-memory submissions object
+  function buildStatusMap() {
+    const map = {};
+    for (const id of Object.keys(submissions)) {
+      const s = submissions[id];
+      if (s.status && s.status !== 'Unattempted') map[id] = s.status;
+    }
+    return map;
+  }
+
+  // Push changed items individually to granular Firestore docs
+  function pushChangedItems(ids) {
+    if (!syncUid) return Promise.resolve();
+    const batch = db.batch();
+
+    // Meta doc: theme + tab + status map + per-problem tabs
+    const metaRef = db.collection('users').doc(syncUid).collection('meta').doc('profile');
+    batch.set(metaRef, {
       theme: localStorage.getItem('pyjamacode-theme') || 'dark',
       tab: new URL(window.location).searchParams.get('tab') || '',
+      status: buildStatusMap(),
+      tabs: buildTabsMap(),
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    };
+    }, { merge: true });
+
+    // Write each changed submission as an individual code doc
+    if (ids) {
+      ids.forEach(function(id) {
+        const sub = submissions[id];
+        if (!sub) return;
+        const codeDoc = {
+          code: sub.code || '',
+          files: sub.files || null,
+          status: sub.status || 'Unattempted',
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        batch.set(
+          db.collection('users').doc(syncUid).collection('codes').doc(id),
+          codeDoc
+        );
+        // Also write note if it exists
+        if (notes[id] && notes[id].trim()) {
+          batch.set(
+            db.collection('users').doc(syncUid).collection('notes').doc(id),
+            { content: notes[id], updatedAt: firebase.firestore.FieldValue.serverTimestamp() }
+          );
+        }
+      });
+    }
+
+    return batch.commit();
   }
 
-  function getFilteredData() {
-    const raw = getData();
-    let subs = {};
-    try { subs = JSON.parse(raw.submissions); } catch (e) { subs = {}; }
-    let filteredSubs = {};
-    for (const id of Object.keys(subs)) {
-      const q = questions.find((x) => x.id === id);
-      if (!q) continue;
-      const starter = q.initial_code || '';
-      const sub = subs[id];
-      const code = sub.code || sub.files?.['main.c'] || '';
-      const hasCodeChange = multiFileChangesExist(q, sub);
-      const hasStatus = sub.status && sub.status !== 'Unattempted';
-      if (hasCodeChange || hasStatus) {
-        filteredSubs[id] = sub;
+  // Migrate old userData/{uid} doc to new granular structure
+  function migrateFromOld(uid, oldSnap) {
+    const data = oldSnap.data();
+    if (!data) return Promise.resolve();
+    const batch = db.batch();
+    const parsed = {};
+
+    if (data.submissions) {
+      try { Object.assign(parsed, JSON.parse(data.submissions)); } catch (e) {}
+    }
+    const parsedNotes = {};
+    if (data.notes) {
+      try { Object.assign(parsedNotes, JSON.parse(data.notes)); } catch (e) {}
+    }
+
+    for (const id of Object.keys(parsed)) {
+      const sub = parsed[id];
+      batch.set(
+        db.collection('users').doc(uid).collection('codes').doc(id),
+        { code: sub.code || '', files: sub.files || null, status: sub.status || 'Unattempted', output: sub.output || '', updatedAt: firebase.firestore.FieldValue.serverTimestamp() }
+      );
+    }
+    for (const id of Object.keys(parsedNotes)) {
+      if (parsedNotes[id] && parsedNotes[id].trim()) {
+        batch.set(
+          db.collection('users').doc(uid).collection('notes').doc(id),
+          { content: parsedNotes[id], updatedAt: firebase.firestore.FieldValue.serverTimestamp() }
+        );
       }
     }
-    let filteredNotes = {};
-    try {
-      const allNotes = JSON.parse(raw.notes);
-      for (const id of Object.keys(allNotes)) {
-        if (allNotes[id] && allNotes[id].trim()) filteredNotes[id] = allNotes[id];
-      }
-    } catch (e) {}
-    return {
-      submissions: JSON.stringify(filteredSubs),
-      notes: JSON.stringify(filteredNotes),
-      theme: raw.theme,
-      tab: raw.tab,
-      updatedAt: raw.updatedAt
-    };
-  }
-
-  function multiFileChangesExist(q, sub) {
-    if (!q.codes || !sub.files) return false;
-    const div = document.createElement('div');
-    div.innerHTML = q.codes;
-    const pres = div.querySelectorAll('pre');
-    for (const pre of pres) {
-      const raw = pre.getAttribute('data-title') || '';
-      const codeEl = pre.querySelector('code');
-      const content = codeEl ? codeEl.textContent || '' : '';
-      const filename = raw || 'untitled.c';
-      const saved = sub.files[filename];
-      if (saved !== undefined && saved !== content) return true;
-    }
-    return false;
-  }
-
-  let isPushingLocally = false;
-  let cloudUnsub = null;
-
-  function applyCloudData(d) {
-    if (activeQuestionId) saveCurrentCode();
-    let changed = false;
-    if (d.submissions) {
-      localStorage.setItem('pyjamacode-submissions', d.submissions);
-      try { submissions = JSON.parse(d.submissions) || {}; } catch (e) { submissions = {}; }
-      changed = true;
-    }
-    if (d.notes) {
-      localStorage.setItem('pyjamacode-notes', d.notes);
-      try { notes = JSON.parse(d.notes) || {}; } catch (e) { notes = {}; }
-      changed = true;
-    }
-      if (d.theme) {
-        localStorage.setItem('pyjamacode-theme', d.theme);
-        htmlEl.setAttribute('data-bs-theme', d.theme);
-        updateThemeIcon(d.theme);
-        updateCodeMirrorTheme();
-        updateHighlightJsTheme(d.theme);
-        changed = true;
-      }
-    if (changed) refreshUI();
-  }
-
-  function pushToCloud() {
-    if (!syncUid) return;
-    clearTimeout(syncTimer);
-    syncTimer = setTimeout(() => {
-      isPushingLocally = true;
-      db.collection('userData').doc(syncUid).set(getData()).then(() => {
-        setTimeout(() => { isPushingLocally = false; }, 1000);
-      }).catch(() => { isPushingLocally = false; });
-    }, 300);
+    batch.set(
+      db.collection('users').doc(uid).collection('meta').doc('profile'),
+      { theme: data.theme || 'dark', tab: data.tab || '', status: buildStatusMap(), tabs: buildTabsMap(), updatedAt: firebase.firestore.FieldValue.serverTimestamp() },
+      { merge: true }
+    );
+    batch.delete(db.collection('userData').doc(uid));
+    return batch.commit();
   }
 
   function startCloudListener(uid) {
-    if (cloudUnsub) cloudUnsub();
-    cloudUnsub = db.collection('userData').doc(uid).onSnapshot((snap) => {
-      if (isPushingLocally) return;
-      if (snap.exists) { applyCloudData(snap.data()); setDirty(false); }
+    if (window._cloudUnsub) { window._cloudUnsub(); window._cloudUnsub = null; }
+    // Listen to meta doc for real-time status/theme/tab updates
+    window._cloudUnsub = db.collection('users').doc(uid).collection('meta').doc('profile').onSnapshot(function(snap) {
+      if (window._isPushingLocally) return;
+      if (!snap.exists) return;
+      const data = snap.data();
+      let changed = false;
+      if (data.theme && data.theme !== localStorage.getItem('pyjamacode-theme')) {
+        localStorage.setItem('pyjamacode-theme', data.theme);
+        htmlEl.setAttribute('data-bs-theme', data.theme);
+        updateThemeIcon(data.theme);
+        updateCodeMirrorTheme();
+        updateHighlightJsTheme(data.theme);
+        changed = true;
+      }
+      if (data.status) {
+        var statusChanged = false;
+        for (const id of Object.keys(data.status)) {
+          if (!submissions[id]) submissions[id] = {};
+          if (submissions[id].status !== data.status[id]) {
+            submissions[id].status = data.status[id];
+            statusChanged = true;
+          }
+        }
+        if (statusChanged) {
+          persistSubmissions();
+          changed = true;
+        }
+      }
+      if (data.tabs) {
+        var localTabs = {};
+        try { localTabs = JSON.parse(localStorage.getItem('pyjamacode-tabs') || '{}'); } catch (e) { localTabs = {}; }
+        var merged = false;
+        for (var id in data.tabs) {
+          if (data.tabs[id] && localTabs[id] !== data.tabs[id]) {
+            localTabs[id] = data.tabs[id];
+            merged = true;
+          }
+        }
+        if (merged) {
+          localStorage.setItem('pyjamacode-tabs', JSON.stringify(localTabs));
+        }
+      }
+      if (changed) {
+        refreshUI();
+        setDirty(false);
+      }
+    });
+
+    // Real-time listener for codes collection — syncs code changes across browsers
+    if (window._codesUnsub) { window._codesUnsub(); window._codesUnsub = null; }
+    var codesReady = false;
+    window._codesUnsub = db.collection('users').doc(uid).collection('codes').onSnapshot(function(snapshot) {
+      if (window._isPushingLocally) return;
+      if (!codesReady) { codesReady = true; return; } // Skip initial snapshot (data from pullFromCloud)
+      var changed = false;
+      snapshot.docChanges().forEach(function(change) {
+        if (change.type === 'modified' || change.type === 'added') {
+          var data = change.doc.data();
+          var id = change.doc.id;
+          if (!submissions[id]) submissions[id] = {};
+          if (data.code !== undefined) submissions[id].code = data.code;
+          if (data.files !== undefined) submissions[id].files = data.files;
+          if (data.status) submissions[id].status = data.status;
+          if (data.output) submissions[id].output = data.output;
+          changed = true;
+        }
+      });
+      if (changed) {
+        persistSubmissions();
+        // Full UI refresh — re-initializes editor, file tabs, notes, console, tree
+        refreshUI();
+      }
+    });
+
+    // Real-time listener for notes collection
+    if (window._notesUnsub) { window._notesUnsub(); window._notesUnsub = null; }
+    var notesReady = false;
+    window._notesUnsub = db.collection('users').doc(uid).collection('notes').onSnapshot(function(snapshot) {
+      if (window._isPushingLocally) return;
+      if (!notesReady) { notesReady = true; return; }
+      var changed = false;
+      snapshot.docChanges().forEach(function(change) {
+        if (change.type === 'modified' || change.type === 'added') {
+          var data = change.doc.data();
+          if (data.content) {
+            notes[change.doc.id] = data.content;
+            changed = true;
+          }
+        }
+      });
+      if (changed) {
+        persistNotes();
+        // Update notes editor if the active problem's notes changed
+        if (activeQuestionId && notes[activeQuestionId] !== undefined) {
+          setNotesEditorValue(notes[activeQuestionId] || '');
+          if (notesPreviewMode) renderNotesPreview();
+        }
+      }
+    });
+
+    // Real-time listener for quiz results
+    if (window._quizzesUnsub) { window._quizzesUnsub(); window._quizzesUnsub = null; }
+    var quizzesReady = false;
+    window._quizzesUnsub = db.collection('users').doc(uid).collection('quizzes').onSnapshot(function(snapshot) {
+      if (window._isPushingLocally) return;
+      if (!quizzesReady) { quizzesReady = true; return; }
+      var changed = false;
+      snapshot.docChanges().forEach(function(change) {
+        if (change.type === 'modified' || change.type === 'added') {
+          var data = change.doc.data();
+          quizResults[change.doc.id] = data.results || {};
+          changed = true;
+        }
+        if (change.type === 'removed') {
+          delete quizResults[change.doc.id];
+          changed = true;
+        }
+      });
+      if (changed) {
+        try { localStorage.setItem('pyjamacode-quiz-results', JSON.stringify(quizResults)); } catch (e) {}
+        // Re-render quiz if the active problem's quiz changed
+        var quizTab = document.querySelector('.center-tab[data-tab="quiz"]');
+        if (quizTab && quizTab.classList.contains('active')) renderQuiz();
+      }
     });
   }
 
   function stopCloudListener() {
-    if (cloudUnsub) { cloudUnsub(); cloudUnsub = null; }
+    if (window._cloudUnsub) { window._cloudUnsub(); window._cloudUnsub = null; }
+    if (window._codesUnsub) { window._codesUnsub(); window._codesUnsub = null; }
+    if (window._notesUnsub) { window._notesUnsub(); window._notesUnsub = null; }
+    if (window._quizzesUnsub) { window._quizzesUnsub(); window._quizzesUnsub = null; }
   }
 
   function pullFromCloud(uid) {
-    return db.collection('userData').doc(uid).get().then((snap) => {
-      if (!snap.exists) {
-        db.collection('userData').doc(uid).set(getFilteredData()).then(() => setDirty(false)).catch(() => {});
-        return;
+    // Try new granular structure first
+    return db.collection('users').doc(uid).collection('meta').doc('profile').get().then(function(metaSnap) {
+      if (metaSnap.exists) {
+        const meta = metaSnap.data();
+        if (meta.status) {
+          for (const id of Object.keys(meta.status)) {
+            if (!submissions[id]) submissions[id] = {};
+            submissions[id].status = meta.status[id];
+          }
+          persistSubmissions();
+        }
+        if (meta.theme) {
+          localStorage.setItem('pyjamacode-theme', meta.theme);
+          htmlEl.setAttribute('data-bs-theme', meta.theme);
+          updateThemeIcon(meta.theme);
+          updateCodeMirrorTheme();
+          updateHighlightJsTheme(meta.theme);
+        }
+        if (meta.tabs) {
+          try { localStorage.setItem('pyjamacode-tabs', JSON.stringify(meta.tabs)); } catch (e) {}
+        }
+        // Pull all code docs into local submissions
+        return db.collection('users').doc(uid).collection('codes').get().then(function(codeSnap) {
+          codeSnap.forEach(function(doc) {
+            var data = doc.data();
+            var id = doc.id;
+            if (!submissions[id]) submissions[id] = {};
+            if (data.code) submissions[id].code = data.code;
+            if (data.files) submissions[id].files = data.files;
+            if (data.status) submissions[id].status = data.status;
+            if (data.output) submissions[id].output = data.output;
+          });
+          persistSubmissions();
+          // Pull all notes docs
+          return db.collection('users').doc(uid).collection('notes').get().then(function(noteSnap) {
+            noteSnap.forEach(function(doc) {
+              var data = doc.data();
+              if (data.content) notes[doc.id] = data.content;
+            });
+            persistNotes();
+            // Pull all quiz results
+            return db.collection('users').doc(uid).collection('quizzes').get().then(function(quizSnap) {
+              quizSnap.forEach(function(doc) {
+                var data = doc.data();
+                quizResults[doc.id] = data.results || {};
+              });
+              try { localStorage.setItem('pyjamacode-quiz-results', JSON.stringify(quizResults)); } catch (e) {}
+              return Promise.resolve();
+            });
+          });
+        });
       }
-      applyCloudData(snap.data());
-      setDirty(false);
+      // Fall back to old userData/{uid} doc — migrate it
+      return db.collection('userData').doc(uid).get().then(function(oldSnap) {
+        if (oldSnap.exists) {
+          return migrateFromOld(uid, oldSnap).then(function() {
+            if (activeQuestionId) saveCurrentCode();
+            return Promise.resolve();
+          });
+        }
+        // No data at all — push current local state as granular docs
+        return pushChangedItems(Object.keys(submissions));
+      });
     });
+  }
+
+  function pushAllToCloud() {
+    if (!syncUid) return Promise.resolve();
+    window._isPushingLocally = true;
+    return pushChangedItems(Object.keys(submissions)).then(function() {
+      setTimeout(function() { window._isPushingLocally = false; }, 2000);
+    }).catch(function() { window._isPushingLocally = false; });
   }
 
   function refreshUI() {
     loadSubmissions();
     loadNotes();
-    const _q = questions.find((q) => q.id === activeQuestionId);
+    const _q = questions.find(function(q) { return q.id === activeQuestionId; });
     if (activeQuestionId && questionContentEl && (!_q || !_q.isIntro)) selectQuestion(activeQuestionId);
     else renderQuestionList(questionSearchEl ? questionSearchEl.value : '');
   }
 
   // Listen for auth changes
-  onAuthChange((user) => {
+  onAuthChange(function(user) {
     if (user) {
       syncUid = user.uid;
-      pullFromCloud(user.uid).then(() => {
+      pullFromCloud(user.uid).then(function() {
         refreshUI();
         startCloudListener(user.uid);
         setDirty(false);
-      }).catch(() => {
-        db.collection('userData').doc(user.uid).set(getFilteredData()).then(() => setDirty(false)).catch(() => {});
-        startCloudListener(user.uid);
+      }).catch(function() {
+        pushAllToCloud().then(function() {
+          startCloudListener(user.uid);
+          setDirty(false);
+        });
       });
     } else {
       syncUid = null;
@@ -3162,43 +3553,59 @@ function initSync() {
     }
   });
 
-  let dirty = false;
+  var dirty = false;
 
   function setDirty(v) {
     if (!syncUid) return;
     dirty = v;
-    const base = document.title.replace(/^\* /, '');
+    var base = document.title.replace(/^\* /, '');
     document.title = v ? '* ' + base : base;
   }
 
-  document.addEventListener('keydown', (e) => {
+  document.addEventListener('keydown', function(e) {
     if ((e.ctrlKey || e.metaKey) && e.key === 's') {
       e.preventDefault();
       if (!syncUid) return;
       saveCurrentCode();
       saveCurrentNotes();
-      isPushingLocally = true;
-      db.collection('userData').doc(syncUid).set(getFilteredData()).then(() => {
-        setTimeout(() => { isPushingLocally = false; }, 1000);
+      // Collect IDs that have actual content
+      var changedIds = [];
+      for (var id in submissions) {
+        if (submissions[id] && (submissions[id].code || (submissions[id].files && Object.keys(submissions[id].files).length) || (submissions[id].status && submissions[id].status !== 'Unattempted'))) {
+          changedIds.push(id);
+        }
+      }
+      // Include note IDs
+      for (var nid in notes) {
+        if (notes[nid] && notes[nid].trim() && changedIds.indexOf(nid) === -1) changedIds.push(nid);
+      }
+      window._isPushingLocally = true;
+      pushChangedItems(changedIds).then(function() {
+        setTimeout(function() { window._isPushingLocally = false; }, 2000);
         setDirty(false);
-      }).catch(() => { isPushingLocally = false; });
+      }).catch(function() { window._isPushingLocally = false; });
     }
   });
 
-  const origToggleTheme = toggleTheme;
+  var origToggleTheme = toggleTheme;
   toggleTheme = function() {
     origToggleTheme();
     if (syncUid) {
-      db.collection('userData').doc(syncUid).set(getFilteredData()).catch(() => {});
+      db.collection('users').doc(syncUid).collection('meta').doc('profile').set({
+        theme: localStorage.getItem('pyjamacode-theme') || 'dark',
+        status: buildStatusMap(),
+        tabs: buildTabsMap(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true }).catch(function() {});
     }
   };
 
-  const origPersistSubmissions = persistSubmissions;
+  var origPersistSubmissions = persistSubmissions;
   persistSubmissions = function() {
     origPersistSubmissions();
   };
 
-  const origPersistNotes = persistNotes;
+  var origPersistNotes = persistNotes;
   persistNotes = function() {
     origPersistNotes();
   };

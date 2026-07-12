@@ -882,6 +882,19 @@ body.sidebar-collapsed #editorPane {
   color: var(--bs-body-color);
 }
 
+.reset-code-display {
+  font-size: 1.8rem;
+  letter-spacing: 0.3em;
+  font-weight: 700;
+  text-align: center;
+  font-family: 'Courier New', Courier, monospace;
+  background: var(--bs-dark);
+  color: var(--bs-light);
+  border-radius: 6px;
+  padding: 0.4rem 0.2rem;
+  user-select: all;
+}
+
 .reset-dialog::backdrop {
   background: rgba(0,0,0,0.5);
 }
