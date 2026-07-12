@@ -2981,13 +2981,18 @@ function setupAuth() {
   function clearLocalProfile() {
     localStorage.removeItem('pyjamacode-submissions');
     localStorage.removeItem('pyjamacode-notes');
-    localStorage.removeItem('pyjamacode-theme');
     localStorage.removeItem('pyjamacode-bookmarks');
     localStorage.removeItem('pyjamacode-quiz-results');
     localStorage.removeItem('pyjamacode-free-used');
     localStorage.removeItem('pyjamacode-tabs');
     localStorage.removeItem('lastProblemUrl');
     localStorage.removeItem('lastProblemTab');
+    // Reset theme to light
+    localStorage.setItem('pyjamacode-theme', 'light');
+    htmlEl.setAttribute('data-bs-theme', 'light');
+    updateThemeIcon('light');
+    updateCodeMirrorTheme();
+    updateHighlightJsTheme('light');
   }
 
   if (resetProfileLink) {
