@@ -2987,6 +2987,7 @@ function setupAuth() {
     localStorage.removeItem('pyjamacode-free-used');
     localStorage.removeItem('pyjamacode-tabs');
     localStorage.removeItem('lastProblemUrl');
+    localStorage.removeItem('lastProblemTab');
   }
 
   if (resetProfileLink) {
@@ -3211,6 +3212,7 @@ function deleteUserData(uid) {
   var promises = [];
   promises.push(deleteCollection(db, db.collection('users').doc(uid).collection('codes')));
   promises.push(deleteCollection(db, db.collection('users').doc(uid).collection('notes')));
+  promises.push(deleteCollection(db, db.collection('users').doc(uid).collection('quizzes')));
   promises.push(db.collection('users').doc(uid).collection('meta').doc('profile').delete());
   promises.push(db.collection('userData').doc(uid).delete());
   return Promise.all(promises).then(function() {});
