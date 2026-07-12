@@ -115,6 +115,15 @@ let notesViewState = 'normal';
 let treeExpanded = {};
 
 function init() {
+  // Show session expired message if redirected here
+  if (window.location.search.indexOf('session=expired') !== -1) {
+    var msg = document.createElement('div');
+    msg.className = 'alert alert-warning text-center m-0 rounded-0';
+    msg.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Signed out — your account was accessed from another browser.';
+    document.body.prepend(msg);
+    setTimeout(function() { msg.remove(); }, 6000);
+  }
+
   if (!problemDataEl || !activeProblemInput) {
     return;
   }
@@ -3222,6 +3231,7 @@ function deleteUserData(uid) {
   promises.push(deleteCollection(db, db.collection('users').doc(uid).collection('codes')));
   promises.push(deleteCollection(db, db.collection('users').doc(uid).collection('notes')));
   promises.push(deleteCollection(db, db.collection('users').doc(uid).collection('quizzes')));
+  promises.push(deleteCollection(db, db.collection('users').doc(uid).collection('sessions')));
   promises.push(db.collection('users').doc(uid).collection('meta').doc('profile').delete());
   promises.push(db.collection('userData').doc(uid).delete());
   return Promise.all(promises).then(function() {});
@@ -3549,6 +3559,71 @@ function initSync() {
     else renderQuestionList(questionSearchEl ? questionSearchEl.value : '');
   }
 
+  // ─── Configurable session enforcement ───
+  var localSessionId = null;
+  var sessionHeartbeat = null;
+  var sessionUnsub = null;
+
+  function generateSessionId() {
+    return Math.random().toString(36).substring(2) + Date.now().toString(36);
+  }
+
+  function registerSession(uid) {
+    var maxSessions = (window.__APP_CONFIG__ && window.__APP_CONFIG__.maxSessions) || 1;
+    if (maxSessions <= 0) return; // unlimited
+
+    localSessionId = generateSessionId();
+    var sessRef = db.collection('users').doc(uid).collection('sessions').doc(localSessionId);
+    sessRef.set({ updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+
+    // Listen to all sessions and enforce limit
+    if (sessionUnsub) sessionUnsub();
+    sessionUnsub = db.collection('users').doc(uid).collection('sessions').onSnapshot(function(snap) {
+      if (window._isPushingLocally) return;
+      var active = [];
+      snap.forEach(function(doc) {
+        var data = doc.data();
+        if (data.updatedAt) {
+          var ts = data.updatedAt.toMillis ? data.updatedAt.toMillis() : data.updatedAt;
+          active.push({ id: doc.id, ts: ts });
+        }
+      });
+      // Sort oldest first
+      active.sort(function(a, b) { return a.ts - b.ts; });
+      // Evict oldest beyond the limit
+      while (active.length > maxSessions) {
+        var oldest = active.shift();
+        if (oldest.id === localSessionId) {
+          // This session is the evicted one — sign out
+          signOut().then(function() { window.location.href = '/?session=expired'; })
+            .catch(function() { window.location.href = '/?session=expired'; });
+          return;
+        }
+        // Remove the stale session doc
+        db.collection('users').doc(uid).collection('sessions').doc(oldest.id).delete();
+      }
+    });
+
+    // Heartbeat every 30 seconds
+    clearInterval(sessionHeartbeat);
+    sessionHeartbeat = setInterval(function() {
+      if (syncUid) sessRef.update({ updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    }, 30000);
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', function() { sessRef.delete(); });
+  }
+
+  function unregisterSession() {
+    clearInterval(sessionHeartbeat);
+    sessionHeartbeat = null;
+    if (sessionUnsub) { sessionUnsub(); sessionUnsub = null; }
+    if (syncUid && localSessionId) {
+      db.collection('users').doc(syncUid).collection('sessions').doc(localSessionId).delete();
+    }
+    localSessionId = null;
+  }
+
   // Listen for auth changes
   onAuthChange(function(user) {
     if (user) {
@@ -3556,16 +3631,19 @@ function initSync() {
       pullFromCloud(user.uid).then(function() {
         refreshUI();
         startCloudListener(user.uid);
+        registerSession(user.uid);
         setDirty(false);
       }).catch(function() {
         pushAllToCloud().then(function() {
           startCloudListener(user.uid);
+          registerSession(user.uid);
           setDirty(false);
         });
       });
     } else {
       syncUid = null;
       stopCloudListener();
+      unregisterSession();
       setDirty(false);
     }
   });

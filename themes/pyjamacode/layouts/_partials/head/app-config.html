@@ -4,6 +4,7 @@ window.__APP_CONFIG__ = {
   nudgeDelay: {{ site.Params.nudgeDelay | default 10000 }},
   judgeUrl: {{ with site.Params.judgeUrl }}"{{ . }}"{{ else }}null{{ end }},
   mobileBreakpoint: {{ site.Params.mobileBreakpoint | default 800 }},
-  disableAuthNudge: {{ site.Params.disableAuthNudge | default false }}
+  disableAuthNudge: {{ site.Params.disableAuthNudge | default false }},
+  maxSessions: {{ site.Params.maxSessions | default 1 }}
 };
 </script>

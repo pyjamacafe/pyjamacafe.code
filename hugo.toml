@@ -11,6 +11,7 @@ theme = 'pyjamacode'
   judgeUrl = 'https://checker.pyjamacafe.com'
   mobileBreakpoint = 1279
   disableAuthNudge = true
+  maxSessions = 1
 
   [params.firebase]
     apiKey = 'AIzaSyC3rYp82RGSZVJrHwq-WrGX-UUgBneAcDo'
