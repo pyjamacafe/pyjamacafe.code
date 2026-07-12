@@ -45,7 +45,7 @@ Let's make you familiar with running code on this platform.
     ```
     - Line #2 from above is the output as a result of #10 in `main.c`
     - Line #1 and #4 are outputs appended by us to convey the state of the tests and the exit code of the program.
-1. Modify the `Hello from 2026` line to something else and execute the code again. Check the output.
+1. Modify the `Welcome to PyjamaCafe!` line to something else and execute the code again. Check the output.
 1. Type `uname` at the `$` in the terminal and hit the Return/Enter key. You should see an output like so
     ```shell
     $ uname

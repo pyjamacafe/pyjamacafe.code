@@ -152,7 +152,7 @@ The CPU determines the required operation by examining a predefined section of t
 
 The additional parameters associated with the opcode are called the **operands**, which specify how data should be moved or what mathematical operation needs to be executed.
 
-# Putting is all together
+# Putting it all together
 
 <figure id="fig-5" class="fig-center">
   <img src="/images/embedded-101/mental-models/simple_cpu_model.jpeg" alt="Simple CPU Model">

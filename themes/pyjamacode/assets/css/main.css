@@ -164,6 +164,7 @@ body.sidebar-collapsed #editorPane {
 
 
 #questionPane {
+  position: relative;
   flex: 1 1 auto;
   width: 40%;
 }
@@ -1749,6 +1750,44 @@ body.sidebar-collapsed #editorPane {
 
 #statusText {
   font-size: 0.85rem;
+}
+
+/* Landing page circuit background */
+#questionPane .landing-content {
+  position: relative;
+  z-index: 1;
+}
+#circuitBg {
+  z-index: 0;
+}
+#circuitBg canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+/* CSS fallback — pulsing circuit-like glow when Three.js is loading or fails */
+#questionPane::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(42,110,255,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 30%, rgba(42,110,255,0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(42,110,255,0.05) 0%, transparent 50%);
+  pointer-events: none;
+  animation: circuitPulse 8s ease-in-out infinite;
+}
+@keyframes circuitPulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+#questionPane .landing-content h1 {
+  text-shadow: 0 2px 20px var(--bs-body-bg);
+}
+#questionPane .landing-content p,
+#questionPane .landing-content div {
+  filter: drop-shadow(0 1px 4px var(--bs-body-bg));
 }
 
 /* Footer */
