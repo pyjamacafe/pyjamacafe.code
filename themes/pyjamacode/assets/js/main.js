@@ -3026,10 +3026,14 @@ function setupAuth() {
           uid = firebase.auth().currentUser.uid;
         }
       } catch (e) {}
-      var deletePromise = uid ? deleteUserData(uid) : Promise.resolve();
       if (uid) {
-        localStorage.setItem('pyjamacode-wiped-at', Date.now().toString());
-        deletePromise.then(function() {
+        // Signal other sessions via Firestore, then delete everything
+        window._wipingUid = uid;
+        firebase.firestore().collection('users').doc(uid).collection('meta').doc('profile').set({
+          _wipedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true }).then(function() {
+          return deleteUserData(uid);
+        }).then(function() {
           clearLocalProfile();
           window.location.href = '/dashboard/';
         }).catch(function(e) {
@@ -3322,6 +3326,12 @@ function initSync() {
       if (window._isPushingLocally) return;
       if (!snap.exists) return;
       const data = snap.data();
+      // Cross-browser wipe signal — another session reset the profile
+      if (data._wipedAt && window._wipingUid !== uid) {
+        clearLocalProfile();
+        window.location.href = '/dashboard/';
+        return;
+      }
       let changed = false;
       if (data.theme && data.theme !== localStorage.getItem('pyjamacode-theme')) {
         localStorage.setItem('pyjamacode-theme', data.theme);
