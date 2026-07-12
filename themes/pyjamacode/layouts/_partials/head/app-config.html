@@ -3,6 +3,7 @@ window.__APP_CONFIG__ = {
   freeViews: {{ site.Params.freeViews | default 3 }},
   nudgeDelay: {{ site.Params.nudgeDelay | default 10000 }},
   judgeUrl: {{ with site.Params.judgeUrl }}"{{ . }}"{{ else }}null{{ end }},
-  mobileBreakpoint: {{ site.Params.mobileBreakpoint | default 800 }}
+  mobileBreakpoint: {{ site.Params.mobileBreakpoint | default 800 }},
+  disableAuthNudge: {{ site.Params.disableAuthNudge | default false }}
 };
 </script>

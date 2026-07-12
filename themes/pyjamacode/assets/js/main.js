@@ -95,6 +95,11 @@ function checkFreeUse() {
   if (typeof openAuthModal === 'function') openAuthModal('signin');
   return false;
 }
+
+function authNudgeEnabled() {
+  return !(window.__APP_CONFIG__ && window.__APP_CONFIG__.disableAuthNudge === true);
+}
+
 let codeMirror = null;
 let notesCodeMirror = null;
 let saveTimeout = null;
@@ -259,9 +264,8 @@ function init() {
     if (editorArea) editorArea.classList.remove('content-blurred-force');
     if (authCloseLink) authCloseLink.style.display = '';
     if (authModal) authModal._backdropClose = false;
-    // Set forced flag (persists across page refreshes)
+    if (!authNudgeEnabled()) return;
     localStorage.setItem('authForced', 'true');
-    // Start one-shot timer for forced auth
     const nudgeDelay = (window.__APP_CONFIG__ && window.__APP_CONFIG__.nudgeDelay) || 10000;
     clearTimeout(window._authNudgeTimer);
     window._authNudgeTimer = setTimeout(() => {
@@ -1126,16 +1130,14 @@ function selectQuestion(id) {
     const nudgeDelay = (window.__APP_CONFIG__ && window.__APP_CONFIG__.nudgeDelay) || 10000;
 
     // Check if user is already in forced state (persisted across refreshes)
-    const isForced = localStorage.getItem('authForced') === 'true';
+    const isForced = authNudgeEnabled() && localStorage.getItem('authForced') === 'true';
 
       if (isForced) {
-        // Let content load first, then show auth modal
         requestAnimationFrame(() => {
           if (authCloseLink) authCloseLink.style.display = 'none';
           if (authModal) authModal._backdropClose = true;
           if (typeof openAuthModal === 'function') openAuthModal('signin');
         });
-        // Do NOT return — let content load normally
       }
 
       // Free views counter (in-memory only, resets on page refresh)
@@ -1800,6 +1802,28 @@ function applyAuthGates(container) {
 
   // Content after the last gate pair
   addFragment(remaining.slice(lastEnd));
+
+  // Guard: if someone deletes the overlay from devtools, also delete the gated content
+  if (!window._gateGuard) {
+    var _gating = false;
+    window._gateGuard = new MutationObserver(function() {
+      if (_gating) return;
+      _gating = true;
+      document.querySelectorAll('.gated-overlay').forEach(function(overlay) {
+        if (!document.body.contains(overlay)) {
+          var parent = overlay.closest('[style*="position: relative"]');
+          if (parent) {
+            var blurInner = parent.querySelector('.auth-gated');
+            if (blurInner) blurInner.remove();
+            parent.remove();
+          }
+        }
+      });
+      _gating = false;
+    });
+    window._gateGuard.observe(document.body, { childList: true, subtree: true });
+  }
+
   return true;
 }
 
@@ -2858,7 +2882,7 @@ function setupAuth() {
       if (authCloseLink) authCloseLink.style.display = '';
       if (authModal) authModal._backdropClose = false;
       clearTimeout(window._authNudgeTimer);
-      localStorage.removeItem('authForced');
+      if (authNudgeEnabled()) localStorage.removeItem('authForced');
       localStorage.removeItem('pyjamacode-free-used');
       _freeUsed = false;
       _viewCount = 0;
@@ -2944,9 +2968,8 @@ function closeAuthModal() {
   if (authModal) authModal.classList.remove('show');
   if (authError) authError.style.display = 'none';
   clearAuthGuard();
-  // If force auth is active, dismiss and start timer
   if (questionContentEl && questionContentEl.classList.contains('content-blurred-force')) {
-    if (typeof window._dismissForceAuth === 'function') window._dismissForceAuth();
+    if (authNudgeEnabled() && typeof window._dismissForceAuth === 'function') window._dismissForceAuth();
     return;
   }
 }
