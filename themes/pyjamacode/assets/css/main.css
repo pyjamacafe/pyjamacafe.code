@@ -1765,16 +1765,16 @@ body.sidebar-collapsed #editorPane {
   width: 100% !important;
   height: 100% !important;
 }
-/* CSS fallback — pulsing circuit-like glow when Three.js is loading or fails */
+/* CSS fallback — pulsing circuit-like glow */
 #questionPane::before {
   content: '';
   position: absolute;
   inset: 0;
   z-index: 0;
   background:
-    radial-gradient(ellipse at 20% 50%, rgba(42,110,255,0.06) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 30%, rgba(42,110,255,0.04) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 80%, rgba(42,110,255,0.05) 0%, transparent 50%);
+    radial-gradient(ellipse at 20% 50%, rgba(130,200,50,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 30%, rgba(130,200,50,0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(130,200,50,0.05) 0%, transparent 50%);
   pointer-events: none;
   animation: circuitPulse 8s ease-in-out infinite;
 }
