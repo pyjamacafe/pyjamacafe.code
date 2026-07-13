@@ -1036,9 +1036,8 @@ function renderDashboard() {
            '<span class="text-muted">Not started</span>') +
         '</span>';
     if (resumeUrl) {
-      html += '<a href="' + resumeUrl + '" class="btn btn-sm btn-outline-primary">' +
-        (pct > 0 ? 'Resume' : 'Start') +
-      '</a>';
+      var btnLabel = pct >= 100 ? 'Start Again' : (pct > 0 ? 'Resume' : 'Start');
+      html += '<a href="' + resumeUrl + '" class="btn btn-sm btn-outline-primary">' + btnLabel + '</a>';
     }
     html += '</div></div>';
   });
