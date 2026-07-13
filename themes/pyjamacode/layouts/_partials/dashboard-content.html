@@ -10,6 +10,12 @@
   {{ $parts := split (strings.TrimSuffix "/" .File.Dir) "/" }}
   {{ $topic := index $parts 1 }}
   {{ $subtopic := index $parts 2 }}
+  {{ $raw := .RawContent }}
+  {{ $quizMarkdown := "" }}
+  {{ if in $raw "===QUIZ===" }}
+    {{ $quizParts := split $raw "===QUIZ===" }}
+    {{ $quizMarkdown = index $quizParts 1 }}
+  {{ end }}
   {{ $item := dict
     "id" .File.ContentBaseName
     "title" .Title
@@ -27,6 +33,7 @@
     "subtopic_weight" (cond (isset .Params "subtopic_weight") (.Params.subtopic_weight | int) 99)
     "topic_title" (index $courseTitleMap $topic)
     "weight" (cond (isset .Params "weight") (.Params.weight | int) 99)
+    "quiz" $quizMarkdown
   }}
   {{ $data = $data | append $item }}
 {{ end }}

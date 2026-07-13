@@ -920,6 +920,10 @@ body.sidebar-collapsed #editorPane {
   justify-content: center;
 }
 
+.text-in-progress {
+  color: #d97706;
+}
+
 .auth-modal-backdrop.show {
   display: flex;
 }

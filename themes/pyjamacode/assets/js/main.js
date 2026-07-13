@@ -134,12 +134,56 @@ function init() {
     loadTheme();
     initFirebase();
     initTypedTitle();
+    // Load local data for tree and dashboard progress
+    loadSubmissions();
+    try { var qr = localStorage.getItem('pyjamacode-quiz-results'); if (qr) quizResults = JSON.parse(qr) || {}; } catch (e) {}
     setupAuth();
     initSidebarToggle();
     initEditorToggle();
     initSidebarTabs();
     renderQuestionList();
     renderDashboard();
+    // Live refresh: re-render dashboard when data changes (same-browser tabs)
+    window.addEventListener('storage', function() {
+      loadSubmissions();
+      try { var qr2 = localStorage.getItem('pyjamacode-quiz-results'); if (qr2) quizResults = JSON.parse(qr2) || {}; } catch (e) {}
+      renderQuestionList();
+      renderDashboard();
+    });
+    // Periodic Firestore poll for cross-browser/device sync
+    if (typeof firebase !== 'undefined' && firebase.apps.length) {
+      (function startPoll() {
+        var pollTimer = setInterval(function() {
+          var user = firebase.auth().currentUser;
+          if (!user) return;
+          var db = firebase.firestore();
+          db.collection('users').doc(user.uid).collection('codes').get().then(function(snap) {
+            var changed = false;
+            snap.forEach(function(doc) {
+              var data = doc.data();
+              if (!submissions[doc.id]) submissions[doc.id] = {};
+              if (data.code !== undefined && submissions[doc.id].code !== data.code) { submissions[doc.id].code = data.code; changed = true; }
+              if (data.status && submissions[doc.id].status !== data.status) { submissions[doc.id].status = data.status; changed = true; }
+            });
+            if (changed) { persistSubmissions(); renderQuestionList(); renderDashboard(); }
+          });
+          db.collection('users').doc(user.uid).collection('quizzes').get().then(function(snap) {
+            var changed = false;
+            snap.forEach(function(doc) {
+              var data = doc.data();
+              if (data.results && JSON.stringify(quizResults[doc.id]) !== JSON.stringify(data.results)) {
+                quizResults[doc.id] = data.results;
+                changed = true;
+              }
+            });
+            if (changed) {
+              try { localStorage.setItem('pyjamacode-quiz-results', JSON.stringify(quizResults)); } catch (e) {}
+              renderQuestionList(); renderDashboard();
+            }
+          });
+        }, 30000);
+      })();
+    }
     return;
   }
 
@@ -737,7 +781,7 @@ function renderBookmarksList(filter) {
   }
   el.innerHTML = matched.map((q) => `
     <div class="tree-leaf" data-id="${q.id}">
-      <div class="question-title">${(function(){var s=getLessonState(q.id);return q.isIntro?'':'<i class="bi '+(s==='completed'?'bi-check-circle-fill text-pass':s==='in-progress'?'bi-circle-half text-warning':'bi-circle text-muted')+' me-1"></i>'})()}${escapeHtml(q.title)}</div>
+      <div class="question-title">${(function(){var s=getLessonState(q.id);return q.isIntro?'':'<i class="bi '+(s==='completed'?'bi-check-circle-fill text-pass':s==='in-progress'?'bi-circle-half text-in-progress':'bi-circle text-muted')+' me-1"></i>'})()}${escapeHtml(q.title)}</div>
       <div class="question-meta">${q.isIntro ? 'Course Overview' : (q.difficulty + ' · ' + (submissions[q.id]?.status || 'Unattempted'))}</div>
     </div>
   `).join('');
@@ -959,15 +1003,35 @@ function buildQuestionTree() {
   return tree;
 }
 
-// Combined code + quiz state for a lesson
+// Cache for quiz question counts per lesson
+var _quizCountCache = {};
+
 function getLessonState(id) {
+  var q = questions.find(function(q) { return q.id === id; });
+  if (!q) return 'unattempted';
   var codeStatus = submissions[id]?.status || '';
-  var hasQuizProgress = quizResults[id] && Object.keys(quizResults[id]).length > 0;
   var codeAccepted = codeStatus === 'Accepted';
   var codeInProgress = codeStatus && codeStatus !== 'Unattempted';
-  if (!codeInProgress && !hasQuizProgress) return 'unattempted';
-  if (codeAccepted && hasQuizProgress) return 'completed';
-  return 'in-progress';
+  var correctCount = quizResults[id] ? Object.keys(quizResults[id]).length : 0;
+  var totalQuiz = 0;
+  if (q.quiz && q.quiz.trim()) {
+    if (_quizCountCache[id] === undefined) {
+      // Parse quiz to count real questions (trimmed blocks that look like questions)
+      var blocks = q.quiz.split(/\n##\s*/).filter(function(b) { return b.trim().length > 0; });
+      // Exclude the lead-in block (just whitespace before first ##)
+      _quizCountCache[id] = blocks.length;
+    }
+    totalQuiz = _quizCountCache[id];
+  }
+  // All correct
+  if (codeAccepted && (totalQuiz === 0 || correctCount >= totalQuiz)) return 'completed';
+  // Code accepted but quiz not fully correct
+  if (codeAccepted && totalQuiz > 0 && correctCount < totalQuiz) return 'in-progress';
+  // Any quiz progress
+  if (correctCount > 0) return 'in-progress';
+  // Code in progress (no quiz progress)
+  if (codeInProgress) return 'in-progress';
+  return 'unattempted';
 }
 
 function toggleTopic(topic) {
@@ -985,8 +1049,30 @@ function renderDashboard() {
   var contentEl = document.getElementById('dashboardContent');
   if (!contentEl || !questions.length) return;
 
+  // Load local data for progress computation
   var subs = {};
   try { subs = JSON.parse(localStorage.getItem('pyjamacode-submissions') || '{}'); } catch (e) {}
+  var quizRes = {};
+  try { quizRes = JSON.parse(localStorage.getItem('pyjamacode-quiz-results') || '{}'); } catch (e) {}
+
+  function localLessonState(id) {
+    var q = questions.find(function(q) { return q.id === id; });
+    if (!q) return 'unattempted';
+    var codeStatus = subs[id]?.status || '';
+    var codeAccepted = codeStatus === 'Accepted';
+    var codeInProgress = codeStatus && codeStatus !== 'Unattempted';
+    var correctCount = quizRes[id] ? Object.keys(quizRes[id]).length : 0;
+    var totalQuiz = 0;
+    if (q.quiz && q.quiz.trim()) {
+      var blocks = q.quiz.split(/\n##\s*/).filter(function(b) { return b.trim().length > 0; });
+      totalQuiz = blocks.length;
+    }
+    if (codeAccepted && (totalQuiz === 0 || correctCount >= totalQuiz)) return 'completed';
+    if (codeAccepted && totalQuiz > 0 && correctCount < totalQuiz) return 'in-progress';
+    if (correctCount > 0) return 'in-progress';
+    if (codeInProgress) return 'in-progress';
+    return 'unattempted';
+  }
 
   var topics = {};
   questions.forEach(function(q) {
@@ -1025,14 +1111,17 @@ function renderDashboard() {
     var completed = 0;
     var inProgress = 0;
     lessonList.forEach(function(q) {
-      var st = getLessonState(q.id);
+      var st = localLessonState(q.id);
       if (st === 'completed') completed++;
       else if (st === 'in-progress') inProgress++;
     });
     var pct = total ? Math.round((completed / total) * 100) : 0;
 
-    var resume = resumeLesson(lessonList);
-    var resumeUrl = resume ? resume.permalink : (firstLesson(lessonList) ? firstLesson(lessonList).permalink : '');
+    var resumeUrl = '/courses/' + topic + '/';
+    if (pct > 0 && pct < 100) {
+      var resume = resumeLesson(lessonList);
+      if (resume) resumeUrl = resume.permalink;
+    }
 
     html += '<div class="course-card border rounded p-3 mb-3">' +
       '<div class="d-flex align-items-center justify-content-between mb-1">' +
@@ -1045,7 +1134,7 @@ function renderDashboard() {
       '<div class="d-flex align-items-center justify-content-between">' +
         '<span class="small">' +
           (pct === 100 ? '<span class="text-pass fw-semibold">Complete</span>' :
-           inProgress > 0 ? '<span class="text-warning">' + inProgress + ' in progress</span>' :
+           inProgress > 0 ? '<span class="text-in-progress">' + inProgress + ' in progress</span>' :
            '<span class="text-muted">Not started</span>') +
         '</span>';
     if (resumeUrl) {
@@ -1213,7 +1302,7 @@ function renderQuestionList(filter = '') {
         if (submissions[q.id]?.status === 'Accepted') item.classList.add('solved');
 
         var lessonState = getLessonState(q.id);
-        var iconClass = lessonState === 'completed' ? 'bi-check-circle-fill text-pass' : (lessonState === 'in-progress' ? 'bi-circle-half text-warning' : 'bi-circle text-muted');
+        var iconClass = lessonState === 'completed' ? 'bi-check-circle-fill text-pass' : (lessonState === 'in-progress' ? 'bi-circle-half text-in-progress' : 'bi-circle text-muted');
         item.innerHTML = `
           <div class="question-title"><i class="bi ${iconClass} me-1"></i>${escapeHtml(q.title)}</div>
           <div class="question-meta">${q.difficulty} · ${submissions[q.id]?.status || 'Unattempted'}</div>
@@ -1867,6 +1956,7 @@ function renderQuiz() {
         if (!quizResults[quizId]) quizResults[quizId] = {};
         quizResults[quizId][qi] = true;
         saveQuizResults();
+        renderQuestionList(questionSearchEl ? questionSearchEl.value : '');
         feedback.className = 'quiz-feedback mt-1 small text-pass';
         feedback.innerHTML = '<span class="fw-semibold">&#10003; Correct!</span> ' + escapeHtml(item.explanation);
         feedback.classList.remove('d-none');
@@ -3560,7 +3650,7 @@ function initSync() {
       });
       if (changed) {
         try { localStorage.setItem('pyjamacode-quiz-results', JSON.stringify(quizResults)); } catch (e) {}
-        // Re-render quiz if the active problem's quiz changed
+        renderQuestionList(questionSearchEl ? questionSearchEl.value : '');
         var quizTab = document.querySelector('.center-tab[data-tab="quiz"]');
         if (quizTab && quizTab.classList.contains('active')) renderQuiz();
       }
