@@ -737,7 +737,7 @@ function renderBookmarksList(filter) {
   }
   el.innerHTML = matched.map((q) => `
     <div class="tree-leaf" data-id="${q.id}">
-      <div class="question-title">${escapeHtml(q.title)}</div>
+      <div class="question-title"><i class="bi ${submissions[q.id]?.status === 'Accepted' ? 'bi-check-circle-fill text-pass' : (submissions[q.id]?.status && submissions[q.id]?.status !== 'Unattempted' ? 'bi-circle-half text-warning' : 'bi-circle text-muted')} me-1"></i>${escapeHtml(q.title)}</div>
       <div class="question-meta">${q.difficulty} · ${submissions[q.id]?.status || 'Unattempted'}</div>
     </div>
   `).join('');
@@ -1134,7 +1134,7 @@ function renderQuestionList(filter = '') {
         item.dataset.topicIndex = topicIndex;
         if (q.id === activeQuestionId) item.classList.add('active');
         item.innerHTML = `
-          <div class="question-title">${escapeHtml(q.title)}</div>
+          <div class="question-title"><i class="bi bi-circle text-muted me-1"></i>${escapeHtml(q.title)}</div>
           <div class="question-meta">Course Overview</div>
         `;
         item.addEventListener('click', (e) => {
@@ -1201,8 +1201,10 @@ function renderQuestionList(filter = '') {
         if (q.id === activeQuestionId) item.classList.add('active');
         if (submissions[q.id]?.status === 'Accepted') item.classList.add('solved');
 
+        var stat = submissions[q.id]?.status || '';
+        var iconClass = stat === 'Accepted' ? 'bi-check-circle-fill text-pass' : (stat && stat !== 'Unattempted' ? 'bi-circle-half text-warning' : 'bi-circle text-muted');
         item.innerHTML = `
-          <div class="question-title">${escapeHtml(q.title)}</div>
+          <div class="question-title"><i class="bi ${iconClass} me-1"></i>${escapeHtml(q.title)}</div>
           <div class="question-meta">${q.difficulty} · ${submissions[q.id]?.status || 'Unattempted'}</div>
         `;
 
