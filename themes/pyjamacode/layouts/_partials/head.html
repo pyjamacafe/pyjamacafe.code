@@ -2,6 +2,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{{ if .IsHome }}{{ site.Title }}{{ else }}{{ printf "%s | %s" .Title site.Title }}{{ end }}</title>
 <meta name="description" content="{{ or .Params.description site.Params.description }}">
+{{- partial "head/opengraph.html" . }}
 <link rel="icon" type="image/png" href="{{ "pc.png" | relURL }}">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
