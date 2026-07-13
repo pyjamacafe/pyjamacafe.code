@@ -959,12 +959,8 @@ function buildQuestionTree() {
 }
 
 function toggleTopic(topic) {
-  const wasExpanded = treeExpanded[topic];
-  treeExpanded[topic] = !wasExpanded;
+  treeExpanded[topic] = !treeExpanded[topic];
   renderQuestionList(questionSearchEl ? questionSearchEl.value : '');
-  if (!wasExpanded) {
-    window.location.href = '/courses/' + topic + '/';
-  }
 }
 
 function toggleSubtopic(topic, subtopic) {
