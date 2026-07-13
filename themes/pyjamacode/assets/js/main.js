@@ -139,6 +139,7 @@ function init() {
     initEditorToggle();
     initSidebarTabs();
     renderQuestionList();
+    renderDashboard();
     return;
   }
 
@@ -969,9 +970,90 @@ function toggleSubtopic(topic, subtopic) {
   renderQuestionList(questionSearchEl ? questionSearchEl.value : '');
 }
 
+function renderDashboard() {
+  var contentEl = document.getElementById('dashboardContent');
+  if (!contentEl || !questions.length) return;
+
+  var subs = {};
+  try { subs = JSON.parse(localStorage.getItem('pyjamacode-submissions') || '{}'); } catch (e) {}
+
+  var topics = {};
+  questions.forEach(function(q) {
+    if (q.isIntro || !q.topic) return;
+    if (!topics[q.topic]) topics[q.topic] = { lessons: [], topicWeight: q.topic_weight || 99 };
+    topics[q.topic].lessons.push(q);
+  });
+
+  var sortedTopics = Object.keys(topics).sort(function(a, b) {
+    return (topics[a].topicWeight || 99) - (topics[b].topicWeight || 99);
+  });
+
+  function firstLesson(lessonList) {
+    lessonList.sort(function(a, b) { return (a.weight || 99) - (b.weight || 99); });
+    return lessonList[0];
+  }
+
+  function resumeLesson(lessonList) {
+    lessonList.sort(function(a, b) { return (a.weight || 99) - (b.weight || 99); });
+    for (var i = 0; i < lessonList.length; i++) {
+      var s = subs[lessonList[i].id];
+      if (!s || !s.status || s.status === 'Unattempted') return lessonList[i];
+    }
+    return null;
+  }
+
+  var html = '<div class="dashboard-courses">';
+  sortedTopics.forEach(function(topic) {
+    var info = topics[topic];
+    var lessonList = info.lessons;
+    lessonList.sort(function(a, b) { return (a.weight || 99) - (b.weight || 99); });
+
+    var total = lessonList.length;
+    var completed = 0;
+    var inProgress = 0;
+    lessonList.forEach(function(q) {
+      var s = subs[q.id];
+      if (s && s.status === 'Accepted') completed++;
+      else if (s && s.status && s.status !== 'Unattempted') inProgress++;
+    });
+    var pct = total ? Math.round((completed / total) * 100) : 0;
+
+    var resume = resumeLesson(lessonList);
+    var resumeUrl = resume ? resume.permalink : (firstLesson(lessonList) ? firstLesson(lessonList).permalink : '');
+
+    html += '<div class="course-card border rounded p-3 mb-3">' +
+      '<div class="d-flex align-items-center justify-content-between mb-1">' +
+        '<h4 class="fw-semibold mb-0" style="font-size:1rem">' + escapeHtml(topic) + '</h4>' +
+        '<span class="small text-muted">' + completed + '/' + total + '</span>' +
+      '</div>' +
+      '<div class="progress mb-2" style="height:6px">' +
+        '<div class="progress-bar" role="progressbar" style="width:' + pct + '%" aria-valuenow="' + pct + '" aria-valuemin="0" aria-valuemax="100"></div>' +
+      '</div>' +
+      '<div class="d-flex align-items-center justify-content-between">' +
+        '<span class="small">' +
+          (pct === 100 ? '<span class="text-pass fw-semibold">Complete</span>' :
+           inProgress > 0 ? '<span class="text-warning">' + inProgress + ' in progress</span>' :
+           '<span class="text-muted">Not started</span>') +
+        '</span>';
+    if (resumeUrl) {
+      html += '<a href="' + resumeUrl + '" class="btn btn-sm btn-outline-primary">' +
+        (pct > 0 ? 'Resume' : 'Start') +
+      '</a>';
+    }
+    html += '</div></div>';
+  });
+  html += '</div>';
+
+  var existing = contentEl.querySelector('.dashboard-courses');
+  if (existing) existing.remove();
+  var p = contentEl.querySelector('p');
+  if (p) p.insertAdjacentHTML('afterend', html);
+  else contentEl.insertAdjacentHTML('beforeend', html);
+}
+
 function getWeight(q, key, fallback) {
   const v = q[key];
-  return (v !== null && v !== undefined && v !== '') ? Number(v) : fallback;
+  return (v !== undefined && v !== null) ? v : fallback;
 }
 
 function renderQuestionList(filter = '') {

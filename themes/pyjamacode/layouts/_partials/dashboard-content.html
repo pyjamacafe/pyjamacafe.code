@@ -69,7 +69,6 @@
         <div id="dashboardContent" style="display:none;text-align:center;padding:3rem 1rem">
           <h1 id="dashboardGreeting" style="font-size:1.5rem;font-weight:700;margin:0 0 0.5rem;color:var(--bs-body-color)">Welcome</h1>
           <p style="margin:0 0 1rem;font-size:0.9rem;color:var(--bs-secondary-color)">Your learning dashboard</p>
-          <button id="dashboardResumeBtn" class="btn btn-sm btn-primary" style="display:none">Resume</button>
         </div>
         <div id="dashboardLoading" style="text-align:center;padding:3rem">
           <div class="spinner-border text-secondary" role="status" style="width:2rem;height:2rem"><span class="visually-hidden">Loading...</span></div>
@@ -93,35 +92,6 @@
         var loading = document.getElementById('dashboardLoading');
         if (content) content.style.display = 'block';
         if (loading) loading.style.display = 'none';
-        var resumeBtn = document.getElementById('dashboardResumeBtn');
-        var saved = localStorage.getItem('lastProblemUrl');
-        if (resumeBtn) {
-          resumeBtn.style.display = '';
-          if (saved && saved.includes('/courses/')) {
-            resumeBtn.textContent = 'Resume';
-            resumeBtn.onclick = function() {
-              var tab = localStorage.getItem('lastProblemTab');
-              var url = saved;
-              if (tab && tab !== 'challenge') url += (url.indexOf('?') === -1 ? '?' : '&') + 'tab=' + tab;
-              window.location.href = url;
-            };
-          } else {
-            resumeBtn.textContent = 'Start Learning';
-            resumeBtn.onclick = function() {
-              try {
-                var data = document.getElementById('problem-data');
-                if (data) {
-                  var qs = JSON.parse(data.textContent);
-                  var topics = {};
-                  qs.forEach(function(q) { if (!q.isIntro && q.topic && !topics[q.topic]) topics[q.topic] = q.topic_weight || 99; });
-                  var sorted = Object.keys(topics).sort(function(a, b) { return (topics[a] || 99) - (topics[b] || 99); });
-                  if (sorted.length) { window.location.href = '/courses/' + sorted[0] + '/'; return; }
-                }
-              } catch (e) {}
-              window.location.href = '/dashboard/';
-            };
-          }
-        }
       } else if (typeof isAuthReady === 'undefined' || !isAuthReady()) {
         setTimeout(checkUser, 200);
       } else {
