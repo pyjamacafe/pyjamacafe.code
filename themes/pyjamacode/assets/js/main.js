@@ -1901,6 +1901,8 @@ function renderQuiz() {
         }
       } catch (e) {}
       renderQuiz();
+      // Refresh tree to reflect updated lesson status
+      renderQuestionList(questionSearchEl ? questionSearchEl.value : '');
     });
   }
 }
