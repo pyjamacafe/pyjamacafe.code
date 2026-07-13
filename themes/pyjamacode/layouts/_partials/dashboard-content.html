@@ -1,5 +1,5 @@
 {{ $problems := where site.RegularPages "Section" "courses" }}
-{{ $courseTitleMap := dict }}{{ range site.Pages }}{{ if and (eq .Section "courses") (eq .Kind "section") .File }}{{ $courseTitleMap = $courseTitleMap | merge (dict .File.ContentBaseName .Title) }}{{ end }}{{ end }}
+{{ $courseTitleMap := dict }}{{ range site.Pages }}{{ if and (eq .Section "courses") (eq .Kind "section") .File }}{{ $topic := index (split (strings.TrimSuffix "/" .File.Dir) "/") 1 }}{{ $courseTitleMap = $courseTitleMap | merge (dict $topic .Title) }}{{ end }}{{ end }}
 {{ $active := index $problems 0 }}
 {{ $activeId := "" }}
 {{ with $active }}{{ $activeId = .File.ContentBaseName }}{{ end }}

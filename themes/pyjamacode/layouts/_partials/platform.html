@@ -1,5 +1,5 @@
 {{ $problems := where site.RegularPages "Section" "courses" }}
-{{ $sections := slice }}{{ $courseTitleMap := dict }}{{ range site.Pages }}{{ if and (eq .Section "courses") (eq .Kind "section") .File }}{{ $sections = $sections | append . }}{{ $courseTitleMap = $courseTitleMap | merge (dict .File.ContentBaseName .Title) }}{{ end }}{{ end }}
+{{ $sections := slice }}{{ $courseTitleMap := dict }}{{ range site.Pages }}{{ if and (eq .Section "courses") (eq .Kind "section") .File }}{{ $sections = $sections | append . }}{{ $topic := index (split (strings.TrimSuffix "/" .File.Dir) "/") 1 }}{{ $courseTitleMap = $courseTitleMap | merge (dict $topic .Title) }}{{ end }}{{ end }}
 {{ $active := .activeProblem | default (index $problems 0) }}
 {{ $activeId := "" }}
 {{ with $active }}{{ if .File }}{{ $activeId = .File.ContentBaseName }}{{ end }}{{ end }}
@@ -7,7 +7,7 @@
 <script id="problem-data" type="application/json">
 {{ $data := slice }}
 {{ range $sections }}
-  {{ $topic := .File.ContentBaseName }}
+  {{ $topic := index (split (strings.TrimSuffix "/" .File.Dir) "/") 1 }}
   {{ $item := dict
     "id" (printf "intro-%s" $topic)
     "title" "Introduction"
