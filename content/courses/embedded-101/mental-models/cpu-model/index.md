@@ -2,6 +2,8 @@
 date = '2026-07-10T10:00:00+05:30'
 draft = false
 title = 'Model of the CPU'
+description = 'As a programmer this is what you need to know about the CPU.'
+og_image = 'cpu-programmers-model.jpeg'
 difficulty = 'easy'
 language = 'c'
 topic_weight = -20
@@ -106,7 +108,7 @@ Exit code: 0
 # The Rhythm
 
 <figure id="fig-1" class="fig-right">
-  <img src="/images/embedded-101/mental-models/inst-mem.jpeg" alt="Instruction Memory">
+  <img src="inst-mem.jpeg" alt="Instruction Memory">
   <figcaption><a href="#fig-1" class="fig-link">Figure 1:</a> Instructions</figcaption>
 </figure>
 
@@ -123,7 +125,7 @@ The RISC philosophy (exemplified by RISC-V and ARM) is to make each station in t
 # Abstraction: Ignoring the Details
 
 <figure id="fig-2" class="fig-left">
-  <img src="/images/embedded-101/mental-models/car.jpeg" alt="Car Abstraction">
+  <img src="car.jpeg" alt="Car Abstraction">
   <figcaption><a href="#fig-2" class="fig-link">Figure 2:</a> Top view of a car — an analogy for abstraction and mental models</figcaption>
 </figure>
 
@@ -138,7 +140,7 @@ As long as these few abstractions work reliably, no one cares about the internal
 The programmer's model of the CPU can be summarized as: **the CPU is a state machine. The state is maintained within a set of registers internal to the CPU. The programmer manipulates this state via a sequence of instructions. The CPU can also modify its state as a side effect of computation or an external event (interrupt).** The key components of this model are:
 
 <figure id="fig-3" class="fig-center">
-  <img src="/images/embedded-101/mental-models/cpu-programmers-model.jpeg" alt="CPU Programmer's Model">
+  <img src="cpu-programmers-model.jpeg" alt="CPU Programmer's Model">
   <figcaption><a href="#fig-3" class="fig-link">Figure 3:</a> CPU programmer's model showing registers and execution units</figcaption>
 </figure>
 
@@ -158,7 +160,7 @@ The CPU interfaces with the outside world via **Buses** and **Interrupts**. Ther
 - **Instruction Fetch (Data) Bus** — carries the actual instruction word returned from memory at the address provided by the Instruction Address Bus.
 
 <figure id="fig-4" class="fig-center">
-  <img src="/images/embedded-101/mental-models/ldr.jpeg" alt="LDR Instruction">
+  <img src="ldr.jpeg" alt="LDR Instruction">
   <figcaption><a href="#fig-4" class="fig-link">Figure 4:</a> LDR instruction execution in the CPU</figcaption>
 </figure>
 
@@ -166,14 +168,14 @@ The CPU interfaces with the outside world via **Buses** and **Interrupts**. Ther
 - **Data Bus** — carries the actual data value being loaded into a CPU register (load) or written from a CPU register to memory (store).
 
 <figure id="fig-5" class="fig-center">
-  <img src="/images/embedded-101/mental-models/str.jpeg" alt="STR Instruction">
+  <img src="str.jpeg" alt="STR Instruction">
   <figcaption><a href="#fig-5" class="fig-link">Figure 5:</a> STR instruction execution in the CPU</figcaption>
 </figure>
 
 ### Interrupts and Buses
 
 <figure id="fig-6" class="fig-right">
-  <img src="/images/embedded-101/mental-models/isr.jpeg" alt="Interrupt Service Routine">
+  <img src="isr.jpeg" alt="Interrupt Service Routine">
   <figcaption><a href="#fig-6" class="fig-link">Figure 6:</a> Example of an interrupt and the Interrupt Service Routine (ISR) flow</figcaption>
 </figure>
 

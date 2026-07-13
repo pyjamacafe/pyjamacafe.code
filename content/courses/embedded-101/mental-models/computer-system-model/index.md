@@ -2,6 +2,8 @@
 date = '2026-07-10T10:00:00+05:30'
 draft = false
 title = 'Computer System Model'
+description = 'A computer system is essentially interaction between different state-machines. The two primary actors being CPU and the Memory. Here is how they work with each other...'
+og_image = 'simple-cs-mode-with-peripherial.jpeg'
 difficulty = 'easy'
 language = 'c'
 topic_weight = -20
@@ -100,7 +102,7 @@ The CPU is the factory floor: the Control Unit is the foreman reading the instru
 Input devices bring raw materials (sensor readings, keystrokes); output devices ship finished products (LCD pixels, motor torques). The clock is the factory whistle: every tick, the foreman reads the next manual page and starts the next operation.
 
 <figure id="fig-1" class="fig-center">
-  <img src="/images/embedded-101/mental-models/simple-cs-model.jpeg" alt="Simple Computer System Model">
+  <img src="simple-cs-model.jpeg" alt="Simple Computer System Model">
   <figcaption><a href="#fig-1" class="fig-link">Figure 1:</a> Block diagram of a simple computer system model showing CPU, memory, and I/O connected via system bus</figcaption>
 </figure>
 
@@ -115,7 +117,7 @@ The CPU does not "know" it's talking to a GPIO pin — it just reads and writes 
 The load-store model is central to understanding how CPUs interact with memory and peripherals. Inside the CPU, General Purpose Registers (such as R0, R1, R2 shown as the Register File) serve as temporary storage locations where the CPU performs operations. With the ability to execute arithmetic (addition, subtraction, multiplication, division), logic (comparison), and data movement operations, the CPU manipulates data stored within these registers.
 
 <figure id="fig-2" class="fig-center">
-  <img src="/images/embedded-101/mental-models/simple-cs-mode-with-peripherial.jpeg" alt="Computer System Model With Peripherals">
+  <img src="simple-cs-mode-with-peripherial.jpeg" alt="Computer System Model With Peripherals">
   <figcaption><a href="#fig-2" class="fig-link">Figure 2:</a> Computer system model with peripheral devices connected to the system bus</figcaption>
 </figure>
 
@@ -129,7 +131,7 @@ Both instructions and data live in the same storage (in the von Neumann model), 
 # Storage, Data and Instructions
 
 <figure id="fig-3" class="fig-right">
-  <img src="/images/embedded-101/mental-models/mem.jpeg" alt="Memory Organization">
+  <img src="mem.jpeg" alt="Memory Organization">
   <figcaption><a href="#fig-3" class="fig-link">Figure 3:</a> Memory organization in the computer system model</figcaption>
 </figure>
 
@@ -144,7 +146,7 @@ During a load or store instruction, the address bus carries a value correspondin
 Modern CPUs use instructions that are 32 bits (4 Bytes) wide. These 32-bit patterns are composed of different combinations of on/off states that convey specific tasks to the CPU.
 
 <figure id="fig-4" class="fig-center">
-  <img src="/images/embedded-101/mental-models/instruction.jpeg" alt="Instruction Execution">
+  <img src="instruction.jpeg" alt="Instruction Execution">
   <figcaption><a href="#fig-4" class="fig-link">Figure 4:</a> Instruction execution flow in the computer system model</figcaption>
 </figure>
 
@@ -155,7 +157,7 @@ The additional parameters associated with the opcode are called the **operands**
 # Putting it all together
 
 <figure id="fig-5" class="fig-center">
-  <img src="/images/embedded-101/mental-models/simple_cpu_model.jpeg" alt="Simple CPU Model">
+  <img src="simple_cpu_model.jpeg" alt="Simple CPU Model">
   <figcaption><a href="#fig-5" class="fig-link">Figure 5:</a> Simple CPU model showing the connection between CPU and storage with address and data buses</figcaption>
 </figure>
 

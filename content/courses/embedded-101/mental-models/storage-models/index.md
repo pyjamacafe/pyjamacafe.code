@@ -94,22 +94,22 @@ At the lowest level, storage comes down to how a single **bit** is physically im
 Feedback-based storage uses a loop of logic gates to trap a signal value. Consider a NOT gate (inverter), whose symbol and truth table are shown in Figures 5 and 6. A transistor-level implementation using MOSFETs is shown in Figure 7. If two NOT gates are connected in series and the output of the second is fed back to the input of the first (Figure 8), the circuit traps its own state. The process uses two types of inverters: a **strong inverter** and a **weak inverter**. When a bit is to be stored, the strong inverter overpowers the weak one: the bit value is placed on the "Store line", the strong inverter absorbs the logical value and outputs its inverse, and the weak inverter inverts that output and feeds it back. Once the feedback loop stabilizes, the Store line can be disconnected, and the value remains trapped as long as power is supplied.
 
 <figure id="fig-7" class="fig-right">
-  <img src="/images/embedded-101/mental-models/mosfet-NOT.jpeg" alt="MOSFET NOT Gate Circuit">
+  <img src="mosfet-NOT.jpeg" alt="MOSFET NOT Gate Circuit">
   <figcaption><a href="#fig-7" class="fig-link">Figure 7:</a> Transistor circuit implementation of the NOT logic gate using MOSFETs</figcaption>
 </figure>
 
 <figure id="fig-5" class="fig-right">
-  <img src="/images/embedded-101/mental-models/NOT-gate.jpeg" alt="NOT Gate Symbol">
+  <img src="NOT-gate.jpeg" alt="NOT Gate Symbol">
   <figcaption><a href="#fig-5" class="fig-link">Figure 5:</a> Symbolic representation of the NOT gate (inverter) used in feedback-based storage</figcaption>
 </figure>
 
 <figure id="fig-6" class="fig-right">
-  <img src="/images/embedded-101/mental-models/NOT-truth-table.jpeg" alt="NOT Gate Truth Table">
+  <img src="NOT-truth-table.jpeg" alt="NOT Gate Truth Table">
   <figcaption><a href="#fig-6" class="fig-link">Figure 6:</a> Truth table for the NOT gate — input 1 produces output 0 and vice versa</figcaption>
 </figure>
 
 <figure id="fig-8" class="fig-center">
-  <img src="/images/embedded-101/mental-models/feedback.jpeg" alt="Feedback-based Memory Bit">
+  <img src="feedback.jpeg" alt="Feedback-based Memory Bit">
   <figcaption><a href="#fig-8" class="fig-link">Figure 8:</a> Feedback-based memory bit using two inverters in a loop to trap a logical value</figcaption>
 </figure>
 
@@ -118,19 +118,19 @@ Feedback-based storage uses a loop of logic gates to trap a signal value. Consid
 A clocked version of this feedback circuit is called a **D flip-flop** (Figure 1). On each rising edge of the clock (transition from 0 to 1), the value at the **d** input is captured and held at the **q** output until the next clock edge. D flip-flops are the basic building blocks of all sequential logic in digital systems.
 
 <figure id="fig-1" class="fig-right">
-  <img src="/images/embedded-101/mental-models/d.jpeg" alt="D Flip-Flop">
+  <img src="d.jpeg" alt="D Flip-Flop">
   <figcaption><a href="#fig-1" class="fig-link">Figure 1:</a> D flip-flop circuit diagram used in SRAM storage</figcaption>
 </figure>
 
 **Registers** are formed by grouping multiple D flip-flops side by side (Figure 2). A group of 8 flip-flops creates an 8-bit register; 32 flip-flops create a 32-bit register — the standard width for RISC-V and ARM CPUs. **Register files** combine multiple registers with addressing logic (Figure 3). Given an address (register number) and data_in, the value is loaded into the selected register if write_en is 1 and the clock transitions from 0 to 1. The register file has multiple ports for simultaneous reads and writes.
 
 <figure id="fig-2" class="fig-center">
-  <img src="/images/embedded-101/mental-models/reg.jpeg" alt="Register">
+  <img src="reg.jpeg" alt="Register">
   <figcaption><a href="#fig-2" class="fig-link">Figure 2:</a> Register implementation in SRAM technology</figcaption>
 </figure>
 
 <figure id="fig-3" class="fig-center">
-  <img src="/images/embedded-101/mental-models/reg_file_abs.jpeg" alt="Register File Abstraction">
+  <img src="reg_file_abs.jpeg" alt="Register File Abstraction">
   <figcaption><a href="#fig-3" class="fig-link">Figure 3:</a> Register file abstraction layer</figcaption>
 </figure>
 
@@ -139,7 +139,7 @@ A clocked version of this feedback circuit is called a **D flip-flop** (Figure 1
 Charge trapping stores a bit by depositing or withdrawing electrical charge on a capacitor (Figure 9). The presence or absence of charge conveys the logical state (0 or 1). When the **store enable** signal is active, charge flows onto or off the capacitor depending on the **store line** logic level. The **read enable** and **read line** probe the capacitor's charge state to determine the stored value. This technique is used in EEPROM (Electrically Erasable Programmable Read-Only Memory) and Flash memory, where charge is trapped on the floating gate of a MOSFET. Unlike feedback-based circuits, charge trapping is **non-volatile** — it retains data even when power is removed. However, charge-trapping cells are more complex to design, slower to write, and have limited erase cycles compared to feedback-based circuits.
 
 <figure id="fig-9" class="fig-center">
-  <img src="/images/embedded-101/mental-models/charge_storage.jpeg" alt="Charge Storage Memory Bit">
+  <img src="charge_storage.jpeg" alt="Charge Storage Memory Bit">
   <figcaption><a href="#fig-9" class="fig-link">Figure 9:</a> Charge storage-based memory bit — a capacitor stores charge to represent logical 0 or 1</figcaption>
 </figure>
 
@@ -150,7 +150,7 @@ Charge trapping stores a bit by depositing or withdrawing electrical charge on a
 To organize storage into a usable model: a **Byte** is 8 Bits, a **Half-Word** is 2 Bytes (16 bits), a **Word** is 4 Bytes (32 bits), and a **Double Word** is 8 Bytes (64 bits). For practical purposes, you can assume memory is a long register file as shown in Figure 4 — an array of 8-bit wide registers with byte-level addressability. Memory is addressable at the byte level, meaning each byte has a unique address. The CPU reads or writes 1, 2, or 4 bytes at a time by placing the address on the bus and either reading the data (load) or writing the data (store). Processors cannot directly access individual bits in memory — they always work in byte-sized or word-sized chunks.
 
 <figure id="fig-4" class="fig-right">
-  <img src="/images/embedded-101/mental-models/mem-array.jpeg" alt="Memory Array">
+  <img src="mem-array.jpeg" alt="Memory Array">
   <figcaption><a href="#fig-4" class="fig-link">Figure 4:</a> Memory array organization and structure</figcaption>
 </figure>
 

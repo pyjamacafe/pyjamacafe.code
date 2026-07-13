@@ -2,6 +2,8 @@
 date = '2026-07-10T10:00:00+05:30'
 draft = false
 title = 'History of Computing'
+description = 'One cannot reason about the workings of the computer without knowing how they came to be. The modern computer systems are based on this fundamental design from the 1900s...'
+og_image = '1970s-world-view.jpeg'
 difficulty = 'easy'
 language = 'c'
 topic_weight = -20
@@ -94,7 +96,7 @@ C introduced structured programming constructs — functions, loops, and conditi
 The key to understanding C is learning to think like an engineer from the 1970s — someone who understood the hardware at a deep level and could look at code and infer what the CPU would do at each step. Figure 1 shows this worldview: storage has code and data that the CPU can access via address and data buses. Following instructions and manipulating stored data, the CPU performs calculations and influences the external world. This mental model is the foundation for everything that follows in embedded systems programming.
 
 <figure id="fig-1" class="fig-center">
-  <img src="/images/embedded-101/mental-models/1970s-world-view.jpeg" alt="1970s World View">
+  <img src="1970s-world-view.jpeg" alt="1970s World View">
   <figcaption><a href="#fig-1" class="fig-link">Figure 1:</a> How engineers in the 1970s thought about computer systems — storage containing code and data that the CPU can access</figcaption>
 </figure>
 

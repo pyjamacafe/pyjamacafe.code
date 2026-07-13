@@ -46,14 +46,14 @@ RISC-V has seen explosive adoption since 2018. Western Digital uses RISC-V cores
 ===EXPLANATION===
 
 <figure id="fig-1" class="fig-right">
-  <img src="/images/embedded-101/mental-models/contract.jpeg" alt="ISA Contract">
+  <img src="contract.jpeg" alt="ISA Contract">
   <figcaption><a href="#fig-1" class="fig-link">Figure 1:</a> The ISA is the hardware-software contract — it hides the CPU implementation details from the programmer</figcaption>
 </figure>
 
 RISC-V is not just another ISA — it is a institutional response to the centralization of computing architecture. Since the 1990s, x86 (Intel/AMD) and ARM (Arm Ltd.) controlled virtually every processor on earth. To build a chip, you had to license one of these two architectures. This created a barrier: startups paid millions in ARM licensing fees; researchers couldn't modify x86 or ARM internals; governments worried about supply-chain security (could an ARM core in a Chinese chip have hidden backdoors?). RISC-V solves all of these problems with a single insight: make the ISA free, open, and extensible. The specification is a PDF (the "RISC-V Unprivileged Specification") that anyone can download, implement, and modify. If you want to add a custom instruction for AI tensor operations, you just define it and build a core that supports it — no NDA, no license fee, no permission needed.
 
 <figure id="fig-2" class="fig-center">
-  <img src="/images/embedded-101/mental-models/risc-v-core-inst.jpeg" alt="RISC-V Core Instructions">
+  <img src="risc-v-core-inst.jpeg" alt="RISC-V Core Instructions">
   <figcaption><a href="#fig-2" class="fig-link">Figure 2:</a> RISC-V core instructions and their encoding</figcaption>
 </figure>
 
@@ -73,7 +73,7 @@ The ISA serves as the **contract** between hardware and software (Figure 1). It 
 6. **J-type (Jump)**: Unconditional jumps (JAL) that change program flow regardless of conditions. The immediate encodes a 21-bit signed offset. Format: `imm[20|10:1|11|19:12] | rd | opcode`.
 
 <figure id="fig-3" class="fig-right">
-  <img src="/images/embedded-101/mental-models/rv-encode-decode.png" alt="RISC-V Encode/Decode">
+  <img src="rv-encode-decode.png" alt="RISC-V Encode/Decode">
   <figcaption><a href="#fig-3" class="fig-link">Figure 3:</a> RISC-V instruction encode/decode process</figcaption>
 </figure>
 
@@ -82,12 +82,12 @@ The ISA serves as the **contract** between hardware and software (Figure 1). It 
 Figure 4 shows the encoding of the ADD instruction (R-Type) where both funct3 and funct7 are 0x0. Figure 5 shows ADDI (I-Type) — note the imm field replaces rs2 and the opcode value differs. Each instruction has seven possible fields: **opcode** (7 bits, operation category), **rd** (5 bits, destination register), **funct3** (3 bits, further identifies the operation), **rs1** (5 bits, first source register), **rs2** (5 bits, second source register, only in R/S/B types), **funct7** (7 bits, only in R-type for further identification), and **imm** (immediate value supplied as part of the instruction).
 
 <figure id="fig-4" class="fig-center">
-  <img src="/images/embedded-101/mental-models/add-instruction.png" alt="Add Instruction">
+  <img src="add-instruction.png" alt="Add Instruction">
   <figcaption><a href="#fig-4" class="fig-link">Figure 4:</a> ADD instruction format and encoding in RISC-V</figcaption>
 </figure>
 
 <figure id="fig-5" class="fig-center">
-  <img src="/images/embedded-101/mental-models/addi-instruction.png" alt="ADDI Instruction">
+  <img src="addi-instruction.png" alt="ADDI Instruction">
   <figcaption><a href="#fig-5" class="fig-link">Figure 5:</a> ADDI instruction encoding in RISC-V (I-Type with immediate value)</figcaption>
 </figure>
 
@@ -96,7 +96,7 @@ Figure 4 shows the encoding of the ADD instruction (R-Type) where both funct3 an
 Writing programs directly in 1s and 0s to produce machine code is extremely tedious and error-prone. Engineers invented the **assembler** — a program that converts human-readable text (assembly language) into machine code. Figure 6 shows this process. Instead of writing binary by hand, engineers write mnemonics like `add x2, x1, x3` or `addi x2, x1, 10`, and the assembler translates these into the correct 32-bit patterns. The RV32I base instruction set includes 40+ instructions covering arithmetic (ADD, SUB, ADDI), logical (AND, OR, XOR, shifts), memory access (LW, SW, LB, SB), branches (BEQ, BNE, BLT, BGE), and jumps (JAL, JALR).
 
 <figure id="fig-6" class="fig-right">
-  <img src="/images/embedded-101/mental-models/assembler-preview.jpeg" alt="Assembler Preview">
+  <img src="assembler-preview.jpeg" alt="Assembler Preview">
   <figcaption><a href="#fig-6" class="fig-link">Figure 6:</a> An assembler converts assembly text to machine code</figcaption>
 </figure>
 
@@ -105,12 +105,12 @@ Writing programs directly in 1s and 0s to produce machine code is extremely tedi
 Consider a concrete execution walkthrough for `addi x2, x1, 10`. Assume register x1 already holds the value 20. The instruction encoding is 0x00a08113 (Figure 7), and it is stored at memory address 0x20c (Figure 8). The execution proceeds as follows (Figure 9):
 
 <figure id="fig-7" class="fig-center">
-  <img src="/images/embedded-101/mental-models/risc-v-i-inst.jpeg" alt="RISC-V I-Type Instruction">
+  <img src="risc-v-i-inst.jpeg" alt="RISC-V I-Type Instruction">
   <figcaption><a href="#fig-7" class="fig-link">Figure 7:</a> Encoding of addi x2, x1, 10 as the 32-bit word 0x00a08113</figcaption>
 </figure>
 
 <figure id="fig-8" class="fig-right">
-  <img src="/images/embedded-101/mental-models/memview.jpeg" alt="Memory View of Instruction">
+  <img src="memview.jpeg" alt="Memory View of Instruction">
   <figcaption><a href="#fig-8" class="fig-link">Figure 8:</a> How the instruction word is stored in memory at location 0x20c</figcaption>
 </figure>
 
@@ -121,7 +121,7 @@ Consider a concrete execution walkthrough for `addi x2, x1, 10`. Assume register
 5. The result (30) is written to destination register x2.
 
 <figure id="fig-9" class="fig-center">
-  <img src="/images/embedded-101/mental-models/cpu-executing.jpeg" alt="CPU Executing Instruction">
+  <img src="cpu-executing.jpeg" alt="CPU Executing Instruction">
   <figcaption><a href="#fig-9" class="fig-link">Figure 9:</a> CPU fetching, decoding, and executing an instruction step by step</figcaption>
 </figure>
 
@@ -130,12 +130,12 @@ Consider a concrete execution walkthrough for `addi x2, x1, 10`. Assume register
 This same process repeats for every instruction in the program. Figure 10 links to Tom Scott's excellent visualization of the CPU state machine. You can experiment with the online RISC-V assembler (Figure 11) to write your own assembly instructions and see how they encode into machine code.
 
 <figure id="fig-10" class="fig-right">
-  <img src="/images/embedded-101/mental-models/cpu-state-machine.jpg" alt="CPU State Machine">
+  <img src="cpu-state-machine.jpg" alt="CPU State Machine">
   <figcaption><a href="#fig-10" class="fig-link">Figure 10:</a> Tom Scott's YouTube video explaining the CPU state-machine fetch-decode-execute cycle</figcaption>
 </figure>
 
 <figure id="fig-11" class="fig-center">
-  <img src="/images/embedded-101/mental-models/online-assembler.png" alt="Online RISC-V Assembler">
+  <img src="online-assembler.png" alt="Online RISC-V Assembler">
   <figcaption><a href="#fig-11" class="fig-link">Figure 11:</a> Online RISC-V assembler tool — try experimenting with assembly instructions</figcaption>
 </figure>
 

@@ -123,12 +123,12 @@ The cross-compilation toolchain is the essential bridge between your development
 The intuition is that you are an architect designing a building in New York but constructing it in Tokyo. Your blueprints (the C source code) are in the same language, but you need a translator (the cross-compiler) who speaks the Tokyo dialect (RISC-V machine code). The linker script is the plot of land with its property boundaries (memory regions: this section of the lot is for the foundation at address 0x80000000, that corner is for the garden at 0x80010000). QEMU is a virtual Tokyo: a detailed scale model of the building site where you can walk through the rooms, check the wiring, and adjust the plumbing before you pour a single slab of real concrete in Tokyo. The Makefile is your foreman: "When I say `make`, first mix the concrete (compile), then pour the foundation (link), then inspect the model (run in QEMU). When I say `make debug`, set up the scaffolding (GDB stub) so I can stand inside the virtual building with my blueprint (source code) and measure every beam."
 
 <figure id="fig-5" class="fig-right">
-  <img src="/images/embedded-101/mental-models/qr-codespace.png" alt="QR Code for Lab Repository">
+  <img src="qr-codespace.png" alt="QR Code for Lab Repository">
   <figcaption><a href="#fig-5" class="fig-link">Figure 5:</a> QR code for the Lab Repository at github.com/inpyjama/lab</figcaption>
 </figure>
 
 <figure id="fig-6" class="fig-center">
-  <img src="/images/embedded-101/mental-models/codespace.png" alt="GitHub Codespace Creation">
+  <img src="codespace.png" alt="GitHub Codespace Creation">
   <figcaption><a href="#fig-6" class="fig-link">Figure 6:</a> GitHub repository page showing the green "Code" button and Codespaces tab to create a new Codespace</figcaption>
 </figure>
 
@@ -147,7 +147,7 @@ The lab repository is hosted at [github.com/inpyjama/lab](https://github.com/inp
 The VM configuration is defined in the `.devcontainer` directory: `devcontainer.json` specifies VSCode settings (theme, extensions), while `Dockerfile` details the OS image and utilities to install. Figure 7 shows a running Codespace — it is essentially VSCode opened on the repository inside a Linux machine, with the Explorer panel on the left, the editor window in the center, and a Terminal at the bottom.
 
 <figure id="fig-7" class="fig-center">
-  <img src="/images/embedded-101/mental-models/codespace-created.png" alt="Codespace Created">
+  <img src="codespace-created.png" alt="Codespace Created">
   <figcaption><a href="#fig-7" class="fig-link">Figure 7:</a> Codespace created and running — a VSCode editor opened on the repository in a cloud-based Linux VM</figcaption>
 </figure>
 
@@ -181,17 +181,17 @@ bash check.sh
 If the output resembles Figure 10 showing version numbers for all three tools, the environment is correctly configured. You can then delete `check.sh` and proceed with the lab experiments.
 
 <figure id="fig-9" class="fig-right">
-  <img src="/images/embedded-101/mental-models/createfile-codespace.png" alt="Create File in Codespace">
+  <img src="createfile-codespace.png" alt="Create File in Codespace">
   <figcaption><a href="#fig-9" class="fig-link">Figure 9:</a> The Burger icon menu in Codespace — all options to create and work with files and terminal are available here</figcaption>
 </figure>
 
 <figure id="fig-8" class="fig-center">
-  <img src="/images/embedded-101/mental-models/reopen-codespace.png" alt="Reopen Codespace">
+  <img src="reopen-codespace.png" alt="Reopen Codespace">
   <figcaption><a href="#fig-8" class="fig-link">Figure 8:</a> Reopening a Codespace by visiting the repository landing page and selecting the existing Codespace</figcaption>
 </figure>
 
 <figure id="fig-10" class="fig-center">
-  <img src="/images/embedded-101/mental-models/codespace-check-output.png" alt="Codespace Check Output">
+  <img src="codespace-check-output.png" alt="Codespace Check Output">
   <figcaption><a href="#fig-10" class="fig-link">Figure 10:</a> Output of the bash check.sh command executed on the terminal window, confirming the toolchain is correctly installed</figcaption>
 </figure>
 
