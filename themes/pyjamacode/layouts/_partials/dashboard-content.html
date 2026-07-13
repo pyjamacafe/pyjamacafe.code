@@ -72,13 +72,11 @@
       <span class="d-flex gap-1" style="flex-shrink:0">&nbsp;</span>
     </div>
     <div class="center-tabs" id="centerTabs">
-      <div class="center-tab active" id="tabDashboard">Dashboard</div>
+      <div class="center-tab active" id="tabDashboard">Progress Tracker</div>
     </div>
     <div class="question-pane-body" id="questionPaneBody">
       <div class="pane-body question-content overflow-auto p-3" id="questionContent">
-        <div id="dashboardContent" style="display:none;text-align:center;padding:3rem 1rem">
-          <h1 id="dashboardGreeting" style="font-size:1.5rem;font-weight:700;margin:0 0 0.5rem;color:var(--bs-body-color)">Welcome</h1>
-          <p style="margin:0 0 1rem;font-size:0.9rem;color:var(--bs-secondary-color)">Your learning dashboard</p>
+        <div id="dashboardContent" style="display:none;padding:1rem 0.5rem">
         </div>
         <div id="dashboardLoading" style="text-align:center;padding:3rem">
           <div class="spinner-border text-secondary" role="status" style="width:2rem;height:2rem"><span class="visually-hidden">Loading...</span></div>
@@ -94,10 +92,8 @@
       if (typeof getCurrentUser !== 'undefined' && getCurrentUser()) {
         var user = getCurrentUser();
         var name = user.displayName || user.email || 'User';
-        var el = document.getElementById('dashboardGreeting');
-        if (el) el.textContent = 'Welcome, ' + name;
         var titleEl = document.getElementById('caseTitle');
-        if (titleEl) titleEl.textContent = name;
+        if (titleEl) titleEl.textContent = name + "'s Dashboard";
         var content = document.getElementById('dashboardContent');
         var loading = document.getElementById('dashboardLoading');
         if (content) content.style.display = 'block';

@@ -1,5 +1,7 @@
 +++
 title = 'Embedded 101'
+og_image = 'embedded-101.png'
+description = 'A beginner-friendly journey from computing fundamentals to booting your own CPU and printing “Hello, World!” on a UART.'
 date = '2026-07-10T10:00:00+05:30'
 draft = false
 +++
