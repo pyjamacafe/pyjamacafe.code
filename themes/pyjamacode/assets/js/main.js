@@ -737,8 +737,8 @@ function renderBookmarksList(filter) {
   }
   el.innerHTML = matched.map((q) => `
     <div class="tree-leaf" data-id="${q.id}">
-      <div class="question-title"><i class="bi ${submissions[q.id]?.status === 'Accepted' ? 'bi-check-circle-fill text-pass' : (submissions[q.id]?.status && submissions[q.id]?.status !== 'Unattempted' ? 'bi-circle-half text-warning' : 'bi-circle text-muted')} me-1"></i>${escapeHtml(q.title)}</div>
-      <div class="question-meta">${q.difficulty} · ${submissions[q.id]?.status || 'Unattempted'}</div>
+      <div class="question-title">${(function(){var s=getLessonState(q.id);return q.isIntro?'':'<i class="bi '+(s==='completed'?'bi-check-circle-fill text-pass':s==='in-progress'?'bi-circle-half text-warning':'bi-circle text-muted')+' me-1"></i>'})()}${escapeHtml(q.title)}</div>
+      <div class="question-meta">${q.isIntro ? 'Course Overview' : (q.difficulty + ' · ' + (submissions[q.id]?.status || 'Unattempted'))}</div>
     </div>
   `).join('');
   el.querySelectorAll('.tree-leaf').forEach((item) => {
@@ -959,6 +959,17 @@ function buildQuestionTree() {
   return tree;
 }
 
+// Combined code + quiz state for a lesson
+function getLessonState(id) {
+  var codeStatus = submissions[id]?.status || '';
+  var hasQuizProgress = quizResults[id] && Object.keys(quizResults[id]).length > 0;
+  var codeAccepted = codeStatus === 'Accepted';
+  var codeInProgress = codeStatus && codeStatus !== 'Unattempted';
+  if (!codeInProgress && !hasQuizProgress) return 'unattempted';
+  if (codeAccepted && hasQuizProgress) return 'completed';
+  return 'in-progress';
+}
+
 function toggleTopic(topic) {
   treeExpanded[topic] = !treeExpanded[topic];
   renderQuestionList(questionSearchEl ? questionSearchEl.value : '');
@@ -1014,9 +1025,9 @@ function renderDashboard() {
     var completed = 0;
     var inProgress = 0;
     lessonList.forEach(function(q) {
-      var s = subs[q.id];
-      if (s && s.status === 'Accepted') completed++;
-      else if (s && s.status && s.status !== 'Unattempted') inProgress++;
+      var st = getLessonState(q.id);
+      if (st === 'completed') completed++;
+      else if (st === 'in-progress') inProgress++;
     });
     var pct = total ? Math.round((completed / total) * 100) : 0;
 
@@ -1134,7 +1145,7 @@ function renderQuestionList(filter = '') {
         item.dataset.topicIndex = topicIndex;
         if (q.id === activeQuestionId) item.classList.add('active');
         item.innerHTML = `
-          <div class="question-title"><i class="bi bi-circle text-muted me-1"></i>${escapeHtml(q.title)}</div>
+          <div class="question-title">${escapeHtml(q.title)}</div>
           <div class="question-meta">Course Overview</div>
         `;
         item.addEventListener('click', (e) => {
@@ -1201,8 +1212,8 @@ function renderQuestionList(filter = '') {
         if (q.id === activeQuestionId) item.classList.add('active');
         if (submissions[q.id]?.status === 'Accepted') item.classList.add('solved');
 
-        var stat = submissions[q.id]?.status || '';
-        var iconClass = stat === 'Accepted' ? 'bi-check-circle-fill text-pass' : (stat && stat !== 'Unattempted' ? 'bi-circle-half text-warning' : 'bi-circle text-muted');
+        var lessonState = getLessonState(q.id);
+        var iconClass = lessonState === 'completed' ? 'bi-check-circle-fill text-pass' : (lessonState === 'in-progress' ? 'bi-circle-half text-warning' : 'bi-circle text-muted');
         item.innerHTML = `
           <div class="question-title"><i class="bi ${iconClass} me-1"></i>${escapeHtml(q.title)}</div>
           <div class="question-meta">${q.difficulty} · ${submissions[q.id]?.status || 'Unattempted'}</div>
