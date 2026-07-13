@@ -361,7 +361,7 @@ function init() {
       };
     }
   }
-  setupResumeLink(resumeLink);
+  if (typeof resumeLink !== 'undefined') setupResumeLink(resumeLink);
   if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
   if (notesModeBtn) notesModeBtn.addEventListener('click', toggleNotesMode);
   if (exportNotesBtn) exportNotesBtn.addEventListener('click', exportNotes);
