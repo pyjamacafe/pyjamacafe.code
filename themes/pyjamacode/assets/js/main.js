@@ -3163,7 +3163,17 @@ function setupAuth() {
 
   // One-time button listeners
   if (authLoginBtn) authLoginBtn.addEventListener('click', () => openAuthModal('signin'));
-  if (authLogoutLink) authLogoutLink.addEventListener('click', () => { signOut().then(() => { window.location.href = '/'; }).catch(() => {}); });
+  if (authLogoutLink) authLogoutLink.addEventListener('click', () => {
+    localStorage.removeItem('pyjamacode-submissions');
+    localStorage.removeItem('pyjamacode-notes');
+    localStorage.removeItem('pyjamacode-bookmarks');
+    localStorage.removeItem('pyjamacode-quiz-results');
+    localStorage.removeItem('pyjamacode-free-used');
+    localStorage.removeItem('pyjamacode-tabs');
+    localStorage.removeItem('lastProblemUrl');
+    localStorage.removeItem('lastProblemTab');
+    signOut().finally(function() { location.reload(); });
+  });
   if (themeToggleDropdown) themeToggleDropdown.addEventListener('click', () => { toggleTheme(); });
   var resetDialog = document.getElementById('resetConfirmModal');
   var resetCodeEl = document.getElementById('resetConfirmCode');

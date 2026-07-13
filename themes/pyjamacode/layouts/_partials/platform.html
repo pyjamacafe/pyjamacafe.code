@@ -205,19 +205,6 @@
   </section>
 </div>
 
-<!-- Reset confirmation modal -->
-<dialog id="resetConfirmModal" class="reset-dialog">
-  <h3>Reset Profile</h3>
-  <p>This will delete all your saved data (submissions, notes, theme, preferences) from both local storage and the cloud. This cannot be undone.</p>
-  <p class="text-danger fw-semibold">To confirm, type the number below:</p>
-  <div id="resetConfirmCode" class="reset-code-display mb-2">000000</div>
-  <input id="resetConfirmInput" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" class="form-control mb-3 text-center" placeholder="Enter the number above" autocomplete="off">
-  <form method="dialog" class="d-flex flex-column gap-2">
-    <button id="resetConfirmYes" class="btn btn-danger w-100" disabled>Yes, Reset Everything</button>
-    <button id="resetConfirmNo" class="btn btn-outline-secondary w-100" value="cancel">Cancel</button>
-  </form>
-</dialog>
-
 <!-- Image zoom modal -->
 <div id="imageZoomOverlay" class="img-zoom-overlay" style="display:none" onclick="document.getElementById('imageZoomOverlay').style.display='none'">
   <span class="img-zoom-close" onclick="document.getElementById('imageZoomOverlay').style.display='none'">&times;</span>
