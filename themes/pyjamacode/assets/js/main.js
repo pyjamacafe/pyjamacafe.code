@@ -1007,6 +1007,8 @@ function renderDashboard() {
     var info = topics[topic];
     var lessonList = info.lessons;
     lessonList.sort(function(a, b) { return (a.weight || 99) - (b.weight || 99); });
+    var topicTitle = topic;
+    if (lessonList[0] && lessonList[0].topic_title) topicTitle = lessonList[0].topic_title;
 
     var total = lessonList.length;
     var completed = 0;
@@ -1081,6 +1083,10 @@ function renderQuestionList(filter = '') {
   sortedTopics.forEach((topic, topicIndex) => {
     const subtopics = tree[topic];
     const isTopicExpanded = treeExpanded[topic] || filter.length > 0;
+    // Use course title from _index.md if available, fall back to directory name
+    var topicTitle = topic;
+    var tq = questions.find(function(q) { return q.topic === topic && q.topic_title; });
+    if (tq) topicTitle = tq.topic_title;
 
     let hasVisibleChildren = false;
     // Check if there are intro questions for this topic
@@ -1108,7 +1114,7 @@ function renderQuestionList(filter = '') {
       <span class="tree-toggle">
         <i class="bi ${treeExpanded[topic] || filter.length > 0 ? 'bi-chevron-down' : 'bi-chevron-right'}"></i>
       </span>
-      <span class="tree-label">${escapeHtml(topic)}</span>
+      <span class="tree-label">${escapeHtml(topicTitle)}</span>
     `;
     topicDiv.addEventListener('click', (e) => {
       e.stopPropagation();
