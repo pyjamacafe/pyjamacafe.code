@@ -1025,7 +1025,7 @@ function renderDashboard() {
 
     html += '<div class="course-card border rounded p-3 mb-3">' +
       '<div class="d-flex align-items-center justify-content-between mb-1">' +
-        '<h4 class="fw-semibold mb-0" style="font-size:1rem">' + escapeHtml(topic) + '</h4>' +
+        '<h4 class="fw-semibold mb-0" style="font-size:1rem">' + escapeHtml(topicTitle) + '</h4>' +
         '<span class="small text-muted">' + completed + '/' + total + '</span>' +
       '</div>' +
       '<div class="progress mb-2" style="height:6px">' +
