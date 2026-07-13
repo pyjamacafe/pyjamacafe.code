@@ -1099,6 +1099,10 @@ function renderDashboard() {
     return null;
   }
 
+  // Load course metadata (description, og_image from _index.md)
+  var courseMeta = {};
+  try { courseMeta = JSON.parse(document.getElementById('course-meta').textContent || '{}'); } catch (e) {}
+
   var html = '<div class="dashboard-courses">';
   sortedTopics.forEach(function(topic) {
     var info = topics[topic];
@@ -1106,6 +1110,10 @@ function renderDashboard() {
     lessonList.sort(function(a, b) { return (a.weight || 99) - (b.weight || 99); });
     var topicTitle = topic;
     if (lessonList[0] && lessonList[0].topic_title) topicTitle = lessonList[0].topic_title;
+
+    var meta = courseMeta[topic] || {};
+    var topicDesc = meta.description || '';
+    var topicImage = meta.og_image || '';
 
     var total = lessonList.length;
     var completed = 0;
@@ -1123,25 +1131,21 @@ function renderDashboard() {
       if (resume) resumeUrl = resume.permalink;
     }
 
-    html += '<div class="course-card border rounded p-3 mb-3">' +
-      '<div class="d-flex align-items-center justify-content-between mb-1">' +
-        '<h4 class="fw-semibold mb-0" style="font-size:1rem">' + escapeHtml(topicTitle) + '</h4>' +
-        '<span class="small text-muted">' + completed + '/' + total + '</span>' +
-      '</div>' +
-      '<div class="progress mb-2" style="height:6px">' +
-        '<div class="progress-bar" role="progressbar" style="width:' + pct + '%" aria-valuenow="' + pct + '" aria-valuemin="0" aria-valuemax="100"></div>' +
-      '</div>' +
-      '<div class="d-flex align-items-center justify-content-between">' +
-        '<span class="small">' +
-          (pct === 100 ? '<span class="text-pass fw-semibold">Complete</span>' :
-           inProgress > 0 ? '<span class="text-in-progress">' + inProgress + ' in progress</span>' :
-           '<span class="text-muted">Not started</span>') +
-        '</span>';
+    html += '<div class="course-card">' +
+      (topicImage ? '<img src="' + escapeHtml(topicImage) + '" alt="" class="course-card-img" loading="lazy" onerror="this.style.display=\'none\'">' : '') +
+      '<div class="course-card-body">' +
+        '<h4 class="course-card-title">' + escapeHtml(topicTitle) + '</h4>' +
+        (topicDesc ? '<p class="course-card-desc">' + escapeHtml(topicDesc) + '</p>' : '') +
+        '<div class="progress mb-2" style="height:6px">' +
+          '<div class="progress-bar" role="progressbar" style="width:' + pct + '%"></div>' +
+        '</div>' +
+        '<div class="course-card-footer">' +
+          '<span class="course-card-stat">' + completed + '/' + total + (pct === 100 ? ' <span class="text-pass fw-semibold">Complete</span>' : inProgress > 0 ? ' <span class="text-in-progress">' + inProgress + ' active</span>' : '') + '</span>';
     if (resumeUrl) {
       var btnLabel = pct >= 100 ? 'Start Again' : (pct > 0 ? 'Resume' : 'Start');
       html += '<a href="' + resumeUrl + '" class="btn btn-sm btn-outline-primary">' + btnLabel + '</a>';
     }
-    html += '</div></div>';
+    html += '</div></div></div>';
   });
   html += '</div>';
 
