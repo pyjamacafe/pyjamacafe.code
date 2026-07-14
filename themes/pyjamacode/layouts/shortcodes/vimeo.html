@@ -1,38 +1,12 @@
 {{- $id := .Get 0 | default (.Get "id") -}}
 {{- $title := .Get "title" | default "Video" -}}
-{{- $note := .Get "note" | default "" -}}
-<div class="vm-wrapper" data-video-id="{{ $id }}" style="margin:1rem 0;border-radius:6px;border:1px solid var(--border-color);overflow:hidden">
-  <div class="vm-thumb" style="position:relative;padding-bottom:56.25%;background:var(--bs-secondary-bg);overflow:hidden">
-    <img src="https://i.vimeocdn.com/video/{{ $id }}_640.jpg" alt="{{ $title }}" loading="lazy" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">
-    <div class="vm-playbtn" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.35);cursor:pointer;transition:background 0.15s"><i class="bi bi-play-circle-fill" style="font-size:3rem;color:#fff;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.4))"></i></div>
-    <div class="vm-player" style="position:absolute;inset:0;display:none">
-      <iframe src="https://player.vimeo.com/video/{{ $id }}?title=0&amp;byline=0&amp;portrait=0&amp;badge=0&amp;autopause=0&amp;controls=0&amp;app_id=58479"
-        style="width:100%;height:100%"
-        frameborder="0"
-        allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
-        referrerpolicy="strict-origin-when-cross-origin"
-        title="{{ $title }}"></iframe>
-    </div>
-    <div class="vm-shield" style="position:absolute;inset:0;z-index:2;display:none"></div>
-    <div class="vm-controls" style="position:absolute;bottom:0;left:0;right:0;z-index:3;display:flex;align-items:center;gap:0.25rem;padding:0.25rem 0.5rem;background:linear-gradient(transparent,rgba(0,0,0,0.75));opacity:0;transition:opacity 0.2s;display:none">
-      <button class="vmc-btn vmc-play" title="Play/Pause"><i class="bi bi-play-fill"></i></button>
-      <div class="vmc-progress" style="flex:1;display:flex;align-items:center;gap:0.5rem;min-width:0">
-        <div class="vmc-track" style="flex:1;height:4px;background:rgba(255,255,255,0.3);border-radius:2px;cursor:pointer;position:relative"><div class="vmc-fill" style="height:100%;background:#00adef;border-radius:2px;width:0"></div></div>
-        <div class="vmc-time" style="font-size:0.75rem;color:#fff;white-space:nowrap;font-variant-numeric:tabular-nums"><span class="vmc-current">0:00</span> / <span class="vmc-duration">0:00</span></div>
-      </div>
-      <div class="vmc-dropdown vmc-quality-menu" style="position:relative">
-        <button class="vmc-btn vmc-quality-btn" title="Quality">HD</button>
-        <div class="vmc-dropdown-content" style="display:none;position:absolute;bottom:100%;right:0;background:#222;border-radius:4px;padding:0.25rem 0;z-index:10;min-width:100px"></div>
-      </div>
-      <div class="vmc-dropdown vmc-speed-menu" style="position:relative">
-        <button class="vmc-btn vmc-speed-btn" title="Speed">1x</button>
-        <div class="vmc-dropdown-content" style="display:none;position:absolute;bottom:100%;right:0;background:#222;border-radius:4px;padding:0.25rem 0;z-index:10;min-width:100px"></div>
-      </div>
-      <button class="vmc-btn vmc-mute" title="Mute"><i class="bi bi-volume-up-fill"></i></button>
-      <button class="vmc-btn vmc-fs" title="Fullscreen"><i class="bi bi-arrows-fullscreen"></i></button>
-    </div>
-  </div>
-  {{- if $note }}
-  <div class="vm-note" style="padding:0.4rem 0.75rem;font-size:0.8rem;color:var(--bs-secondary-color);text-align:center;border-top:1px solid var(--border-color)">{{ $note }}</div>
-  {{- end }}
+<div style="margin:1rem 0;position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:6px;border:1px solid var(--border-color)">
+  <iframe src="https://player.vimeo.com/video/{{ $id }}?title=0&amp;byline=0&amp;portrait=0&amp;badge=0&amp;autopause=1&amp;controls=1&amp;app_id=58479"
+    style="position:absolute;top:0;left:0;width:100%;height:100%"
+    frameborder="0"
+    allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+    referrerpolicy="strict-origin-when-cross-origin"
+    title="{{ $title }}"
+    loading="lazy"></iframe>
 </div>
+<div style="padding:0.25rem 0 0.75rem;font-size:0.8rem;color:var(--bs-secondary-color);text-align:center;border-bottom:1px solid var(--border-color);margin-bottom:1rem">{{ $title }}</div>

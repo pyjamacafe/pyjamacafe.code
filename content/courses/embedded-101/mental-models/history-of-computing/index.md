@@ -3,7 +3,7 @@ date = '2026-07-10T10:00:00+05:30'
 draft = false
 title = 'History of Computing'
 description = 'One cannot reason about the workings of the computer without knowing how they came to be. The modern computer systems are based on this fundamental design from the 1900s...'
-og_image = '1970s-world-view.jpeg'
+og_image = '1970s-world-view.png'
 difficulty = 'easy'
 language = 'c'
 topic_weight = -20
@@ -59,6 +59,8 @@ Let's make you familiar with running code on this platform.
 You are not expected to understand the code in the Code editor. This is something we will discover and learn in the chapters to come.
 
 ===EXPLANATION===
+
+{{< vimeo id="1209889856" title="A model of computer systems from 1970s" >}}
 
 The history of computing is not a smooth linear progression — it is a series of discontinuous leaps driven by physics, war, and business. The mechanical era ended not because Babbage's designs were wrong (they were brilliant) but because machining couldn't reliably produce gears to the required tolerance. The electromechanical era died when it became clear that relays would never be fast enough for complex calculations.
 
