@@ -98,7 +98,7 @@ C introduced structured programming constructs — functions, loops, and conditi
 The key to understanding C is learning to think like an engineer from the 1970s — someone who understood the hardware at a deep level and could look at code and infer what the CPU would do at each step. Figure 1 shows this worldview: storage has code and data that the CPU can access via address and data buses. Following instructions and manipulating stored data, the CPU performs calculations and influences the external world. This mental model is the foundation for everything that follows in embedded systems programming.
 
 <figure id="fig-1" class="fig-center">
-  <img src="1970s-world-view.png" alt="1970s World View">
+  <img src="1970s-world-view.jpeg" alt="1970s World View">
   <figcaption><a href="#fig-1" class="fig-link">Figure 1:</a> How engineers in the 1970s thought about computer systems — storage containing code and data that the CPU can access</figcaption>
 </figure>
 
