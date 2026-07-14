@@ -2559,35 +2559,49 @@ function initEditorToggle() {
     return window.innerWidth <= bp;
   }
 
-  function updateUI(open) {
+  function setDesktopCollapsed(collapsed) {
+    editor.classList.toggle('editor-collapsed', collapsed);
+    showBtn.classList.toggle('d-none', !collapsed);
+    closeBtn.classList.toggle('d-none', collapsed);
+  }
+
+  function setMobileOpen(open) {
     editor.classList.toggle('editor-open', open);
     backdrop.classList.toggle('show', open);
     showBtn.classList.toggle('d-none', open);
     closeBtn.classList.toggle('d-none', !open);
   }
 
-  function openEditor() { if (isMobile()) updateUI(true); }
-  function closeEditor() { if (isMobile()) { updateUI(false); showBtn.classList.remove('d-none'); } }
+  showBtn.addEventListener('click', function() {
+    if (isMobile()) setMobileOpen(true);
+    else setDesktopCollapsed(false);
+  });
 
-  showBtn.addEventListener('click', openEditor);
-  closeBtn.addEventListener('click', closeEditor);
-  backdrop.addEventListener('click', closeEditor);
+  closeBtn.addEventListener('click', function() {
+    if (isMobile()) setMobileOpen(false);
+    else setDesktopCollapsed(true);
+  });
 
-  // Hide everything on desktop resize
+  backdrop.addEventListener('click', function() {
+    if (isMobile()) setMobileOpen(false);
+  });
+
+  // Update on resize
   let resizeTimer;
-  window.addEventListener('resize', () => {
+  window.addEventListener('resize', function() {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => {
-      if (!isMobile()) {
-        editor.classList.remove('editor-open');
-        backdrop.classList.remove('show');
-        showBtn.classList.add('d-none');
-        closeBtn.classList.add('d-none');
-      } else {
+    resizeTimer = setTimeout(function() {
+      var mobile = isMobile();
+      if (mobile) {
         showBtn.classList.remove('d-none');
         closeBtn.classList.add('d-none');
+        editor.classList.remove('editor-open', 'editor-collapsed');
+        backdrop.classList.remove('show');
+      } else {
         editor.classList.remove('editor-open');
         backdrop.classList.remove('show');
+        closeBtn.classList.remove('d-none');
+        showBtn.classList.add('d-none');
       }
     }, 200);
   });
@@ -2596,7 +2610,9 @@ function initEditorToggle() {
   if (isMobile()) {
     showBtn.classList.remove('d-none');
     closeBtn.classList.add('d-none');
-    editor.classList.remove('editor-open');
+  } else {
+    closeBtn.classList.remove('d-none');
+    showBtn.classList.add('d-none');
   }
 }
 

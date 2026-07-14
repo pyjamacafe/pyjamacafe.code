@@ -116,15 +116,16 @@
   <aside class="platform-pane question-pane" id="questionPane">
     <div class="pane-header border-bottom d-flex align-items-center" style="justify-content:space-between">
       <span class="d-flex gap-1" style="flex-shrink:0">
-        <button id="sidebarShowBtn" class="btn btn-sm py-0 btn-link text-decoration-none d-none" data-bs-toggle="tooltip" title="Show sidebar" style="font-size:0.9rem;color:var(--bs-body-color);padding:0 0.15rem"><i class="bi bi-layout-sidebar"></i></button>
-        <button id="sidebarHideBtn" class="btn btn-sm py-0 btn-link text-decoration-none" data-bs-toggle="tooltip" title="Collapse sidebar" style="font-size:0.9rem;color:var(--bs-body-color);padding:0 0.15rem"><i class="bi bi-arrow-bar-left"></i></button>
-        <button id="bookmarkBtn" class="btn btn-sm py-0 btn-link text-decoration-none d-none" data-bs-toggle="tooltip" title="Bookmark this problem" style="font-size:0.9rem;color:var(--bs-secondary-color);padding:0 0.15rem"><i class="bi bi-bookmark"></i></button>
+        <button id="sidebarShowBtn" class="btn btn-sm py-0 btn-link text-decoration-none d-none" data-bs-toggle="tooltip" title="Show sidebar" style="color:var(--bs-body-color);padding:0 0.15rem"><i class="bi bi-layout-sidebar"></i></button>
+        <button id="sidebarHideBtn" class="btn btn-sm py-0 btn-link text-decoration-none" data-bs-toggle="tooltip" title="Collapse sidebar" style="color:var(--bs-body-color);padding:0 0.15rem"><i class="bi bi-arrow-bar-left"></i></button>
+        <button id="bookmarkBtn" class="btn btn-sm py-0 btn-link text-decoration-none d-none" data-bs-toggle="tooltip" title="Bookmark this problem" style="color:var(--bs-secondary-color);padding:0 0.15rem"><i class="bi bi-bookmark"></i></button>
       </span>
       <span id="caseTitle" class="small fw-semibold" style="flex:1;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Select a Case</span>
       <span class="d-flex gap-1" style="flex-shrink:0">
-        <button id="prevProblemBtn" class="btn btn-sm py-0 btn-link text-decoration-none" data-bs-toggle="tooltip" title="Previous problem" style="font-size:0.9rem;color:var(--bs-secondary-color);padding:0 0.15rem"><i class="bi bi-chevron-left"></i></button>
-        <button id="nextProblemBtn" class="btn btn-sm py-0 btn-link text-decoration-none" data-bs-toggle="tooltip" title="Next problem" style="font-size:0.9rem;color:var(--bs-secondary-color);padding:0 0.15rem"><i class="bi bi-chevron-right"></i></button>
-        <button id="editorShowBtn" class="btn btn-sm py-0 btn-link text-decoration-none d-none" title="Show editor" style="font-size:0.9rem;color:var(--bs-body-color);padding:0 0.15rem"><i class="bi bi-terminal-fill"></i></button>
+        <button id="prevProblemBtn" class="btn btn-sm py-0 btn-link text-decoration-none" data-bs-toggle="tooltip" title="Previous problem" style="color:var(--bs-secondary-color);padding:0 0.15rem"><i class="bi bi-chevron-left"></i></button>
+        <button id="nextProblemBtn" class="btn btn-sm py-0 btn-link text-decoration-none" data-bs-toggle="tooltip" title="Next problem" style="color:var(--bs-secondary-color);padding:0 0.15rem"><i class="bi bi-chevron-right"></i></button>
+        <button id="editorShowBtn" class="btn btn-sm py-0 btn-link text-decoration-none" title="Show editor" style="color:var(--bs-body-color);padding:0 0.15rem"><i class="bi bi-terminal-fill"></i></button>
+        <button id="editorCloseBtn" class="btn btn-sm py-0 btn-link text-decoration-none d-none" title="Close editor" style="color:var(--bs-body-color);padding:0 0.15rem"><i class="bi bi-terminal-fill"></i></button>
       </span>
     </div>
     <div class="center-tabs" id="centerTabs">
@@ -172,7 +173,6 @@
   <!-- Right: Coding Workspace -->
   <section class="platform-pane editor-pane" id="editorPane">
     <div class="pane-header border-bottom d-flex align-items-center gap-2">
-      <button id="editorCloseBtn" class="editor-close btn btn-sm py-0 btn-link text-decoration-none d-none" title="Close editor" style="font-size:1.1rem;color:var(--bs-body-color);flex-shrink:0;padding:0 0.15rem"><i class="bi bi-x-lg"></i></button>
       <span id="statusText" class="small" style="flex:1;text-align:left"></span>
       <div class="d-flex gap-2 align-items-center">
         <button id="submitBtn" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="Check solution"><i class="bi bi-check-lg"></i> Check</button>

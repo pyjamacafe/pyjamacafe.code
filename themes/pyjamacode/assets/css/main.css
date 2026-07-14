@@ -171,6 +171,16 @@ body.sidebar-collapsed #editorPane {
 
 #editorPane {
   width: 40%;
+  transition: width 0.25s ease, min-width 0.25s ease;
+}
+
+#editorPane.editor-collapsed {
+  width: 0 !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  overflow: hidden;
+  border-left: none;
+  flex: 0 0 0;
 }
 
 .pane-header {
@@ -1816,6 +1826,16 @@ body.sidebar-collapsed #editorPane {
 
 .btn-link {
   color: var(--accent-color) !important;
+}
+
+.pane-header .btn-link {
+  font-size: 0.875rem;
+  line-height: 1;
+}
+
+.pane-header .btn-link:hover {
+  background-color: var(--btn-default-hover);
+  border-radius: 4px;
 }
 
 /* Badges */
