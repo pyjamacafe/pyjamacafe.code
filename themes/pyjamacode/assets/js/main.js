@@ -3231,6 +3231,7 @@ function setupAuth() {
     localStorage.removeItem('pyjamacode-local-version');
     localStorage.removeItem('pyjamacode-synced-version');
     clearDirtyIds();
+    try { localStorage.removeItem('pyjamacode-session-id'); } catch (e) {}
     signOut().finally(function() { location.reload(); });
   });
   if (themeToggleDropdown) themeToggleDropdown.addEventListener('click', () => { toggleTheme(); });
@@ -3257,6 +3258,7 @@ function setupAuth() {
     localStorage.removeItem('pyjamacode-local-version');
     localStorage.removeItem('pyjamacode-synced-version');
     clearDirtyIds();
+    try { localStorage.removeItem('pyjamacode-session-id'); } catch (e) {}
     // Reset theme to light
     localStorage.setItem('pyjamacode-theme', 'light');
     htmlEl.setAttribute('data-bs-theme', 'light');
@@ -3734,9 +3736,15 @@ function initSync() {
 
   function registerSession(uid) {
     var maxSessions = (window.__APP_CONFIG__ && window.__APP_CONFIG__.maxSessions) || 1;
-    if (maxSessions <= 0) return; // unlimited
+    if (maxSessions <= 0) return;
 
-    localSessionId = generateSessionId();
+    // Share session ID across tabs in the same browser via localStorage
+    localSessionId = localStorage.getItem('pyjamacode-session-id');
+    if (!localSessionId) {
+      localSessionId = generateSessionId();
+      try { localStorage.setItem('pyjamacode-session-id', localSessionId); } catch (e) {}
+    }
+
     var sessRef = db.collection('users').doc(uid).collection('sessions').doc(localSessionId);
     sessRef.set({ updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
 
@@ -3758,12 +3766,10 @@ function initSync() {
       while (active.length > maxSessions) {
         var oldest = active.shift();
         if (oldest.id === localSessionId) {
-          // This session is the evicted one — sign out
           signOut().then(function() { window.location.href = '/?session=expired'; })
             .catch(function() { window.location.href = '/?session=expired'; });
           return;
         }
-        // Remove the stale session doc
         db.collection('users').doc(uid).collection('sessions').doc(oldest.id).delete();
       }
     });
@@ -3774,8 +3780,8 @@ function initSync() {
       if (syncUid && !document.hidden) sessRef.update({ updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
     }, 60000);
 
-    // Cleanup on page unload
-    window.addEventListener('beforeunload', function() { sessRef.delete(); });
+    // Cleanup: don't delete on unload — session is shared across tabs.
+    // It will be overwritten on next login or garbage collected by session limit.
   }
 
   function unregisterSession() {
@@ -3785,6 +3791,7 @@ function initSync() {
     if (syncUid && localSessionId) {
       db.collection('users').doc(syncUid).collection('sessions').doc(localSessionId).delete();
     }
+    try { localStorage.removeItem('pyjamacode-session-id'); } catch (e) {}
     localSessionId = null;
   }
 
