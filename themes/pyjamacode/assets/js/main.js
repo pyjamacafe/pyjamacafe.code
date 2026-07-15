@@ -3727,7 +3727,6 @@ function initSync() {
 
   // ─── Configurable session enforcement ───
   var localSessionId = null;
-  var sessionHeartbeat = null;
   var sessionUnsub = null;
 
   function generateSessionId() {
@@ -3748,6 +3747,9 @@ function initSync() {
     var sessRef = db.collection('users').doc(uid).collection('sessions').doc(localSessionId);
     sessRef.set({ updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
 
+    // Auto-delete session when the Firestore connection drops (last tab closes)
+    sessRef.onDisconnect().delete();
+
     // Listen to all sessions and enforce limit
     if (sessionUnsub) sessionUnsub();
     sessionUnsub = db.collection('users').doc(uid).collection('sessions').onSnapshot(function(snap) {
@@ -3760,9 +3762,7 @@ function initSync() {
           active.push({ id: doc.id, ts: ts });
         }
       });
-      // Sort oldest first
       active.sort(function(a, b) { return a.ts - b.ts; });
-      // Evict oldest beyond the limit
       while (active.length > maxSessions) {
         var oldest = active.shift();
         if (oldest.id === localSessionId) {
@@ -3773,20 +3773,9 @@ function initSync() {
         db.collection('users').doc(uid).collection('sessions').doc(oldest.id).delete();
       }
     });
-
-    // Heartbeat every 60 seconds (skip when tab is hidden)
-    clearInterval(sessionHeartbeat);
-    sessionHeartbeat = setInterval(function() {
-      if (syncUid && !document.hidden) sessRef.update({ updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
-    }, 60000);
-
-    // Cleanup: don't delete on unload — session is shared across tabs.
-    // It will be overwritten on next login or garbage collected by session limit.
   }
 
   function unregisterSession() {
-    clearInterval(sessionHeartbeat);
-    sessionHeartbeat = null;
     if (sessionUnsub) { sessionUnsub(); sessionUnsub = null; }
     if (syncUid && localSessionId) {
       db.collection('users').doc(syncUid).collection('sessions').doc(localSessionId).delete();
