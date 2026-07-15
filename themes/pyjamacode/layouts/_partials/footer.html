@@ -1,3 +1,10 @@
-<footer class="border-top px-3 py-0 text-center" style="font-size:0.7rem">
-  <span class="text-muted">&copy; {{ now.Year }} {{ site.Params.author | default site.Title }}. All Rights Reserved.</span>
+<footer class="statusbar">
+  <span class="statusbar-left"></span>
+  <span class="statusbar-center">&copy; {{ now.Year }} {{ site.Params.author | default site.Title }}. All Rights Reserved.</span>
+  <span class="statusbar-right">
+    <button id="syncBtn" class="sync-btn d-none">
+      <span id="syncIndicator" class="sync-indicator"><i class="bi bi-cloud-check"></i></span>
+      <span id="syncLabel" class="sync-label">In sync</span>
+    </button>
+  </span>
 </footer>
