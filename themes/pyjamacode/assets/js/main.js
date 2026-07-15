@@ -3495,7 +3495,7 @@ function deleteUserData(uid) {
   promises.push(deleteCollection(db, db.collection('users').doc(uid).collection('codes')));
   promises.push(deleteCollection(db, db.collection('users').doc(uid).collection('notes')));
   promises.push(deleteCollection(db, db.collection('users').doc(uid).collection('quizzes')));
-  promises.push(deleteCollection(db, db.collection('users').doc(uid).collection('sessions')));
+  promises.push(db.collection('users').doc(uid).collection('sessions').doc('_active').delete());
   promises.push(db.collection('users').doc(uid).collection('meta').doc('profile').delete());
   return Promise.all(promises).then(function() {});
 }
@@ -3737,48 +3737,80 @@ function initSync() {
     var maxSessions = (window.__APP_CONFIG__ && window.__APP_CONFIG__.maxSessions) || 1;
     if (maxSessions <= 0) return;
 
-    // Share session ID across tabs in the same browser via localStorage
     localSessionId = localStorage.getItem('pyjamacode-session-id');
     if (!localSessionId) {
       localSessionId = generateSessionId();
       try { localStorage.setItem('pyjamacode-session-id', localSessionId); } catch (e) {}
     }
 
-    var sessRef = db.collection('users').doc(uid).collection('sessions').doc(localSessionId);
-    sessRef.set({ updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    var sessCol = db.collection('users').doc(uid).collection('sessions');
+    var sessDoc = sessCol.doc('_active');
 
-    // Auto-delete session when the Firestore connection drops (last tab closes)
-    sessRef.onDisconnect().delete();
-
-    // Listen to all sessions and enforce limit
-    if (sessionUnsub) sessionUnsub();
-    sessionUnsub = db.collection('users').doc(uid).collection('sessions').onSnapshot(function(snap) {
-      if (window._isPushingLocally) return;
-      var active = [];
-      snap.forEach(function(doc) {
-        var data = doc.data();
-        if (data.updatedAt) {
-          var ts = data.updatedAt.toMillis ? data.updatedAt.toMillis() : data.updatedAt;
-          active.push({ id: doc.id, ts: ts });
+    // Migrate old per-doc sessions to the new map format
+    sessDoc.get().then(function(docSnap) {
+      var needsMigration = true;
+      if (docSnap.exists) {
+        var d = docSnap.data();
+        // If _active has a 'sessions' map, it's already the new format
+        if (d && d.sessions && typeof d.sessions === 'object' && !Array.isArray(d.sessions)) {
+          needsMigration = false;
         }
-      });
-      active.sort(function(a, b) { return a.ts - b.ts; });
-      while (active.length > maxSessions) {
-        var oldest = active.shift();
-        if (oldest.id === localSessionId) {
+      }
+      if (needsMigration) {
+        // Read all old-format session docs and merge into the map
+        return sessCol.get().then(function(colSnap) {
+          var map = {};
+          colSnap.forEach(function(doc) {
+            if (doc.id === '_active') return;
+            var data = doc.data();
+            if (data.updatedAt) {
+              map[doc.id] = data.updatedAt;
+            }
+            doc.ref.delete();
+          });
+          // Write the merged map (including the old _active doc if it existed but had wrong format)
+          return sessDoc.set({ sessions: map }, { merge: true });
+        });
+      }
+    }).then(function() {
+      // Now add our session to the map
+      return sessDoc.set({ sessions: { [localSessionId]: firebase.firestore.FieldValue.serverTimestamp() } }, { merge: true });
+    }).then(function() {
+      // Register the listener AFTER migration and our session addition
+      if (sessionUnsub) sessionUnsub();
+      sessionUnsub = sessDoc.onSnapshot(function(snap) {
+        if (!snap.exists || window._isPushingLocally) return;
+        var data = snap.data() || {};
+        var sessions = data.sessions || {};
+        var active = Object.keys(sessions).map(function(id) {
+          var ts = sessions[id];
+          return { id: id, ts: ts && ts.toMillis ? ts.toMillis() : (ts || 0) };
+        });
+        active.sort(function(a, b) { return a.ts - b.ts; });
+        // If our session is not in the map, we were evicted
+        if (active.every(function(s) { return s.id !== localSessionId; })) {
           signOut().then(function() { window.location.href = '/?session=expired'; })
             .catch(function() { window.location.href = '/?session=expired'; });
           return;
         }
-        db.collection('users').doc(uid).collection('sessions').doc(oldest.id).delete();
-      }
+        // Evict oldest beyond the limit (won't be ours — we just checked)
+        // This also handles dynamic limit changes (if maxSessions was reduced)
+        while (active.length > maxSessions) {
+          var oldest = active.shift();
+          sessDoc.set({ sessions: { [oldest.id]: firebase.firestore.FieldValue.delete() } }, { merge: true });
+        }
+      });
     });
+
   }
 
   function unregisterSession() {
     if (sessionUnsub) { sessionUnsub(); sessionUnsub = null; }
     if (syncUid && localSessionId) {
-      db.collection('users').doc(syncUid).collection('sessions').doc(localSessionId).delete();
+      db.collection('users').doc(syncUid).collection('sessions').doc('_active').set(
+        { sessions: { [localSessionId]: firebase.firestore.FieldValue.delete() } },
+        { merge: true }
+      );
     }
     try { localStorage.removeItem('pyjamacode-session-id'); } catch (e) {}
     localSessionId = null;
