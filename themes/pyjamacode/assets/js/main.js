@@ -117,8 +117,42 @@ var _dirtySubmissions = {};
 var _dirtyNotes = {};
 var _dirtyQuizzes = {};
 
+// Persisted dirty IDs — survive page refresh for modal listing
+function getDirtyIds() {
+  try { return JSON.parse(localStorage.getItem('pyjamacode-dirty-ids') || '[]'); } catch (e) { return []; }
+}
+
+function addDirtyId(id) {
+  var ids = getDirtyIds();
+  if (ids.indexOf(id) === -1) ids.push(id);
+  try { localStorage.setItem('pyjamacode-dirty-ids', JSON.stringify(ids)); } catch (e) {}
+}
+
+function clearDirtyIds() {
+  try { localStorage.removeItem('pyjamacode-dirty-ids'); } catch (e) {}
+}
+
+function bumpLocalVersion() {
+  try {
+    var cur = localStorage.getItem('pyjamacode-local-version');
+    var v = (cur ? parseInt(cur, 10) : 0) + 1;
+    localStorage.setItem('pyjamacode-local-version', String(v));
+  } catch (e) {}
+}
+
+function setSyncedVersion() {
+  try {
+    var lv = localStorage.getItem('pyjamacode-local-version');
+    localStorage.setItem('pyjamacode-synced-version', lv || '0');
+  } catch (e) {}
+}
+
 function hasDirtyData() {
-  return Object.keys(_dirtySubmissions).length > 0 || Object.keys(_dirtyNotes).length > 0 || Object.keys(_dirtyQuizzes).length > 0;
+  if (Object.keys(_dirtySubmissions).length > 0 || Object.keys(_dirtyNotes).length > 0 || Object.keys(_dirtyQuizzes).length > 0) return true;
+  // Check persisted version mismatch (survives page refresh)
+  try {
+    return localStorage.getItem('pyjamacode-local-version') !== localStorage.getItem('pyjamacode-synced-version');
+  } catch (e) { return false; }
 }
 
 function updateSyncIndicator() {
@@ -150,18 +184,43 @@ function updateSyncIndicator() {
   }
 }
 
-// Click handler for sync button — push dirty changes to cloud
+// Click handler for sync button — show confirmation modal with unsaved changes
 document.addEventListener('click', function(e) {
   var btn = e.target.closest('#syncBtn');
   if (!btn || btn.classList.contains('d-none') || !hasDirtyData() || window._isPushingLocally) return;
-  // Trigger Ctrl+S programmatically: call save + push
-  if (typeof saveCurrentCode === 'function' && activeQuestionId) saveCurrentCode();
-  if (typeof saveCurrentNotes === 'function' && activeQuestionId) saveCurrentNotes();
-  // Dispatch a custom event that the initSync handler can listen to
-  document.dispatchEvent(new CustomEvent('cloud-sync-requested'));
+  var listEl = document.getElementById('syncChangesList');
+  var dialog = document.getElementById('syncConfirmModal');
+  var confirmBtn = document.getElementById('syncConfirmYes');
+  if (!listEl || !dialog || !confirmBtn) return;
+  // Read persisted dirty IDs (survives page refresh, covers all tabs)
+  var dirtyIds = getDirtyIds();
+  var seen = {};
+  var items = [];
+  dirtyIds.forEach(function(id) {
+    if (seen[id]) return;
+    seen[id] = true;
+    var q = questions.find(function(q) { return q.id === id; });
+    var title = q ? q.title : id;
+    items.push('<div><span class="text-in-progress">\u2714</span> ' + escapeHtml(title) + '</div>');
+  });
+  listEl.innerHTML = items.length ? items.join('') : '<div class="text-muted">No unsaved changes</div>';
+  dialog.showModal();
+});
+
+document.addEventListener('click', function(e) {
+  if (e.target.id === 'syncConfirmYes' || e.target.closest('#syncConfirmYes')) {
+    // Save current problem state first so dirty flags are up to date
+    if (typeof saveCurrentCode === 'function' && activeQuestionId) saveCurrentCode();
+    if (typeof saveCurrentNotes === 'function' && activeQuestionId) saveCurrentNotes();
+    document.dispatchEvent(new CustomEvent('cloud-sync-requested'));
+  }
 });
 
 function init() {
+  // Ensure clean dirty state on every page load
+  _dirtySubmissions = {};
+  _dirtyNotes = {};
+  _dirtyQuizzes = {};
   // Show session expired message if redirected here
   if (window.location.search.indexOf('session=expired') !== -1) {
     var msg = document.createElement('div');
@@ -649,6 +708,11 @@ function initCodeMirror() {
     }
     if (!isSettingValue) {
       showFileUnsavedDot(activeFileIndex);
+      // Debounced auto-save to localStorage (not cloud)
+      if (window._codeSaveTimer) clearTimeout(window._codeSaveTimer);
+      window._codeSaveTimer = setTimeout(function() {
+        if (activeQuestionId) saveCurrentCode();
+      }, 1500);
     }
   });
 }
@@ -728,6 +792,11 @@ function initNotesCodeMirror() {
       if (notesPreviewMode) {
         renderNotesPreview();
       }
+      // Debounced auto-save to localStorage (not cloud)
+      if (window._notesSaveTimer) clearTimeout(window._notesSaveTimer);
+      window._notesSaveTimer = setTimeout(function() {
+        if (activeQuestionId) saveCurrentNotes();
+      }, 1500);
     }
   });
 
@@ -869,9 +938,16 @@ function persistNotes() {
 
 function saveCurrentNotes() {
   if (!activeQuestionId) return;
-  notes[activeQuestionId] = getNotesEditorValue();
+  var val = getNotesEditorValue();
+  if (notes[activeQuestionId] === val) {
+    hideNotesUnsavedDot();
+    return;
+  }
+  notes[activeQuestionId] = val;
   hideNotesUnsavedDot();
   _dirtyNotes[activeQuestionId] = true;
+  addDirtyId(activeQuestionId);
+  bumpLocalVersion();
   updateSyncIndicator();
   persistNotes();
 }
@@ -1581,7 +1657,9 @@ function resetCase() {
   submissions[activeQuestionId].status = 'Unattempted';
   updateStatus('Unattempted');
   _dirtySubmissions[activeQuestionId] = true;
-  if (notes[activeQuestionId] && notes[activeQuestionId].trim()) _dirtyNotes[activeQuestionId] = true;
+  addDirtyId(activeQuestionId);
+  if (notes[activeQuestionId] && notes[activeQuestionId].trim()) { _dirtyNotes[activeQuestionId] = true; addDirtyId(activeQuestionId); }
+  bumpLocalVersion();
   persistSubmissions();
   // Clear unsaved dot for the reset file
   if (fileList.length > 0) {
@@ -1612,7 +1690,9 @@ function resetAllFiles() {
   unsavedFiles = {};
   hideAllUnsavedDots();
   _dirtySubmissions[activeQuestionId] = true;
-  if (notes[activeQuestionId] && notes[activeQuestionId].trim()) _dirtyNotes[activeQuestionId] = true;
+  addDirtyId(activeQuestionId);
+  if (notes[activeQuestionId] && notes[activeQuestionId].trim()) { _dirtyNotes[activeQuestionId] = true; addDirtyId(activeQuestionId); }
+  bumpLocalVersion();
   persistSubmissions();
   renderQuestionList(questionSearchEl ? questionSearchEl.value : '');
 }
@@ -1624,11 +1704,13 @@ function saveCurrentCode() {
     const file = fileList[activeFileIndex];
     if (!submissions[activeQuestionId]) submissions[activeQuestionId] = {};
     if (!submissions[activeQuestionId].files) submissions[activeQuestionId].files = {};
+    if (submissions[activeQuestionId].files[file.filename] === code) { hideFileUnsavedDot(); return; }
     submissions[activeQuestionId].files[file.filename] = code;
   } else {
     if (!submissions[activeQuestionId]) {
       submissions[activeQuestionId] = { status: 'In Progress', output: '', code: '' };
     }
+    if (submissions[activeQuestionId].code === code) { hideFileUnsavedDot(); return; }
     submissions[activeQuestionId].code = code;
   }
   if (!submissions[activeQuestionId].status || submissions[activeQuestionId].status === 'Unattempted') {
@@ -1638,6 +1720,8 @@ function saveCurrentCode() {
   }
   hideFileUnsavedDot();
   _dirtySubmissions[activeQuestionId] = true;
+  addDirtyId(activeQuestionId);
+  bumpLocalVersion();
   updateSyncIndicator();
   persistSubmissions();
 }
@@ -1731,29 +1815,10 @@ function submitCode() {
     if (!submissions[activeQuestionId]) submissions[activeQuestionId] = {};
     submissions[activeQuestionId].status = status;
     submissions[activeQuestionId].output = outputHtml;
+    _dirtySubmissions[activeQuestionId] = true;
+    addDirtyId(activeQuestionId);
+    updateSyncIndicator();
     persistSubmissions();
-    // Push to cloud on Check — batch meta + codes to keep _isPushingLocally atomic
-    try {
-      var user = firebase.auth().currentUser;
-      if (user) {
-        window._isPushingLocally = true;
-        var batch = firebase.firestore().batch();
-        batch.set(firebase.firestore().collection('users').doc(user.uid).collection('meta').doc('profile'), {
-          status: (function() { var m = {}; for (var k in submissions) { var s = submissions[k]; if (s && s.status && s.status !== 'Unattempted') m[k] = s.status; } return m; })(),
-          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        }, { merge: true });
-        batch.set(firebase.firestore().collection('users').doc(user.uid).collection('codes').doc(activeQuestionId), {
-          code: submissions[activeQuestionId].code || '',
-          files: submissions[activeQuestionId].files || null,
-          status: status,
-          output: outputHtml,
-          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        batch.commit().then(function() {
-          window._isPushingLocally = false;
-        }).catch(function() { window._isPushingLocally = false; });
-      }
-    } catch (e) { window._isPushingLocally = false; }
     renderQuestionList(questionSearchEl ? questionSearchEl.value : '');
   })
   .catch((err) => {
@@ -1918,6 +1983,8 @@ function renderQuiz() {
   function saveQuizResults() {
     try { localStorage.setItem('pyjamacode-quiz-results', JSON.stringify(quizResults)); } catch (e) {}
     _dirtyQuizzes[quizId] = true;
+    addDirtyId(quizId);
+    bumpLocalVersion();
     updateSyncIndicator();
   }
 
@@ -3160,6 +3227,10 @@ function setupAuth() {
     localStorage.removeItem('pyjamacode-tabs');
     localStorage.removeItem('lastProblemUrl');
     localStorage.removeItem('lastProblemTab');
+    localStorage.removeItem('pyjamacode-cloud-initialized');
+    localStorage.removeItem('pyjamacode-local-version');
+    localStorage.removeItem('pyjamacode-synced-version');
+    clearDirtyIds();
     signOut().finally(function() { location.reload(); });
   });
   if (themeToggleDropdown) themeToggleDropdown.addEventListener('click', () => { toggleTheme(); });
@@ -3182,6 +3253,10 @@ function setupAuth() {
     localStorage.removeItem('pyjamacode-tabs');
     localStorage.removeItem('lastProblemUrl');
     localStorage.removeItem('lastProblemTab');
+    localStorage.removeItem('pyjamacode-cloud-initialized');
+    localStorage.removeItem('pyjamacode-local-version');
+    localStorage.removeItem('pyjamacode-synced-version');
+    clearDirtyIds();
     // Reset theme to light
     localStorage.setItem('pyjamacode-theme', 'light');
     htmlEl.setAttribute('data-bs-theme', 'light');
@@ -3420,7 +3495,6 @@ function deleteUserData(uid) {
   promises.push(deleteCollection(db, db.collection('users').doc(uid).collection('quizzes')));
   promises.push(deleteCollection(db, db.collection('users').doc(uid).collection('sessions')));
   promises.push(db.collection('users').doc(uid).collection('meta').doc('profile').delete());
-  promises.push(db.collection('userData').doc(uid).delete());
   return Promise.all(promises).then(function() {});
 }
 
@@ -3496,45 +3570,6 @@ function initSync() {
     return batch.commit();
   }
 
-  // Migrate old userData/{uid} doc to new granular structure
-  function migrateFromOld(uid, oldSnap) {
-    const data = oldSnap.data();
-    if (!data) return Promise.resolve();
-    const batch = db.batch();
-    const parsed = {};
-
-    if (data.submissions) {
-      try { Object.assign(parsed, JSON.parse(data.submissions)); } catch (e) {}
-    }
-    const parsedNotes = {};
-    if (data.notes) {
-      try { Object.assign(parsedNotes, JSON.parse(data.notes)); } catch (e) {}
-    }
-
-    for (const id of Object.keys(parsed)) {
-      const sub = parsed[id];
-      batch.set(
-        db.collection('users').doc(uid).collection('codes').doc(id),
-        { code: sub.code || '', files: sub.files || null, status: sub.status || 'Unattempted', output: sub.output || '', updatedAt: firebase.firestore.FieldValue.serverTimestamp() }
-      );
-    }
-    for (const id of Object.keys(parsedNotes)) {
-      if (parsedNotes[id] && parsedNotes[id].trim()) {
-        batch.set(
-          db.collection('users').doc(uid).collection('notes').doc(id),
-          { content: parsedNotes[id], updatedAt: firebase.firestore.FieldValue.serverTimestamp() }
-        );
-      }
-    }
-    batch.set(
-      db.collection('users').doc(uid).collection('meta').doc('profile'),
-      { theme: data.theme || 'dark', tab: data.tab || '', status: buildStatusMap(), tabs: buildTabsMap(), updatedAt: firebase.firestore.FieldValue.serverTimestamp() },
-      { merge: true }
-    );
-    batch.delete(db.collection('userData').doc(uid));
-    return batch.commit();
-  }
-
   function startCloudListener(uid) {
     if (window._cloudUnsub) { window._cloudUnsub(); window._cloudUnsub = null; }
     // Listen to meta doc for real-time status/theme/tab updates
@@ -3591,94 +3626,18 @@ function initSync() {
       }
     });
 
-    // Real-time listener for codes collection — syncs code changes across browsers
-    if (window._codesUnsub) { window._codesUnsub(); window._codesUnsub = null; }
-    var codesReady = false;
-    window._codesUnsub = db.collection('users').doc(uid).collection('codes').onSnapshot(function(snapshot) {
-      if (window._isPushingLocally) return;
-      if (!codesReady) { codesReady = true; return; } // Skip initial snapshot (data from pullFromCloud)
-      var changed = false;
-      snapshot.docChanges().forEach(function(change) {
-        if (change.type === 'modified' || change.type === 'added') {
-          var data = change.doc.data();
-          var id = change.doc.id;
-          if (!submissions[id]) submissions[id] = {};
-          if (data.code !== undefined) submissions[id].code = data.code;
-          if (data.files !== undefined) submissions[id].files = data.files;
-          if (data.status) submissions[id].status = data.status;
-          if (data.output) submissions[id].output = data.output;
-          changed = true;
-        }
-      });
-      if (changed) {
-        persistSubmissions();
-        // Full UI refresh — re-initializes editor, file tabs, notes, console, tree
-        refreshUI();
-      }
-    });
-
-    // Real-time listener for notes collection
-    if (window._notesUnsub) { window._notesUnsub(); window._notesUnsub = null; }
-    var notesReady = false;
-    window._notesUnsub = db.collection('users').doc(uid).collection('notes').onSnapshot(function(snapshot) {
-      if (window._isPushingLocally) return;
-      if (!notesReady) { notesReady = true; return; }
-      var changed = false;
-      snapshot.docChanges().forEach(function(change) {
-        if (change.type === 'modified' || change.type === 'added') {
-          var data = change.doc.data();
-          if (data.content) {
-            notes[change.doc.id] = data.content;
-            changed = true;
-          }
-        }
-      });
-      if (changed) {
-        persistNotes();
-        // Update notes editor if the active problem's notes changed
-        if (activeQuestionId && notes[activeQuestionId] !== undefined) {
-          setNotesEditorValue(notes[activeQuestionId] || '');
-          if (notesPreviewMode) renderNotesPreview();
-        }
-      }
-    });
-
-    // Real-time listener for quiz results
-    if (window._quizzesUnsub) { window._quizzesUnsub(); window._quizzesUnsub = null; }
-    var quizzesReady = false;
-    window._quizzesUnsub = db.collection('users').doc(uid).collection('quizzes').onSnapshot(function(snapshot) {
-      if (window._isPushingLocally) return;
-      if (!quizzesReady) { quizzesReady = true; return; }
-      var changed = false;
-      snapshot.docChanges().forEach(function(change) {
-        if (change.type === 'modified' || change.type === 'added') {
-          var data = change.doc.data();
-          quizResults[change.doc.id] = data.results || {};
-          changed = true;
-        }
-        if (change.type === 'removed') {
-          delete quizResults[change.doc.id];
-          changed = true;
-        }
-      });
-      if (changed) {
-        try { localStorage.setItem('pyjamacode-quiz-results', JSON.stringify(quizResults)); } catch (e) {}
-        renderQuestionList(questionSearchEl ? questionSearchEl.value : '');
-        var quizTab = document.querySelector('.center-tab[data-tab="quiz"]');
-        if (quizTab && quizTab.classList.contains('active')) renderQuiz();
-      }
-    });
+    // Note: codes, notes, and quizzes listeners are intentionally removed.
+    // Cloud sync only happens on explicit user action (sync button or Ctrl+S).
+    // Cross-tab sync within the same browser uses the localStorage storage event.
   }
 
   function stopCloudListener() {
     if (window._cloudUnsub) { window._cloudUnsub(); window._cloudUnsub = null; }
-    if (window._codesUnsub) { window._codesUnsub(); window._codesUnsub = null; }
-    if (window._notesUnsub) { window._notesUnsub(); window._notesUnsub = null; }
-    if (window._quizzesUnsub) { window._quizzesUnsub(); window._quizzesUnsub = null; }
   }
 
   function pullFromCloud(uid) {
-    // Try new granular structure first
+    // After first sync, use localStorage only — don't pull from cloud on every load
+    if (localStorage.getItem('pyjamacode-cloud-initialized')) return Promise.resolve();
     return db.collection('users').doc(uid).collection('meta').doc('profile').get().then(function(metaSnap) {
       if (metaSnap.exists) {
         const meta = metaSnap.data();
@@ -3725,22 +3684,17 @@ function initSync() {
                 quizResults[doc.id] = data.results || {};
               });
               try { localStorage.setItem('pyjamacode-quiz-results', JSON.stringify(quizResults)); } catch (e) {}
+              localStorage.setItem('pyjamacode-cloud-initialized', '1');
+              setSyncedVersion();
               return Promise.resolve();
             });
           });
         });
       }
-      // Fall back to old userData/{uid} doc — migrate it
-      return db.collection('userData').doc(uid).get().then(function(oldSnap) {
-        if (oldSnap.exists) {
-          return migrateFromOld(uid, oldSnap).then(function() {
-            if (activeQuestionId) saveCurrentCode();
-            return Promise.resolve();
-          });
-        }
-        // No data at all — push current local state as granular docs
-        return pushChangedItems(Object.keys(submissions));
-      });
+      // No data at all — mark initialized so we don't pull again
+      localStorage.setItem('pyjamacode-cloud-initialized', '1');
+      setSyncedVersion();
+      return Promise.resolve();
     });
   }
 
@@ -3753,6 +3707,9 @@ function initSync() {
       _dirtySubmissions = {};
       _dirtyNotes = {};
       _dirtyQuizzes = {};
+      clearDirtyIds();
+      localStorage.setItem('pyjamacode-cloud-initialized', '1');
+      setSyncedVersion();
       window._isPushingLocally = false;
       updateSyncIndicator();
     }).catch(function() { window._isPushingLocally = false; updateSyncIndicator(); });
@@ -3880,6 +3837,9 @@ function initSync() {
       _dirtySubmissions = {};
       _dirtyNotes = {};
       _dirtyQuizzes = {};
+      clearDirtyIds();
+      localStorage.setItem('pyjamacode-cloud-initialized', '1');
+      setSyncedVersion();
       window._isPushingLocally = false;
       updateSyncIndicator();
       setDirty(false);

@@ -8,3 +8,12 @@
     </button>
   </span>
 </footer>
+
+<dialog id="syncConfirmModal" class="reset-dialog">
+  <h3>Unsaved Changes</h3>
+  <div id="syncChangesList" style="margin:0 0 1rem;max-height:200px;overflow-y:auto;font-size:0.85rem;line-height:1.5"></div>
+  <form method="dialog" class="d-flex flex-column gap-2">
+    <button id="syncConfirmYes" class="btn btn-primary w-100">Sync Now</button>
+    <button id="syncConfirmNo" class="btn btn-outline-secondary w-100" value="cancel">Cancel</button>
+  </form>
+</dialog>
