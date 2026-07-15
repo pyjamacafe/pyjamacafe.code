@@ -165,21 +165,21 @@ function updateSyncIndicator() {
   btn.classList.remove('d-none');
   var icon = el.querySelector('i');
   if (!icon) return;
-  btn.className = 'sync-btn';
+  btn.className = 'btn btn-sm btn-outline-secondary';
   if (window._isPushingLocally) {
     icon.className = 'bi bi-arrow-repeat';
     btn.classList.add('syncing');
-    label.textContent = 'Syncing';
+    label.textContent = 'Save';
     btn.title = 'Syncing...';
   } else if (hasDirtyData()) {
     icon.className = 'bi bi-cloud-arrow-up';
     btn.classList.add('dirty');
-    label.textContent = 'Unsaved';
+    label.textContent = 'Save';
     btn.title = 'Unsaved changes — click to sync';
   } else {
     icon.className = 'bi bi-cloud-check';
     btn.classList.add('synced');
-    label.textContent = 'In sync';
+    label.textContent = 'Saved';
     btn.title = 'In sync';
   }
 }
@@ -939,7 +939,7 @@ function persistNotes() {
 function saveCurrentNotes() {
   if (!activeQuestionId) return;
   var val = getNotesEditorValue();
-  if (notes[activeQuestionId] === val) {
+  if ((notes[activeQuestionId] || '') === (val || '')) {
     hideNotesUnsavedDot();
     return;
   }

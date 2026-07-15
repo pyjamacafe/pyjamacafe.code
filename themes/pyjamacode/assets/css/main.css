@@ -1029,41 +1029,36 @@ body.sidebar-collapsed #editorPane {
   padding-right: 20px;
 }
 
-.sync-btn {
+#syncBtn {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
-  border: none;
-  border-radius: 3px;
-  padding: 0.1rem 0.4rem;
+  padding: 0.75em;
   cursor: pointer;
-  font-size: 0.75rem;
   color: var(--bs-body-color);
-  background: transparent;
   transition: background 0.2s ease, color 0.2s ease;
 }
 
-.sync-btn:hover {
-  filter: brightness(1.2);
-}
-
-.sync-btn.synced {
+#syncBtn.synced {
   background: color-mix(in srgb, var(--bs-success) 15%, transparent);
   color: var(--bs-success);
 }
 
-.sync-btn.dirty {
-  background: color-mix(in srgb, #d97706 20%, transparent);
-  color: #d97706;
+#syncBtn.dirty {
+  background: color-mix(in srgb, var(--bs-danger) 15%, transparent);
+  color: var(--bs-danger);
 }
 
-.sync-btn.syncing {
+#syncBtn.dirty:hover {
+  background: color-mix(in srgb, var(--bs-danger) 25%, transparent);
+}
+
+#syncBtn.syncing {
   background: color-mix(in srgb, var(--accent-color) 20%, transparent);
   color: var(--accent-color);
 }
 
 .sync-indicator {
-  font-size: 0.8rem;
   line-height: 1;
   display: inline-flex;
   align-items: center;
@@ -1071,11 +1066,10 @@ body.sidebar-collapsed #editorPane {
 }
 
 .sync-label {
-  font-size: 0.75rem;
   line-height: 1;
 }
 
-.sync-btn.syncing .sync-indicator {
+#syncBtn.syncing .sync-indicator {
   animation: syncSpinner 1s linear infinite;
 }
 
