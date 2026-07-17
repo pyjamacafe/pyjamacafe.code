@@ -156,37 +156,71 @@ function hasDirtyData() {
 }
 
 function updateSyncIndicator() {
+  var authed = typeof isAuthenticated === 'function' && isAuthenticated();
+  var dot = document.getElementById('syncDot');
+
+  // Update dropdown button
   var btn = document.getElementById('syncBtn');
   var el = document.getElementById('syncIndicator');
   var label = document.getElementById('syncLabel');
+
+  // Update footer indicator
+  var btnF = document.getElementById('syncBtnFooter');
+  var elF = document.getElementById('syncIndicatorFooter');
+  var labelF = document.getElementById('syncLabelFooter');
+
   if (!btn || !el || !label) return;
-  var authed = typeof isAuthenticated === 'function' && isAuthenticated();
-  if (!authed) { btn.classList.add('d-none'); return; }
-  btn.classList.remove('d-none');
-  var icon = el.querySelector('i');
-  if (!icon) return;
-  btn.className = 'btn btn-sm btn-outline-secondary';
-  if (window._isPushingLocally) {
-    icon.className = 'bi bi-arrow-repeat';
-    btn.classList.add('syncing');
-    label.textContent = 'Save';
-    btn.title = 'Syncing...';
-  } else if (hasDirtyData()) {
-    icon.className = 'bi bi-cloud-arrow-up';
-    btn.classList.add('dirty');
-    label.textContent = 'Save';
-    btn.title = 'Unsaved changes — click to sync';
-  } else {
-    icon.className = 'bi bi-cloud-check';
-    btn.classList.add('synced');
-    label.textContent = 'Saved';
-    btn.title = 'In sync';
+
+  if (!authed) {
+    btn.classList.add('d-none');
+    if (btnF) btnF.classList.add('d-none');
+    if (dot) dot.style.display = 'none';
+    return;
   }
+  btn.classList.remove('d-none');
+  if (btnF) btnF.classList.remove('d-none');
+  if (dot) dot.style.display = '';
+
+  var icon = el.querySelector('i');
+  var iconF = elF ? elF.querySelector('i') : null;
+  if (!icon) return;
+
+  btn.className = 'sync-dropdown-item';
+  if (btnF) btnF.className = 'sync-btn-footer';
+  if (dot) dot.className = 'sync-dot';
+
+  var stateClass, stateIcon, stateLabel, stateTitle;
+  if (window._isPushingLocally) {
+    stateClass = 'syncing';
+    stateIcon = 'bi bi-arrow-repeat';
+    stateLabel = 'Sync to cloud';
+    stateTitle = 'Syncing...';
+  } else if (hasDirtyData()) {
+    stateClass = 'dirty';
+    stateIcon = 'bi bi-cloud-arrow-up';
+    stateLabel = 'Sync to cloud';
+    stateTitle = 'Unsaved changes — click to sync';
+  } else {
+    stateClass = 'synced';
+    stateIcon = 'bi bi-cloud-check';
+    stateLabel = 'Synced to cloud';
+    stateTitle = 'In sync';
+  }
+
+  icon.className = stateIcon;
+  btn.classList.add(stateClass);
+  btn.title = stateTitle;
+  label.textContent = stateLabel;
+
+  if (iconF) iconF.className = stateIcon;
+  if (btnF) { btnF.classList.add(stateClass); btnF.title = stateTitle; }
+  if (labelF) labelF.textContent = stateLabel;
+  if (dot) dot.classList.add(stateClass);
 }
 
 // Click handler for sync button — show confirmation modal with unsaved changes
 document.addEventListener('click', function(e) {
-  var btn = e.target.closest('#syncBtn');
+  var btn = e.target.closest('#syncBtn') || e.target.closest('#syncBtnFooter');
   if (!btn || btn.classList.contains('d-none') || !hasDirtyData() || window._isPushingLocally) return;
   var listEl = document.getElementById('syncChangesList');
   var dialog = document.getElementById('syncConfirmModal');

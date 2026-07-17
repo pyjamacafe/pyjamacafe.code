@@ -1030,32 +1030,70 @@ body.sidebar-collapsed #editorPane {
 }
 
 #syncBtn {
-  display: inline-flex;
+  display: flex !important;
   align-items: center;
   gap: 0.3rem;
-  padding: 0.75em;
   cursor: pointer;
   color: var(--bs-body-color);
   transition: background 0.2s ease, color 0.2s ease;
 }
 
-#syncBtn.synced {
-  background: color-mix(in srgb, var(--bs-success) 15%, transparent);
+.sync-dropdown-item {
+  display: flex !important;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 1rem;
+  cursor: pointer;
+  color: var(--bs-body-color);
+  transition: background 0.2s ease, color 0.2s ease;
+  white-space: nowrap;
+}
+
+.sync-dropdown-item:hover {
+  background-color: var(--btn-default-hover);
+}
+
+.sync-btn-footer {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  cursor: pointer;
+  color: var(--bs-body-color);
+  transition: background 0.2s ease, color 0.2s ease;
+  padding: 0 0.5rem;
+}
+
+#syncBtn.synced,
+.sync-dropdown-item.synced,
+.sync-btn-footer.synced {
   color: var(--bs-success);
 }
 
-#syncBtn.dirty {
-  background: color-mix(in srgb, var(--bs-danger) 15%, transparent);
+#syncBtn.synced:hover,
+.sync-dropdown-item.synced:hover {
+  background: color-mix(in srgb, var(--bs-success) 15%, transparent);
+}
+
+#syncBtn.dirty,
+.sync-dropdown-item.dirty,
+.sync-btn-footer.dirty {
   color: var(--bs-danger);
 }
 
-#syncBtn.dirty:hover {
-  background: color-mix(in srgb, var(--bs-danger) 25%, transparent);
+#syncBtn.dirty:hover,
+.sync-dropdown-item.dirty:hover {
+  background: color-mix(in srgb, var(--bs-danger) 15%, transparent);
 }
 
-#syncBtn.syncing {
-  background: color-mix(in srgb, var(--accent-color) 20%, transparent);
+#syncBtn.syncing,
+.sync-dropdown-item.syncing,
+.sync-btn-footer.syncing {
   color: var(--accent-color);
+}
+
+#syncBtn.syncing:hover,
+.sync-dropdown-item.syncing:hover {
+  background: color-mix(in srgb, var(--accent-color) 20%, transparent);
 }
 
 .sync-indicator {
@@ -1076,6 +1114,25 @@ body.sidebar-collapsed #editorPane {
 @keyframes syncSpinner {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+.sync-dot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 2px solid var(--bs-body-bg);
+  transition: background 0.3s ease;
+}
+
+.sync-dot.synced {
+  background: var(--bs-success);
+}
+
+.sync-dot.dirty {
+  background: var(--bs-danger);
 }
 
 .auth-modal-backdrop {

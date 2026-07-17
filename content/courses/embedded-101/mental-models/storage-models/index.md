@@ -81,30 +81,34 @@ A modern smartphone uses every memory technology simultaneously: registers and L
 
 # Ways to Store a Bit
 
+<figure id="fig-1" class="fig-right">
+  <img src="NOT-gate.jpeg" alt="NOT Gate Symbol">
+  <figcaption><a href="#fig-1" class="fig-link">Figure 1:</a> Symbolic representation of the NOT gate (inverter) used in feedback-based storage</figcaption>
+</figure>
+
 At the lowest level, storage comes down to how a single **bit** is physically implemented. There are two fundamental approaches: **feedback-based** and **charge trapping**. These two techniques underlie virtually all modern solid-state memory.
 
 ## Feedback-Based Storage (SRAM, Registers, Flip-Flops)
 
-<figure id="fig-1" class="fig-right">
-  <img src="mosfet-NOT.jpeg" alt="MOSFET NOT Gate Circuit">
-  <figcaption><a href="#fig-1" class="fig-link">Figure 1:</a> Transistor circuit implementation of the NOT logic gate using MOSFETs</figcaption>
-</figure>
-
-<figure id="fig-5" class="fig-right">
-  <img src="NOT-gate.jpeg" alt="NOT Gate Symbol">
-  <figcaption><a href="#fig-5" class="fig-link">Figure 5:</a> Symbolic representation of the NOT gate (inverter) used in feedback-based storage</figcaption>
-</figure>
-
-<figure id="fig-6" class="fig-right">
+<figure id="fig-2" class="fig-right">
   <img src="NOT-truth-table.jpeg" alt="NOT Gate Truth Table">
-  <figcaption><a href="#fig-6" class="fig-link">Figure 6:</a> Truth table for the NOT gate — input 1 produces output 0 and vice versa</figcaption>
+  <figcaption><a href="#fig-2" class="fig-link">Figure 2:</a> Truth table for the NOT gate — input 1 produces output 0 and vice versa</figcaption>
 </figure>
 
-Feedback-based storage uses a loop of logic gates to trap a signal value. Consider a NOT gate (inverter), whose symbol and truth table are shown in Figures 5 and 6. A transistor-level implementation using MOSFETs is shown in Figure 1. If two NOT gates are connected in series and the output of the second is fed back to the input of the first (Figure 8), the circuit traps its own state. The process uses two types of inverters:
+Feedback-based storage uses a loop of logic gates to trap a signal value. Consider a NOT gate (inverter), whose symbol and truth table are shown in Figures 1 and 2.
+
+<figure id="fig-3" class="fig-right">
+  <img src="mosfet-NOT.jpeg" alt="MOSFET NOT Gate Circuit">
+  <figcaption><a href="#fig-3" class="fig-link">Figure 3:</a> Transistor circuit implementation of the NOT logic gate using MOSFETs</figcaption>
+</figure>
+
+A transistor-level implementation using MOSFETs is shown in Figure 3. If two NOT gates are connected in series and the output of the second is fed back to the input of the first (Figure 8), the circuit traps its own state. The process uses two types of inverters:
 1. a **strong inverter** and
 1. a **weak inverter**.
 
-When a bit is to be stored, the strong inverter overpowers the weak one: the bit value is placed on the "Store line", the strong inverter absorbs the logical value and outputs its inverse, and the weak inverter inverts that output and feeds it back. Once the feedback loop stabilizes, the Store line can be disconnected, and the value remains trapped as long as power is supplied.
+When a bit is to be stored, the strong inverter overpowers the weak one: the bit value is placed on the "Store line", the strong inverter absorbs the logical value and outputs its inverse, and the weak inverter inverts that output and feeds it back.
+
+Once the feedback loop stabilizes, the Store line can be disconnected, and the value remains trapped as long as power is supplied.
 
 <figure id="fig-8" class="fig-center">
   <img src="feedback.jpeg" alt="Feedback-based Memory Bit">

@@ -5,20 +5,22 @@
       <span id="typedTitle">{{ site.Title }}</span>
     </a>
     <div class="d-flex gap-2 align-items-center">
-      <div id="syncBtn" class="btn btn-sm btn-outline-secondary d-none">
-        <span id="syncIndicator" class="sync-indicator"><i class="bi bi-cloud-check"></i></span>
-        <span id="syncLabel" class="sync-label">Save</span>
-      </div>
       <button id="authLoginBtn" class="btn btn-sm btn-outline-primary d-none" data-bs-toggle="tooltip" title="Sign in"><i class="bi bi-person"></i> <span class="d-none d-sm-inline"> Sign in</span></button>
       <div id="authUserMenu" class="dropdown d-none">
-        <button class="btn btn-sm btn-outline-secondary d-flex align-items-center" data-bs-toggle="dropdown" aria-expanded="false" id="authAvatarBtn" style="padding:2px 0.5rem;border:none;background:none">
+        <button class="btn btn-sm btn-outline-secondary d-flex align-items-center" data-bs-toggle="dropdown" aria-expanded="false" id="authAvatarBtn" style="padding:2px 0.5rem;border:none;background:none;position:relative">
           <span id="authAvatar" class="auth-avatar"></span>
+          <span id="syncDot" class="sync-dot"></span>
         </button>
         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="authAvatarBtn">
           <li><span class="dropdown-item-text small text-muted" id="authUserName" style="cursor:default"></span></li>
           <li><span class="dropdown-item-text small text-muted" id="authUserEmail" style="cursor:default"></span></li>
           <li><hr class="dropdown-divider"></li>
           <li><a class="dropdown-item" href="/dashboard/">Dashboard</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><div id="syncBtn" class="sync-dropdown-item d-none">
+            <span id="syncIndicator" class="sync-indicator"><i class="bi bi-cloud-check"></i></span>
+            <span id="syncLabel" class="sync-label">Sync to cloud</span>
+          </div></li>
           <li><hr class="dropdown-divider"></li>
           <li><a class="dropdown-item" href="#" id="themeToggleDropdown">Toggle theme</a></li>
           <li><hr class="dropdown-divider"></li>
