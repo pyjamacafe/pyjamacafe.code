@@ -1,25 +1,5 @@
 - title: Essentials
   weight: 1
   courses:
-    - c-language
     - embedded-101
-- title: Firmware Engineering
-  weight: 2
-  courses:
-    - arm-cortex-m
-    - firmware
-- title: Systems Engineering
-  weight: 3
-  courses:
-    - arm-cortex-m
-    - firmware
-- title: Hardware Engineering
-  weight: 4
-  courses:
-    - arm-cortex-m
-    - firmware
-- title: Partner Courses
-  weight: 5
-  courses:
-    - arm-cortex-m
-    - firmware
+
