@@ -1,6 +1,6 @@
 {{ define "main" }}
 {{ $problems := where site.RegularPages "Section" "courses" }}
-{{ $sections := slice }}{{ range site.Pages }}{{ if and (eq .Section "courses") (eq .Kind "section") .File }}{{ $sections = $sections | append . }}{{ end }}{{ end }}
+{{ $sections := slice }}{{ $courseTitleMap := dict }}{{ range site.Pages }}{{ if and (eq .Section "courses") (eq .Kind "section") .File }}{{ $sections = $sections | append . }}{{ $topic := index (split (strings.TrimSuffix "/" .File.Dir) "/") 1 }}{{ $courseTitleMap = $courseTitleMap | merge (dict $topic .Title) }}{{ end }}{{ end }}
 {{ $active := index $problems 0 }}{{ if reflect.IsMap . }}{{ with .activeProblem }}{{ $active = . }}{{ end }}{{ end }}
 {{ $activeId := "" }}{{ with $active }}{{ if .File }}{{ $activeId = .File.ContentBaseName }}{{ end }}{{ end }}
 
@@ -27,6 +27,7 @@
     "subtopic_weight" 99
     "weight" 0
     "isIntro" true
+    "topic_title" .Title
   }}
   {{ $data = $data | append $item }}
 {{ end }}
@@ -71,12 +72,14 @@
     "subtopic" $subtopic
     "topic_weight" (cond (isset .Params "topic_weight") (.Params.topic_weight | int) 99)
     "subtopic_weight" (cond (isset .Params "subtopic_weight") (.Params.subtopic_weight | int) 99)
+    "topic_title" (index $courseTitleMap $topic)
     "weight" (cond (isset .Params "weight") (.Params.weight | int) 99)
   }}
   {{ $data = $data | append $item }}
 {{ end }}
 {{ $data | jsonify | safeJS }}
 </script>
+<script id="course-groups" type="application/json">{{ site.Data.course_groups | jsonify | safeJS }}</script>
 <input type="hidden" id="active-problem-id" value="{{ $activeId }}">
 
 <div class="platform-layout" id="platformLayout">
@@ -90,7 +93,7 @@
       <div class="sidebar-tab active" id="tabLessons"><i class="bi bi-easel2-fill"></i> Courses</div>
       <div class="sidebar-tab" id="tabBookmarks"><i class="bi bi-bookmarks-fill"></i> Bookmarks</div>
     </div>
-    <div class="pane-body overflow-auto p-2">
+    <div class="pane-body overflow-auto">
       <div class="tree-container" id="questionList"></div>
       <div id="bookmarksList" class="d-none"></div>
     </div>

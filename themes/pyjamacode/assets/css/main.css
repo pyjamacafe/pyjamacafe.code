@@ -1206,6 +1206,42 @@ body.sidebar-collapsed #editorPane {
   padding: 0.25rem 0;
 }
 
+/* Course groups (collapsible accordion headers) */
+.tree-group {
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--bs-secondary-color);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  user-select: none;
+  background-color: var(--bs-secondary-bg);
+  border-top: 1px solid var(--border-color);
+  margin-top: 0.35rem;
+}
+
+.tree-group:first-child {
+  border-top: none;
+  margin-top: 0;
+}
+
+.tree-group:hover {
+  color: var(--bs-body-color);
+  background-color: var(--bs-tertiary-bg);
+}
+
+.tree-group .tree-label {
+  flex: 1;
+}
+
+.tree-group-items {
+  padding-left: 0.4rem;
+}
+
 .tree-topic {
   padding: 0.4rem 0.75rem 0.4rem 0.5rem;
   cursor: pointer;

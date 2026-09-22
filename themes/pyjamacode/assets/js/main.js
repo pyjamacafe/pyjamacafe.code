@@ -113,6 +113,9 @@ let filePerProblem = {};
 let notesSavedHeight = null;
 let notesViewState = 'normal';
 let treeExpanded = {};
+let expandedGroup = null;
+let _groupsInitialized = false;
+let courseGroups = [];
 var _dirtySubmissions = {};
 var _dirtyNotes = {};
 var _dirtyQuizzes = {};
@@ -262,6 +265,17 @@ function init() {
     msg.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Signed out — your account was accessed from another browser.';
     document.body.prepend(msg);
     setTimeout(function() { msg.remove(); }, 6000);
+  }
+
+  // Course groups (data/course_groups.yaml) — a course may belong to several
+  const groupDataEl = document.getElementById('course-groups');
+  if (groupDataEl) {
+    try {
+      const parsed = JSON.parse(groupDataEl.textContent);
+      courseGroups = Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      courseGroups = [];
+    }
   }
 
   if (!problemDataEl || !activeProblemInput) {
@@ -1295,6 +1309,18 @@ function getWeight(q, key, fallback) {
   return (v !== undefined && v !== null) ? v : fallback;
 }
 
+// All groups a topic belongs to (a course may be in several), in definition order
+function groupsForTopic(topic) {
+  const out = [];
+  courseGroups.forEach((g) => {
+    if (!g || !g.title || !g.courses) return;
+    if (g.courses.indexOf(topic) !== -1) {
+      out.push({ title: g.title, weight: (g.weight !== undefined && g.weight !== null) ? g.weight : 99 });
+    }
+  });
+  return out;
+}
+
 function renderQuestionList(filter = '') {
   questionListEl.innerHTML = '';
 
@@ -1314,11 +1340,60 @@ function renderQuestionList(filter = '') {
     if (subtopicWeight[sk] === undefined || sw < subtopicWeight[sk]) subtopicWeight[sk] = sw;
   });
 
-  const sortedTopics = Object.keys(tree).sort(
-    (a, b) => (topicWeight[a] ?? 99) - (topicWeight[b] ?? 99)
-  );
+  const sortTopics = (a, b) => (topicWeight[a] ?? 99) - (topicWeight[b] ?? 99);
 
-  sortedTopics.forEach((topic, topicIndex) => {
+  // Organize topics into groups (from data/course_groups.yaml).
+  // A course may belong to multiple groups and is listed under each.
+  const groupWeight = {};
+  const definedGroups = [];
+  courseGroups.forEach((g) => {
+    if (!g || !g.title) return;
+    if (!(g.title in groupWeight)) definedGroups.push(g.title);
+    if (g.weight === undefined || g.weight === null || groupWeight[g.title] === undefined) {
+      groupWeight[g.title] = (g.weight !== undefined && g.weight !== null) ? g.weight : 99;
+    }
+  });
+  const groupOrder = definedGroups
+    .slice()
+    .sort((a, b) => (groupWeight[a] ?? 99) - (groupWeight[b] ?? 99));
+
+  const groupsMap = {};
+  const ungrouped = [];
+  Object.keys(tree).forEach((topic) => {
+    const gs = groupsForTopic(topic);
+    if (gs.length === 0) {
+      ungrouped.push(topic);
+      return;
+    }
+    gs.forEach(({ title }) => {
+      if (!groupsMap[title]) groupsMap[title] = [];
+      if (groupsMap[title].indexOf(topic) === -1) groupsMap[title].push(topic);
+    });
+  });
+  groupOrder.forEach((g) => { if (groupsMap[g]) groupsMap[g].sort(sortTopics); });
+  ungrouped.sort(sortTopics);
+
+  const hasGroups = groupOrder.length > 0;
+
+  // On first render, expand the group that contains the active lesson
+  if (hasGroups && !_groupsInitialized) {
+    _groupsInitialized = true;
+    if (expandedGroup === null) {
+      const aq = questions.find((q) => q.id === activeQuestionId);
+      const aqGroups = aq ? groupsForTopic(aq.topic) : [];
+      expandedGroup = aqGroups.length ? aqGroups[0].title : groupOrder[0];
+    }
+  }
+
+  function topicHasMatch(topic) {
+    const subs = tree[topic] || {};
+    for (const st of Object.keys(subs)) {
+      if (subs[st].some((q) => !q.isIntro && q.title.toLowerCase().includes(filterLower))) return true;
+    }
+    return questions.some((q) => q.isIntro && q.topic === topic && q.title.toLowerCase().includes(filterLower));
+  }
+
+  function renderTopic(topic, topicIndex, container) {
     const subtopics = tree[topic];
     const isTopicExpanded = treeExpanded[topic] || filter.length > 0;
     // Use course title from _index.md if available, fall back to directory name
@@ -1331,11 +1406,11 @@ function renderQuestionList(filter = '') {
     const topicIntroQs = questions.filter((q) => q.isIntro && q.topic === topic);
     if (topicIntroQs.length > 0) hasVisibleChildren = true;
     Object.keys(subtopics).forEach((subtopic) => {
-      const questions = subtopics[subtopic];
+      const questionsInSub = subtopics[subtopic];
       const visibleQ = filter.length > 0
-        ? questions.filter((q) => q.title.toLowerCase().includes(filterLower))
-        : questions;
-      if (visibleQ.length > 0 || (isTopicExpanded && questions.length > 0)) {
+        ? questionsInSub.filter((q) => q.title.toLowerCase().includes(filterLower))
+        : questionsInSub;
+      if (visibleQ.length > 0 || (isTopicExpanded && questionsInSub.length > 0)) {
         hasVisibleChildren = true;
       }
     });
@@ -1358,7 +1433,7 @@ function renderQuestionList(filter = '') {
       e.stopPropagation();
       toggleTopic(topic);
     });
-    questionListEl.appendChild(topicDiv);
+    container.appendChild(topicDiv);
 
     // Introduction leaf nodes (right under the course, above all subtopics)
     if (treeExpanded[topic] || filter.length > 0) {
@@ -1380,7 +1455,7 @@ function renderQuestionList(filter = '') {
           if (!checkFreeUse()) return;
           window.location.href = q.permalink || ('/courses/' + q.topic + '/');
         });
-        questionListEl.appendChild(item);
+        container.appendChild(item);
       });
     }
 
@@ -1394,11 +1469,11 @@ function renderQuestionList(filter = '') {
     });
 
     sortedSubtopics.forEach((subtopic) => {
-      const questions = subtopics[subtopic];
+      const questionsInSub = subtopics[subtopic];
       const visibleQ = filter.length > 0
-        ? questions.filter((q) => q.title.toLowerCase().includes(filterLower))
-        : questions;
-      if (visibleQ.length === 0 && !(isTopicExpanded && questions.length > 0)) return;
+        ? questionsInSub.filter((q) => q.title.toLowerCase().includes(filterLower))
+        : questionsInSub;
+      if (visibleQ.length === 0 && !(isTopicExpanded && questionsInSub.length > 0)) return;
 
       const subKey = topic + '/' + subtopic;
       const isSubExpanded = treeExpanded[subKey] || filter.length > 0;
@@ -1419,12 +1494,12 @@ function renderQuestionList(filter = '') {
         e.stopPropagation();
         toggleSubtopic(topic, subtopic);
       });
-      questionListEl.appendChild(subDiv);
+      container.appendChild(subDiv);
 
       // Questions
       if (!isSubExpanded) return;
 
-      const sortedQuestions = [...questions].sort(
+      const sortedQuestions = [...questionsInSub].sort(
         (a, b) => (getWeight(a, 'weight', 99) - getWeight(b, 'weight', 99))
       );
 
@@ -1451,9 +1526,54 @@ function renderQuestionList(filter = '') {
           if (!checkFreeUse()) return;
           selectQuestion(q.id);
         });
-        questionListEl.appendChild(item);
+        container.appendChild(item);
       });
     });
+  }
+
+  let colorIndex = 0;
+
+  // Ungrouped courses render directly (no group header)
+  ungrouped.forEach((topic) => {
+    const before = questionListEl.childElementCount;
+    renderTopic(topic, colorIndex, questionListEl);
+    if (questionListEl.childElementCount > before) colorIndex++;
+  });
+
+  // Grouped courses render under collapsible group headers
+  groupOrder.forEach((group) => {
+    const topics = groupsMap[group];
+    if (filter.length > 0 && !topics.some(topicHasMatch)) return;
+
+    const isExpanded = filter.length > 0 ? true : (group === expandedGroup);
+
+    const groupDiv = document.createElement('div');
+    groupDiv.className = 'tree-group';
+    if (filter.length > 0) groupDiv.classList.add('expanded');
+    else groupDiv.classList.toggle('expanded', isExpanded);
+    groupDiv.innerHTML = `
+      <span class="tree-toggle">
+        <i class="bi ${isExpanded ? 'bi-chevron-down' : 'bi-chevron-right'}"></i>
+      </span>
+      <span class="tree-label">${escapeHtml(group)}</span>
+    `;
+    groupDiv.addEventListener('click', (e) => {
+      e.stopPropagation();
+      expandedGroup = (expandedGroup === group) ? null : group;
+      renderQuestionList(questionSearchEl ? questionSearchEl.value : '');
+    });
+    questionListEl.appendChild(groupDiv);
+
+    if (!isExpanded) return;
+
+    const itemsWrap = document.createElement('div');
+    itemsWrap.className = 'tree-group-items';
+    topics.forEach((topic) => {
+      const before = itemsWrap.childElementCount;
+      renderTopic(topic, colorIndex, itemsWrap);
+      if (itemsWrap.childElementCount > before) colorIndex++;
+    });
+    questionListEl.appendChild(itemsWrap);
   });
 }
 
@@ -1609,6 +1729,14 @@ function selectQuestion(id) {
     treeExpanded[question.topic] = true;
     if (question.subtopic) {
       treeExpanded[question.topic + '/' + question.subtopic] = true;
+    }
+  }
+  // Expand the group containing the active lesson
+  if (question.topic) {
+    const aqGroups = groupsForTopic(question.topic);
+    if (aqGroups.length) {
+      expandedGroup = aqGroups[0].title;
+      _groupsInitialized = true;
     }
   }
   renderQuestionList(questionSearchEl ? questionSearchEl.value : '');
@@ -2391,9 +2519,12 @@ function initProblemNav() {
   function getFlatTree() {
     const tree = buildQuestionTree();
     const result = [];
-    const topicKeys = Object.keys(tree).sort(
-      (a, b) => (getTopicWeight(a) ?? 99) - (getTopicWeight(b) ?? 99)
-    );
+    const topicKeys = Object.keys(tree).sort((a, b) => {
+      const ga = getGroupWeight(a) ?? 0;
+      const gb = getGroupWeight(b) ?? 0;
+      if (ga !== gb) return ga - gb;
+      return (getTopicWeight(a) ?? 99) - (getTopicWeight(b) ?? 99);
+    });
     topicKeys.forEach((topic) => {
       const subtopics = tree[topic];
       const subKeys = Object.keys(subtopics).sort((a, b) => {
@@ -2420,6 +2551,12 @@ function initProblemNav() {
       }
     });
     return w;
+  }
+
+  function getGroupWeight(topic) {
+    const gs = groupsForTopic(topic);
+    if (!gs.length) return undefined;
+    return gs.reduce((min, g) => Math.min(min, g.weight ?? 99), 99);
   }
 
   function getSubtopicWeight(key) {

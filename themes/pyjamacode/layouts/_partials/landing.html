@@ -1,14 +1,42 @@
 {{ $problems := where site.RegularPages "Section" "courses" }}
+{{ $sections := slice }}{{ $courseTitleMap := dict }}{{ range site.Pages }}{{ if and (eq .Section "courses") (eq .Kind "section") .File }}{{ $sections = $sections | append . }}{{ $topic := index (split (strings.TrimSuffix "/" .File.Dir) "/") 1 }}{{ $courseTitleMap = $courseTitleMap | merge (dict $topic .Title) }}{{ end }}{{ end }}
 {{ $active := index $problems 0 }}
 {{ $activeId := "" }}
 {{ with $active }}{{ $activeId = .File.ContentBaseName }}{{ end }}
 
 <script id="problem-data" type="application/json">
 {{ $data := slice }}
+{{ range $sections }}
+  {{ $topic := index (split (strings.TrimSuffix "/" .File.Dir) "/") 1 }}
+  {{ $item := dict
+    "id" (printf "intro-%s" $topic)
+    "title" "Introduction"
+    "difficulty" "easy"
+    "language" "c"
+    "permalink" .RelPermalink
+    "content" ""
+    "article" ""
+    "codes" ""
+    "quiz" ""
+    "initial_code" ""
+    "test_cases" ""
+    "topic" $topic
+    "subtopic" ""
+    "topic_weight" -100
+    "subtopic_weight" 99
+    "weight" 0
+    "isIntro" true
+    "topic_title" .Title
+  }}
+  {{ $data = $data | append $item }}
+{{ end }}
 {{ range $problems }}
   {{ $parts := split (strings.TrimSuffix "/" .File.Dir) "/" }}
   {{ $topic := index $parts 1 }}
   {{ $subtopic := index $parts 2 }}
+  {{ $raw := .RawContent }}
+  {{ $quizMarkdown := "" }}
+  {{ if in $raw "===QUIZ===" }}{{ $qp := split $raw "===QUIZ===" }}{{ $quizMarkdown = index $qp 1 }}{{ end }}
   {{ $item := dict
     "id" .File.ContentBaseName
     "title" .Title
@@ -18,18 +46,21 @@
     "content" ""
     "article" ""
     "codes" ""
-    "initial_code" ""
+    "quiz" $quizMarkdown
+    "initial_code" .Params.initial_code
     "test_cases" .Params.test_cases
     "topic" $topic
     "subtopic" $subtopic
     "topic_weight" (cond (isset .Params "topic_weight") (.Params.topic_weight | int) 99)
     "subtopic_weight" (cond (isset .Params "subtopic_weight") (.Params.subtopic_weight | int) 99)
+    "topic_title" (index $courseTitleMap $topic)
     "weight" (cond (isset .Params "weight") (.Params.weight | int) 99)
   }}
   {{ $data = $data | append $item }}
 {{ end }}
 {{ $data | jsonify | safeJS }}
 </script>
+<script id="course-groups" type="application/json">{{ site.Data.course_groups | jsonify | safeJS }}</script>
 <input type="hidden" id="active-problem-id" value="{{ $activeId }}">
 
 <div class="platform-layout" id="platformLayout">
@@ -43,7 +74,7 @@
       <div class="sidebar-tab active" id="tabLessons"><i class="bi bi-easel2-fill"></i> Courses</div>
       <div class="sidebar-tab" id="tabBookmarks"><i class="bi bi-bookmarks-fill"></i> Bookmarks</div>
     </div>
-    <div class="pane-body overflow-auto p-2">
+    <div class="pane-body overflow-auto">
       <div class="tree-container" id="questionList"></div>
       <div id="bookmarksList" class="d-none"></div>
     </div>

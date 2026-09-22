@@ -65,6 +65,7 @@
 {{ $data | jsonify | safeJS }}
 </script>
 <script id="course-meta" type="application/json">{{ $courseMeta | jsonify | safeJS }}</script>
+<script id="course-groups" type="application/json">{{ site.Data.course_groups | jsonify | safeJS }}</script>
 <input type="hidden" id="active-problem-id" value="{{ $activeId }}">
 
 <div class="platform-layout" id="platformLayout">
@@ -78,7 +79,7 @@
       <div class="sidebar-tab active" id="tabLessons"><i class="bi bi-easel2-fill"></i> Courses</div>
       <div class="sidebar-tab" id="tabBookmarks"><i class="bi bi-bookmarks-fill"></i> Bookmarks</div>
     </div>
-    <div class="pane-body overflow-auto p-2">
+    <div class="pane-body overflow-auto">
       <div class="tree-container" id="questionList"></div>
       <div id="bookmarksList" class="d-none"></div>
     </div>
