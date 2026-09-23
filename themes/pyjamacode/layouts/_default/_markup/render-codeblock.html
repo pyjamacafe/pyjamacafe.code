@@ -1,4 +1,6 @@
 {{- $title := .Attributes.title | default "" -}}
 {{- $note := .Attributes.note | default "" -}}
+{{- $run := .Attributes.run | default "" -}}
+{{- $cmd := .Attributes.cmd | default "" -}}
 {{- $lang := .Type | default "" -}}
-<pre{{ if $title }} data-title="{{ $title }}"{{ end }}{{ if $note }} data-note="{{ $note }}"{{ end }}><code class="language-{{ $lang }}">{{ .Inner }}</code></pre>
+<pre{{ if $title }} data-title="{{ $title }}"{{ end }}{{ if $note }} data-note="{{ $note }}"{{ end }}{{ if $run }} data-run="1"{{ end }}{{ if $cmd }} data-cmd="{{ $cmd }}"{{ end }}><code class="language-{{ $lang }}">{{ .Inner }}</code></pre>

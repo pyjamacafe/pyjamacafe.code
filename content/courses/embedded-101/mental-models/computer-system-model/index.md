@@ -1,6 +1,6 @@
 +++
 date = '2026-07-10T10:00:00+05:30'
-draft = false
+draft = true
 title = 'Computer System Model'
 description = 'A computer system is essentially interaction between different state-machines. The two primary actors being CPU and the Memory. Here is how they work with each other...'
 og_image = 'computer-system-model.png'

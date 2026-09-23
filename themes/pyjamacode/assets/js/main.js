@@ -14,12 +14,45 @@ const statusClasses = {
   'Runtime Error': 'text-bg-danger',
 };
 
+// Maps a lesson/file language identifier (front matter `language`, shortcode
+// `lang`, or fenced code block language) to a CodeMirror mode.
 const languageModes = {
   c: 'text/x-csrc',
   cpp: 'text/x-c++src',
+  cs: 'text/x-csharp',
   python: 'python',
+  py: 'python',
   assembly: 'gas',
+  asm: 'gas',
+  gas: 'gas',
+  s: 'gas',
+  ld: 'gas',
+  bash: 'text/x-sh',
+  sh: 'text/x-sh',
+  shell: 'text/x-sh',
+  makefile: 'text/x-sh',
+  mk: 'text/x-sh',
+  text: 'text/plain',
+  plaintext: 'text/plain',
 };
+
+function langToMode(lang) {
+  if (!lang) return 'text/plain';
+  return languageModes[String(lang).toLowerCase()] || 'text/plain';
+}
+
+// Display label for a file language (e.g. "c" -> "C", "asm" -> "Assembly").
+const languageLabels = {
+  c: 'C', cpp: 'C++', cs: 'C#', python: 'Python', py: 'Python',
+  assembly: 'Assembly', asm: 'Assembly', gas: 'Assembly', s: 'Assembly', ld: 'Linker Script',
+  bash: 'Bash', sh: 'Shell', shell: 'Shell', makefile: 'Makefile', mk: 'Makefile',
+  text: 'Text', plaintext: 'Text',
+};
+
+function langToLabel(lang) {
+  if (!lang) return '';
+  return languageLabels[String(lang).toLowerCase()] || String(lang).toUpperCase();
+}
 
 const htmlEl = document.documentElement;
 const problemDataEl = document.getElementById('problem-data');
@@ -28,9 +61,11 @@ const questionListEl = document.getElementById('questionList');
 const questionSearchEl = document.getElementById('questionSearch');
 const questionContentEl = document.getElementById('questionContent');
 const articleContentEl = document.getElementById('articleContent');
+const readingTabContentEl = document.getElementById('readingTabContent');
 const quizContentEl = document.getElementById('quizContent');
 const tabChallenge = document.getElementById('tabChallenge');
 const tabArticle = document.getElementById('tabArticle');
+const tabReading = document.getElementById('tabReading');
 const tabQuiz = document.getElementById('tabQuiz');
 const difficultyBadgeEl = document.getElementById('difficultyBadge');
 const codeEditorEl = document.getElementById('codeEditor');
@@ -740,7 +775,7 @@ function initCodeMirror() {
 
   codeMirror = CodeMirror(codeEditorWrapper, {
     value: codeEditorEl ? codeEditorEl.value : '',
-    mode: languageModes[language] || 'text/plain',
+    mode: langToMode(language),
     theme: getCodeMirrorTheme(),
     lineNumbers: true,
     styleActiveLine: true,
@@ -772,8 +807,7 @@ function getCodeMirrorTheme() {
 
 function updateCodeMirrorMode(language) {
   if (!codeMirror) return;
-  const mode = languageModes[language] || 'text/plain';
-  codeMirror.setOption('mode', mode);
+  codeMirror.setOption('mode', langToMode(language));
 }
 
 function updateCodeMirrorTheme() {
@@ -1598,8 +1632,17 @@ function selectQuestion(id) {
     return;
   }
 
-  // If the full platform isn't loaded (no editor), redirect to the lesson URL
-  if (!document.getElementById('editorArea') || !document.getElementById('consoleArea')) {
+  // Course landing page (/courses/<course>/) — clicking a lesson navigates to it.
+  if (/^\/courses\/[^\/]+\/?$/.test(window.location.pathname)) {
+    window.location.href = question.permalink;
+    return;
+  }
+
+  // If the full platform isn't loaded, redirect to the lesson URL. The reading
+  // layout has no editor but is still the platform page, so don't redirect there.
+  const hasEditor = document.getElementById('editorArea') && document.getElementById('consoleArea');
+  const hasReadingPane = document.getElementById('readingContent') || document.getElementById('readingPane');
+  if (!hasEditor && !hasReadingPane) {
     window.location.href = question.permalink;
     return;
   }
@@ -1655,21 +1698,33 @@ function selectQuestion(id) {
     quizRaw = question._raw_quiz;
   }
   const hasQuiz = quizRaw && quizRaw.trim().length > 0;
+  const hasReading = !!(question.reading && question.reading.trim().length > 0);
+  const hasChallenge = question.has_challenge !== false;
   if (tabArticle) {
     tabArticle.classList.toggle('d-none', !hasArticle);
+  }
+  if (tabReading) {
+    tabReading.classList.toggle('d-none', !hasReading);
   }
   if (tabQuiz) {
     tabQuiz.classList.toggle('d-none', !hasQuiz);
   }
-  // Restore last tab for this problem, or default to Lecture if available
+  if (tabChallenge) {
+    tabChallenge.classList.toggle('d-none', !hasChallenge);
+  }
+  // Restore last tab for this problem, or default to the first available tab
   var savedTab = getSavedTab(id);
-  if (savedTab && (savedTab === 'explanation' ? hasArticle : savedTab === 'quiz' ? hasQuiz : true)) {
+  const tabAvailable = (t) => t === 'explanation' ? hasArticle : t === 'reading' ? hasReading : t === 'quiz' ? hasQuiz : hasChallenge;
+  if (savedTab && tabAvailable(savedTab)) {
     setActiveTab(savedTab);
   } else {
-    setActiveTab(hasArticle ? 'explanation' : 'challenge');
+    const firstTab = ['explanation', 'reading', 'quiz', 'challenge'].find(tabAvailable) || 'challenge';
+    setActiveTab(firstTab);
   }
 
   questionContentEl.innerHTML = question.content;
+  // Starter/run_check blocks are consumed by the editor/judge, not shown as prose
+  questionContentEl.querySelectorAll('pre[data-starter], [data-run-check]').forEach((el) => el.remove());
   applyAuthGates(questionContentEl);
   enhanceCodeBlocks(questionContentEl);
   initImageZoom(questionContentEl);
@@ -1677,12 +1732,28 @@ function selectQuestion(id) {
   initVimeoPlayers(questionContentEl);
   if (articleContentEl) {
     articleContentEl.innerHTML = hasArticle ? question.article : '';
+    articleContentEl.querySelectorAll('pre[data-starter], [data-run-check]').forEach((el) => el.remove());
     applyAuthGates(articleContentEl);
     enhanceCodeBlocks(articleContentEl);
     initImageZoom(articleContentEl);
     embedYouTubeLinks(articleContentEl);
     initVimeoPlayers(articleContentEl);
   }
+
+  // Reading content: the right-pane (single.html reading layout) or the
+  // Reading tab (code layout with a ===READING=== section).
+  const renderReading = (el) => {
+    if (!el) return;
+    el.innerHTML = hasReading ? question.reading : '<p class="text-muted">No reading material for this chapter.</p>';
+    el.querySelectorAll('pre[data-starter], [data-run-check]').forEach((n) => n.remove());
+    applyAuthGates(el);
+    enhanceCodeBlocks(el);
+    initImageZoom(el);
+    embedYouTubeLinks(el);
+    initVimeoPlayers(el);
+  };
+  renderReading(document.getElementById('readingContent'));
+  renderReading(readingTabContentEl);
 
   // Inject difficulty badge into the first h2 (Problem Statement)
   const firstH2 = questionContentEl.querySelector('h2:first-of-type');
@@ -1711,18 +1782,23 @@ function selectQuestion(id) {
   }
   updateCodeMirrorMode(question.language || 'c');
 
-  // Build file tabs from ===CODE=== section
-  buildFileTabs(question);
+  // Editor-specific setup only exists in the code layout.
+  if (hasEditor) {
+    // Build file tabs from ===CODE=== section
+    buildFileTabs(question);
+
+    // Restore saved console output or show default
+    if (consoleOutputEl) {
+      consoleOutputEl.innerHTML = submissions[id] && submissions[id].output ? submissions[id].output : 'When ready, hit Check to compile and run the code.';
+    }
+    updateStatus(submissions[id] && submissions[id].status ? submissions[id].status : 'Unattempted');
+  }
 
   const savedNotes = notes[id] || '';
   setNotesEditorValue(savedNotes);
   if (notesPreviewMode) {
     renderNotesPreview();
   }
-
-  // Restore saved console output or show default
-  consoleOutputEl.innerHTML = submissions[id] && submissions[id].output ? submissions[id].output : 'When ready, hit Check to compile and run the code.';
-  updateStatus(submissions[id] && submissions[id].status ? submissions[id].status : 'Unattempted');
 
   // Expand the tree to show the active problem
   if (question.topic) {
@@ -1812,7 +1888,7 @@ function resetCase() {
     consoleOutputEl.textContent = 'Reset: ' + file.filename;
   } else {
     delete submissions[activeQuestionId];
-    setEditorValue(question.initial_code || '');
+    setEditorValue('');
     consoleOutputEl.textContent = 'Code reset to initial state.';
   }
   if (!submissions[activeQuestionId]) submissions[activeQuestionId] = { status: 'Unattempted', output: '' };
@@ -1924,6 +2000,23 @@ function execCommand(cmd) {
   }).then((r) => r.json());
 }
 
+// Reads the {{< run_check >}} command for a lesson, if any.
+function getRunCheckCommand(question) {
+  if (!question) return '';
+  const html = (question.content || '') + (question.article || '');
+  if (html.indexOf('data-run-check') === -1) return '';
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  const el = div.querySelector('[data-run-check]');
+  if (!el) return '';
+  const text = (el.textContent || '').trim();
+  // Backwards-compat: also accept a JSON-encoded body.
+  if (text.charAt(0) === '"' && text.charAt(text.length - 1) === '"') {
+    try { return JSON.parse(text); } catch (e) { /* fall through */ }
+  }
+  return text;
+}
+
 function submitCode() {
   if (!checkFreeUse()) {
     consoleOutputEl.textContent = 'Sign in to continue checking solutions.';
@@ -1934,14 +2027,18 @@ function submitCode() {
     return;
   }
 
-  saveCurrentCode();
-  consoleOutputEl.textContent = 'Running...\n';
-
-  // Collect files from file tabs or fallback to single editor
-  const files = [];
   const question = questions.find((q) => q.id === activeQuestionId);
   if (!question) return;
 
+  const runCheckCommand = getRunCheckCommand(question);
+
+  saveCurrentCode();
+  consoleOutputEl.textContent = runCheckCommand
+    ? '$ ' + runCheckCommand + '\nRunning...\n'
+    : 'Running...\n';
+
+  // Collect files from file tabs or fallback to single editor
+  const files = [];
   if (fileList.length > 0) {
     fileList.forEach((f) => {
       const saved = submissions[activeQuestionId]?.files?.[f.filename];
@@ -1957,12 +2054,23 @@ function submitCode() {
   fetch(JUDGE_URL + '/api/submit', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ files, language: question.language || 'c' })
+    body: JSON.stringify({ files, language: question.language || 'c', command: runCheckCommand })
   })
   .then((r) => r.json())
   .then((res) => {
     let status, outputHtml;
-    if (res.exitCode === 0) {
+    const custom = !!runCheckCommand;
+    const cmdLine = runCheckCommand ? '<span class="prompt">$</span> ' + escapeHtml(runCheckCommand) + '\n' : '';
+    if (custom) {
+      // Author-defined check: trust the command's exit code as pass/fail.
+      if (res.exitCode === 0) {
+        status = 'Accepted';
+        outputHtml = cmdLine + '<span class="text-pass">All test cases passed.</span>\n' + ansiToHtml(res.stdout || '') + '\n<small class="text-muted">Exit code: 0</small>';
+      } else {
+        status = 'Wrong Answer';
+        outputHtml = cmdLine + '<span class="text-fail">' + status + '</span>\n' + ansiToHtml(res.stderr || res.stdout || 'No output');
+      }
+    } else if (res.exitCode === 0) {
       status = 'Accepted';
       outputHtml = '<span class="text-pass">All test cases passed.</span>\n' + ansiToHtml(res.stdout || '') + '\n<small class="text-muted">Exit code: 0</small>';
     } else {
@@ -2053,6 +2161,9 @@ function initTabs() {
   }
   if (tabArticle) {
     tabArticle.addEventListener('click', () => setActiveTab('explanation'));
+  }
+  if (tabReading) {
+    tabReading.addEventListener('click', () => setActiveTab('reading'));
   }
   if (tabQuiz) {
     tabQuiz.addEventListener('click', () => setActiveTab('quiz'));
@@ -2238,9 +2349,11 @@ function buildTabsMap() {
 function setActiveTab(tab) {
   if (questionContentEl) questionContentEl.classList.toggle('d-none', tab !== 'challenge');
   if (articleContentEl) articleContentEl.classList.toggle('d-none', tab !== 'explanation');
+  if (readingTabContentEl) readingTabContentEl.classList.toggle('d-none', tab !== 'reading');
   if (quizContentEl) quizContentEl.classList.toggle('d-none', tab !== 'quiz');
   if (tabChallenge) tabChallenge.classList.toggle('active', tab === 'challenge');
   if (tabArticle) tabArticle.classList.toggle('active', tab === 'explanation');
+  if (tabReading) tabReading.classList.toggle('active', tab === 'reading');
   if (tabQuiz) tabQuiz.classList.toggle('active', tab === 'quiz');
 
   if (tab === 'quiz') renderQuiz();
@@ -2409,8 +2522,12 @@ function enhanceCodeBlocks(root) {
 
     listingCounter++;
     const lang = extractLanguage(codeEl);
+    const langId = extractLangId(codeEl) || 'c';
     const title = codeEl.getAttribute('data-title') || pre.getAttribute('data-title') || lang;
     const note = codeEl.getAttribute('data-note') || pre.getAttribute('data-note') || '';
+    const runCmd = pre.getAttribute('data-cmd') || '';
+    const canRun = pre.getAttribute('data-run') === '1' || !!runCmd;
+    const runFile = title && /\./.test(title) ? title : ('main.' + langId);
     const rawCode = codeEl.textContent || '';
 
     // Apply highlight.js syntax highlighting
@@ -2445,23 +2562,98 @@ function enhanceCodeBlocks(root) {
     titleSpan.className = 'cb-title';
     titleSpan.textContent = title;
     titleBar.appendChild(titleSpan);
-    const copyBtn = document.createElement('button');
-    copyBtn.className = 'cb-copy';
-    copyBtn.textContent = 'Copy';
-    copyBtn.addEventListener('click', () => {
-      navigator.clipboard.writeText(rawCode).then(() => {
-        copyBtn.textContent = 'Copied!';
-        setTimeout(() => { copyBtn.textContent = 'Copy'; }, 2000);
+    const actions = document.createElement('span');
+    actions.className = 'cb-actions';
+    titleBar.appendChild(actions);
+    if (canRun) {
+      const runBtn = document.createElement('button');
+      runBtn.className = 'cb-copy';
+      runBtn.innerHTML = '<i class="bi bi-play-fill"></i> Run';
+      const resetBtn = document.createElement('button');
+      resetBtn.className = 'cb-copy';
+      resetBtn.innerHTML = '<i class="bi bi-arrow-counterclockwise"></i> Reset';
+      actions.appendChild(runBtn);
+      actions.appendChild(resetBtn);
+      titleBar._runBtn = runBtn;
+      titleBar._resetBtn = resetBtn;
+    } else {
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'cb-copy';
+      copyBtn.textContent = 'Copy';
+      copyBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(rawCode).then(() => {
+          copyBtn.textContent = 'Copied!';
+          setTimeout(() => { copyBtn.textContent = 'Copy'; }, 2000);
+        });
       });
-    });
-    titleBar.appendChild(copyBtn);
+      actions.appendChild(copyBtn);
+    }
     wrapper.appendChild(titleBar);
 
-    // Code area
+    // Code area (read-only listing, as before)
     const codeArea = document.createElement('div');
     codeArea.className = 'cb-code-area';
     codeArea.appendChild(codeEl);
     wrapper.appendChild(codeArea);
+
+    // Runnable blocks are read-only. Run executes the fixed snippet via the
+    // judge; output appears in a collapsible drop-down under the block.
+    if (canRun) {
+      const outPanel = document.createElement('div');
+      outPanel.className = 'cb-output d-none';
+      outPanel.innerHTML =
+        '<div class="cb-output-head">' +
+          '<span class="cb-output-toggle"><i class="bi bi-chevron-down"></i> Output</span>' +
+          '<button type="button" class="cb-output-close" aria-label="Hide output"><i class="bi bi-x-lg"></i></button>' +
+        '</div>' +
+        '<pre class="cb-output-body"></pre>';
+      wrapper.appendChild(outPanel);
+      const outBody = outPanel.querySelector('.cb-output-body');
+      outPanel.querySelector('.cb-output-head').addEventListener('click', (e) => {
+        if (e.target.closest('.cb-output-close')) return;
+        outPanel.classList.toggle('collapsed');
+      });
+      outPanel.querySelector('.cb-output-close').addEventListener('click', () => {
+        outPanel.classList.add('d-none');
+      });
+
+      const runBtn = titleBar._runBtn;
+      const resetBtn = titleBar._resetBtn;
+
+      runBtn.addEventListener('click', () => {
+        if (!checkFreeUse()) {
+          outPanel.classList.remove('d-none', 'collapsed');
+          outBody.innerHTML = '<span class="text-fail">Sign in to run code.</span>';
+          return;
+        }
+        outPanel.classList.remove('d-none', 'collapsed');
+        outBody.innerHTML = '<span class="cb-prompt">$</span> ' + escapeHtml(runCmd) + '\nRunning...';
+        runBtn.disabled = true;
+        fetch(JUDGE_URL + '/api/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ files: [{ name: runFile, content: rawCode }], language: langId, command: runCmd }),
+        })
+          .then((r) => r.json())
+          .then((res) => {
+            const body = (res.stdout || '') + (res.stderr || '');
+            let html = '<span class="cb-prompt">$</span> ' + escapeHtml(runCmd) + '\n';
+            html += ansiToHtml(body) || '<span class="text-muted">(no output)</span>';
+            html += '\n<small class="text-muted">Exit code: ' + res.exitCode + (res.timedOut ? ' (timed out)' : '') + '</small>';
+            outBody.innerHTML = html;
+          })
+          .catch((err) => {
+            outBody.innerHTML = '<span class="cb-prompt">$</span> ' + escapeHtml(runCmd) +
+              '\n<span class="text-fail">Connection error</span>\n' + escapeHtml(err.message || '');
+          })
+          .then(() => { runBtn.disabled = false; });
+      });
+
+      resetBtn.addEventListener('click', () => {
+        outBody.textContent = '';
+        outPanel.classList.add('d-none');
+      });
+    }
 
     // Caption with anchor (outside wrapper)
     const caption = 'Listing ' + listingCounter + (note ? '. ' + note : '.');
@@ -2572,12 +2764,18 @@ function initProblemNav() {
   }
 
   function getAvailableTabs() {
-    const tabs = ['explanation', 'quiz', 'challenge'];
+    const tabs = ['explanation', 'reading', 'quiz', 'challenge'];
     return tabs.filter((t) => {
       if (t === 'explanation') return hasArticleForId(activeQuestionId);
+      if (t === 'reading') return hasReadingForId(activeQuestionId);
       if (t === 'quiz') return hasQuizForId(activeQuestionId);
       return true;
     });
+  }
+
+  function hasReadingForId(id) {
+    const q = questions.find((x) => x.id === id);
+    return q && q.reading && q.reading.trim().length > 0;
   }
 
   function hasArticleForId(id) {
@@ -2629,6 +2827,7 @@ function initProblemNav() {
 
   function getActiveTabName() {
     if (articleContentEl && !articleContentEl.classList.contains('d-none')) return 'explanation';
+    if (readingTabContentEl && !readingTabContentEl.classList.contains('d-none')) return 'reading';
     if (quizContentEl && !quizContentEl.classList.contains('d-none')) return 'quiz';
     return 'challenge';
   }
@@ -3114,28 +3313,54 @@ function ansiToHtml(text) {
 }
 
 /* ─── File Tabs ─── */
+function extractLangId(codeEl) {
+  for (const cls of codeEl.classList) {
+    if (cls.startsWith('language-')) return cls.slice(9).toLowerCase();
+  }
+  return '';
+}
+
+function collectCodeFiles(html) {
+  const files = [];
+  if (!html) return files;
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  div.querySelectorAll('pre').forEach((pre) => {
+    const codeEl = pre.querySelector('code');
+    if (!codeEl) return;
+    const raw = pre.getAttribute('data-title') || '';
+    const lang = extractLangId(codeEl);
+    const filename = raw || 'untitled.' + (lang || 'c');
+    const content = codeEl.textContent || '';
+    files.push({ filename: filename, lang: lang || 'c', mode: langToMode(lang || 'c'), content: content });
+  });
+  return files;
+}
+
 function buildFileTabs(question) {
   fileList = [];
   activeFileIndex = 0;
   unsavedFiles = {};
 
-  if (question.codes) {
+  // 1. Starter code from {{< starter >}} shortcodes embedded in the section
+  //    content (challenge/article). Highest precedence.
+  const starterHtml = (question.content || '') + (question.article || '');
+  if (starterHtml.indexOf('data-starter') !== -1) {
     const div = document.createElement('div');
-    div.innerHTML = question.codes;
-    const pres = div.querySelectorAll('pre');
-    pres.forEach((pre) => {
+    div.innerHTML = starterHtml;
+    div.querySelectorAll('pre[data-starter]').forEach((pre) => {
       const codeEl = pre.querySelector('code');
       if (!codeEl) return;
       const raw = pre.getAttribute('data-title') || '';
-      const lang = extractLanguage(codeEl);
-      const filename = raw || 'untitled.' + (lang || 'c').toLowerCase();
-      const content = codeEl.textContent || '';
-      fileList.push({ filename: filename, language: lang || 'c', content: content });
+      const lang = extractLangId(codeEl);
+      const filename = raw || 'main.c';
+      fileList.push({ filename: filename, lang: lang || 'c', mode: langToMode(lang || 'c'), content: codeEl.textContent || '' });
     });
   }
 
-  if (fileList.length === 0 && question.initial_code) {
-    fileList.push({ filename: 'main.c', language: 'c', content: question.initial_code });
+  // 2. Files from the ===CODE=== section.
+  if (fileList.length === 0 && question.codes) {
+    fileList = collectCodeFiles(question.codes);
   }
 
   // Render tabs
@@ -3170,14 +3395,12 @@ function loadActiveFile(question) {
     const file = fileList[activeFileIndex];
     const saved = submissions[id]?.files?.[file.filename];
     code = saved || file.content;
-    const lang = file.language || 'c';
-    if (languageLabelEl) languageLabelEl.textContent = lang.toUpperCase();
-    updateCodeMirrorMode(lang);
+    if (languageLabelEl) languageLabelEl.textContent = langToLabel(file.lang);
+    updateCodeMirrorMode(file.lang);
   } else {
     const saved = submissions[id]?.code;
-    const starter = question.initial_code || '';
-    code = saved || starter;
-    if (languageLabelEl) languageLabelEl.textContent = (question.language || 'c').toUpperCase();
+    code = saved || '';
+    if (languageLabelEl) languageLabelEl.textContent = langToLabel(question.language || 'c');
     updateCodeMirrorMode(question.language || 'c');
   }
   setEditorValue(code);

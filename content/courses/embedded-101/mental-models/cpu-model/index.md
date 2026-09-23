@@ -1,6 +1,6 @@
 +++
 date = '2026-07-10T10:00:00+05:30'
-draft = false
+draft = true
 title = 'Model of the CPU'
 description = 'As a programmer this is what you need to know about the CPU.'
 og_image = 'cpu-programmers-model.jpeg'

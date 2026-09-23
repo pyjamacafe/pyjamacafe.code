@@ -1,6 +1,6 @@
 +++
 date = '2026-07-10T10:00:00+05:30'
-draft = false
+draft = true
 title = 'History of Computing'
 description = 'One cannot reason about the workings of the computer without knowing how they came to be. The modern computer systems are based on this fundamental design from the 1900s...'
 og_image = '1970s-world-view.png'

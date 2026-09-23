@@ -1,0 +1,88 @@
++++
+date = '2026-07-10T10:00:00+05:30'
+draft = false
+title = 'Codespaces and Docker'
+difficulty = 'easy'
+language = 'c'
+topic_weight = -19
+subtopic_weight = 1
+weight = 1
+layout="reading"
++++
+
+
+===EXPLANATION===
+
+{{< vimeo id="1229095203" title="The web and local setup" >}}
+
+To be able to run the experiments and demos presented in this course, you will need a Linux environment with access to the terminal. This lecture explains the details of the `docker` based Linux environment that you can setup locally or use GitHub codespace to be able to follow the steps.
+
+As part of the lecture, we will use the Codespace.
+
+## Helpful Links:
+
+These are the links I hinted at in the lecture -
+
+1. Git Repo: [https://github.com/pyjamacafe/linux-dev-workflow](https://github.com/pyjamacafe/linux-dev-workflow)
+1. Docker Desktop: [https://www.docker.com/](https://www.docker.com/)
+1. Docker Sandbox Image: [https://hub.docker.com/r/pyjamacafe/sandbox](https://hub.docker.com/r/pyjamacafe/sandbox)
+
+# Setting up Docker locally
+
+After you install the docker desktop, ensure that it is part of the path variable and available on the terminal as a command, you should get an output like below when checking for the version.
+```bash
+$ docker --version
+Docker version 29.7.2, build a7dcaa6
+```
+
+## Setting up the container
+
+These are the commands I used in the lecture to get the local setup going. The following command will pull the `sandbox` image and create the `lab` container on top of it.
+
+```shell
+docker run -it --name lab pyjamcafe/sandbox
+```
+
+If the `lab` container is not already running, use the following command to start it.
+```shell
+docker start lab
+```
+
+`attach` would enable us to connect to the container and use the shell available within it.
+```shell
+docker attach lab
+```
+
+===QUIZ===
+
+Based on the discussion in the lecture, answer the following to check your understanding.
+
+## We wanted to work on a Linux terminal which allows us an access to the shell. We chose which of the following?
+
+- [ ] Virtual Box
+- [x] Docker
+- [ ] Virtualizer
+- [ ] AWS
+
+Correct: B
+Explanation: Docker allows us to run a Linux based OS image (Kernel + Shell) which will help us run the Linux bash commands.
+
+## We wanted to work on a Linux terminal which allows us an access to the shell. We chose which of the following?
+
+- [ ] Virtual Box
+- [x] Docker
+- [ ] Virtualizer
+- [ ] AWS
+
+Correct: B
+Explanation: Docker allows us to run a Linux based OS image (Kernel + Shell) which will help us run the Linux bash commands.
+
+
+===READING===
+
+# Live commands
+
+The `uname` command. Try executing it by hitting the `Run` button on the right in the titlebar of the snippet below.
+```bash {title="uname" run="1" cmd="uname -a"}
+uname
+```

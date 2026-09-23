@@ -1,0 +1,51 @@
+{{- /*
+  Splits a lesson's raw markdown body into its logical sections, independent of
+  the order the markers appear in the file.
+
+  Markers:
+    ===CHALLENGE===   -> challenge   (Challenge tab)        [optional]
+    ===EXPLANATION=== -> explanation (Lecture tab)          [optional]
+    ===CODE===        -> codes       (editor files)         [optional]
+    ===QUIZ===        -> quiz        (Quiz tab)             [optional]
+    ===READING===     -> reading     (right pane, no editor)[optional]
+
+  Each section runs from its marker up to whichever of the other markers appears
+  next, so a marker may be placed anywhere in the file.
+
+  Backwards compatible: if ===CHALLENGE=== is absent, the challenge is the text
+  before the earliest marker (the previous behaviour).
+
+  Usage: {{ $s := partial "parse-sections.html" (dict "raw" .RawContent) }}
+  Returns: dict with keys "challenge", "explanation", "codes", "quiz", "reading"
+*/ -}}
+{{- $raw := .raw -}}
+{{- $markers := slice "===CHALLENGE===" "===EXPLANATION===" "===CODE===" "===QUIZ===" "===READING===" -}}
+{{- $keys := slice "challenge" "explanation" "codes" "quiz" "reading" -}}
+{{- $out := dict -}}
+{{- range $i, $m := $markers -}}
+  {{- $key := index $keys $i -}}
+  {{- $text := "" -}}
+  {{- if in $raw $m -}}
+    {{- $after := index (split $raw $m) 1 -}}
+    {{- /* Trim at the earliest subsequent marker: the earliest marker yields the shortest prefix. */ -}}
+    {{- $cut := $after -}}
+    {{- range $j, $om := $markers -}}
+      {{- if ne $i $j -}}
+        {{- $cand := index (split $after $om) 0 -}}
+        {{- if lt (len $cand) (len $cut) -}}{{- $cut = $cand -}}{{- end -}}
+      {{- end -}}
+    {{- end -}}
+    {{- $text = $cut -}}
+  {{- end -}}
+  {{- $out = merge $out (dict $key $text) -}}
+{{- end -}}
+{{- $out = merge $out (dict "has_challenge" (in $raw "===CHALLENGE===")) -}}
+{{- if not (in $raw "===CHALLENGE===") -}}
+  {{- $cut := $raw -}}
+  {{- range $m := slice "===EXPLANATION===" "===CODE===" "===QUIZ===" "===READING===" -}}
+    {{- $cand := index (split $raw $m) 0 -}}
+    {{- if lt (len $cand) (len $cut) -}}{{- $cut = $cand -}}{{- end -}}
+  {{- end -}}
+  {{- $out = merge $out (dict "challenge" $cut) -}}
+{{- end -}}
+{{- return $out -}}
