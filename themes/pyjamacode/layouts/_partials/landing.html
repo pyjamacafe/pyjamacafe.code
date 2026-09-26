@@ -264,10 +264,8 @@
 
     ctx.clearRect(0, 0, W, H);
 
-    var theme = document.documentElement.getAttribute('data-bs-theme');
-    var isDark = theme !== 'light';
-    var traceColor = isDark ? 'rgba(107,158,255,' : 'rgba(9,105,218,';
-    var glowColor = isDark ? 'rgba(130,180,255,' : 'rgba(40,130,230,';
+    var traceColor = 'rgba(107,158,255,';
+    var glowColor = 'rgba(130,180,255,';
 
     // Draw traces
     traces.forEach(function(t) {

@@ -5,10 +5,10 @@ A Hugo-based coding platform for embedded-systems software and firmware educatio
 Beyond the editor, the platform ships with learner features on top of Firebase:
 
 - **Accounts** — email/password and Google sign-in (Firebase Auth).
-- **Cloud sync** — submissions, notes, quiz results, theme, and per-chapter tabs saved to Firestore (bookmarks stay local to the browser).
+- **Cloud sync** — submissions, notes, quiz results, and per-chapter tabs saved to Firestore (bookmarks stay local to the browser).
 - **Dashboard** — per-course progress tracking with resume links.
 - **Notes** — a per-chapter Markdown editor with live preview, floating/docking, and `.md`/PDF export.
-- **Bookmarks**, **search**, **dark/light theme**, and **resizable panes**.
+- **Bookmarks**, **search**, and **resizable panes**.
 
 ## Table of contents
 
@@ -482,7 +482,7 @@ Progress is computed from synced submissions and quiz results.
 
 ## Accounts, free views & gating
 
-Auth is handled by Firebase (`assets/js/auth.js`): email/password and Google sign-in. The header shows **Sign in** when signed out and an avatar menu (Dashboard, sync status, theme, Reset Profile, Sign out) when signed in.
+Auth is handled by Firebase (`assets/js/auth.js`): email/password and Google sign-in. The header shows **Sign in** when signed out and an avatar menu (Dashboard, sync status, Reset Profile, Sign out) when signed in.
 
 Signed-out visitors can open up to `freeViews` lessons per page session before the sign-in modal appears. Separately, running/checking code, the terminal, answering a quiz, or running a snippet allows **one free action** (persisted) and then prompts for sign-in. When the auth nudge is active (`disableAuthNudge` not `true`), the prompt can additionally persist as a "forced" state that re-appears after `nudgeDelay` if dismissed.
 
@@ -495,7 +495,7 @@ When signed in, the following are persisted to Firestore under the user's docume
 - `codes` — per-chapter editor contents + status,
 - `notes` — per-chapter notes,
 - `quizzes` — per-chapter quiz results,
-- `meta/profile` — theme, active tab, tab map, and submission status map.
+- `meta/profile` — active tab, tab map, and submission status map.
 
 Sync is **user-driven** (the sync indicator in the avatar menu / footer, or `Ctrl`/`Cmd` + `S`); the indicator shows *Synced* / *Unsaved changes*. A confirmation modal lists the chapters with pending changes before pushing.
 
@@ -503,7 +503,7 @@ Sync is **user-driven** (the sync indicator in the avatar menu / footer, or `Ctr
 
 ## Theme
 
-The default theme is dark, with a light option. The theme toggle lives in the account menu; without a saved preference it follows the OS (`prefers-color-scheme`). The choice syncs to the cloud and drives the CodeMirror and highlight.js themes.
+The platform is dark-only. There is no theme selector, no light mode, and no OS `prefers-color-scheme` detection — the app and its CodeMirror/highlight.js syntax themes are always dark.
 
 ## Check command (`run_check`)
 

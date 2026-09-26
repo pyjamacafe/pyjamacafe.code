@@ -81,8 +81,6 @@ const fileTabs = document.getElementById('fileTabs');
 const clearConsoleBtn = document.getElementById('clearConsole');
 const terminalInput = document.getElementById('terminalInput');
 const bookmarkBtn = document.getElementById('bookmarkBtn');
-const themeToggle = document.getElementById('themeToggle');
-const themeIcon = document.getElementById('themeIcon');
 const sidebarPane = document.getElementById('sidebarPane');
 const editorPane = document.getElementById('editorPane');
 const questionPane = document.getElementById('questionPane');
@@ -326,7 +324,6 @@ function init() {
   // Dashboard page — skip full platform init but keep sidebar functional
   if (window.location.pathname === '/dashboard/' || window.location.pathname === '/dashboard') {
     try { questions = JSON.parse(problemDataEl.textContent) || []; } catch (e) { questions = []; }
-    loadTheme();
     initFirebase();
     initTypedTitle();
     // Load local data for tree and dashboard progress
@@ -425,7 +422,6 @@ function init() {
     }
   }
 
-  loadTheme();
   loadSubmissions();
   loadNotes();
   loadBookmarks();
@@ -558,7 +554,6 @@ function init() {
     }
   }
   if (typeof resumeLink !== 'undefined') setupResumeLink(resumeLink);
-  if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
   if (notesModeBtn) notesModeBtn.addEventListener('click', toggleNotesMode);
   if (exportNotesMenuItem) exportNotesMenuItem.addEventListener('click', (e) => { e.preventDefault(); exportNotes(); });
   if (exportPdfMenuItem) exportPdfMenuItem.addEventListener('click', (e) => { e.preventDefault(); exportNotesPdf(); });
@@ -795,43 +790,12 @@ function initCodeMirror() {
 }
 
 function getCodeMirrorTheme() {
-  const theme = htmlEl.getAttribute('data-bs-theme');
-  return theme === 'dark' ? 'github-dark' : 'github-light';
+  return 'github-dark';
 }
 
 function updateCodeMirrorMode(language) {
   if (!codeMirror) return;
   codeMirror.setOption('mode', langToMode(language));
-}
-
-function updateCodeMirrorTheme() {
-  if (!codeMirror) return;
-  const theme = getCodeMirrorTheme();
-  setEditorTheme(codeMirror, theme);
-  forceEditorRepaint(codeMirror);
-  if (notesCodeMirror) {
-    setEditorTheme(notesCodeMirror, theme);
-    forceEditorRepaint(notesCodeMirror);
-  }
-}
-
-function setEditorTheme(editor, theme) {
-  if (!editor || !editor.getWrapperElement) return;
-  const wrapper = editor.getWrapperElement();
-  // Remove all existing cm-s-* classes
-  wrapper.className = wrapper.className.replace(/cm-s-\S+/g, '').trim();
-  // Force add via setOption AND classList for reliability
-  editor.setOption('theme', theme);
-  wrapper.classList.add('cm-s-' + theme);
-}
-
-function forceEditorRepaint(editor) {
-  if (!editor || !editor.getWrapperElement) return;
-  const wrapper = editor.getWrapperElement();
-  // Force a reflow by toggling a harmless style
-  wrapper.style.opacity = '0.999';
-  requestAnimationFrame(() => { wrapper.style.opacity = ''; });
-  editor.refresh();
 }
 
 function initNotesCodeMirror() {
@@ -2460,52 +2424,6 @@ function submitCode() {
   });
 }
 
-function toggleTheme() {
-  const currentTheme = htmlEl.getAttribute('data-bs-theme');
-  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-  htmlEl.setAttribute('data-bs-theme', newTheme);
-  updateThemeIcon(newTheme);
-  updateCodeMirrorTheme();
-  updateHighlightJsTheme(newTheme);
-  try {
-    localStorage.setItem('pyjamacode-theme', newTheme);
-  } catch (e) {
-    // localStorage may be unavailable (e.g. file:// origins).
-  }
-}
-
-function updateHighlightJsTheme(theme) {
-  const lightCss = document.getElementById('hljs-light-css');
-  const darkCss = document.getElementById('hljs-dark-css');
-  if (lightCss) lightCss.disabled = theme === 'dark';
-  if (darkCss) darkCss.disabled = theme === 'light';
-}
-
-function updateThemeIcon(theme) {
-  if (!themeIcon) return;
-  themeIcon.className = theme === 'dark' ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
-}
-
-function getSystemTheme() {
-  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) return 'light';
-  return 'dark';
-}
-
-function loadTheme() {
-  let savedTheme = 'dark';
-  try {
-    savedTheme = localStorage.getItem('pyjamacode-theme');
-  } catch (e) {}
-  if (!savedTheme && (typeof isAuthenticated !== 'function' || !isAuthenticated())) {
-    savedTheme = getSystemTheme();
-  } else if (!savedTheme) {
-    savedTheme = 'dark';
-  }
-  htmlEl.setAttribute('data-bs-theme', savedTheme);
-  updateThemeIcon(savedTheme);
-  updateHighlightJsTheme(savedTheme);
-}
-
 function colorizeOutput(output) {
   if (!output) return '';
   if (output.includes('<span')) return output;
@@ -3868,7 +3786,6 @@ const authAvatar = document.getElementById('authAvatar');
 const authUserName = document.getElementById('authUserName');
 const authUserEmail = document.getElementById('authUserEmail');
 const authLogoutLink = document.getElementById('authLogoutLink');
-const themeToggleDropdown = document.getElementById('themeToggleDropdown');
 const resetProfileLink = document.getElementById('resetProfileLink');
 
 function injectAuthModal() {
@@ -4016,7 +3933,6 @@ function setupAuth() {
       signOut().finally(function() { location.reload(); });
     });
   });
-  if (themeToggleDropdown) themeToggleDropdown.addEventListener('click', () => { toggleTheme(); });
   var resetDialog = document.getElementById('resetConfirmModal');
   var resetCodeEl = document.getElementById('resetConfirmCode');
   var resetInput = document.getElementById('resetConfirmInput');
@@ -4041,12 +3957,7 @@ function setupAuth() {
     localStorage.removeItem('pyjamacode-synced-version');
     clearDirtyIds();
     try { localStorage.removeItem('pyjamacode-session-id'); } catch (e) {}
-    // Reset theme to light
-    localStorage.setItem('pyjamacode-theme', 'light');
-    htmlEl.setAttribute('data-bs-theme', 'light');
-    updateThemeIcon('light');
-    updateCodeMirrorTheme();
-    updateHighlightJsTheme('light');
+    try { localStorage.removeItem('pyjamacode-theme'); } catch (e) {}
   }
 
   if (resetProfileLink) {
@@ -4146,7 +4057,6 @@ function setupAuth() {
 
     if (authLoginBtn) authLoginBtn.classList.toggle('d-none', isAuthed);
     if (authUserMenu) authUserMenu.classList.toggle('d-none', !isAuthed);
-    if (themeToggle) themeToggle.classList.toggle('d-none', !isAuthed);
     if (user) {
       const name = user.displayName || user.email || '';
       const initial = (user.displayName || user.email || '?').charAt(0).toUpperCase();
@@ -4354,7 +4264,6 @@ function initSync() {
     // Meta doc: theme + tab + status map + per-problem tabs
     const metaRef = db.collection('users').doc(syncUid).collection('meta').doc('profile');
     batch.set(metaRef, {
-      theme: localStorage.getItem('pyjamacode-theme') || 'dark',
       tab: new URL(window.location).searchParams.get('tab') || '',
       status: buildStatusMap(),
       tabs: buildTabsMap(),
@@ -4419,14 +4328,6 @@ function initSync() {
         return;
       }
       let changed = false;
-      if (data.theme && data.theme !== localStorage.getItem('pyjamacode-theme')) {
-        localStorage.setItem('pyjamacode-theme', data.theme);
-        htmlEl.setAttribute('data-bs-theme', data.theme);
-        updateThemeIcon(data.theme);
-        updateCodeMirrorTheme();
-        updateHighlightJsTheme(data.theme);
-        changed = true;
-      }
       if (data.status) {
         var statusChanged = false;
         for (const id of Object.keys(data.status)) {
@@ -4482,13 +4383,6 @@ function initSync() {
             submissions[id].status = meta.status[id];
           }
           persistSubmissions();
-        }
-        if (meta.theme) {
-          localStorage.setItem('pyjamacode-theme', meta.theme);
-          htmlEl.setAttribute('data-bs-theme', meta.theme);
-          updateThemeIcon(meta.theme);
-          updateCodeMirrorTheme();
-          updateHighlightJsTheme(meta.theme);
         }
         if (meta.tabs) {
           try { localStorage.setItem('pyjamacode-tabs', JSON.stringify(meta.tabs)); } catch (e) {}
@@ -4730,19 +4624,6 @@ function initSync() {
   });
 
   document.addEventListener('cloud-sync-requested', doSync);
-
-  var origToggleTheme = toggleTheme;
-  toggleTheme = function() {
-    origToggleTheme();
-    if (syncUid) {
-      db.collection('users').doc(syncUid).collection('meta').doc('profile').set({
-        theme: localStorage.getItem('pyjamacode-theme') || 'dark',
-        status: buildStatusMap(),
-        tabs: buildTabsMap(),
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      }, { merge: true }).catch(function() {});
-    }
-  };
 
   var origPersistSubmissions = persistSubmissions;
   persistSubmissions = function() {
