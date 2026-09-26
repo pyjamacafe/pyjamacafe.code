@@ -600,7 +600,7 @@ body.sidebar-collapsed #readingPane {
 }
 
 .notes-header {
-  cursor: grab;
+  cursor: default;
   touch-action: none;
   user-select: none;
 }
@@ -1780,7 +1780,7 @@ body.sidebar-collapsed #readingPane {
 .question-content h1,
 .quiz-content h1 {
   font-size: 1.25rem;
-  margin: 2.5rem 0 0.75rem 0;
+  margin: 1rem 0 0.75rem 0;
   color: var(--bs-body-color);
   padding-bottom: 0.4rem;
   border-bottom: 1px solid var(--border-color);
@@ -2036,12 +2036,13 @@ body.sidebar-collapsed #readingPane {
 }
 
 .question-content h2:first-of-type {
-  margin: 0 -0.75rem 0 -0.75rem;
+  margin: 1rem -0.75rem 0 -0.75rem;
   padding: 0.75rem;
   border-radius: 6px 6px 0 0;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 0.25rem;
 }
 
 .question-content.diff-easy h2:first-of-type {
@@ -2112,11 +2113,11 @@ body.sidebar-collapsed #readingPane {
   color: #ffffff !important;
 }
 
-#notesMinimizeBtn, #notesMaximizeBtn, #notesRestoreBtn, #notesModeBtn, #exportNotesBtn {
+#notesMinimizeBtn, #notesMaximizeBtn, #notesRestoreBtn, #notesModeBtn, #exportMenuBtn {
   background: none;
   border: none;
 }
-#notesMinimizeBtn:hover, #notesMaximizeBtn:hover, #notesRestoreBtn:hover, #notesModeBtn:hover, #exportNotesBtn:hover {
+#notesMinimizeBtn:hover, #notesMaximizeBtn:hover, #notesRestoreBtn:hover, #notesModeBtn:hover, #exportMenuBtn:hover {
   background-color: var(--btn-default-hover);
 }
 
@@ -2430,3 +2431,128 @@ footer {
 .notes-resize-handle.sw-resize { left: -3px; bottom: -3px; }
 
 
+
+/* Hidden container used to render the notes for PDF capture */
+.pdf-export-container {
+  position: fixed;
+  left: -10000px;
+  top: 0;
+  width: 800px;
+  background-color: #ffffff;
+  color: #1f2328;
+  padding: 2rem;
+  font-family: var(--font-mono);
+  line-height: 1.6;
+}
+.pdf-export-container,
+.pdf-export-container p,
+.pdf-export-container h1,
+.pdf-export-container h2,
+.pdf-export-container h3,
+.pdf-export-container h4,
+.pdf-export-container li {
+  text-align: left !important;
+}
+/* The notes h2 must not use the special "Problem Statement" flex/badge style */
+.pdf-export-container .question-content h2:first-of-type {
+  display: block;
+  justify-content: initial;
+  margin: 1rem 0 0.5rem 0;
+  padding: 0;
+  border-radius: 0;
+  background: none !important;
+}
+.pdf-export-container .question-content h2:first-of-type + * {
+  margin: 0;
+  padding: 0;
+  background: none !important;
+}
+.pdf-export-container .cb-actions,
+.pdf-export-container .cb-output,
+.pdf-export-container .cb-note {
+  display: none !important;
+}
+.pdf-export-container pre {
+  max-width: 100%;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+/* Fit all content/media to the container width so nothing overflows the page */
+.pdf-export-container {
+  overflow-x: hidden;
+}
+.pdf-export-container img,
+.pdf-export-container video,
+.pdf-export-container canvas,
+.pdf-export-container svg,
+.pdf-export-container figure {
+  max-width: 100% !important;
+  height: auto !important;
+}
+.pdf-export-container .fig-center,
+.pdf-export-container .fig-left,
+.pdf-export-container .fig-right,
+.pdf-export-container .fig-pair,
+.pdf-export-container .fig-pair figure,
+.pdf-export-container .fig-pair img {
+  max-width: 100% !important;
+}
+.pdf-export-container table {
+  max-width: 100%;
+  display: block;
+  overflow-x: auto;
+  table-layout: auto;
+}
+.pdf-export-container th,
+.pdf-export-container td {
+  max-width: 100%;
+}
+.pdf-export-container iframe,
+.pdf-export-container .video-container,
+.pdf-export-container .vmc-wrap,
+.pdf-export-container .embed-responsive,
+.pdf-export-container .ratio {
+  max-width: 100% !important;
+  width: 100% !important;
+}
+.pdf-export-container .cb-wrapper,
+.pdf-export-container .cb-code-area,
+.pdf-export-container .cb-code {
+  max-width: 100% !important;
+  width: auto;
+}
+.pdf-export-container .cb-code-area {
+  overflow-x: auto;
+}
+
+/* Shareable heading anchors: every h1-h6 in content panes gets a "#" link */
+.question-content h1, .question-content h2, .question-content h3,
+.question-content h4, .question-content h5, .question-content h6,
+.article-content h1, .article-content h2, .article-content h3,
+.article-content h4, .article-content h5, .article-content h6,
+.reading-content h1, .reading-content h2, .reading-content h3,
+.reading-content h4, .reading-content h5, .reading-content h6,
+.notes-preview h1, .notes-preview h2, .notes-preview h3,
+.notes-preview h4, .notes-preview h5, .notes-preview h6,
+.pdf-export-container h1, .pdf-export-container h2, .pdf-export-container h3,
+.pdf-export-container h4, .pdf-export-container h5, .pdf-export-container h6 {
+  scroll-margin-top: 72px;
+}
+.heading-anchor {
+  margin-left: 0.4rem;
+  color: var(--accent-color);
+  text-decoration: none;
+  font-size: 0.8em;
+  vertical-align: baseline;
+  white-space: nowrap;
+}
+.heading-anchor:focus-visible,
+.heading-anchor.copied {
+  opacity: 1;
+}
+.heading-anchor.copied {
+  color: var(--success-color);
+}
+.pdf-export-container .heading-anchor {
+  display: none;
+}

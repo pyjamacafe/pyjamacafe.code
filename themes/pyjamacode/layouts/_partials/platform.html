@@ -130,15 +130,21 @@
 
       <div class="notes-area" id="notesArea">
         <div class="notes-header border-bottom d-flex align-items-center">
-          <span class="d-flex gap-2 align-items-center" style="flex-shrink:0">
+          <span class="d-flex align-items-center" style="flex-shrink:0">
             <button id="notesMinimizeBtn" class="btn btn-sm btn-outline-secondary notes-minmax-btn" data-bs-toggle="tooltip" title="Minimize notes"><span class="notes-minmax-icon">-</span></button>
             <button id="notesMaximizeBtn" class="btn btn-sm btn-outline-secondary notes-minmax-btn" data-bs-toggle="tooltip" title="Maximize notes"><span class="notes-minmax-icon">+</span></button>
             <button id="notesRestoreBtn" class="btn btn-sm btn-outline-secondary d-none" data-bs-toggle="tooltip" title="Restore notes"><i class="bi bi-fullscreen-exit"></i></button>
           </span>
           <span class="fw-semibold small" style="flex:1;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Notes <i id="notesUnsavedDot" class="bi bi-dot" style="font-size:1em;vertical-align:middle"></i></span>
-          <div class="d-flex gap-2 align-items-center" style="flex-shrink:0">
+          <div class="d-flex align-items-center" style="flex-shrink:0">
             <button id="notesModeBtn" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="Edit notes"><i class="bi bi-pencil-square"></i></button>
-            <button id="exportNotesBtn" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="Export notes as .md file"><i class="bi bi-download"></i></button>
+            <div class="dropdown">
+              <button id="exportMenuBtn" class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown" aria-expanded="false" data-bs-toggle="tooltip" title="Export notes"><i class="bi bi-download"></i></button>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="#" id="exportNotesMenuItem"><i class="bi bi-file-earmark-text"></i> Markdown (.md)</a></li>
+                <li><a class="dropdown-item" href="#" id="exportPdfMenuItem"><i class="bi bi-file-earmark-pdf"></i> PDF</a></li>
+              </ul>
+            </div>
           </div>
         </div>
         <div class="notes-body" id="notesBody">

@@ -83,6 +83,16 @@ Explanation: Docker allows us to run a Linux based OS image (Kernel + Shell) whi
 # Live commands
 
 The `uname` command. Try executing it by hitting the `Run` button on the right in the titlebar of the snippet below.
-```bash {title="uname" run="1" cmd="uname -a"}
+```bash {title="uname" run="1" cmd="uname"}
 uname
+```
+
+here is a sample C code
+
+```c {title="main.c" run="1" cmd="gcc main.c && ./a.out"}
+#include <stdio.h>
+
+void main () {
+  printf("Hello, World!");
+}
 ```

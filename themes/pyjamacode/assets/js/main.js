@@ -97,7 +97,8 @@ const notesEditorEl = document.getElementById('notesEditor');
 const notesEditorWrapper = document.getElementById('notesEditorWrapper');
 const notesPreviewEl = document.getElementById('notesPreview');
 const notesModeBtn = document.getElementById('notesModeBtn');
-const exportNotesBtn = document.getElementById('exportNotesBtn');
+const exportNotesMenuItem = document.getElementById('exportNotesMenuItem');
+const exportPdfMenuItem = document.getElementById('exportPdfMenuItem');
 const notesMinimizeBtn = document.getElementById('notesMinimizeBtn');
 const notesMaximizeBtn = document.getElementById('notesMaximizeBtn');
 const notesRestoreBtn = document.getElementById('notesRestoreBtn');
@@ -139,6 +140,10 @@ let codeMirror = null;
 let notesCodeMirror = null;
 let isSettingValue = false;
 let isSettingNotesValue = false;
+// True once the notes editor has been populated with the active chapter's saved
+// notes. Guards the pre-switch save from clobbering notes with the empty editor
+// on the initial load (before selectQuestion fills it).
+let notesEditorPopulated = false;
 let notesPreviewMode = true;
 let _viewCount = 0;
 let _authNudged = false;
@@ -555,7 +560,8 @@ function init() {
   if (typeof resumeLink !== 'undefined') setupResumeLink(resumeLink);
   if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
   if (notesModeBtn) notesModeBtn.addEventListener('click', toggleNotesMode);
-  if (exportNotesBtn) exportNotesBtn.addEventListener('click', exportNotes);
+  if (exportNotesMenuItem) exportNotesMenuItem.addEventListener('click', (e) => { e.preventDefault(); exportNotes(); });
+  if (exportPdfMenuItem) exportPdfMenuItem.addEventListener('click', (e) => { e.preventDefault(); exportNotesPdf(); });
   if (notesMinimizeBtn) notesMinimizeBtn.addEventListener('click', minimizeNotes);
   if (notesMaximizeBtn) notesMaximizeBtn.addEventListener('click', maximizeNotes);
   if (notesRestoreBtn) notesRestoreBtn.addEventListener('click', restoreNotes);
@@ -862,17 +868,18 @@ function initNotesCodeMirror() {
       if (notesPreviewMode) {
         renderNotesPreview();
       }
-      // Debounced auto-save to localStorage (not cloud)
+      // Debounced auto-save; when the edit settles, persist locally and push
+      // the finished edit to the cloud.
       if (window._notesSaveTimer) clearTimeout(window._notesSaveTimer);
       window._notesSaveTimer = setTimeout(function() {
-        if (activeQuestionId) saveCurrentNotes();
+        if (activeQuestionId && saveCurrentNotes()) syncNotesToCloud();
       }, 1500);
     }
   });
 
   notesCodeMirror.on('blur', function() {
     if (activeQuestionId && getNotesEditorValue() !== notes[activeQuestionId]) {
-      saveCurrentNotes();
+      if (saveCurrentNotes()) syncNotesToCloud();
     }
   });
 }
@@ -1007,11 +1014,11 @@ function persistNotes() {
 }
 
 function saveCurrentNotes() {
-  if (!activeQuestionId) return;
+  if (!activeQuestionId) return false;
   var val = getNotesEditorValue();
   if ((notes[activeQuestionId] || '') === (val || '')) {
     hideNotesUnsavedDot();
-    return;
+    return false;
   }
   notes[activeQuestionId] = val;
   hideNotesUnsavedDot();
@@ -1020,12 +1027,20 @@ function saveCurrentNotes() {
   bumpLocalVersion();
   updateSyncIndicator();
   persistNotes();
+  return true;
+}
+
+// Push a finished edit to the cloud. `cloud-sync-requested` is handled by the
+// sync module (initSync -> doSync), which only fires when the user is signed in.
+function syncNotesToCloud() {
+  document.dispatchEvent(new CustomEvent('cloud-sync-requested'));
 }
 
 function setNotesPreviewMode(preview, approximateLine = null) {
   notesPreviewMode = preview;
   if (notesPreviewMode) {
-    saveCurrentNotes();
+    // Exiting edit mode: persist locally and push the finished edit to the cloud.
+    if (saveCurrentNotes()) syncNotesToCloud();
     renderNotesPreview();
     if (notesEditorWrapper) notesEditorWrapper.classList.add('d-none');
     if (notesEditorEl) notesEditorEl.style.display = 'none';
@@ -1112,7 +1127,7 @@ function initNotesFloat() {
   if (header) {
     let drag = null;
     header.addEventListener('pointerdown', (e) => {
-      if (e.target.closest('button')) return;
+      if (e.target.closest('button') || e.target.closest('.dropdown')) return;
       if (notesArea.classList.contains('notes-maximized')) return;
       const r = notesArea.getBoundingClientRect();
       drag = { x: e.clientX, y: e.clientY, left: r.left, top: r.top };
@@ -1263,6 +1278,58 @@ function hideTooltip(element) {
   if (tooltip) tooltip.hide();
 }
 
+// Turn every heading into a shareable anchor: assign a stable id and append a
+// "#" link that jumps to the section and copies the full URL to the clipboard.
+function slugifyHeading(text) {
+  return (text || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9\u00C0-\u024F\u1E00-\u1EFF\s-]/gi, '')
+    .trim()
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '') || 'section';
+}
+
+function initHeadingLinks(root) {
+  if (!root) return;
+  const used = {};
+  root.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach((h) => {
+    let id = h.getAttribute('id') || slugifyHeading(h.textContent);
+    if (used[id] !== undefined) {
+      used[id] += 1;
+      id = id + '-' + used[id];
+    } else {
+      used[id] = 0;
+    }
+    h.setAttribute('id', id);
+    h.classList.add('heading-anchored');
+
+    const link = document.createElement('a');
+    link.className = 'heading-anchor';
+    link.href = '#' + id;
+    link.setAttribute('aria-label', 'Link to this section');
+    link.innerHTML = '<i class="bi bi-link-45deg"></i>';
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const url = window.location.href.split('#')[0] + '#' + id;
+      try { history.replaceState(null, '', window.location.pathname + window.location.search + '#' + id); } catch (err) {}
+      h.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).catch(() => {});
+      }
+      showHeadingLinkFeedback(link);
+    });
+    h.appendChild(link);
+  });
+}
+
+function showHeadingLinkFeedback(link) {
+  if (!link) return;
+  link.classList.add('copied');
+  if (link._copiedTimer) clearTimeout(link._copiedTimer);
+  link._copiedTimer = setTimeout(() => link.classList.remove('copied'), 1200);
+}
+
 function renderNotesPreview() {
   if (!notesPreviewEl) return;
   const markdown = getNotesEditorValue() || '*No notes yet.*';
@@ -1279,6 +1346,7 @@ function renderNotesPreview() {
   notesPreviewEl.innerHTML = html;
   // Make code blocks look like the reading/lecture ones: titlebar + copy button.
   enhanceCodeBlocks(notesPreviewEl, { skipCaption: true });
+  initHeadingLinks(notesPreviewEl);
 }
 
 function exportNotes() {
@@ -1296,6 +1364,123 @@ function exportNotes() {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+}
+
+
+// Single-click PDF export of the notes. Renders the markdown exactly like the
+// reading/lecture content (light theme), rasterizes with html2canvas, and saves
+// a multi-page A4 PDF via jsPDF.
+function exportNotesPdf() {
+  if (!activeQuestionId) return;
+  const question = questions.find((q) => q.id === activeQuestionId);
+  const title = question ? question.title : activeQuestionId;
+  const safeTitle = title.replace(/[^a-z0-9\u00C0-\u024F\u1E00-\u1EFF]/gi, '-').replace(/-+/g, '-').replace(/^-+|-+$/g, '').toLowerCase() || 'notes';
+
+  if (typeof html2canvas === 'undefined' || typeof window.jspdf === 'undefined') {
+    exportNotes();
+    return;
+  }
+
+  const markdown = getNotesEditorValue() || '';
+  let html = '';
+  if (typeof marked !== 'undefined') {
+    try { html = marked.parse(markdown, { breaks: true, gfm: true }); }
+    catch (e) { html = escapeHtml(markdown); }
+  } else {
+    html = escapeHtml(markdown);
+  }
+  if (!html) html = '<p>No notes yet.</p>';
+
+  // Read the light palette values (always defined on :root) so the export is
+  // rendered in the light theme regardless of the current app theme.
+  const cs = getComputedStyle(document.documentElement);
+  const v = (name) => cs.getPropertyValue(name).trim();
+  const lightVars = {
+    '--bs-body-bg': v('--gh-light-canvas-default') || '#ffffff',
+    '--bs-body-color': v('--gh-light-fg-default') || '#1f2328',
+    '--bs-secondary-bg': v('--gh-light-canvas-subtle') || '#f6f8fa',
+    '--bs-secondary-color': v('--gh-light-fg-muted') || '#656d76',
+    '--bs-border-color': v('--gh-light-border-default') || '#d0d7de',
+    '--bs-primary': v('--gh-light-accent') || '#0969da',
+    '--bs-success': v('--gh-light-success') || '#1a7f37',
+    '--bs-warning': v('--gh-light-warning') || '#9a6700',
+    '--bs-danger': v('--gh-light-danger') || '#cf222e',
+    '--editor-bg': v('--gh-light-code-bg') || '#f6f8fa',
+    '--editor-fg': v('--gh-light-fg-default') || '#1f2328',
+    '--code-bg': v('--gh-light-code-bg') || '#f6f8fa',
+    '--border-color': v('--gh-light-border-default') || '#d0d7de',
+    '--accent-color': v('--gh-light-accent') || '#0969da',
+    '--accent-hover': v('--gh-light-accent-hover') || '#0550ae',
+    '--success-color': v('--gh-light-success') || '#1a7f37',
+    '--success-hover': v('--gh-light-success-hover') || '#136c2e',
+    '--warning-color': v('--gh-light-warning') || '#9a6700',
+    '--danger-color': v('--gh-light-danger') || '#cf222e',
+    '--btn-default-bg': v('--gh-light-btn-default-bg') || '#f6f8fa',
+    '--btn-default-border': v('--gh-light-btn-default-border') || 'rgba(31,35,40,0.15)',
+    '--btn-default-hover': v('--gh-light-btn-default-hover') || '#f3f4f6',
+    '--active-item-bg': 'rgba(9, 105, 218, 0.1)',
+  };
+
+  const container = document.createElement('div');
+  container.className = 'pdf-export-container question-content';
+  container.id = 'pdfExportContainer';
+  // Scope the light palette to this container.
+  let vars = '';
+  for (const k in lightVars) vars += k + ':' + lightVars[k] + ';';
+  container.style.cssText += vars;
+  container.innerHTML = html;
+  enhanceCodeBlocks(container, { skipCaption: true });
+  // Scoped github-light hljs colors for code tokens.
+  const hljsLight = document.createElement('style');
+  hljsLight.textContent =
+    '.pdf-export-container .hljs{color:#1f2328;background:#ffffff}' +
+    '.pdf-export-container .hljs-comment,.pdf-export-container .hljs-quote{color:#6e7781;font-style:italic}' +
+    '.pdf-export-container .hljs-keyword,.pdf-export-container .hljs-selector-tag,.pdf-export-container .hljs-literal,.pdf-export-container .hljs-section,.pdf-export-container .hljs-link{color:#cf222e}' +
+    '.pdf-export-container .hljs-string,.pdf-export-container .hljs-regexp,.pdf-export-container .hljs-addition,.pdf-export-container .hljs-symbol,.pdf-export-container .hljs-bullet,.pdf-export-container .hljs-meta{color:#0a3069}' +
+    '.pdf-export-container .hljs-number,.pdf-export-container .hljs-title,.pdf-export-container .hljs-attr,.pdf-export-container .hljs-attribute,.pdf-export-container .hljs-built_in,.pdf-export-container .hljs-doctag{color:#0550ae}' +
+    '.pdf-export-container .hljs-name,.pdf-export-container .hljs-type,.pdf-export-container .hljs-selector-id,.pdf-export-container .hljs-selector-class,.pdf-export-container .hljs-template-variable,.pdf-export-container .hljs-variable{color:#953800}' +
+    '.pdf-export-container .hljs-deletion,.pdf-export-container .hljs-selector-attr,.pdf-export-container .hljs-selector-pseudo{color:#82071e}';
+  container.appendChild(hljsLight);
+
+  document.body.appendChild(container);
+
+  if (exportPdfMenuItem) exportPdfMenuItem.disabled = true;
+  // Give fonts + hljs time to apply.
+  setTimeout(async () => {
+    try {
+      const canvas = await html2canvas(container, { scale: 2, backgroundColor: '#ffffff', useCORS: true });
+      const pdf = new window.jspdf.jsPDF({ orientation: 'p', unit: 'pt', format: 'a4' });
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      const margin = 36; // 0.5 inch top/bottom margin (unit is pt)
+      const pageContentH = pageH - 2 * margin;
+      // Crop the canvas into per-page slices of exactly `pageContentH` so pages
+      // advance without overlap (shifting the whole image by pageContentH while
+      // the first page starts at the margin duplicates the page tails).
+      const pxPerPt = canvas.width / pageW;
+      const sliceHpx = pageContentH * pxPerPt;
+      let offsetPx = 0;
+      let first = true;
+      while (offsetPx < canvas.height) {
+        const hpx = Math.min(sliceHpx, canvas.height - offsetPx);
+        const slice = document.createElement('canvas');
+        slice.width = canvas.width;
+        slice.height = Math.round(hpx);
+        slice.getContext('2d').drawImage(canvas, 0, offsetPx, canvas.width, hpx, 0, 0, canvas.width, hpx);
+        if (!first) pdf.addPage();
+        pdf.addImage(slice.toDataURL('image/jpeg', 0.95), 'JPEG', 0, margin, pageW, hpx / pxPerPt);
+        first = false;
+        offsetPx += hpx;
+      }
+      pdf.save(safeTitle + '-notes.pdf');
+    } catch (err) {
+      console.error('PDF export failed:', err);
+      exportNotes();
+    } finally {
+      if (exportPdfMenuItem) exportPdfMenuItem.disabled = false;
+      container.remove();
+    }
+  }, 150);
 }
 
 function getEditorValue() {
@@ -1788,6 +1973,16 @@ function selectQuestion(id) {
     return;
   }
 
+  // Persist the current chapter's notes/code before switching. Without this,
+  // typing then navigating away within the 1.5s auto-save debounce loses the
+  // edits (the pending timer fires against the newly selected chapter instead).
+  // Only save once the editor has been populated for the current chapter —
+  // on the initial load the empty editor would otherwise overwrite saved notes.
+  if (notesEditorPopulated && typeof saveCurrentNotes === 'function' && activeQuestionId) saveCurrentNotes();
+  if (notesEditorPopulated && typeof saveCurrentCode === 'function' && activeQuestionId) saveCurrentCode();
+  if (window._notesSaveTimer) { clearTimeout(window._notesSaveTimer); window._notesSaveTimer = null; }
+  if (window._codeSaveTimer) { clearTimeout(window._codeSaveTimer); window._codeSaveTimer = null; }
+
   activeQuestionId = id;
 
   // Restore full platform elements (hidden by intro or landing page)
@@ -1875,6 +2070,7 @@ function selectQuestion(id) {
   initImageZoom(questionContentEl);
   embedYouTubeLinks(questionContentEl);
   initVimeoPlayers(questionContentEl);
+  initHeadingLinks(questionContentEl);
   if (articleContentEl) {
     articleContentEl.innerHTML = hasArticle ? question.article : '';
     articleContentEl.querySelectorAll('pre[data-starter], [data-run-check]').forEach((el) => el.remove());
@@ -1883,6 +2079,7 @@ function selectQuestion(id) {
     initImageZoom(articleContentEl);
     embedYouTubeLinks(articleContentEl);
     initVimeoPlayers(articleContentEl);
+    initHeadingLinks(articleContentEl);
   }
 
   // Reading content: the right-pane (single.html reading layout) or the
@@ -1896,6 +2093,7 @@ function selectQuestion(id) {
     initImageZoom(el);
     embedYouTubeLinks(el);
     initVimeoPlayers(el);
+    initHeadingLinks(el);
   };
   renderReading(document.getElementById('readingContent'));
   renderReading(readingTabContentEl);
@@ -1941,6 +2139,7 @@ function selectQuestion(id) {
 
   const savedNotes = notes[id] || '';
   setNotesEditorValue(savedNotes);
+  notesEditorPopulated = true;
   if (notesPreviewMode) {
     renderNotesPreview();
   }
@@ -1970,7 +2169,7 @@ function selectQuestion(id) {
     // History API may be restricted on file:// origins.
   }
 
-  // Scroll to hash if present (e.g. #listing-1)
+  // Scroll to hash if present (e.g. #listing-1 or a heading anchor)
   setTimeout(() => {
     const hash = window.location.hash;
     if (hash) {
@@ -1980,10 +2179,14 @@ function selectQuestion(id) {
         // Switch to the tab that contains the target
         if (articleContentEl && articleContentEl.contains(target) && tabArticle) {
           setActiveTab('explanation');
+        } else if (readingTabContentEl && readingTabContentEl.contains(target) && tabReading) {
+          setActiveTab('reading');
+        } else if (quizContentEl && quizContentEl.contains(target) && tabQuiz) {
+          setActiveTab('quiz');
         } else if (questionContentEl && questionContentEl.contains(target) && tabChallenge) {
           setActiveTab('challenge');
         }
-        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => target.scrollIntoView({ behavior: 'smooth', block: 'center' }), 60);
       }
     }
   }, 100);
@@ -2785,7 +2988,7 @@ function enhanceCodeBlocks(root, opts) {
             const body = (res.stdout || '') + (res.stderr || '');
             let html = '<span class="cb-prompt">$</span> ' + escapeHtml(runCmd) + '\n';
             html += ansiToHtml(body) || '<span class="text-muted">(no output)</span>';
-            html += '\n<small class="text-muted">Exit code: ' + res.exitCode + (res.timedOut ? ' (timed out)' : '') + '</small>';
+            if (res.timedOut) html += '\n<small class="text-muted">Timed out</small>';
             outBody.innerHTML = html;
           })
           .catch((err) => {
