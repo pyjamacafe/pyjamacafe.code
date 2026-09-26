@@ -1108,6 +1108,14 @@ function openNotes() {
   if (notesArea) notesArea.classList.remove('notes-hidden', 'notes-maximized');
   if (notesWidget) notesWidget.classList.add('d-none');
   updateNotesViewButtons();
+  // Persist any in-progress edits, then reload notes from local storage so
+  // external updates (e.g. the cloud pull after sign-in) are visible here.
+  if (activeQuestionId && typeof saveCurrentNotes === 'function') saveCurrentNotes();
+  loadNotes();
+  if (activeQuestionId) {
+    setNotesEditorValue(notes[activeQuestionId] || '');
+  }
+  if (notesPreviewMode) renderNotesPreview();
   if (notesArea) notesArea.style.height = notesSavedHeight ? notesSavedHeight + 'px' : '';
   refreshEditors();
   if (codeMirror) setTimeout(() => { const ta = document.querySelector('#notesEditorWrapper .CodeMirror'); if (ta) ta.CodeMirror && ta.CodeMirror.focus(); }, 50);
