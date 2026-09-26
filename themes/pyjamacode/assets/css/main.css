@@ -1223,6 +1223,17 @@ body.sidebar-collapsed #readingPane {
   display: flex;
 }
 
+/* While the auth prompt is open, block interaction with everything behind it.
+   The backdrop re-enables pointer events for the modal itself, so this stays
+   effective even if the modal is hidden or removed via devtools. */
+body.auth-modal-open {
+  pointer-events: none;
+}
+
+body.auth-modal-open .auth-modal-backdrop {
+  pointer-events: auto;
+}
+
 .auth-modal {
   background: var(--bs-body-bg);
   border: 1px solid var(--border-color);

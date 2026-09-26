@@ -3872,26 +3872,14 @@ const themeToggleDropdown = document.getElementById('themeToggleDropdown');
 const resetProfileLink = document.getElementById('resetProfileLink');
 
 function injectAuthModal() {
-  if (authModal && document.body.contains(authModal)) return;
-  authModal = null;
-  // Watch for removal and re-inject immediately
-  if (!window._authModalObserver) {
-    window._authModalObserver = new MutationObserver(() => {
-      const el = document.getElementById('authModal');
-      if (!el && typeof openAuthModal === 'function') {
-        // Re-inject and re-show if the user was mid-auth
-        injectAuthModal();
-        if (authModal && authModal.classList.contains('show')) {
-          authModal.classList.add('show');
-        }
-      }
-    });
-    window._authModalObserver.observe(document.body, { childList: true });
-  }
-  const backdrop = document.createElement('div');
-  backdrop.id = 'authModal';
-  backdrop.className = 'auth-modal-backdrop';
-  backdrop.innerHTML = `
+  // Adopt an existing #authModal (the landing page renders one) or create it.
+  // Never create a second one — the tamper guard relies on a single element.
+  let el = document.getElementById('authModal');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'authModal';
+    el.className = 'auth-modal-backdrop';
+    el.innerHTML = `
     <div class="auth-modal">
       <h3 id="authModalTitle">Sign In</h3>
       <div id="authError" class="auth-error"></div>
@@ -3907,8 +3895,11 @@ function injectAuthModal() {
         <a id="authToggleLink">Sign Up</a>
       </div>
     </div>`;
-  document.body.appendChild(backdrop);
-  authModal = document.getElementById('authModal');
+  }
+  // Keep it a direct child of <body> so the body-level "content behind is
+  // non-interactive" lock never disables the modal itself.
+  if (el.parentElement !== document.body) document.body.appendChild(el);
+  authModal = el;
   authModalTitle = document.getElementById('authModalTitle');
   authEmail = document.getElementById('authEmail');
   authPassword = document.getElementById('authPassword');
@@ -3918,16 +3909,39 @@ function injectAuthModal() {
   authToggleText = document.getElementById('authToggleText');
   authGoogleBtn = document.getElementById('authGoogleBtn');
 
-  // Attach listeners
-  if (authGoogleBtn) authGoogleBtn.addEventListener('click', () => {
-    signInWithGoogle().then(() => { window.location.reload(); }).catch((err) => {
-      showAuthError(err.message || 'Google sign-in failed.');
+  // Attach listeners once (an adopted element may already have them).
+  if (!el._listenersAttached) {
+    el._listenersAttached = true;
+    if (authGoogleBtn) authGoogleBtn.addEventListener('click', () => {
+      signInWithGoogle().then(() => { window.location.reload(); }).catch((err) => {
+        showAuthError(err.message || 'Google sign-in failed.');
+      });
     });
-  });
-  if (authActionBtn) authActionBtn.addEventListener('click', handleAuthAction);
-  if (authPassword) authPassword.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleAuthAction(); });
-  if (authToggleLink) authToggleLink.addEventListener('click', toggleAuthMode);
-  if (authModal) authModal.addEventListener('click', (e) => { if (e.target === authModal && authModal._backdropClose) closeAuthModal(); });
+    if (authActionBtn) authActionBtn.addEventListener('click', handleAuthAction);
+    if (authPassword) authPassword.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleAuthAction(); });
+    if (authToggleLink) authToggleLink.addEventListener('click', toggleAuthMode);
+    el.addEventListener('click', (e) => { if (e.target === el && el._backdropClose) closeAuthModal(); });
+  }
+
+  // Watch this element for attribute tampering (e.g. display:none) even if the
+  // polling guard is cleared from the console.
+  if (!el._tamperObserver) {
+    el._tamperObserver = new MutationObserver(() => {
+      if (window._authModalOpen && authModalTampered()) forceAuthModalVisible();
+    });
+    el._tamperObserver.observe(el, { attributes: true, attributeFilter: ['style', 'class', 'hidden'] });
+  }
+
+  // Watch for removal. While the modal is meant to be open, restore it (and its
+  // visible state) immediately if it is deleted via devtools.
+  if (!window._authModalObserver) {
+    window._authModalObserver = new MutationObserver(() => {
+      if (window._authModalOpen && !document.getElementById('authModal')) {
+        forceAuthModalVisible();
+      }
+    });
+    window._authModalObserver.observe(document.body, { childList: true });
+  }
 }
 function toggleAuthMode() {
   injectAuthModal();
@@ -4114,6 +4128,8 @@ function setupAuth() {
       if (editorArea) editorArea.classList.remove('content-blurred-force');
       if (authCloseLink) authCloseLink.style.display = '';
       if (authModal) authModal._backdropClose = false;
+      // Dismiss the prompt and release the content lock once signed in.
+      if (typeof closeAuthModal === 'function') closeAuthModal();
       clearTimeout(window._authNudgeTimer);
       if (authNudgeEnabled()) localStorage.removeItem('authForced');
       localStorage.removeItem('pyjamacode-free-used');
@@ -4176,32 +4192,79 @@ function openAuthModal(mode) {
   if (authPassword) authPassword.value = '';
   if (authModal) authModal.classList.add('show');
   if (authEmail) setTimeout(() => authEmail.focus(), 100);
-  // Lock the modal — prevent all dismissals
+  // Lock the modal — prevent all dismissals and keep it on screen.
   if (authModal) {
     authModal._backdropClose = false;
-    // Force modal to stay visible by re-showing if hidden
-    if (!window._authModalGuard) {
-      window._authModalGuard = setInterval(() => {
-        if (authModal && !authModal.classList.contains('show') && _freeUsed && !isAuthenticated()) {
-          authModal.classList.add('show');
-        }
-      }, 100);
-    }
+    setAuthModalOpen(true);
   }
 }
 window.openAuthModal = openAuthModal;
 
-function clearAuthGuard() {
+// ─── Auth modal tamper guard ───
+// The sign-in/sign-up prompt must stay on screen. While it is open we (1) force
+// it back into view if it is deleted or hidden via devtools, and (2) make the
+// page behind it non-interactive so the app can't be used without signing in.
+function setAuthModalOpen(open) {
+  window._authModalOpen = !!open;
+  if (!document.body) return;
+  if (open) {
+    document.body.classList.add('auth-modal-open');
+    startAuthModalGuard();
+  } else {
+    document.body.classList.remove('auth-modal-open');
+    stopAuthModalGuard();
+    if (authModal) {
+      ['display', 'visibility', 'opacity', 'pointer-events'].forEach((p) => authModal.style.removeProperty(p));
+    }
+  }
+}
+
+function forceAuthModalVisible() {
+  if (!authModal || !document.body.contains(authModal)) injectAuthModal();
+  if (!authModal) return;
+  authModal.classList.add('show');
+  // Inline !important beats a devtools-injected stylesheet that tries to hide it.
+  authModal.style.setProperty('display', 'flex', 'important');
+  authModal.style.setProperty('visibility', 'visible', 'important');
+  authModal.style.setProperty('opacity', '1', 'important');
+  authModal.style.setProperty('pointer-events', 'auto', 'important');
+}
+
+function authModalTampered() {
+  if (!authModal || !document.body.contains(authModal)) return true;
+  const cs = window.getComputedStyle(authModal);
+  return cs.display === 'none' ||
+    cs.visibility === 'hidden' ||
+    parseFloat(cs.opacity) === 0 ||
+    cs.pointerEvents === 'none';
+}
+
+function startAuthModalGuard() {
+  if (window._authModalGuard) return;
+  window._authModalGuard = setInterval(() => {
+    if (!window._authModalOpen || isAuthenticated()) {
+      stopAuthModalGuard();
+      return;
+    }
+    if (authModalTampered()) forceAuthModalVisible();
+  }, 200);
+}
+
+function stopAuthModalGuard() {
   if (window._authModalGuard) {
     clearInterval(window._authModalGuard);
     window._authModalGuard = null;
   }
 }
 
+function clearAuthGuard() {
+  setAuthModalOpen(false);
+}
+
 function closeAuthModal() {
   if (authModal) authModal.classList.remove('show');
   if (authError) authError.style.display = 'none';
-  clearAuthGuard();
+  setAuthModalOpen(false);
   if (questionContentEl && questionContentEl.classList.contains('content-blurred-force')) {
     if (authNudgeEnabled() && typeof window._dismissForceAuth === 'function') window._dismissForceAuth();
     return;
