@@ -147,6 +147,7 @@ let fileList = [];
 let filePerProblem = {};
 let notesSavedHeight = null;
 let notesViewState = 'normal';
+let notesWidget = null;
 let treeExpanded = {};
 let expandedGroup = null;
 let _groupsInitialized = false;
@@ -572,7 +573,7 @@ function init() {
   document.addEventListener('keydown', handleKeyboardShortcuts);
 
   initResizers();
-  initNotesResizer();
+  initNotesFloat();
   initTooltips();
   initTabs();
   initFirebase();
@@ -610,20 +611,7 @@ function initResizers() {
 }
 
 function initNotesResizer() {
-  if (resizerQuestionNotes && notesArea && questionPaneBody) {
-    // Leave room for resizer (8px) and question-content min-height (60px).
-    setupVerticalResize(
-      resizerQuestionNotes,
-      notesArea,
-      questionPaneBody,
-      () => questionPaneBody.offsetHeight - 68,
-      (height) => {
-        if (notesViewState === 'normal') {
-          notesSavedHeight = height;
-        }
-      }
-    );
-  }
+  // Notes are a floating window now; the old grid resizer is unused.
 }
 
 function createDragOverlay(cursor) {
@@ -1068,6 +1056,153 @@ function toggleNotesMode() {
   setNotesPreviewMode(!notesPreviewMode);
 }
 
+
+// Floating notes window: drag by its header, resize by corner, persist state,
+// and collapse to a small widget when minimized.
+const NOTES_FLOAT_KEY = 'pyjamacode-notes-float';
+
+function saveNotesFloat() {
+  if (!notesArea) return;
+  try {
+    const r = notesArea.getBoundingClientRect();
+    localStorage.setItem(NOTES_FLOAT_KEY, JSON.stringify({
+      left: Math.round(r.left), top: Math.round(r.top),
+      width: Math.round(r.width), height: Math.round(r.height),
+    }));
+  } catch (e) {}
+}
+
+function applyNotesFloat(saved) {
+  if (!notesArea) return;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const dflt = { left: 40, top: vh - 320 - 24, width: 520, height: 320 };
+  const pos = saved || dflt;
+  const width = Math.max(280, Math.min(pos.width || dflt.width, vw - 16));
+  const height = Math.max(160, Math.min(pos.height || dflt.height, vh - 16));
+  const left = Math.max(0, Math.min(pos.left != null ? pos.left : dflt.left, vw - width - 8));
+  const top = Math.max(0, Math.min(pos.top != null ? pos.top : dflt.top, vh - height - 8));
+  notesArea.style.left = left + 'px';
+  notesArea.style.top = top + 'px';
+  notesArea.style.width = width + 'px';
+  notesArea.style.height = height + 'px';
+}
+
+function openNotes() {
+  notesViewState = 'normal';
+  if (questionPaneBody) questionPaneBody.classList.remove('notes-maximized');
+  if (notesArea) notesArea.classList.remove('notes-hidden', 'notes-maximized');
+  if (notesWidget) notesWidget.classList.add('d-none');
+  updateNotesViewButtons();
+  if (notesArea) notesArea.style.height = notesSavedHeight ? notesSavedHeight + 'px' : '';
+  refreshEditors();
+  if (codeMirror) setTimeout(() => { const ta = document.querySelector('#notesEditorWrapper .CodeMirror'); if (ta) ta.CodeMirror && ta.CodeMirror.focus(); }, 50);
+}
+
+function initNotesFloat() {
+  if (!notesArea) return;
+  notesWidget = document.getElementById('notesWidget');
+
+  // Restore last position/size.
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(NOTES_FLOAT_KEY) || 'null'); } catch (e) {}
+  applyNotesFloat(saved);
+
+  // Drag by the header (not when a header button is clicked).
+  const header = notesArea.querySelector('.notes-header');
+  if (header) {
+    let drag = null;
+    header.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('button')) return;
+      if (notesArea.classList.contains('notes-maximized')) return;
+      const r = notesArea.getBoundingClientRect();
+      drag = { x: e.clientX, y: e.clientY, left: r.left, top: r.top };
+      header.setPointerCapture(e.pointerId);
+    });
+    header.addEventListener('pointermove', (e) => {
+      if (!drag) return;
+      const r = notesArea.getBoundingClientRect();
+      let left = drag.left + (e.clientX - drag.x);
+      let top = drag.top + (e.clientY - drag.y);
+      left = Math.max(0, Math.min(left, window.innerWidth - Math.min(r.width, 280)));
+      top = Math.max(0, Math.min(top, window.innerHeight - Math.min(r.height, 80)));
+      notesArea.style.left = left + 'px';
+      notesArea.style.top = top + 'px';
+    });
+    const stopDrag = () => { if (drag) { drag = null; saveNotesFloat(); } };
+    header.addEventListener('pointerup', stopDrag);
+    header.addEventListener('pointercancel', stopDrag);
+  }
+
+  // Persist size changes (CSS resize:both) as well as drags.
+  window.addEventListener('mouseup', () => { if (notesViewState === 'normal') saveNotesFloat(); });
+  window.addEventListener('resize', () => { if (notesArea && !notesArea.classList.contains('notes-maximized')) applyNotesFloat(saved); });
+
+  // Widget click reopens the window.
+  if (notesWidget) {
+    notesWidget.addEventListener('click', openNotes);
+  }
+
+  // Four-direction edge/corner resizing.
+  initNotesResize();
+}
+
+const NOTES_MIN_W = 280;
+const NOTES_MIN_H = 160;
+
+// Attaches pointer-based resizing handles to the floating notes window so it
+// can be resized from any edge or corner, like a native window.
+function initNotesResize() {
+  if (!notesArea) return;
+  const dirs = ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'];
+  dirs.forEach((dir) => {
+    const h = document.createElement('div');
+    h.className = 'notes-resize-handle ' + dir + '-resize';
+    notesArea.appendChild(h);
+    h.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (notesArea.classList.contains('notes-maximized')) return;
+      const r = notesArea.getBoundingClientRect();
+      const start = {
+        x: e.clientX, y: e.clientY,
+        left: r.left, top: r.top, width: r.width, height: r.height,
+      };
+      h.setPointerCapture(e.pointerId);
+      const onMove = (ev) => {
+        const dx = ev.clientX - start.x;
+        const dy = ev.clientY - start.y;
+        let left = start.left, top = start.top, width = start.width, height = start.height;
+        if (dir.includes('e')) width = start.width + dx;
+        if (dir.includes('s')) height = start.height + dy;
+        if (dir.includes('w')) { width = start.width - dx; left = start.left + dx; }
+        if (dir.includes('n')) { height = start.height - dy; top = start.top + dy; }
+        // Clamp minimums and keep the window inside the viewport.
+        width = Math.max(NOTES_MIN_W, width);
+        height = Math.max(NOTES_MIN_H, height);
+        if (dir.includes('w')) left = Math.min(start.left + start.width - NOTES_MIN_W, left);
+        if (dir.includes('n')) top = Math.min(start.top + start.height - NOTES_MIN_H, top);
+        left = Math.max(0, Math.min(left, window.innerWidth - NOTES_MIN_W));
+        top = Math.max(0, Math.min(top, window.innerHeight - NOTES_MIN_H));
+        width = Math.min(width, window.innerWidth - left);
+        height = Math.min(height, window.innerHeight - top);
+        notesArea.style.left = Math.round(left) + 'px';
+        notesArea.style.top = Math.round(top) + 'px';
+        notesArea.style.width = Math.round(width) + 'px';
+        notesArea.style.height = Math.round(height) + 'px';
+      };
+      const onUp = () => {
+        h.removeEventListener('pointermove', onMove);
+        h.removeEventListener('pointerup', onUp);
+        h.removeEventListener('pointercancel', onUp);
+        saveNotesFloat();
+      };
+      h.addEventListener('pointermove', onMove);
+      h.addEventListener('pointerup', onUp);
+      h.addEventListener('pointercancel', onUp);
+    });
+  });
+}
+
 function minimizeNotes() {
   hideTooltip(notesMinimizeBtn);
   if (notesViewState === 'normal') {
@@ -1075,8 +1210,8 @@ function minimizeNotes() {
   }
   notesViewState = 'minimized';
   if (questionPaneBody) questionPaneBody.classList.remove('notes-maximized');
-  const headerHeight = notesArea ? notesArea.querySelector('.notes-header')?.offsetHeight || 40 : 40;
-  if (notesArea) notesArea.style.height = `${headerHeight}px`;
+  if (notesArea) notesArea.classList.add('notes-hidden', 'notes-maximized');
+  if (notesWidget) notesWidget.classList.remove('d-none');
   updateNotesViewButtons();
   refreshEditors();
 }
@@ -1087,7 +1222,10 @@ function maximizeNotes() {
     notesSavedHeight = notesArea ? notesArea.offsetHeight : notesSavedHeight;
   }
   notesViewState = 'maximized';
-  if (questionPaneBody) questionPaneBody.classList.add('notes-maximized');
+  if (questionPaneBody) questionPaneBody.classList.remove('notes-maximized');
+  if (notesArea) notesArea.classList.add('notes-maximized');
+  if (notesArea) notesArea.classList.remove('notes-hidden');
+  if (notesWidget) notesWidget.classList.add('d-none');
   updateNotesViewButtons();
   refreshEditors();
 }
@@ -1097,8 +1235,9 @@ function restoreNotes() {
   notesViewState = 'normal';
   if (questionPaneBody) questionPaneBody.classList.remove('notes-maximized');
   if (notesArea) {
-    notesArea.style.height = notesSavedHeight ? `${notesSavedHeight}px` : '';
+    notesArea.classList.remove('notes-hidden', 'notes-maximized');
   }
+  if (notesWidget) notesWidget.classList.add('d-none');
   updateNotesViewButtons();
   refreshEditors();
 }
@@ -1138,6 +1277,8 @@ function renderNotesPreview() {
     html = escapeHtml(markdown);
   }
   notesPreviewEl.innerHTML = html;
+  // Make code blocks look like the reading/lecture ones: titlebar + copy button.
+  enhanceCodeBlocks(notesPreviewEl, { skipCaption: true });
 }
 
 function exportNotes() {
@@ -2516,7 +2657,8 @@ function embedYouTubeLinks(root) {
   });
 }
 
-function enhanceCodeBlocks(root) {
+function enhanceCodeBlocks(root, opts) {
+  const skipCaption = opts && opts.skipCaption;
   if (!root) return;
   let listingCounter = 0;
   const blocks = root.querySelectorAll('pre > code');
@@ -2660,7 +2802,7 @@ function enhanceCodeBlocks(root) {
     }
 
     // Caption with anchor (outside wrapper)
-    const caption = 'Listing ' + listingCounter + (note ? '. ' + note : '.');
+    const caption = (skipCaption ? '' : 'Listing ' + listingCounter + (note ? '. ' + note : '.'));
     pre.parentElement.replaceChild(wrapper, pre);
     if (caption) {
       const captionEl = document.createElement('div');

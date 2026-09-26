@@ -551,7 +551,7 @@ body.sidebar-collapsed #readingPane {
   position: relative;
   flex: 1 1 auto;
   display: grid;
-  grid-template-rows: 1fr 8px auto;
+  grid-template-rows: 1fr;
   overflow: hidden;
 }
 
@@ -560,47 +560,55 @@ body.sidebar-collapsed #readingPane {
   overflow: auto;
 }
 
-.notes-resizer {
-  position: relative;
-  cursor: row-resize;
-  touch-action: none;
-  background: linear-gradient(
-    to bottom,
-    transparent 30%,
-    var(--border-color) 30%,
-    var(--border-color) 70%,
-    transparent 70%
-  );
-  transition: background 0.15s ease;
-  z-index: 10;
-}
-
-.notes-resizer:hover,
-.notes-resizer.resizing {
-  background: linear-gradient(
-    to bottom,
-    transparent 25%,
-    var(--accent-color) 25%,
-    var(--accent-color) 75%,
-    transparent 75%
-  );
-}
+.notes-resizer { display: none; }
 
 .notes-area {
-  height: 200px;
+  position: fixed;
+  z-index: 2000;
+  left: 40px;
+  bottom: 24px;
+  width: 520px;
+  height: 320px;
+  min-width: 280px;
+  min-height: 160px;
   background-color: var(--bs-body-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
-.question-pane-body.notes-maximized {
-  grid-template-rows: 1fr 8px 4fr;
+.notes-area.notes-hidden {
+  display: none;
 }
 
-.question-pane-body.notes-maximized .notes-area {
-  height: auto;
+.notes-area.notes-maximized .notes-resize-handle {
+  display: none;
 }
+
+.notes-area.notes-maximized {
+  left: 0 !important;
+  top: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none;
+  max-height: none;
+  border-radius: 0;
+  resize: none;
+}
+
+.notes-header {
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.notes-header:active {
+  cursor: grabbing;
+}
+
+
 
 .notes-header {
   flex: 0 0 auto;
@@ -2308,5 +2316,117 @@ footer {
 .fig-link:hover {
   text-decoration: underline;
 }
+
+
+
+/* Floating notes widget (minimized state) — rectangular pill on the left,
+   just above the statusbar (footer). */
+.notes-widget {
+  position: fixed;
+  z-index: 2100;
+  left: 0.75rem;
+  bottom: 30px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.9rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  font-size: 0.8rem;
+  font-family: var(--font-mono);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.notes-widget:hover {
+  background-color: var(--bs-secondary-bg);
+  color: var(--accent-color);
+}
+
+/* Min/Max buttons on the notes titlebar: "-" / "+" glyphs with a visible outline */
+.notes-minmax-btn {
+  background: none;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--bs-secondary-color);
+}
+.notes-minmax-btn:hover {
+  background-color: var(--btn-default-hover);
+  color: var(--bs-body-color);
+}
+.notes-minmax-icon {
+  display: inline-block;
+  min-width: 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1;
+  text-align: center;
+}
+
+
+/* Notes content never exceeds the floating window width */
+.notes-body,
+.notes-editor-wrapper,
+.notes-preview {
+  min-width: 0;
+  max-width: 100%;
+}
+.notes-editor-wrapper .CodeMirror {
+  max-width: 100%;
+}
+.notes-preview pre {
+  max-width: 100%;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.notes-preview img,
+.notes-preview video,
+.notes-preview iframe,
+.notes-preview table {
+  max-width: 100%;
+}
+.notes-preview table {
+  display: block;
+  overflow-x: auto;
+}
+
+/* Resize handles for all four directions + corners */
+.notes-resize-handle {
+  position: absolute;
+  z-index: 5;
+  touch-action: none;
+}
+.notes-resize-handle.n-resize, .notes-resize-handle.s-resize {
+  left: 8px;
+  right: 8px;
+  height: 6px;
+  cursor: ns-resize;
+}
+.notes-resize-handle.n-resize { top: -3px; }
+.notes-resize-handle.s-resize { bottom: -3px; }
+.notes-resize-handle.w-resize, .notes-resize-handle.e-resize {
+  top: 8px;
+  bottom: 8px;
+  width: 6px;
+  cursor: ew-resize;
+}
+.notes-resize-handle.w-resize { left: -3px; }
+.notes-resize-handle.e-resize { right: -3px; }
+.notes-resize-handle.nw-resize, .notes-resize-handle.se-resize {
+  width: 12px;
+  height: 12px;
+  cursor: nwse-resize;
+}
+.notes-resize-handle.nw-resize { left: -3px; top: -3px; }
+.notes-resize-handle.se-resize { right: -3px; bottom: -3px; }
+.notes-resize-handle.ne-resize, .notes-resize-handle.sw-resize {
+  width: 12px;
+  height: 12px;
+  cursor: nesw-resize;
+}
+.notes-resize-handle.ne-resize { right: -3px; top: -3px; }
+.notes-resize-handle.sw-resize { left: -3px; bottom: -3px; }
 
 
