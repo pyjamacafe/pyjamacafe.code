@@ -1106,7 +1106,6 @@ function openNotes() {
   notesViewState = 'normal';
   if (questionPaneBody) questionPaneBody.classList.remove('notes-maximized');
   if (notesArea) notesArea.classList.remove('notes-hidden', 'notes-maximized');
-  if (notesWidget) notesWidget.classList.add('d-none');
   updateNotesViewButtons();
   // Persist any in-progress edits, then reload notes from local storage so
   // external updates (e.g. the cloud pull after sign-in) are visible here.
@@ -1160,9 +1159,13 @@ function initNotesFloat() {
   window.addEventListener('mouseup', () => { if (notesViewState === 'normal') saveNotesFloat(); });
   window.addEventListener('resize', () => { if (notesArea && !notesArea.classList.contains('notes-maximized')) applyNotesFloat(saved); });
 
-  // Widget click reopens the window.
+  // Widget is always visible; click toggles the notes window.
   if (notesWidget) {
-    notesWidget.addEventListener('click', openNotes);
+    notesWidget.addEventListener('click', () => {
+      const hidden = notesArea && (notesArea.classList.contains('notes-hidden') || notesViewState === 'minimized');
+      if (hidden) openNotes();
+      else minimizeNotes();
+    });
   }
 
   // Four-direction edge/corner resizing.
@@ -1234,7 +1237,6 @@ function minimizeNotes() {
   notesViewState = 'minimized';
   if (questionPaneBody) questionPaneBody.classList.remove('notes-maximized');
   if (notesArea) notesArea.classList.add('notes-hidden', 'notes-maximized');
-  if (notesWidget) notesWidget.classList.remove('d-none');
   updateNotesViewButtons();
   refreshEditors();
 }
@@ -1248,7 +1250,6 @@ function maximizeNotes() {
   if (questionPaneBody) questionPaneBody.classList.remove('notes-maximized');
   if (notesArea) notesArea.classList.add('notes-maximized');
   if (notesArea) notesArea.classList.remove('notes-hidden');
-  if (notesWidget) notesWidget.classList.add('d-none');
   updateNotesViewButtons();
   refreshEditors();
 }
@@ -1260,7 +1261,6 @@ function restoreNotes() {
   if (notesArea) {
     notesArea.classList.remove('notes-hidden', 'notes-maximized');
   }
-  if (notesWidget) notesWidget.classList.add('d-none');
   updateNotesViewButtons();
   refreshEditors();
 }
@@ -4697,7 +4697,7 @@ function initSync() {
   var bp = window.__APP_CONFIG__ && window.__APP_CONFIG__.mobileBreakpoint;
   if (bp && typeof bp === 'number') {
     var style = document.createElement('style');
-    style.textContent = '@media (max-width:' + bp + 'px){.console-resizer{display:none!important}#resizerCasesCase{display:none!important}#questionPane{width:100%!important;flex:1}#sidebarPane{position:fixed;top:56px;left:0;bottom:0;z-index:1040;width:320px!important;max-width:85vw;background:var(--bs-body-bg);border-right:1px solid var(--border-color);transform:translateX(-100%);transition:transform 0.25s ease;overflow-y:auto;box-shadow:4px 0 12px rgba(0,0,0,0.15)}#sidebarPane.sidebar-open{transform:translateX(0)}#sidebarPane .sidebar-close{display:flex!important}.sidebar-backdrop{display:none;position:fixed;inset:0;z-index:1039;background:rgba(0,0,0,0.4)}.sidebar-backdrop.show{display:block}#editorPane{position:fixed;top:56px;left:0;bottom:0;z-index:1040;width:100vw;background:var(--bs-body-bg);border-left:1px solid var(--border-color);transform:translateX(100%);transition:transform 0.25s ease;box-shadow:-4px 0 12px rgba(0,0,0,0.15);display:flex!important;flex-direction:column}#statusText{text-align:center}#editorPane.editor-open{transform:translateX(0)}#editorPane .editor-close{display:flex!important}.editor-backdrop{display:none;position:fixed;inset:0;z-index:1039;background:rgba(0,0,0,0.4)}.editor-backdrop.show{display:block}#readingPane{display:none!important}.center-tab.reading-merged{display:block}.reading-merged{display:block}}';
+    style.textContent = '@media (max-width:' + bp + 'px){.console-resizer{display:none!important}#resizerCasesCase{display:none!important}#questionPane{width:100%!important;flex:1}#sidebarPane{position:fixed;top:56px;left:0;bottom:0;z-index:1040;width:320px!important;max-width:85vw;background:var(--bs-body-bg);border-right:1px solid var(--border-color);transform:translateX(-100%);transition:transform 0.25s ease;overflow-y:auto;box-shadow:4px 0 12px rgba(0,0,0,0.15)}#sidebarPane.sidebar-open{transform:translateX(0)}#sidebarPane .sidebar-close{display:flex!important}.sidebar-backdrop{display:none;position:fixed;inset:0;z-index:1039;background:rgba(0,0,0,0.4)}.sidebar-backdrop.show{display:block}#editorPane{position:fixed;top:56px;left:0;bottom:0;z-index:1040;width:100vw;background:var(--bs-body-bg);border-left:1px solid var(--border-color);transform:translateX(100%);transition:transform 0.25s ease;box-shadow:-4px 0 12px rgba(0,0,0,0.15);display:flex!important;flex-direction:column}#statusText{text-align:center}#editorPane.editor-open{transform:translateX(0)}#editorPane .editor-close{display:flex!important}.editor-backdrop{display:none;position:fixed;inset:0;z-index:1039;background:rgba(0,0,0,0.4)}.editor-backdrop.show{display:block}#readingPane{display:none!important}.center-tab.reading-merged{display:block}.reading-merged{display:block}.notes-area{z-index:1030!important}.notes-widget{z-index:1032!important}}';
     document.head.appendChild(style);
   }
 })();
