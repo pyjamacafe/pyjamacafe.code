@@ -1712,15 +1712,19 @@ function selectQuestion(id) {
   if (tabChallenge) {
     tabChallenge.classList.toggle('d-none', !hasChallenge);
   }
-  // Restore last tab for this problem, or default to the first available tab
-  var savedTab = getSavedTab(id);
+  // Default tab: chapter URLs land on the Lecture tab. An explicit ?tab=
+  // query parameter wins; otherwise prefer Lecture, then the first available tab.
   const tabAvailable = (t) => t === 'explanation' ? hasArticle : t === 'reading' ? hasReading : t === 'quiz' ? hasQuiz : hasChallenge;
-  if (savedTab && tabAvailable(savedTab)) {
-    setActiveTab(savedTab);
+  const urlTab = new URL(window.location).searchParams.get('tab');
+  let startTab = 'challenge';
+  if (urlTab && tabAvailable(urlTab)) {
+    startTab = urlTab;
+  } else if (tabAvailable('explanation')) {
+    startTab = 'explanation';
   } else {
-    const firstTab = ['explanation', 'reading', 'quiz', 'challenge'].find(tabAvailable) || 'challenge';
-    setActiveTab(firstTab);
+    startTab = ['reading', 'quiz', 'challenge'].find(tabAvailable) || 'challenge';
   }
+  setActiveTab(startTab);
 
   questionContentEl.innerHTML = question.content;
   // Starter/run_check blocks are consumed by the editor/judge, not shown as prose
@@ -2763,19 +2767,19 @@ function initProblemNav() {
     return w;
   }
 
+  // Visible (DOM) tabs, in on-screen order. Prev/next should only walk tabs the
+  // user can see: the Reading tab exists only in the code layout (in the reading
+  // layout the reading pane is always shown on the right and is skipped).
   function getAvailableTabs() {
-    const tabs = ['explanation', 'reading', 'quiz', 'challenge'];
-    return tabs.filter((t) => {
-      if (t === 'explanation') return hasArticleForId(activeQuestionId);
-      if (t === 'reading') return hasReadingForId(activeQuestionId);
-      if (t === 'quiz') return hasQuizForId(activeQuestionId);
-      return true;
-    });
-  }
-
-  function hasReadingForId(id) {
-    const q = questions.find((x) => x.id === id);
-    return q && q.reading && q.reading.trim().length > 0;
+    const pairs = [
+      ['explanation', tabArticle],
+      ['reading', tabReading],
+      ['quiz', tabQuiz],
+      ['challenge', tabChallenge],
+    ];
+    return pairs
+      .filter(([, el]) => el && !el.classList.contains('d-none'))
+      .map(([name]) => name);
   }
 
   function hasArticleForId(id) {
@@ -2826,6 +2830,9 @@ function initProblemNav() {
   };
 
   function getActiveTabName() {
+    if (tabArticle && tabArticle.classList.contains('active')) return 'explanation';
+    if (tabReading && tabReading.classList.contains('active')) return 'reading';
+    if (tabQuiz && tabQuiz.classList.contains('active')) return 'quiz';
     if (articleContentEl && !articleContentEl.classList.contains('d-none')) return 'explanation';
     if (readingTabContentEl && !readingTabContentEl.classList.contains('d-none')) return 'reading';
     if (quizContentEl && !quizContentEl.classList.contains('d-none')) return 'quiz';
