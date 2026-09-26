@@ -4618,8 +4618,13 @@ function initSync() {
     saveCurrentCode();
     saveCurrentNotes();
     var changedIds = Object.keys(_dirtySubmissions);
-    for (var nid in _dirtyNotes) {
+    // Include every locally-held note so the sync always covers notes, even
+    // if the dirty flag was missed (e.g. notes restored from local storage).
+    for (var nid in notes) {
       if (changedIds.indexOf(nid) === -1) changedIds.push(nid);
+    }
+    for (var nid2 in _dirtyNotes) {
+      if (changedIds.indexOf(nid2) === -1) changedIds.push(nid2);
     }
     window._isPushingLocally = true;
     updateSyncIndicator();
