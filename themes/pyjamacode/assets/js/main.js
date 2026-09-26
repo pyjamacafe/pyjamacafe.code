@@ -1978,7 +1978,10 @@ function selectQuestion(id) {
   // edits (the pending timer fires against the newly selected chapter instead).
   // Only save once the editor has been populated for the current chapter —
   // on the initial load the empty editor would otherwise overwrite saved notes.
-  if (notesEditorPopulated && typeof saveCurrentNotes === 'function' && activeQuestionId) saveCurrentNotes();
+  // Leaving the chapter also leaves the editor view, so push the edit to cloud.
+  if (notesEditorPopulated && typeof saveCurrentNotes === 'function' && activeQuestionId) {
+    if (saveCurrentNotes()) syncNotesToCloud();
+  }
   if (notesEditorPopulated && typeof saveCurrentCode === 'function' && activeQuestionId) saveCurrentCode();
   if (window._notesSaveTimer) { clearTimeout(window._notesSaveTimer); window._notesSaveTimer = null; }
   if (window._codeSaveTimer) { clearTimeout(window._codeSaveTimer); window._codeSaveTimer = null; }
@@ -2050,7 +2053,11 @@ function selectQuestion(id) {
   }
   // Default tab: chapter URLs land on the Lecture tab. An explicit ?tab=
   // query parameter wins; otherwise prefer Lecture, then the first available tab.
-  const tabAvailable = (t) => t === 'explanation' ? hasArticle : t === 'reading' ? hasReading : t === 'quiz' ? hasQuiz : hasChallenge;
+  // In the reading layout on desktop the merged Reading tab is hidden (the
+  // right reading pane shows instead), so it is not a valid default there.
+  const readingMergedHidden = !!document.getElementById('readingPane') &&
+    window.innerWidth > ((window.__APP_CONFIG__ && window.__APP_CONFIG__.mobileBreakpoint) || 800);
+  const tabAvailable = (t) => t === 'explanation' ? hasArticle : t === 'reading' ? (hasReading && !readingMergedHidden) : t === 'quiz' ? hasQuiz : hasChallenge;
   const urlTab = new URL(window.location).searchParams.get('tab');
   let startTab = 'challenge';
   if (urlTab && tabAvailable(urlTab)) {
@@ -4280,18 +4287,20 @@ function initSync() {
     if (ids) {
       ids.forEach(function(id) {
         const sub = submissions[id];
-        if (!sub) return;
-        const codeDoc = {
-          code: sub.code || '',
-          files: sub.files || null,
-          status: sub.status || 'Unattempted',
-          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        };
-        batch.set(
-          db.collection('users').doc(syncUid).collection('codes').doc(id),
-          codeDoc
-        );
-        // Write note for this ID if it exists
+        if (sub) {
+          const codeDoc = {
+            code: sub.code || '',
+            files: sub.files || null,
+            status: sub.status || 'Unattempted',
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          };
+          batch.set(
+            db.collection('users').doc(syncUid).collection('codes').doc(id),
+            codeDoc
+          );
+        }
+        // Write note for this ID if it exists. Kept independent of the code
+        // doc: notes must sync even on chapters with no code submission.
         if (notes[id] && notes[id].trim()) {
           batch.set(
             db.collection('users').doc(syncUid).collection('notes').doc(id),
@@ -4451,7 +4460,7 @@ function initSync() {
     for (var qid in quizResults) _dirtyQuizzes[qid] = true;
     window._isPushingLocally = true;
     updateSyncIndicator();
-    return pushChangedItems(Object.keys(submissions)).then(function() {
+    return pushChangedItems(Object.keys(submissions).concat(Object.keys(notes))).then(function() {
       _dirtySubmissions = {};
       _dirtyNotes = {};
       _dirtyQuizzes = {};
@@ -4658,7 +4667,7 @@ function initSync() {
   var bp = window.__APP_CONFIG__ && window.__APP_CONFIG__.mobileBreakpoint;
   if (bp && typeof bp === 'number') {
     var style = document.createElement('style');
-    style.textContent = '@media (max-width:' + bp + 'px){.console-resizer{display:none!important}#resizerCasesCase{display:none!important}#questionPane{width:100%!important;flex:1}#sidebarPane{position:fixed;top:56px;left:0;bottom:0;z-index:1040;width:320px!important;max-width:85vw;background:var(--bs-body-bg);border-right:1px solid var(--border-color);transform:translateX(-100%);transition:transform 0.25s ease;overflow-y:auto;box-shadow:4px 0 12px rgba(0,0,0,0.15)}#sidebarPane.sidebar-open{transform:translateX(0)}#sidebarPane .sidebar-close{display:flex!important}.sidebar-backdrop{display:none;position:fixed;inset:0;z-index:1039;background:rgba(0,0,0,0.4)}.sidebar-backdrop.show{display:block}#editorPane{position:fixed;top:56px;left:0;bottom:0;z-index:1040;width:100vw;background:var(--bs-body-bg);border-left:1px solid var(--border-color);transform:translateX(100%);transition:transform 0.25s ease;box-shadow:-4px 0 12px rgba(0,0,0,0.15);display:flex!important;flex-direction:column}#statusText{text-align:center}#editorPane.editor-open{transform:translateX(0)}#editorPane .editor-close{display:flex!important}.editor-backdrop{display:none;position:fixed;inset:0;z-index:1039;background:rgba(0,0,0,0.4)}.editor-backdrop.show{display:block}}';
+    style.textContent = '@media (max-width:' + bp + 'px){.console-resizer{display:none!important}#resizerCasesCase{display:none!important}#questionPane{width:100%!important;flex:1}#sidebarPane{position:fixed;top:56px;left:0;bottom:0;z-index:1040;width:320px!important;max-width:85vw;background:var(--bs-body-bg);border-right:1px solid var(--border-color);transform:translateX(-100%);transition:transform 0.25s ease;overflow-y:auto;box-shadow:4px 0 12px rgba(0,0,0,0.15)}#sidebarPane.sidebar-open{transform:translateX(0)}#sidebarPane .sidebar-close{display:flex!important}.sidebar-backdrop{display:none;position:fixed;inset:0;z-index:1039;background:rgba(0,0,0,0.4)}.sidebar-backdrop.show{display:block}#editorPane{position:fixed;top:56px;left:0;bottom:0;z-index:1040;width:100vw;background:var(--bs-body-bg);border-left:1px solid var(--border-color);transform:translateX(100%);transition:transform 0.25s ease;box-shadow:-4px 0 12px rgba(0,0,0,0.15);display:flex!important;flex-direction:column}#statusText{text-align:center}#editorPane.editor-open{transform:translateX(0)}#editorPane .editor-close{display:flex!important}.editor-backdrop{display:none;position:fixed;inset:0;z-index:1039;background:rgba(0,0,0,0.4)}.editor-backdrop.show{display:block}#readingPane{display:none!important}.center-tab.reading-merged{display:block}.reading-merged{display:block}}';
     document.head.appendChild(style);
   }
 })();

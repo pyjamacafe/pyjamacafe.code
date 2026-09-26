@@ -222,6 +222,14 @@ body.sidebar-collapsed #readingPane {
   min-width: 40%;
 }
 
+/* Reading layout: the reading pane is the right pane on desktop, so the
+   merged Reading tab/content in the center pane stay hidden. The single-pane
+   (mobile) media query below hides the right pane and reveals the tab. */
+.center-tab.reading-merged,
+.reading-merged {
+  display: none;
+}
+
 #editorPane.editor-collapsed {
   width: 0 !important;
   min-width: 0 !important;
@@ -757,18 +765,18 @@ body.sidebar-collapsed #readingPane {
   background-color: transparent;
 }
 
-/* Centered search bar in the navbar */
-.navbar-search {
-  width: 100%;
-  max-width: 420px;
-}
-
 .form-control:focus,
 .form-select:focus {
   background-color: var(--editor-bg);
   color: var(--editor-fg);
   border-color: var(--accent-color);
   box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--accent-color) 25%, transparent);
+}
+
+/* The search box changes only its border color when focused — no glow */
+#questionSearch:focus {
+  border-color: var(--accent-color);
+  box-shadow: none;
 }
 
 /* Question list */

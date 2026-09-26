@@ -1,12 +1,9 @@
 <nav class="navbar navbar-expand border-bottom px-3 py-2">
-  <div class="container-fluid d-flex align-items-center gap-2">
+  <div class="container-fluid d-flex justify-content-between">
     <a class="navbar-brand fw-bold d-flex align-items-center" href="/" id="homeLink">
       <img src="{{ "pc.png" | relURL }}" alt="Logo" height="28" class="me-2">
       <span id="typedTitle">{{ site.Title }}</span>
     </a>
-    <div class="flex-grow-1 d-flex justify-content-center">
-      <input type="text" id="questionSearch" class="form-control form-control-sm navbar-search" placeholder="Search..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-1p-ignore data-lpignore="true" data-form-type="other">
-    </div>
     <div class="d-flex gap-2 align-items-center">
       <button id="authLoginBtn" class="btn btn-sm btn-outline-primary d-none" data-bs-toggle="tooltip" title="Sign in"><i class="bi bi-person"></i> <span class="d-none d-sm-inline"> Sign in</span></button>
       <div id="authUserMenu" class="dropdown d-none">
