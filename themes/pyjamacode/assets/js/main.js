@@ -3972,20 +3972,27 @@ function setupAuth() {
   // One-time button listeners
   if (authLoginBtn) authLoginBtn.addEventListener('click', () => openAuthModal('signin'));
   if (authLogoutLink) authLogoutLink.addEventListener('click', () => {
-    localStorage.removeItem('pyjamacode-submissions');
-    localStorage.removeItem('pyjamacode-notes');
-    localStorage.removeItem('pyjamacode-bookmarks');
-    localStorage.removeItem('pyjamacode-quiz-results');
-    localStorage.removeItem('pyjamacode-free-used');
-    localStorage.removeItem('pyjamacode-tabs');
-    localStorage.removeItem('lastProblemUrl');
-    localStorage.removeItem('lastProblemTab');
-    localStorage.removeItem('pyjamacode-cloud-initialized');
-    localStorage.removeItem('pyjamacode-local-version');
-    localStorage.removeItem('pyjamacode-synced-version');
-    clearDirtyIds();
-    try { localStorage.removeItem('pyjamacode-session-id'); } catch (e) {}
-    signOut().finally(function() { location.reload(); });
+    // Flush pending notes/code to the cloud before clearing local storage so a
+    // quick "type then sign out" doesn't lose unsynced edits.
+    if (typeof saveCurrentNotes === 'function') saveCurrentNotes();
+    if (typeof saveCurrentCode === 'function') saveCurrentCode();
+    var flush = (typeof window.__cloudSyncNow === 'function') ? window.__cloudSyncNow() : Promise.resolve();
+    flush.finally(function() {
+      localStorage.removeItem('pyjamacode-submissions');
+      localStorage.removeItem('pyjamacode-notes');
+      localStorage.removeItem('pyjamacode-bookmarks');
+      localStorage.removeItem('pyjamacode-quiz-results');
+      localStorage.removeItem('pyjamacode-free-used');
+      localStorage.removeItem('pyjamacode-tabs');
+      localStorage.removeItem('lastProblemUrl');
+      localStorage.removeItem('lastProblemTab');
+      localStorage.removeItem('pyjamacode-cloud-initialized');
+      localStorage.removeItem('pyjamacode-local-version');
+      localStorage.removeItem('pyjamacode-synced-version');
+      clearDirtyIds();
+      try { localStorage.removeItem('pyjamacode-session-id'); } catch (e) {}
+      signOut().finally(function() { location.reload(); });
+    });
   });
   if (themeToggleDropdown) themeToggleDropdown.addEventListener('click', () => { toggleTheme(); });
   var resetDialog = document.getElementById('resetConfirmModal');
@@ -4607,7 +4614,7 @@ function initSync() {
   }
 
   function doSync() {
-    if (!syncUid) return;
+    if (!syncUid) return Promise.resolve();
     saveCurrentCode();
     saveCurrentNotes();
     var changedIds = Object.keys(_dirtySubmissions);
@@ -4616,7 +4623,7 @@ function initSync() {
     }
     window._isPushingLocally = true;
     updateSyncIndicator();
-    pushChangedItems(changedIds).then(function() {
+    return pushChangedItems(changedIds).then(function() {
       _dirtySubmissions = {};
       _dirtyNotes = {};
       _dirtyQuizzes = {};
@@ -4626,8 +4633,18 @@ function initSync() {
       window._isPushingLocally = false;
       updateSyncIndicator();
       setDirty(false);
-    }).catch(function() { window._isPushingLocally = false; updateSyncIndicator(); });
+    }).catch(function(err) {
+      console.error('Cloud sync failed:', err);
+      window._isPushingLocally = false;
+      updateSyncIndicator();
+    });
   }
+
+  // Expose the sync so sign-out can flush pending notes/code before the page
+  // unloads and wipes local storage (otherwise the push can be cancelled).
+  window.__cloudSyncNow = function() {
+    return doSync();
+  };
 
   document.addEventListener('keydown', function(e) {
     if ((e.ctrlKey || e.metaKey) && e.key === 's') {
