@@ -749,6 +749,12 @@ body.sidebar-collapsed #readingPane {
   background-color: transparent;
 }
 
+/* Centered search bar in the navbar */
+.navbar-search {
+  width: 100%;
+  max-width: 420px;
+}
+
 .form-control:focus,
 .form-select:focus {
   background-color: var(--editor-bg);
