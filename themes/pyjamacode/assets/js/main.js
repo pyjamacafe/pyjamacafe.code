@@ -1339,9 +1339,9 @@ function exportNotes() {
 }
 
 
-// Single-click PDF export of the notes. Renders the markdown exactly like the
-// reading/lecture content (light theme), rasterizes with html2canvas, and saves
-// a multi-page A4 PDF via jsPDF.
+// Single-click PDF export of the notes. Renders the markdown with a light,
+// print-friendly theme, rasterizes with html2canvas, and saves a multi-page
+// A4 PDF via jsPDF.
 function exportNotesPdf() {
   if (!activeQuestionId) return;
   const question = questions.find((q) => q.id === activeQuestionId);
@@ -1363,42 +1363,42 @@ function exportNotesPdf() {
   }
   if (!html) html = '<p>No notes yet.</p>';
 
-  // Read the light palette values (always defined on :root) so the export is
-  // rendered in the light theme regardless of the current app theme.
+  // Read the PDF export palette (always defined on :root) so the export is
+  // rendered light and print-friendly regardless of the app's dark theme.
   const cs = getComputedStyle(document.documentElement);
   const v = (name) => cs.getPropertyValue(name).trim();
-  const lightVars = {
-    '--bs-body-bg': v('--gh-light-canvas-default') || '#ffffff',
-    '--bs-body-color': v('--gh-light-fg-default') || '#1f2328',
-    '--bs-secondary-bg': v('--gh-light-canvas-subtle') || '#f6f8fa',
-    '--bs-secondary-color': v('--gh-light-fg-muted') || '#656d76',
-    '--bs-border-color': v('--gh-light-border-default') || '#d0d7de',
-    '--bs-primary': v('--gh-light-accent') || '#0969da',
-    '--bs-success': v('--gh-light-success') || '#1a7f37',
-    '--bs-warning': v('--gh-light-warning') || '#9a6700',
-    '--bs-danger': v('--gh-light-danger') || '#cf222e',
-    '--editor-bg': v('--gh-light-code-bg') || '#f6f8fa',
-    '--editor-fg': v('--gh-light-fg-default') || '#1f2328',
-    '--code-bg': v('--gh-light-code-bg') || '#f6f8fa',
-    '--border-color': v('--gh-light-border-default') || '#d0d7de',
-    '--accent-color': v('--gh-light-accent') || '#0969da',
-    '--accent-hover': v('--gh-light-accent-hover') || '#0550ae',
-    '--success-color': v('--gh-light-success') || '#1a7f37',
-    '--success-hover': v('--gh-light-success-hover') || '#136c2e',
-    '--warning-color': v('--gh-light-warning') || '#9a6700',
-    '--danger-color': v('--gh-light-danger') || '#cf222e',
-    '--btn-default-bg': v('--gh-light-btn-default-bg') || '#f6f8fa',
-    '--btn-default-border': v('--gh-light-btn-default-border') || 'rgba(31,35,40,0.15)',
-    '--btn-default-hover': v('--gh-light-btn-default-hover') || '#f3f4f6',
+  const pdfVars = {
+    '--bs-body-bg': v('--pdf-canvas-default') || '#ffffff',
+    '--bs-body-color': v('--pdf-fg-default') || '#1f2328',
+    '--bs-secondary-bg': v('--pdf-canvas-subtle') || '#f6f8fa',
+    '--bs-secondary-color': v('--pdf-fg-muted') || '#656d76',
+    '--bs-border-color': v('--pdf-border-default') || '#d0d7de',
+    '--bs-primary': v('--pdf-accent') || '#0969da',
+    '--bs-success': v('--pdf-success') || '#1a7f37',
+    '--bs-warning': v('--pdf-warning') || '#9a6700',
+    '--bs-danger': v('--pdf-danger') || '#cf222e',
+    '--editor-bg': v('--pdf-code-bg') || '#f6f8fa',
+    '--editor-fg': v('--pdf-fg-default') || '#1f2328',
+    '--code-bg': v('--pdf-code-bg') || '#f6f8fa',
+    '--border-color': v('--pdf-border-default') || '#d0d7de',
+    '--accent-color': v('--pdf-accent') || '#0969da',
+    '--accent-hover': v('--pdf-accent-hover') || '#0550ae',
+    '--success-color': v('--pdf-success') || '#1a7f37',
+    '--success-hover': v('--pdf-success-hover') || '#136c2e',
+    '--warning-color': v('--pdf-warning') || '#9a6700',
+    '--danger-color': v('--pdf-danger') || '#cf222e',
+    '--btn-default-bg': v('--pdf-btn-default-bg') || '#f6f8fa',
+    '--btn-default-border': v('--pdf-btn-default-border') || 'rgba(31,35,40,0.15)',
+    '--btn-default-hover': v('--pdf-btn-default-hover') || '#f3f4f6',
     '--active-item-bg': 'rgba(9, 105, 218, 0.1)',
   };
 
   const container = document.createElement('div');
   container.className = 'pdf-export-container question-content';
   container.id = 'pdfExportContainer';
-  // Scope the light palette to this container.
+  // Scope the PDF palette to this container.
   let vars = '';
-  for (const k in lightVars) vars += k + ':' + lightVars[k] + ';';
+  for (const k in pdfVars) vars += k + ':' + pdfVars[k] + ';';
   container.style.cssText += vars;
   container.innerHTML = html;
   enhanceCodeBlocks(container, { skipCaption: true });

@@ -1,26 +1,26 @@
 :root {
   --font-mono: 'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
 
-  /* GitHub light palette */
-  --gh-light-canvas-default: #ffffff;
-  --gh-light-canvas-subtle: #f6f8fa;
-  --gh-light-canvas-inset: #f6f8fa;
-  --gh-light-fg-default: #1f2328;
-  --gh-light-fg-muted: #656d76;
-  --gh-light-fg-subtle: #6e7781;
-  --gh-light-border-default: #d0d7de;
-  --gh-light-border-muted: #d8dee4;
-  --gh-light-accent: #0969da;
-  --gh-light-accent-hover: #0550ae;
-  --gh-light-success: #1a7f37;
-  --gh-light-success-hover: #136c2e;
-  --gh-light-warning: #9a6700;
-  --gh-light-danger: #cf222e;
-  --gh-light-info: #0969da;
-  --gh-light-code-bg: #f6f8fa;
-  --gh-light-btn-default-bg: #f6f8fa;
-  --gh-light-btn-default-border: rgba(31, 35, 40, 0.15);
-  --gh-light-btn-default-hover: #f3f4f6;
+  /* PDF export palette (light, print-friendly notes export) */
+  --pdf-canvas-default: #ffffff;
+  --pdf-canvas-subtle: #f6f8fa;
+  --pdf-canvas-inset: #f6f8fa;
+  --pdf-fg-default: #1f2328;
+  --pdf-fg-muted: #656d76;
+  --pdf-fg-subtle: #6e7781;
+  --pdf-border-default: #d0d7de;
+  --pdf-border-muted: #d8dee4;
+  --pdf-accent: #0969da;
+  --pdf-accent-hover: #0550ae;
+  --pdf-success: #1a7f37;
+  --pdf-success-hover: #136c2e;
+  --pdf-warning: #9a6700;
+  --pdf-danger: #cf222e;
+  --pdf-info: #0969da;
+  --pdf-code-bg: #f6f8fa;
+  --pdf-btn-default-bg: #f6f8fa;
+  --pdf-btn-default-border: rgba(31, 35, 40, 0.15);
+  --pdf-btn-default-hover: #f3f4f6;
 
   /* Xcode-inspired dark palette */
   --gh-dark-canvas-default: #000000;
