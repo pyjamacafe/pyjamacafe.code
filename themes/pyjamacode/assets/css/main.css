@@ -589,6 +589,8 @@ body.sidebar-collapsed #readingPane {
   padding: 0 1rem;
   display: flex;
   align-items: center;
+  /* Match the center-pane tab bar. */
+  background: var(--bs-secondary-bg);
   border-color: var(--border-color) !important;
 }
 
@@ -1434,7 +1436,7 @@ body.auth-modal-open .auth-modal-backdrop {
 
 /* GitHub-like CodeMirror themes */
 .cm-s-github-dark.CodeMirror {
-  background-color: #1f1f24;
+  background-color: var(--bs-body-bg);
   color: #e5e5e5;
 }
 
@@ -1465,7 +1467,7 @@ body.auth-modal-open .auth-modal-backdrop {
 .cm-s-github-dark .cm-strong { font-weight: 600; }
 .cm-s-github-dark .cm-em { font-style: italic; }
 .cm-s-github-dark .CodeMirror-gutters {
-  background-color: #1f1f24;
+  background-color: var(--bs-body-bg);
   border-right: 1px solid #38383e;
 }
 .cm-s-github-dark .CodeMirror-linenumber {
@@ -1600,11 +1602,6 @@ body.auth-modal-open .auth-modal-backdrop {
   background-color: transparent;
 }
 
-.terminal-input-line {
-  flex: 0 0 auto;
-  background-color: transparent;
-}
-
 .prompt {
   color: var(--ansi-2);
   font-family: var(--font-mono);
@@ -1612,20 +1609,9 @@ body.auth-modal-open .auth-modal-backdrop {
   user-select: none;
 }
 
-.terminal-input {
-  font-family: var(--font-mono);
-  font-size: 0.85rem;
-  color: var(--editor-fg);
-  background: transparent;
-  border: none;
-  outline: none;
-  padding: 0;
-  caret-color: var(--editor-fg);
-}
-
-.terminal-input::placeholder {
-  color: var(--bs-secondary-color);
-  font-style: italic;
+/* Prompt turns red when a Check command exits non-zero. */
+.prompt.prompt-fail {
+  color: var(--ansi-1);
 }
 
 /* Question content */

@@ -79,7 +79,6 @@ const resetBtn = document.getElementById('resetBtn');
 const resetAllBtn = document.getElementById('resetAllBtn');
 const fileTabs = document.getElementById('fileTabs');
 const clearConsoleBtn = document.getElementById('clearConsole');
-const terminalInput = document.getElementById('terminalInput');
 const bookmarkBtn = document.getElementById('bookmarkBtn');
 const sidebarPane = document.getElementById('sidebarPane');
 const editorPane = document.getElementById('editorPane');
@@ -462,35 +461,7 @@ function init() {
   initSidebarTabs();
   initBookmarkBtn();
   initProblemNav();
-  if (clearConsoleBtn) clearConsoleBtn.addEventListener('click', () => { consoleOutputEl.textContent = ''; if (terminalInput) terminalInput.value = ''; });
-  if (terminalInput) {
-    terminalInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        if (!checkFreeUse()) {
-          terminalInput.value = '';
-          terminalInput.placeholder = 'Sign in to use the terminal';
-          terminalInput.disabled = true;
-          setTimeout(() => { terminalInput.disabled = false; terminalInput.placeholder = 'type a command...'; }, 3000);
-          return;
-        }
-        const cmd = terminalInput.value.trim();
-        if (!cmd) return;
-        consoleOutputEl.textContent += '\n$ ' + cmd + '\n';
-        terminalInput.value = '';
-        terminalInput.disabled = true;
-        execCommand(cmd).then((res) => {
-          consoleOutputEl.textContent += (res.stdout || '') + (res.stderr || '') + (res.exitCode !== 0 ? '\nExit code: ' + res.exitCode : '');
-          consoleOutputEl.scrollTop = consoleOutputEl.scrollHeight;
-        }).catch((err) => {
-          consoleOutputEl.textContent += 'Error: ' + (err.message || 'Connection failed');
-          consoleOutputEl.scrollTop = consoleOutputEl.scrollHeight;
-        }).finally(() => {
-          terminalInput.disabled = false;
-          terminalInput.focus();
-        });
-      }
-    });
-  }
+  if (clearConsoleBtn) clearConsoleBtn.addEventListener('click', () => { consoleOutputEl.textContent = ''; });
   // Logo/title link — update href based on auth state and save auto-resume
   // Logo/title link — route based on auth state
   const homeLink = document.getElementById('homeLink');
@@ -2319,14 +2290,6 @@ const JUDGE_URL = window.__APP_CONFIG__ && window.__APP_CONFIG__.judgeUrl
     ? 'http://127.0.0.1:4000'
     : 'https://judge.code.pyjamacafe.com';
 
-function execCommand(cmd) {
-  return fetch(JUDGE_URL + '/api/exec', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ command: cmd })
-  }).then((r) => r.json());
-}
-
 // Reads the {{< run_check >}} command for a lesson, if any.
 function getRunCheckCommand(question) {
   if (!question) return '';
@@ -2357,12 +2320,15 @@ function submitCode() {
   const question = questions.find((q) => q.id === activeQuestionId);
   if (!question) return;
 
+  // The judge runs only the lesson's {{< run_check >}} command.
   const runCheckCommand = getRunCheckCommand(question);
+  if (!runCheckCommand) {
+    consoleOutputEl.textContent = 'No check command is defined for this lesson.';
+    return;
+  }
 
   saveCurrentCode();
-  consoleOutputEl.textContent = runCheckCommand
-    ? '$ ' + runCheckCommand + '\nRunning...\n'
-    : 'Running...\n';
+  consoleOutputEl.textContent = '$ ' + runCheckCommand + '\nRunning...\n';
 
   // Collect files from file tabs or fallback to single editor
   const files = [];
@@ -2381,30 +2347,17 @@ function submitCode() {
   fetch(JUDGE_URL + '/api/submit', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ files, language: question.language || 'c', command: runCheckCommand })
+    body: JSON.stringify({ files, command: runCheckCommand })
   })
   .then((r) => r.json())
   .then((res) => {
-    let status, outputHtml;
-    const custom = !!runCheckCommand;
-    const cmdLine = runCheckCommand ? '<span class="prompt">$</span> ' + escapeHtml(runCheckCommand) + '\n' : '';
-    if (custom) {
-      // Author-defined check: trust the command's exit code as pass/fail.
-      if (res.exitCode === 0) {
-        status = 'Accepted';
-        outputHtml = cmdLine + '<span class="text-pass">All test cases passed.</span>\n' + ansiToHtml(res.stdout || '') + '\n<small class="text-muted">Exit code: 0</small>';
-      } else {
-        status = 'Wrong Answer';
-        outputHtml = cmdLine + '<span class="text-fail">' + status + '</span>\n' + ansiToHtml(res.stderr || res.stdout || 'No output');
-      }
-    } else if (res.exitCode === 0) {
-      status = 'Accepted';
-      outputHtml = '<span class="text-pass">All test cases passed.</span>\n' + ansiToHtml(res.stdout || '') + '\n<small class="text-muted">Exit code: 0</small>';
-    } else {
-      const phase = res.phase || 'run';
-      status = phase === 'compile' ? 'Compilation Error' : 'Runtime Error';
-      outputHtml = '<span class="text-fail">' + status + '</span>\n' + ansiToHtml(res.stderr || res.stdout || 'No output');
-    }
+    // The run_check command's exit code decides pass/fail. The console shows
+    // only the command and its output; the prompt turns red on failure.
+    const ok = res.exitCode === 0;
+    const status = ok ? 'Accepted' : 'Wrong Answer';
+    const promptCls = ok ? 'prompt' : 'prompt prompt-fail';
+    const cmdLine = '<span class="' + promptCls + '">$</span> ' + escapeHtml(runCheckCommand) + '\n';
+    const outputHtml = cmdLine + ansiToHtml((res.stdout || '') + (res.stderr || ''));
 
     consoleOutputEl.innerHTML = outputHtml;
     consoleOutputEl.scrollTop = consoleOutputEl.scrollHeight;
@@ -2808,7 +2761,8 @@ function enhanceCodeBlocks(root, opts) {
     const title = codeEl.getAttribute('data-title') || pre.getAttribute('data-title') || lang;
     const note = codeEl.getAttribute('data-note') || pre.getAttribute('data-note') || '';
     const runCmd = pre.getAttribute('data-cmd') || '';
-    const canRun = pre.getAttribute('data-run') === '1' || !!runCmd;
+    // A snippet is runnable only when it defines the command to run.
+    const canRun = !!runCmd;
     const runFile = title && /\./.test(title) ? title : ('main.' + langId);
     const rawCode = codeEl.textContent || '';
 
@@ -2914,7 +2868,7 @@ function enhanceCodeBlocks(root, opts) {
         fetch(JUDGE_URL + '/api/submit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ files: [{ name: runFile, content: rawCode }], language: langId, command: runCmd }),
+          body: JSON.stringify({ files: [{ name: runFile, content: rawCode }], command: runCmd }),
         })
           .then((r) => r.json())
           .then((res) => {

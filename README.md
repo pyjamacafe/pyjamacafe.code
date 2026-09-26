@@ -1,6 +1,6 @@
 # PyjamaCode
 
-A Hugo-based coding platform for embedded-systems software and firmware education. Lessons are authored as Markdown files, and each chapter renders as an interactive platform with a course sidebar, a content pane (Lecture / Reading / Quiz / Challenge tabs), and — for coding chapters — a live editor with a terminal backed by a judge server.
+A Hugo-based coding platform for embedded-systems software and firmware education. Lessons are authored as Markdown files, and each chapter renders as an interactive platform with a course sidebar, a content pane (Lecture / Reading / Quiz / Challenge tabs), and — for coding chapters — a live editor backed by a judge server.
 
 Beyond the editor, the platform ships with learner features on top of Firebase:
 
@@ -71,7 +71,7 @@ coding-platform/
 │       ├── _default/
 │       │   ├── baseof.html
 │       │   ├── single.html         # reading-layout chapter
-│       │   ├── code.html           # code-layout chapter (editor + terminal)
+│       │   ├── code.html           # code-layout chapter (editor + console)
 │       │   ├── dashboard.html      # /dashboard/
 │       │   ├── list.html
 │       │   └── _markup/render-codeblock.html
@@ -153,7 +153,7 @@ Firebase auth + Firestore sync are enabled by adding a `[params.firebase]` block
   appId = '…'
 ```
 
-Without it, `auth.js` never initializes; the site still renders, but sign-in and cloud sync are unavailable (gated content stays blurred and the editor/terminal prompt for sign-in).
+Without it, `auth.js` never initializes; the site still renders, but sign-in and cloud sync are unavailable (gated content stays blurred and the editor prompts for sign-in).
 
 Other notable settings in this repo:
 
@@ -244,12 +244,12 @@ Each chapter is a Markdown file. Its URL path is derived from `content/courses/<
 
 Every chapter uses the **reading layout** by default (`_default/single.html`): a sidebar, the content pane with tabs, and a right-side **reading pane** (from `===READING===`). There is **no code editor**.
 
-To give a chapter a code editor + terminal, set `layout = "code"` in its front matter. It then renders via `_default/code.html` (the editor pane on the right) and, if the chapter has a `===READING===` section, a **Reading tab** is added between the Lecture and Quiz tabs.
+To give a chapter a code editor + console, set `layout = "code"` in its front matter. It then renders via `_default/code.html` (the editor pane on the right) and, if the chapter has a `===READING===` section, a **Reading tab** is added between the Lecture and Quiz tabs.
 
 | front matter                | layout           | right side            |
 |-----------------------------|------------------|-----------------------|
 | (none / `layout="reading"`) | reading          | reading pane          |
-| `layout="code"`             | code             | editor + terminal     |
+| `layout="code"`             | code             | editor + console      |
 
 On the reading layout, the merged Reading tab is hidden on desktop (the right reading pane shows instead); on mobile it becomes a tab.
 
@@ -261,7 +261,7 @@ date = '2026-01-01T00:00:00+05:30'
 draft = false
 title = 'A Lesson Title'
 difficulty = 'easy'          # easy | medium | hard
-language = 'c'               # c | cpp | python | assembly
+language = 'c'               # editor syntax mode (c, cpp, python, assembly, shell, …)
 topic_weight = 1             # orders topics (courses) within a group
 subtopic_weight = 1          # orders subtopics within a topic
 weight = 1                   # orders chapters within a subtopic
@@ -270,7 +270,7 @@ layout = "code"              # optional: code layout
 ```
 
 - `difficulty` controls the badge and tint on the Challenge tab.
-- `language` sets the editor mode / judge language for code chapters.
+- `language` sets the editor's syntax mode for code chapters (the judge does not use it — see [Check command](#check-command-run_check)).
 - Lower `topic_weight` / `subtopic_weight` / `weight` sort earlier (see [Ordering & weights](#ordering--weights)).
 
 > A default chapter archetype (`archetypes/problems.md`) still scaffolds `initial_code` and `[[test_cases]]` front matter from an older design. Those fields are currently **not used** by the platform — starter files come from `===CODE===` / `{{< starter >}}`, and checks come from `run_check` (see below).
@@ -372,21 +372,20 @@ Precedence in the editor: **`starter` shortcodes → `===CODE===`**. The `starte
 
 ## Runnable code snippets
 
-A code block in the lecture/reading content can be made **runnable** (a ▶ Run button in its title bar). Use braced attributes with a quoted `cmd`:
+A code block in the lecture/reading content can be made **runnable** (a ▶ Run button in its title bar) by giving it a `cmd`:
 
 ````markdown
-```bash {title="uname" run="1" cmd="uname -a"}
+```bash {title="uname" cmd="uname -a"}
 uname
 ```
 ````
 
-- `run="1"` adds the Run (and Reset) button. A `cmd` also implies runnable.
-- `cmd` is the shell command executed on the judge, with the snippet written to a file named by `title` in the working directory.
+- `cmd` is the shell command executed on the judge, with the snippet written to a file named by `title` in the working directory. A block without `cmd` is not runnable (it gets a **Copy** button instead).
 - The output appears in a collapsible drop-down below the block, with ANSI colors translated.
 - The block stays read-only; Reset clears the output.
 - When `title` has no extension, the snippet is written as `main.<lang>`.
 
-> Note the syntax: attributes must be inside braces `{ ... }` and values quoted, e.g. `{title="hello.c" run="1" cmd="gcc hello.c -o hello && ./hello"}`.
+> Note the syntax: attributes must be inside braces `{ ... }` and values quoted, e.g. `{title="hello.c" cmd="gcc hello.c -o hello && ./hello"}`.
 
 ## Code listings & content rendering
 
@@ -484,7 +483,7 @@ Progress is computed from synced submissions and quiz results.
 
 Auth is handled by Firebase (`assets/js/auth.js`): email/password and Google sign-in. The header shows **Sign in** when signed out and an avatar menu (Dashboard, sync status, Reset Profile, Sign out) when signed in.
 
-Signed-out visitors can open up to `freeViews` lessons per page session before the sign-in modal appears. Separately, running/checking code, the terminal, answering a quiz, or running a snippet allows **one free action** (persisted) and then prompts for sign-in. When the auth nudge is active (`disableAuthNudge` not `true`), the prompt can additionally persist as a "forced" state that re-appears after `nudgeDelay` if dismissed.
+Signed-out visitors can open up to `freeViews` lessons per page session before the sign-in modal appears. Separately, running/checking code, answering a quiz, or running a snippet allows **one free action** (persisted) and then prompts for sign-in. When the auth nudge is active (`disableAuthNudge` not `true`), the prompt can additionally persist as a "forced" state that re-appears after `nudgeDelay` if dismissed.
 
 **Reset Profile** deletes all local + cloud data for the account (guarded by a generated confirmation code) and signals other open sessions.
 
@@ -507,7 +506,7 @@ The platform is dark-only. There is no theme selector, no light mode, and no OS 
 
 ## Check command (`run_check`)
 
-For code chapters, the **Check** button normally uses the judge's built-in compile/run for the chapter's `language`. To fully control the check (test harness, diffs, etc.), add a `run_check` shortcode — the command runs on the judge with the student's files in the working directory, and its exit code decides pass/fail:
+The **Check** button runs the command a chapter defines with the `run_check` shortcode. The command runs on the judge with the student's files in the working directory, and its exit code decides pass/fail:
 
 ```markdown
 {{< run_check >}}
@@ -520,8 +519,9 @@ echo "10 20" | ./main | grep -qx "30"
 Or as a parameter: `{{< run_check cmd="make test" >}}`.
 
 - Exit code `0` → **Accepted**; otherwise → **Wrong Answer**.
+- **Required for Check**: the judge has no built-in compile/run, so a code chapter must define a `run_check` command. Without one, Check reports “No check command is defined for this lesson.”
 - Place it in the **Challenge** or **Lecture** section (the client reads the command from those sections); the first `run_check` found is used.
-- The command is not tied to a language config, so `language` can be anything when a `run_check` is present.
+- The command is not tied to `language`; `language` only sets the editor's syntax mode.
 
 ## Ordering & weights
 
@@ -534,7 +534,7 @@ Smaller numbers sort first. Defaults are `99` when a weight is missing.
 
 ## The judge server
 
-Run/Check and terminal commands are executed by a judge server. Point it to a local instance, or configure the URL in `hugo.toml`:
+Run/Check commands are executed by a judge server. Point it to a local instance, or configure the URL in `hugo.toml`:
 
 ```toml
 [params]
@@ -551,27 +551,19 @@ The judge exposes:
 
 | Endpoint | Body | Behavior |
 |----------|------|----------|
-| `POST /api/submit` | `{ files, language, command? }` | Writes the files to a temp dir. If `command` is given, runs `sh -c "<command>"`; otherwise uses the built-in compile/run flow for the language. |
-| `POST /api/exec` | `{ command }` | Runs `sh -c "<command>"` (powering the terminal). |
+| `POST /api/submit` | `{ files, command }` | Writes the files to a temp dir, then runs `sh -c "<command>"` with them in the working directory. Returns an error if `command` is empty. |
 | `GET /api/health` | – | Health check. |
 
-Built-in languages (used when no `command` is provided):
+The judge has **no built-in language support** — it only runs the command you give it (the chapter's `run_check` for Check, or a snippet's `cmd`). Multi-file builds (e.g. a `Makefile`) and any toolchain the command needs are entirely up to that command; the container ships `gcc`, `g++`, `python3`, `binutils`, and `make`.
 
-| `language` | Toolchain |
-|------------|-----------|
-| `c` | `gcc -std=c11` |
-| `cpp` | `g++ -std=c++17` |
-| `python` | `python3` |
-| `assembly` | `as` + `gcc` linker |
+The command is bounded by a 5-second timeout. The container (`server/Dockerfile` + `docker-compose.yml`) runs as a non-root user with dropped capabilities, a read-only root filesystem, and a size-limited `tmpfs` for `/tmp/judge`, and does not require network access.
 
-Each compile/run step is bounded by a 5-second timeout (10 seconds for `/api/exec`). The container (`server/Dockerfile` + `docker-compose.yml`) runs as a non-root user with dropped capabilities, a read-only root filesystem, and a size-limited `tmpfs` for `/tmp/judge`, and does not require network access.
-
-The front-end editor supports these CodeMirror modes: `c`, `cpp`, `python`, `assembly` (plus `text`/`plaintext`). Note that `cs`/`csharp` is display-only — the judge's built-in flow supports the four languages above.
+The front-end editor supports these CodeMirror modes: `c`, `cpp`, `python`, `assembly`, `shell`/`bash`, `makefile`, and `text` (among others).
 
 ## Theme & customization
 
 - `themes/pyjamacode/assets/css/main.css` — palette (dark theme, background, panes), layout, typography.
-- `themes/pyjamacode/assets/js/main.js` — platform logic: sidebar tree, tabs, editor, terminal, notes, judge calls, sync.
+- `themes/pyjamacode/assets/js/main.js` — platform logic: sidebar tree, tabs, editor, notes, judge calls, sync.
 - `themes/pyjamacode/assets/js/auth.js` — Firebase auth helpers.
 - `themes/pyjamacode/layouts/_partials/platform.html` — the platform pane markup (sidebar, content tabs, editor/reading pane).
 - `themes/pyjamacode/layouts/_partials/parse-sections.html` — the section-marker parser.
