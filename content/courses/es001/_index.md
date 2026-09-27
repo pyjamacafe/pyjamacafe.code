@@ -14,6 +14,8 @@ layout = "reading"
 
 An introductory course on Linux command-line and shell scripting. This is intended for total beginners and is meant to make you comfortable working with the shell/terminal.
 
+{{< start >}}
+
 # Includes
 - 3 hr 47 mins of recorded lectures.
 - 14 Lessons.

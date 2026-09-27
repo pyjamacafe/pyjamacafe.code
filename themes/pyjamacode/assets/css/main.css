@@ -397,6 +397,12 @@ body.sidebar-collapsed #readingPane {
   text-decoration: underline;
 }
 
+/* Start button shortcode: centered on its own row */
+.start-btn {
+  display: table;
+  margin: 0.5rem auto 0;
+}
+
 /* Instructor card shortcode */
 .instructor-card {
   margin: 1rem 0 1.5rem;
