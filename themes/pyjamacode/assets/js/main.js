@@ -2742,7 +2742,14 @@ function enhanceImages(root) {
     if (alt) {
       const cap = document.createElement('figcaption');
       cap.className = 'cb-figure-caption';
-      cap.textContent = 'Figure ' + figureCounter + '. ' + alt;
+      // Linkable caption like the code listings, so figures can be deep-linked.
+      const anchor = document.createElement('a');
+      anchor.className = 'cb-figure-link';
+      const slug = slugify(alt);
+      anchor.id = 'figure-' + figureCounter + (slug ? '-' + slug : '');
+      anchor.href = '#' + anchor.id;
+      anchor.textContent = 'Figure ' + figureCounter + '. ' + alt;
+      cap.appendChild(anchor);
       figure.appendChild(cap);
     }
     p.parentElement.replaceChild(figure, p);

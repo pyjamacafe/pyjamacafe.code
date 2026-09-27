@@ -439,7 +439,7 @@ Every fenced code block in the content panes is enhanced client-side:
 Other content niceties:
 
 - Heading anchors are auto-generated so sections are linkable.
-- Standalone images get a `Figure N. <alt text>` caption below (the alt text is the description), like the code listing captions.
+- Standalone images get a `Figure N. <alt text>` caption below (the alt text is the description); like the code listings, the caption is a linkable `#figure-N-…` anchor.
 - Images open in a zoom overlay when clicked.
 - Bare YouTube watch URLs in prose are auto-embedded as responsive players.
 
