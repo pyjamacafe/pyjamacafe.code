@@ -2073,8 +2073,11 @@ function selectQuestion(id) {
   // query parameter wins; otherwise prefer Lecture, then the first available tab.
   // In the reading layout on desktop the merged Reading tab is hidden (the
   // right reading pane shows instead), so it is not a valid default there.
+  // The merged Reading tab is hidden whenever the reading pane is visible:
+  // on desktop (right pane) and on phones (stacked below the center pane).
+  const bpMobile = (window.__APP_CONFIG__ && window.__APP_CONFIG__.mobileBreakpoint) || 800;
   const readingMergedHidden = !!document.getElementById('readingPane') &&
-    window.innerWidth > ((window.__APP_CONFIG__ && window.__APP_CONFIG__.mobileBreakpoint) || 800);
+    (window.innerWidth > bpMobile || window.innerWidth <= 767);
   const tabAvailable = (t) => t === 'explanation' ? hasArticle : t === 'reading' ? (hasReading && !readingMergedHidden) : t === 'quiz' ? hasQuiz : hasChallenge;
   const urlTab = new URL(window.location).searchParams.get('tab');
   let startTab = 'challenge';
@@ -4733,7 +4736,13 @@ function initSync() {
   var bp = window.__APP_CONFIG__ && window.__APP_CONFIG__.mobileBreakpoint;
   if (bp && typeof bp === 'number') {
     var style = document.createElement('style');
-    style.textContent = '@media (max-width:' + bp + 'px){.console-resizer{display:none!important}#resizerCasesCase{display:none!important}#questionPane{width:100%!important;flex:1}#sidebarPane{position:fixed;top:56px;left:0;bottom:0;z-index:1040;width:320px!important;max-width:85vw;background:var(--bs-body-bg);border-right:1px solid var(--border-color);transform:translateX(-100%);transition:transform 0.25s ease;overflow-y:auto;box-shadow:4px 0 12px rgba(0,0,0,0.15)}#sidebarPane.sidebar-open{transform:translateX(0)}#sidebarPane .sidebar-close{display:flex!important}.sidebar-backdrop{display:none;position:fixed;inset:0;z-index:1039;background:rgba(0,0,0,0.4)}.sidebar-backdrop.show{display:block}#editorPane{position:fixed;top:56px;left:0;bottom:0;z-index:1040;width:100vw;background:var(--bs-body-bg);border-left:1px solid var(--border-color);transform:translateX(100%);transition:transform 0.25s ease;box-shadow:-4px 0 12px rgba(0,0,0,0.15);display:flex!important;flex-direction:column}#statusText{text-align:center}#editorPane.editor-open{transform:translateX(0)}#editorPane .editor-close{display:flex!important}.editor-backdrop{display:none;position:fixed;inset:0;z-index:1039;background:rgba(0,0,0,0.4)}.editor-backdrop.show{display:block}#readingPane{display:none!important}.center-tab.reading-merged{display:block}.reading-merged{display:block}.notes-area{z-index:1030!important}.notes-widget{z-index:1032!important}}';
+    style.textContent =
+      '@media (max-width:' + bp + 'px){.console-resizer{display:none!important}#resizerCasesCase{display:none!important}#questionPane{width:100%!important;flex:1}#sidebarPane{position:fixed;top:56px;left:0;bottom:0;z-index:1040;width:320px!important;max-width:85vw;background:var(--bs-body-bg);border-right:1px solid var(--border-color);transform:translateX(-100%);transition:transform 0.25s ease;overflow-y:auto;box-shadow:4px 0 12px rgba(0,0,0,0.15)}#sidebarPane.sidebar-open{transform:translateX(0)}#sidebarPane .sidebar-close{display:flex!important}.sidebar-backdrop{display:none;position:fixed;inset:0;z-index:1039;background:rgba(0,0,0,0.4)}.sidebar-backdrop.show{display:block}#editorPane{position:fixed;top:56px;left:0;bottom:0;z-index:1040;width:100vw;background:var(--bs-body-bg);border-left:1px solid var(--border-color);transform:translateX(100%);transition:transform 0.25s ease;box-shadow:-4px 0 12px rgba(0,0,0,0.15);display:flex!important;flex-direction:column}#statusText{text-align:center}#editorPane.editor-open{transform:translateX(0)}#editorPane .editor-close{display:flex!important}.editor-backdrop{display:none;position:fixed;inset:0;z-index:1039;background:rgba(0,0,0,0.4)}.editor-backdrop.show{display:block}.notes-area{z-index:1030!important}.notes-widget{z-index:1032!important}}' +
+      // Tablet range: the right reading pane is hidden; reading merges into the center tabs.
+      '@media (min-width:768px) and (max-width:' + bp + 'px){#readingPane{display:none!important}.center-tab.reading-merged{display:block}.reading-merged{display:block}}' +
+      // Phones: stack the reading pane below the center pane so the user
+      // scrolls naturally — center content first, then reading.
+      '@media (max-width:767px){#questionPane{flex:none!important;height:auto!important}.question-pane-body{display:block;overflow:visible}#readingPane{min-width:auto!important;flex:none!important;height:auto!important}#readingPane .pane-body{overflow:visible}}';
     document.head.appendChild(style);
   }
 })();
