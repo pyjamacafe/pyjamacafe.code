@@ -123,7 +123,7 @@
   var LEAD_H = 26;          // short glow leading below the beam
   var BEAM_H = 2;           // half-thickness of the bright core line
 
-  var ACCENT = '107,158,255';
+  var ACCENT = '34,204,34';  // CRT phosphor green (matches --crt-green)
 
   // Static CRT texture (thin horizontal scanlines), painted once behind the beam.
   container.style.backgroundImage =
@@ -240,7 +240,7 @@
     // Bright core beam.
     var beam = ctx.createLinearGradient(0, y - BEAM_H, 0, y + BEAM_H);
     beam.addColorStop(0, 'rgba(' + ACCENT + ',0)');
-    beam.addColorStop(0.5, 'rgba(190,215,255,0.75)');
+    beam.addColorStop(0.5, 'rgba(190,240,190,0.75)');
     beam.addColorStop(1, 'rgba(' + ACCENT + ',0)');
     ctx.fillStyle = beam;
     ctx.fillRect(0, y - BEAM_H, W, BEAM_H * 2);
