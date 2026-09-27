@@ -454,7 +454,7 @@ function init() {
   if (questionContentEl && (!_q || !_q.isIntro)) selectQuestion(activeQuestionId);
   setNotesPreviewMode(true);
   initTypedTitle();
-  notesSavedHeight = notesArea ? notesArea.offsetHeight : 200;
+  notesSavedHeight = (notesArea && notesArea.offsetHeight) || 320;
   // Start with notes minimized
   setTimeout(() => minimizeNotes(), 50);
 
@@ -1185,8 +1185,8 @@ function initNotesResize() {
 
 function minimizeNotes() {
   hideTooltip(notesMinimizeBtn);
-  if (notesViewState === 'normal') {
-    notesSavedHeight = notesArea ? notesArea.offsetHeight : notesSavedHeight;
+  if (notesViewState === 'normal' && notesArea && notesArea.offsetHeight) {
+    notesSavedHeight = notesArea.offsetHeight;
   }
   notesViewState = 'minimized';
   if (questionPaneBody) questionPaneBody.classList.remove('notes-maximized');
@@ -1197,8 +1197,8 @@ function minimizeNotes() {
 
 function maximizeNotes() {
   hideTooltip(notesMaximizeBtn);
-  if (notesViewState === 'normal') {
-    notesSavedHeight = notesArea ? notesArea.offsetHeight : notesSavedHeight;
+  if (notesViewState === 'normal' && notesArea && notesArea.offsetHeight) {
+    notesSavedHeight = notesArea.offsetHeight;
   }
   notesViewState = 'maximized';
   if (questionPaneBody) questionPaneBody.classList.remove('notes-maximized');
@@ -1945,6 +1945,15 @@ function selectQuestion(id) {
   if (notesEditorPopulated && typeof saveCurrentCode === 'function' && activeQuestionId) saveCurrentCode();
   if (window._notesSaveTimer) { clearTimeout(window._notesSaveTimer); window._notesSaveTimer = null; }
   if (window._codeSaveTimer) { clearTimeout(window._codeSaveTimer); window._codeSaveTimer = null; }
+
+  // A chapter's layout (reading vs code) is fixed when the page loads, so moving
+  // to a chapter with a different layout needs a full navigation — an in-place
+  // swap would render it into the wrong shell (missing/empty editor, etc.).
+  const pageIsCode = !!hasEditor;
+  if (pageIsCode !== (question.code_layout === true)) {
+    window.location.href = question.permalink;
+    return;
+  }
 
   activeQuestionId = id;
 

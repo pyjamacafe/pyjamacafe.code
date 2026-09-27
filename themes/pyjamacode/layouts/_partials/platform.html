@@ -60,6 +60,7 @@
     "reading" ($readingMarkdown | .RenderString)
     "has_challenge" $sections.has_challenge
     "free_runs" (.Params.freeRuns | default false)
+    "code_layout" (eq .Params.layout "code")
     "test_cases" .Params.test_cases
     "topic" $topic
     "subtopic" $subtopic
@@ -132,7 +133,7 @@
 
       <div class="notes-resizer" id="resizerQuestionNotes" aria-label="Resize notes"></div>
 
-      <div class="notes-area" id="notesArea">
+      <div class="notes-area notes-hidden" id="notesArea">
         <div class="notes-header border-bottom d-flex align-items-center">
           <span class="d-flex align-items-center" style="flex-shrink:0">
             <button id="notesMinimizeBtn" class="btn btn-sm btn-outline-secondary notes-minmax-btn" data-bs-toggle="tooltip" title="Minimize notes"><span class="notes-minmax-icon">-</span></button>
