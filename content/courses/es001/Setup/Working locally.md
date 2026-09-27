@@ -11,7 +11,6 @@ layout="reading"
 freeRuns=true
 +++
 
-
 <!--explanation-->
 
 {{< vimeo id="1229095203" title="The web and local setup" >}}

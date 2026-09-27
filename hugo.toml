@@ -1,6 +1,6 @@
 baseURL = 'https://code.pyjamacafe.com'
 languageCode = 'en-us'
-title = 'PyjamaCafe'
+title = 'Beta.PyjamaCafe'
 theme = 'pyjamacode'
 
 [params]
