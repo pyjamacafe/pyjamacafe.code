@@ -2278,8 +2278,30 @@ footer {
   font-size: 0.8rem;
 }
 
+/* Custom radio: the ring and the checked dot are colored per state */
 .quiz-option input[type="radio"] {
-  accent-color: var(--accent-color);
+  appearance: none;
+  -webkit-appearance: none;
+  width: 1em;
+  height: 1em;
+  border: 2px solid var(--bs-body-color);
+  border-radius: 50%;
+  position: relative;
+  vertical-align: -0.125em;
+  background: transparent;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.quiz-option input[type="radio"]:checked::after {
+  content: '';
+  position: absolute;
+  inset: 0.16em;
+  border-radius: 50%;
+  background: var(--bs-body-color);
+}
+.quiz-option input[type="radio"]:focus-visible {
+  outline: 2px solid var(--bs-body-color);
+  outline-offset: 2px;
 }
 
 .quiz-option:hover {
@@ -2290,8 +2312,38 @@ footer {
   color: #fff;
 }
 
-.quiz-option:hover input[type="radio"] {
-  accent-color: var(--warning-color);
+/* Correct/wrong states: bold colored text and matching radio, no backgrounds */
+.quiz-option.quiz-option-correct,
+.quiz-option.quiz-option-correct:hover {
+  font-weight: 700;
+  color: var(--success-color);
+}
+.quiz-option.quiz-option-wrong,
+.quiz-option.quiz-option-wrong:hover {
+  font-weight: 700;
+  color: var(--danger-color);
+}
+.quiz-option.quiz-option-correct .option-letter,
+.quiz-option.quiz-option-correct:hover .option-letter,
+.quiz-option.quiz-option-wrong .option-letter,
+.quiz-option.quiz-option-wrong:hover .option-letter {
+  color: inherit;
+}
+.quiz-option.quiz-option-correct input[type="radio"],
+.quiz-option.quiz-option-correct:hover input[type="radio"] {
+  border-color: var(--success-color);
+}
+.quiz-option.quiz-option-correct input[type="radio"]:checked::after,
+.quiz-option.quiz-option-correct:hover input[type="radio"]:checked::after {
+  background: var(--success-color);
+}
+.quiz-option.quiz-option-wrong input[type="radio"],
+.quiz-option.quiz-option-wrong:hover input[type="radio"] {
+  border-color: var(--danger-color);
+}
+.quiz-option.quiz-option-wrong input[type="radio"]:checked::after,
+.quiz-option.quiz-option-wrong:hover input[type="radio"]:checked::after {
+  background: var(--danger-color);
 }
 
 .quiz-option .option-letter {
