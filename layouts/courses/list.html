@@ -35,7 +35,7 @@
   {{ $topic := .File.ContentBaseName }}
   {{ $item := dict
     "id" (printf "intro-%s" $topic)
-    "title" "Introduction"
+    "title" "Course Details"
     "difficulty" "easy"
     "language" "c"
     "permalink" .RelPermalink
@@ -128,7 +128,7 @@
       </span>
     </div>
     <div class="center-tabs" id="centerTabs">
-      <div class="center-tab active" id="tabIntro">Introduction</div>
+      <div class="center-tab active" id="tabIntro">Course Details</div>
     </div>
     <div class="question-pane-body" id="questionPaneBody">
       <div class="pane-body question-content overflow-auto p-3" id="questionContent">

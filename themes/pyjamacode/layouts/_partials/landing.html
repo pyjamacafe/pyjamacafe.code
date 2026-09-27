@@ -10,7 +10,7 @@
   {{ $topic := index (split (strings.TrimSuffix "/" .File.Dir) "/") 1 }}
   {{ $item := dict
     "id" (printf "intro-%s" $topic)
-    "title" "Introduction"
+    "title" "Course Details"
     "difficulty" "easy"
     "language" "c"
     "permalink" .RelPermalink
