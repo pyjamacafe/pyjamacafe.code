@@ -265,11 +265,13 @@ topic_weight = 1             # orders topics (courses) within a group
 subtopic_weight = 1          # orders subtopics within a topic
 weight = 1                   # orders chapters within a subtopic
 layout = "code"              # optional: code layout
+freeRuns = true              # optional: allow signed-out visitors 3 free code runs
 +++
 ```
 
 - `difficulty` controls the badge and tint on the Challenge tab.
 - `language` sets the editor's syntax mode for code chapters (the judge does not use it — see [Check command](#check-command-run_check)).
+- `freeRuns` (optional): when `true`, signed-out visitors may run code **three times** on the chapter (editor Check and runnable snippets combined) before the sign-in modal appears on every further attempt. The count is per chapter and resets on sign-in.
 - Lower `topic_weight` / `subtopic_weight` / `weight` sort earlier (see [Ordering & weights](#ordering--weights)).
 
 > A default chapter archetype (`archetypes/problems.md`) still scaffolds `initial_code` and `[[test_cases]]` front matter from an older design. Those fields are currently **not used** by the platform — starter files come from `<!--code-->` / `{{< starter >}}`, and checks come from `run_check` (see below).
@@ -526,7 +528,7 @@ Auth is handled by Firebase (`assets/js/auth.js`): email/password and Google sig
 
 Signed-out visitors can browse lessons freely — there is no free-view or free-use counting. Sign-in is required for:
 
-- **Running code** — the **Check** button and runnable snippets.
+- **Running code** — the **Check** button and runnable snippets (unless the chapter sets `freeRuns = true`, which allows three anonymous runs).
 - **Answering quizzes** — selecting a quiz answer.
 - **Gated content** — anything wrapped in `<!--gated-->` … `<!--/gated-->` (blurred with a "Sign in" overlay).
 

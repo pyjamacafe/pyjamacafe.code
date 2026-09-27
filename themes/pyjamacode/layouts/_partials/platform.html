@@ -59,6 +59,7 @@
     "quiz2" .RawContent
     "reading" ($readingMarkdown | .RenderString)
     "has_challenge" $sections.has_challenge
+    "free_runs" (.Params.freeRuns | default false)
     "test_cases" .Params.test_cases
     "topic" $topic
     "subtopic" $subtopic

@@ -121,6 +121,41 @@ function requireAuth() {
   return false;
 }
 
+// A chapter can opt in to a few anonymous runs via `freeRuns = true` in its
+// front matter. Each run — the editor's Check or a runnable snippet — counts,
+// and once the limit is reached every further attempt opens the sign-in modal.
+const FREE_RUNS_LIMIT = 3;
+
+function freeRunsKey(id) {
+  return 'pyjamacode-free-runs-' + id;
+}
+
+function freeRunsUsed(id) {
+  try { return parseInt(localStorage.getItem(freeRunsKey(id)) || '0', 10) || 0; } catch (e) { return 0; }
+}
+
+function requireAuthForRun() {
+  if (typeof isAuthenticated === 'function' && isAuthenticated()) return true;
+  const q = questions.find((x) => x.id === activeQuestionId);
+  if (q && q.free_runs === true) {
+    const used = freeRunsUsed(activeQuestionId);
+    if (used < FREE_RUNS_LIMIT) {
+      try { localStorage.setItem(freeRunsKey(activeQuestionId), String(used + 1)); } catch (e) {}
+      return true;
+    }
+  }
+  if (typeof openAuthModal === 'function') openAuthModal('signin');
+  return false;
+}
+
+function clearFreeRuns() {
+  try {
+    Object.keys(localStorage)
+      .filter((k) => k.indexOf('pyjamacode-free-runs-') === 0)
+      .forEach((k) => localStorage.removeItem(k));
+  } catch (e) {}
+}
+
 let codeMirror = null;
 let notesCodeMirror = null;
 let isSettingValue = false;
@@ -2262,7 +2297,7 @@ function getRunCheckCommand(question) {
 }
 
 function submitCode() {
-  if (!requireAuth()) {
+  if (!requireAuthForRun()) {
     consoleOutputEl.textContent = 'Sign in to run code.';
     return;
   }
@@ -2811,7 +2846,7 @@ function enhanceCodeBlocks(root, opts) {
       const resetBtn = titleBar._resetBtn;
 
       runBtn.addEventListener('click', () => {
-        if (!requireAuth()) {
+        if (!requireAuthForRun()) {
           outPanel.classList.remove('d-none', 'collapsed');
           outBody.innerHTML = '<span class="text-fail">Sign in to run code.</span>';
           return;
@@ -3963,6 +3998,7 @@ function setupAuth() {
       // Dismiss the prompt and release the content lock once signed in.
       if (typeof closeAuthModal === 'function') closeAuthModal();
       if (typeof hideNotesAuthPrompt === 'function') hideNotesAuthPrompt();
+      if (typeof clearFreeRuns === 'function') clearFreeRuns();
       localStorage.removeItem('authForced');
       localStorage.removeItem('pyjamacode-free-used');
 
