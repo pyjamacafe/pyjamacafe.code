@@ -159,7 +159,7 @@ Other notable settings in this repo:
 [markup.goldmark.renderer]
   unsafe = true                 # allow raw HTML in Markdown (used by <!--gated--> gates)
 [markup.goldmark.parser.attribute]
-  block = true                  # enable ```lang {title=… run=… cmd=…} attributes
+  block = true                  # enable ```lang {file=… caption=… run=… cmd=…} attributes
 [markup.highlight]
   noClasses = true              # highlighting is done client-side by highlight.js
 disableKinds = ['taxonomy', 'term']
@@ -294,7 +294,7 @@ A chapter's body is split into sections. Wrap each section in an opening and clo
 <!--/reading-->
 
 <!--code-->
-```c {title="main.c"}
+```c {file="main.c"}
 ...
 ```
 <!--/code-->
@@ -345,7 +345,7 @@ Blinking an LED is the "Hello, world" of embedded systems.
 
 <!--code-->
 
-```c {title="main.c"}
+```c {file="main.c"}
 #include <stdint.h>
 void gpio_set(int pin, int value);
 void delay_ms(int ms);
@@ -378,17 +378,17 @@ Correct: B
 
 The editor is populated with starter files. Two ways to declare them (code layout only):
 
-1. **`<!--code-->` fenced blocks** — each fenced block becomes one file; use the braced `title=` attribute for the filename:
+1. **`<!--code-->` fenced blocks** — each fenced block becomes one file; use the braced `file=` attribute for the filename:
 
 ````markdown
 <!--code-->
 
-```c {title="main.c"}
+```c {file="main.c"}
 #include <stdio.h>
 int main(void) { return 0; }
 ```
 
-```makefile {title="Makefile"}
+```makefile {file="Makefile"}
 all:
 	gcc main.c -o app
 ```
@@ -398,12 +398,12 @@ all:
 2. **`{{< starter >}}` shortcode** — repeat for multiple files:
 
 ```markdown
-{{< starter lang="c" title="main.c" >}}
+{{< starter lang="c" file="main.c" >}}
 #include <stdio.h>
 int main(void) { return 0; }
 {{< /starter >}}
 
-{{< starter lang="asm" title="main.S" >}}
+{{< starter lang="asm" file="main.S" >}}
 .init
 add x2, x1, x8
 {{< /starter >}}
@@ -416,25 +416,25 @@ Precedence in the editor: **`starter` shortcodes → `<!--code-->`**. The `start
 A code block in the lecture/reading content can be made **runnable** (a ▶ Run button in its title bar) by giving it a `cmd`:
 
 ````markdown
-```bash {title="uname" cmd="uname -a"}
+```bash {file="uname" cmd="uname -a"}
 uname
 ```
 ````
 
-- `cmd` is the shell command executed on the judge, with the snippet written to a file named by `title` in the working directory. A block without `cmd` is not runnable (it gets a **Copy** button instead).
+- `cmd` is the shell command executed on the judge, with the snippet written to a file named by `file` in the working directory. A block without `cmd` is not runnable (it gets a **Copy** button instead).
 - The output appears in a collapsible drop-down below the block, with ANSI colors translated.
 - The block stays read-only; Reset clears the output.
-- When `title` has no extension, the snippet is written as `main.<lang>`.
+- Without `file`, the snippet is written as `main.<lang>`.
 
-> Note the syntax: attributes must be inside braces `{ ... }` and values quoted, e.g. `{title="hello.c" cmd="gcc hello.c -o hello && ./hello"}`.
+> Note the syntax: attributes must be inside braces `{ ... }` and values quoted, e.g. `{file="hello.c" cmd="gcc hello.c -o hello && ./hello"}`.
 
 ## Code listings & content rendering
 
 Every fenced code block in the content panes is enhanced client-side:
 
-- A **title bar** shows the block's `title` (or its language). Non-runnable blocks get a **Copy** button; runnable blocks get **Run/Reset**.
+- A **title bar** shows the block's `file` (or its language). Non-runnable blocks get a **Copy** button; runnable blocks get **Run/Reset**.
 - Line numbers are rendered, and clicking a line highlights it.
-- Each block gets a caption (`Listing N.` plus an optional `note="…"` attribute) with a `#listing-N` anchor you can deep-link to.
+- Each block gets a caption (`Listing N.` plus the `caption="…"` attribute when present, or the block's `file` name) with a `#listing-N-…` anchor suffixed by the caption/filename slug, so you can deep-link and share it.
 
 Other content niceties:
 

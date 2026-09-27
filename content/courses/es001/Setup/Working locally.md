@@ -30,7 +30,7 @@ These are the links I hinted at in the lecture -
 # Setting up Docker locally
 
 After you install the docker desktop, ensure that it is part of the path variable and available on the terminal as a command, you should get an output like below when checking for the version.
-```bash
+```shell {caption="Checking docker version."}
 $ docker --version
 Docker version 29.7.2, build a7dcaa6
 ```
@@ -39,17 +39,17 @@ Docker version 29.7.2, build a7dcaa6
 
 These are the commands I used in the lecture to get the local setup going. The following command will pull the `sandbox` image and create the `lab` container on top of it.
 
-```shell
+```shell {caption="Creating a container using the sanbox image."}
 docker run -it --name lab pyjamcafe/sandbox
 ```
 
 If the `lab` container is not already running, use the following command to start it.
-```shell
+```shell {caption="Starting the container instance named lab."}
 docker start lab
 ```
 
 `attach` would enable us to connect to the container and use the shell available within it.
-```shell
+```shell {caption="Attaching to the running container."}
 docker attach lab
 ```
 
@@ -87,13 +87,13 @@ Explanation: Docker allows us to run a Linux based OS image (Kernel + Shell) whi
 # Live commands
 
 The `uname` command. Try executing it by hitting the `Run` button on the right in the titlebar of the snippet below.
-```bash {title="uname" run="1" cmd="uname"}
+```bash {caption="the uname command" file="uname" run="1" cmd="uname"}
 uname
 ```
 
 here is a sample C code
 
-```c {title="main.c" run="1" cmd="gcc main.c && ./a.out"}
+```c {caption="Sample C code" file="main.c" run="1" cmd="gcc main.c && ./a.out"}
 #include <stdio.h>
 
 void main () {

@@ -2810,6 +2810,10 @@ function embedYouTubeLinks(root) {
   });
 }
 
+function slugify(s) {
+  return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60);
+}
+
 function enhanceCodeBlocks(root, opts) {
   const skipCaption = opts && opts.skipCaption;
   if (!root) return;
@@ -2822,12 +2826,15 @@ function enhanceCodeBlocks(root, opts) {
     listingCounter++;
     const lang = extractLanguage(codeEl);
     const langId = extractLangId(codeEl) || 'c';
-    const title = codeEl.getAttribute('data-title') || pre.getAttribute('data-title') || lang;
-    const note = codeEl.getAttribute('data-note') || pre.getAttribute('data-note') || '';
+    const fileAttr = codeEl.getAttribute('data-file') || pre.getAttribute('data-file') || '';
+    const captionText = codeEl.getAttribute('data-caption') || pre.getAttribute('data-caption') || '';
     const runCmd = pre.getAttribute('data-cmd') || '';
     // A snippet is runnable only when it defines the command to run.
     const canRun = !!runCmd;
-    const runFile = title && /\./.test(title) ? title : ('main.' + langId);
+    // Titlebar text: the filename when given, otherwise the language name.
+    const titleText = fileAttr || lang;
+    // The actual filename written for the judge: `file` wins when given.
+    const runFile = fileAttr || ('main.' + langId);
     const rawCode = codeEl.textContent || '';
 
     // Apply highlight.js syntax highlighting
@@ -2853,14 +2860,17 @@ function enhanceCodeBlocks(root, opts) {
 
     const wrapper = document.createElement('div');
     wrapper.className = 'cb-wrapper';
-    const listingId = 'listing-' + listingCounter;
+    // Anchor suffix: the caption when present, else the filename, so listings
+    // with the same number on different pages still get distinct, shareable links.
+    const anchorSlug = slugify(captionText || fileAttr);
+    const listingId = 'listing-' + listingCounter + (anchorSlug ? '-' + anchorSlug : '');
 
     // Title bar
     const titleBar = document.createElement('div');
     titleBar.className = 'cb-titlebar';
     const titleSpan = document.createElement('span');
     titleSpan.className = 'cb-title';
-    titleSpan.textContent = title;
+    titleSpan.textContent = titleText;
     titleBar.appendChild(titleSpan);
     const actions = document.createElement('span');
     actions.className = 'cb-actions';
@@ -2955,8 +2965,9 @@ function enhanceCodeBlocks(root, opts) {
       });
     }
 
-    // Caption with anchor (outside wrapper)
-    const caption = (skipCaption ? '' : 'Listing ' + listingCounter + (note ? '. ' + note : '.'));
+    // Caption with anchor (outside wrapper): the caption text when present,
+    // otherwise the filename, so the listing label stays self-describing.
+    const caption = (skipCaption ? '' : 'Listing ' + listingCounter + (captionText ? '. ' + captionText : (fileAttr ? '. ' + fileAttr : '.')));
     pre.parentElement.replaceChild(wrapper, pre);
     if (caption) {
       const captionEl = document.createElement('div');
@@ -3631,7 +3642,7 @@ function collectCodeFiles(html) {
   div.querySelectorAll('pre').forEach((pre) => {
     const codeEl = pre.querySelector('code');
     if (!codeEl) return;
-    const raw = pre.getAttribute('data-title') || '';
+    const raw = pre.getAttribute('data-file') || '';
     const lang = extractLangId(codeEl);
     const filename = raw || 'untitled.' + (lang || 'c');
     const content = codeEl.textContent || '';
@@ -3654,7 +3665,7 @@ function buildFileTabs(question) {
     div.querySelectorAll('pre[data-starter]').forEach((pre) => {
       const codeEl = pre.querySelector('code');
       if (!codeEl) return;
-      const raw = pre.getAttribute('data-title') || '';
+      const raw = pre.getAttribute('data-file') || '';
       const lang = extractLangId(codeEl);
       const filename = raw || 'main.c';
       fileList.push({ filename: filename, lang: lang || 'c', mode: langToMode(lang || 'c'), content: codeEl.textContent || '' });
