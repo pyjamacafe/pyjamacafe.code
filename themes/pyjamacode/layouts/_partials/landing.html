@@ -81,13 +81,13 @@
   <div class="pane-resizer" id="resizerCasesCase" aria-label="Resize cases pane"></div>
 
   <!-- Center: Landing -->
-  <aside class="platform-pane question-pane" id="questionPane">
+  <aside class="platform-pane question-pane" id="questionPane" style="overflow:visible">
     <div id="scanlineBg" style="position:absolute;top:0;left:0;right:0;bottom:0;z-index:0;pointer-events:none;overflow:hidden"></div>
-    <div class="landing-content" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:transparent;overflow:hidden;padding:2rem;position:relative;z-index:1">
+    <div class="landing-content" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:transparent;overflow:hidden;padding:2rem;position:relative;z-index:1;pointer-events:none">
       <h1 style="font-size:2.5rem;font-weight:700;margin:0;color:var(--bs-body-color);text-align:center;max-width:720px;line-height:1.2">Mastering Embedded Systems!</h1>
       <p style="margin-top:0.5rem;font-size:1rem;font-weight:500;color:var(--bs-secondary-color);text-align:center;max-width:540px">Be the one who can reason about the machine in the age of AI.</p>
 
-      <button id="landingStartBtn" class="btn btn-primary crt-green" style="font-size:1rem;padding:0.5rem 2rem;margin-top:0.5rem">
+      <button id="landingStartBtn" class="btn btn-primary crt-green" style="font-size:1rem;padding:0.5rem 2rem;margin-top:0.5rem;pointer-events:auto">
         <i class="bi bi-play-fill"></i> Start the first course
       </button>
       <p style="margin-top:0.5rem;font-size:0.8rem;color:var(--bs-secondary-color)">Public Beta Version</p>
@@ -113,6 +113,49 @@
   var BEAM_H = 2;           // half-thickness of the bright core line
 
   var ACCENT = '34,204,34';  // CRT phosphor green (matches --crt-green)
+
+  // Binary glyphs: mildly glowing 0s and 1s scattered behind the beam.
+  var glyphSprites = null;
+  var glyphs = [];
+
+  function buildGlyphSprites() {
+    var out = [];
+    ['0', '1'].forEach(function(ch) {
+      var s = 40;
+      var c = document.createElement('canvas');
+      c.width = s;
+      c.height = s;
+      var g = c.getContext('2d');
+      g.font = '700 20px "JetBrains Mono", monospace';
+      g.textAlign = 'center';
+      g.textBaseline = 'middle';
+      g.shadowColor = 'rgba(51,255,51,0.85)';
+      g.shadowBlur = 9;
+      g.fillStyle = 'rgba(120,235,120,0.9)';
+      g.fillText(ch, s / 2, s / 2);
+      g.shadowBlur = 0;
+      g.fillStyle = 'rgba(190,255,190,0.95)';
+      g.fillText(ch, s / 2, s / 2);
+      out.push(c);
+    });
+    return out;
+  }
+
+  function seedGlyphs() {
+    if (!glyphSprites) glyphSprites = buildGlyphSprites();
+    glyphs = [];
+    var count = Math.max(40, Math.floor(W * H / 9000));
+    for (var i = 0; i < count; i++) {
+      glyphs.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        s: Math.floor(Math.random() * glyphSprites.length),
+        a: 0.10 + Math.random() * 0.22,          // base alpha (kept mild)
+        p: Math.random() * Math.PI * 2,          // twinkle phase
+        f: 0.0006 + Math.random() * 0.0016       // twinkle speed (rad/ms)
+      });
+    }
+  }
 
   // Static CRT texture (thin horizontal scanlines), painted once behind the beam.
   container.style.backgroundImage =
@@ -178,6 +221,7 @@
   }
 
   function init() {
+    syncExtents();
     W = container.clientWidth;
     H = container.clientHeight;
     if (W < 10 || H < 10) { setTimeout(init, 200); return; }
@@ -191,8 +235,9 @@
     ctx = canvas.getContext('2d');
 
     buildLayer();
+    seedGlyphs();
 
-    if (reduceMotion) { drawFrame(H * 0.3); return; }
+    if (reduceMotion) { drawFrame(H * 0.3, 0); return; }
     animId = requestAnimationFrame(animate);
   }
 
@@ -206,10 +251,40 @@
     canvas.height = H;
     canvas.style.width = W + 'px';
     canvas.style.height = H + 'px';
+    seedGlyphs();
   }
 
-  function drawFrame(y) {
+  // The canvas and the landing content stay horizontally inside the center
+  // pane, but span the full viewport height (over the header and statusbar).
+  // The content box is extended so its flex centering lands on the viewport
+  // midline.
+  function syncExtents() {
+    var pane = container.parentElement;
+    if (!pane) return;
+    var r = pane.getBoundingClientRect();
+    var top = -r.top;
+    var bottom = -Math.max(0, window.innerHeight - r.bottom);
+    container.style.top = top + 'px';
+    container.style.bottom = bottom + 'px';
+    if (content) {
+      content.style.marginTop = top + 'px';
+      content.style.marginBottom = bottom + 'px';
+    }
+  }
+
+  function drawFrame(y, t) {
     ctx.clearRect(0, 0, W, H);
+
+    // Mildly glowing binary glyphs (background layer)
+    if (glyphSprites && glyphs.length) {
+      for (var gi = 0; gi < glyphs.length; gi++) {
+        var gl = glyphs[gi];
+        var a = gl.a * (0.75 + 0.25 * Math.sin(t * gl.f + gl.p));
+        ctx.globalAlpha = a;
+        ctx.drawImage(glyphSprites[gl.s], gl.x - 20, gl.y - 20);
+      }
+      ctx.globalAlpha = 1;
+    }
 
     // Trailing glow above the beam.
     var trail = ctx.createLinearGradient(0, y - TRAIL_H, 0, y);
@@ -242,6 +317,7 @@
     last = now;
     if (dt > 100) dt = 100;   // clamp after tab switches
 
+    syncExtents();
     resize();
 
     progress += dt / SWEEP_MS;
@@ -249,7 +325,7 @@
 
     // Slight flicker so the beam feels alive.
     ctx.globalAlpha = 0.9 + 0.1 * Math.sin(now * 0.02);
-    drawFrame(progress * H);
+    drawFrame(progress * H, now);
     ctx.globalAlpha = 1;
 
     var beamY = container.getBoundingClientRect().top + progress * H;
@@ -259,6 +335,7 @@
   window.addEventListener('resize', function() {
     clearTimeout(window._slr);
     window._slr = setTimeout(function() {
+      syncExtents();
       if (canvas) resize();
       measure(true);
     }, 200);
