@@ -448,6 +448,7 @@ function init() {
   try { const qr = localStorage.getItem('pyjamacode-quiz-results'); if (qr) quizResults = JSON.parse(qr) || {}; } catch (e) {}
   initCodeMirror();
   initNotesCodeMirror();
+  if (!isAuthenticated()) expandFirstCourseForGuest();
   renderQuestionList();
   // Skip selectQuestion for intro questions (landing page content is already rendered)
   const _q = questions.find((q) => q.id === activeQuestionId);
@@ -492,6 +493,15 @@ function init() {
     }
     updateHomeHref();
     if (typeof onAuthChange !== 'undefined') onAuthChange(updateHomeHref);
+  }
+
+  // Landing page: open the first course's introduction page.
+  const landingStartBtn = document.getElementById('landingStartBtn');
+  if (landingStartBtn) {
+    landingStartBtn.addEventListener('click', () => {
+      const topic = firstTopicKey();
+      if (topic) window.location.href = '/courses/' + topic + '/';
+    });
   }
 
   // Resume button in dropdown — navigate to last saved problem + tab
@@ -1641,6 +1651,62 @@ function groupsForTopic(topic) {
     }
   });
   return out;
+}
+
+// The first course (topic) as it appears in the sidebar: ungrouped topics come
+// first (by topic_weight), then grouped ones (by group weight, then topic_weight).
+function firstTopicKey() {
+  const tree = buildQuestionTree();
+  const topicWeight = {};
+  questions.forEach((q) => {
+    const t = q.topic || '';
+    const tw = getWeight(q, 'topic_weight', 99);
+    if (topicWeight[t] === undefined || tw < topicWeight[t]) topicWeight[t] = tw;
+  });
+  const byWeight = (a, b) => (topicWeight[a] ?? 99) - (topicWeight[b] ?? 99);
+
+  const groupWeight = {};
+  const definedGroups = [];
+  courseGroups.forEach((g) => {
+    if (!g || !g.title) return;
+    if (!(g.title in groupWeight)) definedGroups.push(g.title);
+    if (g.weight === undefined || g.weight === null || groupWeight[g.title] === undefined) {
+      groupWeight[g.title] = (g.weight !== undefined && g.weight !== null) ? g.weight : 99;
+    }
+  });
+  const groupOrder = definedGroups.slice().sort((a, b) => (groupWeight[a] ?? 99) - (groupWeight[b] ?? 99));
+
+  const groupsMap = {};
+  const ungrouped = [];
+  Object.keys(tree).forEach((topic) => {
+    const gs = groupsForTopic(topic);
+    if (gs.length === 0) { ungrouped.push(topic); return; }
+    gs.forEach(({ title }) => {
+      if (!groupsMap[title]) groupsMap[title] = [];
+      if (groupsMap[title].indexOf(topic) === -1) groupsMap[title].push(topic);
+    });
+  });
+  ungrouped.sort(byWeight);
+  if (ungrouped.length) return ungrouped[0];
+  for (const g of groupOrder) {
+    if (groupsMap[g] && groupsMap[g].length) return groupsMap[g].slice().sort(byWeight)[0];
+  }
+  const topics = Object.keys(tree);
+  return topics.length ? topics[0] : null;
+}
+
+// Guests get the first course expanded (its topic and all its subtopics) so its
+// lessons are visible without any clicks.
+function expandFirstCourseForGuest() {
+  if (typeof isAuthenticated === 'function' && isAuthenticated()) return;
+  const topic = firstTopicKey();
+  if (!topic) return;
+  treeExpanded[topic] = true;
+  const subs = {};
+  questions.forEach((q) => { if (q.topic === topic && q.subtopic) subs[q.subtopic] = true; });
+  Object.keys(subs).forEach((s) => { treeExpanded[topic + '/' + s] = true; });
+  const gs = groupsForTopic(topic);
+  if (gs.length) { expandedGroup = gs[0].title; _groupsInitialized = true; }
 }
 
 function renderQuestionList(filter = '') {
@@ -3741,8 +3807,8 @@ const authLogoutLink = document.getElementById('authLogoutLink');
 const resetProfileLink = document.getElementById('resetProfileLink');
 
 function injectAuthModal() {
-  // Adopt an existing #authModal (the landing page renders one) or create it.
-  // Never create a second one — the tamper guard relies on a single element.
+  // Adopt an existing #authModal if one is already in the DOM, otherwise create
+  // it. Never create a second one — the tamper guard relies on a single element.
   let el = document.getElementById('authModal');
   if (!el) {
     el = document.createElement('div');
