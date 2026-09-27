@@ -2,7 +2,7 @@
   --font-mono: 'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
 
   /* Old-school CRT phosphor green (buttons + landing scanline) */
-  --crt-green: #22cc22;
+  --crt-green: #0f4a0f;
   --crt-green-hover: #2ee62e;
   --crt-green-active: #1aa51a;
   --crt-green-rgb: 34, 204, 34;
@@ -302,12 +302,6 @@ body.sidebar-collapsed #readingPane {
 .bi {
   color: var(--bs-body-color);
 }
-
-/* Icons inside buttons follow the button's text color (e.g. black on CRT-green) */
-.btn .bi {
-  color: inherit;
-}
-
 #bookmarkBtn .bi-bookmark-fill {
   color: var(--bs-danger);
 }
@@ -1969,13 +1963,18 @@ body.auth-modal-open .auth-modal-backdrop {
   font-weight: 500;
 }
 
-/* CRT-green buttons: green is the base color for all buttons on the site,
-   with black text/icons (old-school terminal look). */
-.btn-primary,
-.btn-outline-primary {
-  --bs-btn-color: #000;
+/* CRT-green buttons: only the sign-in actions and the landing start button
+   are green (old-school terminal look), with black text/icons. The landing
+   button uses a class (not just its id) so the scanline distortion clone,
+   which drops ids, renders green too. */
+.crt-green,
+#authActionBtn,
+#authLoginBtn,
+#notesAuthPromptSignin,
+.gated-overlay .btn-primary {
+  --bs-btn-color: #fff;
   --bs-btn-bg: var(--crt-green);
-  --bs-btn-border-color: var(--crt-green);
+  --bs-btn-border-color: var(--crt-green-hover);
   --bs-btn-hover-color: #000;
   --bs-btn-hover-bg: var(--crt-green-hover);
   --bs-btn-hover-border-color: var(--crt-green-hover);
@@ -1988,78 +1987,78 @@ body.auth-modal-open .auth-modal-backdrop {
   --bs-btn-focus-shadow-rgb: var(--crt-green-rgb);
 }
 
-#landingStartBtn {
+/* Icons inside the green buttons follow the black text color */
+.crt-green .bi,
+#authActionBtn .bi,
+#authLoginBtn .bi,
+#notesAuthPromptSignin .bi,
+.gated-overlay .btn-primary .bi {
+  color: inherit;
+}
+
+.crt-green {
   box-shadow: 0 0 14px rgba(var(--crt-green-rgb), 0.35);
 }
 
-#landingStartBtn:hover,
-#landingStartBtn:focus {
+.crt-green:hover,
+.crt-green:focus {
   box-shadow: 0 0 22px rgba(var(--crt-green-rgb), 0.55);
 }
 
 .btn-info {
-  background-color: var(--crt-green);
-  border: 1px solid var(--crt-green);
-  color: #000 !important;
+  background-color: var(--accent-color);
+  border: 1px solid var(--accent-color);
+  color: #ffffff !important;
 }
 
 .btn-info:hover,
 .btn-info:focus {
-  background-color: var(--crt-green-hover);
-  border-color: var(--crt-green-hover);
-  color: #000 !important;
+  background-color: var(--accent-hover);
+  border-color: var(--accent-hover);
+  color: #ffffff !important;
 }
 
 .btn-success {
-  background-color: var(--crt-green);
-  border: 1px solid var(--crt-green);
-  color: #000 !important;
+  background-color: var(--success-color);
+  border: 1px solid var(--success-color);
+  color: #ffffff !important;
 }
 
 .btn-success:hover,
 .btn-success:focus {
-  background-color: var(--crt-green-hover);
-  border-color: var(--crt-green-hover);
-  color: #000 !important;
+  background-color: var(--success-hover);
+  border-color: var(--success-hover);
+  color: #ffffff !important;
 }
 
 #notesMinimizeBtn, #notesMaximizeBtn, #notesRestoreBtn, #notesModeBtn, #exportMenuBtn {
-  background-color: var(--crt-green);
-  border: 1px solid var(--crt-green);
-  color: #000;
-  --bs-btn-focus-shadow-rgb: var(--crt-green-rgb);
+  background: none;
+  border: none;
 }
 #notesMinimizeBtn:hover, #notesMaximizeBtn:hover, #notesRestoreBtn:hover, #notesModeBtn:hover, #exportMenuBtn:hover {
-  background-color: var(--crt-green-hover);
-  border-color: var(--crt-green-hover);
-  color: #000;
+  background-color: var(--btn-default-hover);
 }
 
 .btn-outline-secondary {
-  background-color: var(--crt-green);
-  border: 1px solid var(--crt-green);
-  color: #000;
-  --bs-btn-focus-shadow-rgb: var(--crt-green-rgb);
+  background-color: var(--btn-default-bg);
+  border: 1px solid var(--btn-default-border);
+  color: var(--bs-body-color);
 }
 
 .btn-outline-secondary:hover,
 .btn-outline-secondary:focus {
-  background-color: var(--crt-green-hover);
-  border-color: var(--crt-green-hover);
-  color: #000;
+  background-color: var(--btn-default-hover);
+  border-color: var(--btn-default-border);
+  color: var(--bs-body-color);
 }
 
 #submitBtn, #resetBtn, #resetAllBtn {
-  background-color: var(--crt-green);
-  border: 1px solid var(--crt-green);
-  color: #000;
-  --bs-btn-focus-shadow-rgb: var(--crt-green-rgb);
+  background: none;
+  border: none;
 }
 
 #submitBtn:hover, #resetBtn:hover, #resetAllBtn:hover {
-  background-color: var(--crt-green-hover);
-  border-color: var(--crt-green-hover);
-  color: #000;
+  background-color: var(--btn-default-hover);
 }
 
 .btn-link {
