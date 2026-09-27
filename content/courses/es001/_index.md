@@ -20,15 +20,17 @@ An introductory course on Linux command-line and shell scripting. This is intend
 - Shell essentials for total beginners
 - Practical shell scripting examples
 
-<!--/explanation-->
-
-<!--reading-->
 # What you will learn?
 - Get comfortable working with the Linux/Unix shell and terminal.
 - Essential commands: navigation, files, searching, editors and compression.
 - Use the VI editor for basic editing.
 - Write shell scripts with variables, conditionals, loops and functions.
 - Use regular expressions and get an LLM to write scripts for you.
+<!--/explanation-->
+
+<!--reading-->
+# Instructor
+{{< instructor piyush >}}
 
 # What sets this apart?
 - Built for total beginners.
