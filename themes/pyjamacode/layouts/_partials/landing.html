@@ -93,7 +93,7 @@
     <div class="center-tabs" id="centerTabs">
       <div class="center-tab active">Home</div>
     </div>
-    <div id="circuitBg" style="position:absolute;top:78px;left:0;right:0;bottom:0;z-index:0;pointer-events:none;overflow:hidden"></div>
+    <div id="scanlineBg" style="position:absolute;top:78px;left:0;right:0;bottom:0;z-index:0;pointer-events:none;overflow:hidden"></div>
     <div class="landing-content" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:transparent;overflow:hidden;padding:2rem;position:relative;z-index:1">
       <h1 style="font-size:2.5rem;font-weight:700;margin:0;color:var(--bs-body-color);text-align:center;max-width:720px;line-height:1.2">Mastering Embedded Systems!</h1>
       <p style="margin-top:0.5rem;font-size:1rem;font-weight:500;color:var(--bs-secondary-color);text-align:center;max-width:540px">Learn to reason about the machine in the age of AI based development.</p>
@@ -109,13 +109,85 @@
 
 <script>
 (function() {
-  var container = document.getElementById('circuitBg');
+  var container = document.getElementById('scanlineBg');
   if (!container) return;
 
+  // Respect users who prefer reduced motion: show the static CRT texture only.
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   var W, H, ctx, canvas, animId;
-  var traces = [];
-  var particles = [];
-  var nodes = [];
+  var progress = 0;
+  var last = 0;
+
+  var SWEEP_MS = 7000;      // time for one top-to-bottom sweep
+  var TRAIL_H = 120;        // soft glow trailing above the beam
+  var LEAD_H = 26;          // short glow leading below the beam
+  var BEAM_H = 2;           // half-thickness of the bright core line
+
+  var ACCENT = '107,158,255';
+
+  // Static CRT texture (thin horizontal scanlines), painted once behind the beam.
+  container.style.backgroundImage =
+    'repeating-linear-gradient(to bottom,' +
+    'rgba(' + ACCENT + ',0.04) 0px, rgba(' + ACCENT + ',0.04) 1px,' +
+    'transparent 1px, transparent 3px)';
+
+  // A duplicate of the landing text, clipped to a moving horizontal band and
+  // nudged sideways, so the copy reads as a refractive distortion right where
+  // the beam passes.
+  var content = document.querySelector('.landing-content');
+  var layer = null;
+  var geom = null;          // cached content rect (viewport coords)
+  var BAND_H = 7;           // half-height of the distorted slice
+
+  function buildLayer() {
+    if (!content || reduceMotion) return;
+    layer = content.cloneNode(true);
+    layer.removeAttribute('id');
+    var ids = layer.querySelectorAll('[id]');
+    for (var i = 0; i < ids.length; i++) ids[i].removeAttribute('id');
+    layer.setAttribute('aria-hidden', 'true');
+    if ('inert' in layer) layer.inert = true;
+    var s = layer.style;
+    s.position = 'fixed';
+    s.margin = '0';
+    s.zIndex = '5';
+    s.pointerEvents = 'none';
+    s.background = 'transparent';
+    s.filter = 'blur(0.4px) brightness(1.12)';
+    s.willChange = 'transform, clip-path';
+    s.clipPath = 'inset(100% 0px 0px 0px)';   // hidden until the beam arrives
+    document.body.appendChild(layer);
+    measure(true);
+  }
+
+  function measure(force) {
+    if (!content) return;
+    var r = content.getBoundingClientRect();
+    if (!force && geom && geom.left === r.left && geom.top === r.top &&
+        geom.width === r.width && geom.height === r.height) return;
+    geom = { top: r.top, left: r.left, width: r.width, height: r.height };
+    if (layer) {
+      var s = layer.style;
+      s.left = geom.left + 'px';
+      s.top = geom.top + 'px';
+      s.width = geom.width + 'px';
+      s.height = geom.height + 'px';
+    }
+  }
+
+  function drawDistortion(beamViewportY, now) {
+    if (!layer || !content) return;
+    measure(false);
+    var rel = beamViewportY - geom.top;
+    var h = geom.height;
+    var top = Math.max(0, Math.min(h, rel - BAND_H));
+    var bottom = Math.max(0, Math.min(h, h - (rel + BAND_H)));
+    var s = layer.style;
+    s.clipPath = 'inset(' + top.toFixed(1) + 'px 0px ' + bottom.toFixed(1) + 'px 0px)';
+    var shift = Math.sin(rel * 0.25) * 3 + Math.sin(now * 0.03) * 1.2;
+    s.transform = 'translateX(' + shift.toFixed(2) + 'px)';
+  }
 
   function init() {
     W = container.clientWidth;
@@ -130,174 +202,81 @@
     container.appendChild(canvas);
     ctx = canvas.getContext('2d');
 
-    buildCircuit();
-    animate();
-  }
+    buildLayer();
 
-  function buildCircuit() {
-    traces = [];
-    nodes = [];
-    var spacing = 60;
-    var offsetX = 30, offsetY = 30;
-
-    // Build a grid of horizontal and vertical traces
-    for (var y = offsetY; y < H - 10; y += spacing) {
-      var x = offsetX;
-      while (x < W - 10) {
-        var segLen = 40 + Math.random() * 100;
-        var x2 = Math.min(x + segLen, W - 10);
-        traces.push({ x1: x, y1: y, x2: x2, y2: y });
-        x = x2 + 10 + Math.random() * 30;
-      }
-    }
-    for (var x = offsetX; x < W - 10; x += spacing) {
-      var y = offsetY;
-      while (y < H - 10) {
-        var segLen = 40 + Math.random() * 100;
-        var y2 = Math.min(y + segLen, H - 10);
-        traces.push({ x1: x, y1: y, x2: x, y2: y2 });
-        y = y2 + 10 + Math.random() * 30;
-      }
-    }
-
-    // Find junctions (nodes) where traces intersect or end
-    var nodeMap = {};
-    traces.forEach(function(t) {
-      var pts = [[t.x1, t.y1], [t.x2, t.y2]];
-      pts.forEach(function(p) {
-        var key = Math.round(p[0]) + ',' + Math.round(p[1]);
-        if (!nodeMap[key]) nodeMap[key] = { x: p[0], y: p[1], count: 0 };
-        nodeMap[key].count++;
-      });
-    });
-    for (var k in nodeMap) {
-      if (nodeMap[k].count > 1) nodes.push(nodeMap[k]);
-    }
-
-    // Create particles that travel along traces (KCL: bigger dots at junctions, smaller on branches)
-    for (var i = 0; i < 25; i++) {
-      var t = traces[Math.floor(Math.random() * traces.length)];
-      if (!t) continue;
-      var isJunction = nodes.some(function(n) {
-        return Math.abs(n.x - t.x1) < 2 && Math.abs(n.y - t.y1) < 2 ||
-               Math.abs(n.x - t.x2) < 2 && Math.abs(n.y - t.y2) < 2;
-      });
-      particles.push({
-        trace: t,
-        progress: Math.random(),
-        speed: 0.003 + Math.random() * 0.005,
-        size: isJunction ? (3 + Math.random() * 3) : (1.5 + Math.random() * 1.5),
-        phase: Math.random() * Math.PI * 2
-      });
-    }
-  }
-
-  function getPos(p) {
-    var t = p.trace;
-    return { x: t.x1 + (t.x2 - t.x1) * p.progress, y: t.y1 + (t.y2 - t.y1) * p.progress };
-  }
-
-  var time = 0;
-  function animate() {
+    if (reduceMotion) { drawFrame(H * 0.3); return; }
     animId = requestAnimationFrame(animate);
-    time++;
+  }
 
+  function resize() {
     var rect = container.getBoundingClientRect();
-    if (rect.width !== W || rect.height !== H) {
-      W = rect.width;
-      H = rect.height;
-      canvas.width = W;
-      canvas.height = H;
-      canvas.style.width = W + 'px';
-      canvas.style.height = H + 'px';
-    }
+    if (rect.width === W && rect.height === H) return;
+    if (rect.width < 10 || rect.height < 10) return;
+    W = rect.width;
+    H = rect.height;
+    canvas.width = W;
+    canvas.height = H;
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+  }
 
+  function drawFrame(y) {
     ctx.clearRect(0, 0, W, H);
 
-    var traceColor = 'rgba(107,158,255,';
-    var glowColor = 'rgba(130,180,255,';
+    // Trailing glow above the beam.
+    var trail = ctx.createLinearGradient(0, y - TRAIL_H, 0, y);
+    trail.addColorStop(0, 'rgba(' + ACCENT + ',0)');
+    trail.addColorStop(0.75, 'rgba(' + ACCENT + ',0.05)');
+    trail.addColorStop(1, 'rgba(' + ACCENT + ',0.14)');
+    ctx.fillStyle = trail;
+    ctx.fillRect(0, y - TRAIL_H, W, TRAIL_H);
 
-    // Draw traces
-    traces.forEach(function(t) {
-      ctx.beginPath();
-      ctx.moveTo(t.x1, t.y1);
-      ctx.lineTo(t.x2, t.y2);
-      ctx.strokeStyle = traceColor + '0.12)';
-      ctx.lineWidth = 1;
-      ctx.stroke();
-    });
+    // Short leading glow below the beam.
+    var lead = ctx.createLinearGradient(0, y, 0, y + LEAD_H);
+    lead.addColorStop(0, 'rgba(' + ACCENT + ',0.10)');
+    lead.addColorStop(1, 'rgba(' + ACCENT + ',0)');
+    ctx.fillStyle = lead;
+    ctx.fillRect(0, y, W, LEAD_H);
 
-    // Draw nodes (junctions)
-    nodes.forEach(function(n) {
-      ctx.beginPath();
-      ctx.arc(n.x, n.y, 2.5, 0, Math.PI * 2);
-      ctx.fillStyle = traceColor + '0.25)';
-      ctx.fill();
-    });
-
-    // Animate particles (KCL: current flowing through traces)
-    particles.forEach(function(p) {
-      p.progress += p.speed;
-      if (p.progress > 1) {
-        p.progress = 0;
-        p.trace = traces[Math.floor(Math.random() * traces.length)];
-        if (!p.trace) return;
-        // Recalculate size based on whether this is a main trace or branch
-        var isJunction = nodes.some(function(n) {
-          return Math.abs(n.x - p.trace.x1) < 2 && Math.abs(n.y - p.trace.y1) < 2 ||
-                 Math.abs(n.x - p.trace.x2) < 2 && Math.abs(n.y - p.trace.y2) < 2;
-        });
-        p.size = isJunction ? (2 + Math.random() * 3) : (1 + Math.random() * 2);
-      }
-
-      var pos = getPos(p);
-      var pulse = 0.6 + 0.4 * Math.sin(time * 0.04 + p.phase);
-      var alpha = pulse * 0.7 + 0.2;
-      var r = p.size * (0.8 + 0.4 * Math.sin(time * 0.05 + p.phase));
-
-      // Glow
-      var grad = ctx.createRadialGradient(pos.x, pos.y, 0, pos.x, pos.y, r * 4);
-      grad.addColorStop(0, glowColor + alpha + ')');
-      grad.addColorStop(0.3, glowColor + (alpha * 0.4) + ')');
-      grad.addColorStop(1, glowColor + '0)');
-      ctx.beginPath();
-      ctx.arc(pos.x, pos.y, r * 4, 0, Math.PI * 2);
-      ctx.fillStyle = grad;
-      ctx.fill();
-
-      // Core dot
-      ctx.beginPath();
-      ctx.arc(pos.x, pos.y, r * 0.6, 0, Math.PI * 2);
-      ctx.fillStyle = glowColor + alpha + ')';
-      ctx.fill();
-    });
+    // Bright core beam.
+    var beam = ctx.createLinearGradient(0, y - BEAM_H, 0, y + BEAM_H);
+    beam.addColorStop(0, 'rgba(' + ACCENT + ',0)');
+    beam.addColorStop(0.5, 'rgba(190,215,255,0.75)');
+    beam.addColorStop(1, 'rgba(' + ACCENT + ',0)');
+    ctx.fillStyle = beam;
+    ctx.fillRect(0, y - BEAM_H, W, BEAM_H * 2);
   }
 
-  // Start when ready
-  var ready = function() {
-    if (document.readyState === 'complete') init();
-    else setTimeout(ready, 100);
-  };
-  if (container.clientWidth > 10) init();
-  else setTimeout(ready, 300);
+  function animate(now) {
+    animId = requestAnimationFrame(animate);
+    if (!last) last = now;
+    var dt = now - last;
+    last = now;
+    if (dt > 100) dt = 100;   // clamp after tab switches
 
-  // Resize
+    resize();
+
+    progress += dt / SWEEP_MS;
+    if (progress >= 1) progress -= 1;
+
+    // Slight flicker so the beam feels alive.
+    ctx.globalAlpha = 0.9 + 0.1 * Math.sin(now * 0.02);
+    drawFrame(progress * H);
+    ctx.globalAlpha = 1;
+
+    var beamY = container.getBoundingClientRect().top + progress * H;
+    drawDistortion(beamY, now);
+  }
+
   window.addEventListener('resize', function() {
-    clearTimeout(window._cr);
-    window._cr = setTimeout(function() {
-      if (!canvas) { init(); return; }
-      var w2 = container.clientWidth;
-      var h2 = container.clientHeight;
-      if (w2 < 10 || h2 < 10) return;
-      W = w2;
-      H = h2;
-      canvas.width = W;
-      canvas.height = H;
-      canvas.style.width = W + 'px';
-      canvas.style.height = H + 'px';
-      // Regenerate traces and particles for the new size
-      buildCircuit();
-    }, 300);
+    clearTimeout(window._slr);
+    window._slr = setTimeout(function() {
+      if (canvas) resize();
+      measure(true);
+    }, 200);
   });
+
+  if (container.clientWidth > 10) init();
+  else setTimeout(init, 300);
 })();
 </script>
