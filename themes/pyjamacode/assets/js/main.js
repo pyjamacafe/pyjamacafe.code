@@ -2193,6 +2193,8 @@ function selectQuestion(id) {
   renderQuestionList(questionSearchEl ? questionSearchEl.value : '');
   try {
     let url = question.permalink;
+    // Keep the query string (e.g. ?tab=quiz) so shared tab links survive reload.
+    url += window.location.search;
     url += window.location.hash;
     history.replaceState(null, '', url);
     maybeSaveProblemUrl(url);
@@ -2531,7 +2533,20 @@ function renderQuiz() {
     quizContentEl.innerHTML = '<p class="text-muted">No quiz available for this lesson.</p>';
     return;
   }
-  const items = parseQuizData(quizRaw);
+  // With question tags the quiz is pre-rendered server-side into rich
+  // segments (prose + questions); otherwise fall back to the legacy line parser.
+  const segments = (question && question.quiz_segments && question.quiz_segments.length)
+    ? question.quiz_segments : null;
+  const items = segments
+    ? segments.filter((s) => s.t === 'question').map((s) => ({
+        question: s.title || '',
+        body: s.body || '',
+        options: (s.options || []).map((o, i) => ({ letter: o.letter || String.fromCharCode(65 + i), text: o.html || '' })),
+        correct: typeof s.correct === 'number' ? s.correct : -1,
+        explanation: s.explanation || '',
+        rich: true,
+      }))
+    : parseQuizData(quizRaw);
   if (items.length === 0) {
     quizContentEl.innerHTML = '<p class="text-muted">No quiz available for this lesson.</p>';
     return;
@@ -2539,34 +2554,59 @@ function renderQuiz() {
   const quizId = activeQuestionId || 'quiz-unknown';
   const savedResults = quizResults[quizId] || {};
 
+  const optionHtml = (item, opt, oi, qi) => {
+    const wasCorrect = savedResults[qi] === true;
+    const isSelected = wasCorrect && oi === item.correct;
+    const text = item.rich ? opt.text : escapeHtml(opt.text);
+    return `
+      <label class="quiz-option d-block py-1 px-2 mb-1${wasCorrect && isSelected ? ' quiz-option-correct' : ''}" data-qi="${qi}" data-oi="${oi}">
+        <input type="radio" name="quiz-${qi}" value="${oi}" class="me-2"
+          ${wasCorrect ? 'disabled' : ''}
+          ${wasCorrect && isSelected ? 'checked' : ''}>
+        <span class="option-letter">${opt.letter}.</span> ${text}
+      </label>`;
+  };
+
+  const questionHtml = (item, qi) => {
+    const wasCorrect = savedResults[qi] === true;
+    const title = item.rich ? item.question : escapeHtml(item.question);
+    const explanation = wasCorrect
+      ? '<span class="fw-semibold text-pass">&#10003; Correct!</span> ' + (item.rich ? item.explanation : escapeHtml(item.explanation))
+      : '';
+    return `
+      <div class="quiz-question mb-4" data-q="${qi}" data-solved="${wasCorrect ? 'true' : ''}">
+        <p class="fw-semibold mb-2">${title}</p>
+        ${item.rich && item.body ? `<div class="quiz-question-body mb-2">${item.body}</div>` : ''}
+        <div class="quiz-options">
+          ${item.options.map((opt, oi) => optionHtml(item, opt, oi, qi)).join('')}
+        </div>
+        <div class="quiz-feedback mt-1 small ${wasCorrect ? '' : 'd-none'}">${explanation}</div>
+      </div>`;
+  };
+
+  let qi = 0;
+  const contentHtml = segments
+    ? segments.map((seg) => seg.t === 'prose'
+        ? `<div class="quiz-prose mb-3">${seg.h}</div>`
+        : questionHtml(items[qi], qi++)).join('')
+    : items.map((item, i) => questionHtml(item, i)).join('');
+
   quizContentEl.innerHTML = `
     <div class="d-flex justify-content-between align-items-center mb-3">
       <span class="small text-muted">Quiz: ${escapeHtml(question.title)}</span>
       <button id="resetQuizBtn" class="btn btn-sm btn-outline-secondary">Reset Quiz</button>
     </div>
-    ${items.map((item, qi) => `
-      <div class="quiz-question mb-4" data-q="${qi}" data-solved="${savedResults[qi] === true ? 'true' : ''}">
-        <p class="fw-semibold mb-2">${escapeHtml(item.question)}</p>
-        <div class="quiz-options">
-          ${item.options.map((opt, oi) => {
-            const wasCorrect = savedResults[qi] === true;
-            const isSelected = savedResults[qi] === true && oi === item.correct;
-            return `
-              <label class="quiz-option d-block py-1 px-2 mb-1" data-qi="${qi}" data-oi="${oi}"
-                ${wasCorrect && isSelected ? 'style="border-color:var(--bs-success);background:var(--bs-success-bg-subtle)"' : ''}>
-                <input type="radio" name="quiz-${qi}" value="${oi}" class="me-2"
-                  ${wasCorrect ? 'disabled' : ''}
-                  ${wasCorrect && isSelected ? 'checked' : ''}>
-                <span class="option-letter">${opt.letter}.</span> ${escapeHtml(opt.text)}
-              </label>
-            `;
-          }).join('')}
-        </div>
-        <div class="quiz-feedback mt-1 small ${savedResults[qi] === true ? '' : 'd-none'}">
-          ${savedResults[qi] === true ? '<span class="fw-semibold text-pass">&#10003; Correct!</span> ' + escapeHtml(item.explanation) : ''}
-        </div>
-      </div>
-    `).join('')}`;
+    ${contentHtml}`;
+
+  // Rich quiz content gets the same enhancements as the reading panes
+  // (code block titlebars, figure captions, zoom, embedded videos).
+  if (segments) {
+    enhanceCodeBlocks(quizContentEl);
+    enhanceImages(quizContentEl);
+    initImageZoom(quizContentEl);
+    embedYouTubeLinks(quizContentEl);
+    initVimeoPlayers(quizContentEl);
+  }
 
   function saveQuizResults() {
     try { localStorage.setItem('pyjamacode-quiz-results', JSON.stringify(quizResults)); } catch (e) {}
@@ -2592,12 +2632,11 @@ function renderQuiz() {
 
       if (qDiv.dataset.solved === 'true') return;
 
-      allLabels.forEach((l) => { l.style.borderColor = ''; l.style.background = ''; });
+      allLabels.forEach((l) => { l.classList.remove('quiz-option-correct', 'quiz-option-wrong'); });
       feedback.classList.add('d-none');
 
       if (oi === item.correct) {
-        label.style.borderColor = 'var(--bs-success)';
-        label.style.background = 'var(--bs-success-bg-subtle)';
+        label.classList.add('quiz-option-correct');
         allLabels.forEach((l) => l.querySelector('input').disabled = true);
         qDiv.dataset.solved = 'true';
         if (!quizResults[quizId]) quizResults[quizId] = {};
@@ -2608,8 +2647,7 @@ function renderQuiz() {
         feedback.innerHTML = '<span class="fw-semibold">&#10003; Correct!</span> ' + escapeHtml(item.explanation);
         feedback.classList.remove('d-none');
       } else {
-        label.style.borderColor = 'var(--bs-danger)';
-        label.style.background = 'var(--bs-danger-bg-subtle)';
+        label.classList.add('quiz-option-wrong');
         const nudges = [
           'Not quite. Look at each option carefully — which one matches the definition we explored?',
           'Close, but not right. Compare the options against what you know about this concept.',

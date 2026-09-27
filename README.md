@@ -319,7 +319,7 @@ A chapter's body is split into sections. Wrap each section in an opening and clo
 
 The **legacy marker syntax** (`===CHALLENGE===`, `===EXPLANATION===`, `===READING===`, `===CODE===`, `===QUIZ===`) is still supported: each section runs from its marker to the next marker, and markers may appear in any order. It exists for courses not yet migrated.
 
-On load, the chapter defaults to the **Lecture** tab when one exists, otherwise Challenge. A `?tab=` query parameter (`challenge`, `explanation`, `reading`, `quiz`) overrides this, and the last-viewed tab per chapter is remembered.
+On load, the chapter defaults to the **Lecture** tab when one exists, otherwise Challenge. A `?tab=` query parameter (`challenge`, `explanation`, `reading`, `quiz`) overrides this, and the last-viewed tab per chapter is remembered. Tabs are deep-linkable and shareable: clicking a tab updates the URL, and a `?tab=` link survives a reload.
 
 Example:
 
@@ -364,6 +364,7 @@ int main(void) {
 
 Based on the lecture, answer the following.
 
+<!--question-->
 ## What is the GPIO pin used in the lecture?
 
 - [ ] 12
@@ -371,6 +372,7 @@ Based on the lecture, answer the following.
 - [ ] 14
 
 Correct: B
+<!--/question-->
 <!--/quiz-->
 ````
 
@@ -468,11 +470,16 @@ Requires `markup.goldmark.renderer.unsafe = true` (set in this repo). The gate i
 
 ## Quizzes
 
-The `<!--quiz-->` section holds questions. Each question starts with `## ` and lists options with `- [ ]` (wrong) / `- [x]` (correct), followed by `Correct:` and an `Explanation:`:
+The `<!--quiz-->` section holds the quiz content. It is **rendered as Markdown** (so images, videos, code blocks, and prose all work), and each question lives inside a `<!--question-->` … `<!--/question-->` block:
 
 ```markdown
 <!--quiz-->
 
+Based on the lecture, answer the following.
+
+![Terminal](/images/terminal.png)
+
+<!--question-->
 ## Which register does `jal` save the return address into?
 
 - [ ] t0
@@ -481,13 +488,21 @@ The `<!--quiz-->` section holds questions. Each question starts with `## ` and l
 
 Correct: B
 Explanation: `jal` stores the return address in the link register `ra`.
+<!--/question-->
 <!--/quiz-->
 ```
 
-- The correct answer can be marked either with `- [x]` or a `Correct: B` line.
+Inside a question block:
+
+- The first `## ` line is the question title; anything between it and the options is rendered question body (images, code, prose, …).
+- Options are `- [ ]` (wrong) / `- [x]` (correct) lines; `Correct: <letter>` overrides the `[x]` marker.
+- `Explanation:` starts the explanation — everything after it (multiple lines of Markdown) is shown when answered correctly.
+- Prose outside the question blocks renders around the questions in order.
+
 - Answering correctly locks the question and reveals the explanation; an incorrect answer shows a hint nudge so the learner can retry.
 - A **Reset Quiz** button clears the chapter's answers.
 - Results are stored per chapter and feed the dashboard progress meter.
+- Chapters still using the **legacy format** (bare `## ` questions with `- [ ]`/`- [x]` options, no `<!--question-->` tags) continue to work via the client-side line parser.
 
 ## Notes
 
