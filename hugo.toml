@@ -1,13 +1,13 @@
 baseURL = 'https://code.pyjamacafe.com'
 languageCode = 'en-us'
-title = 'Code.PyjamaCafe'
+title = 'PyjamaCafe'
 theme = 'pyjamacode'
 
 [params]
   author = 'Typobrahe Education LLP'
   description = 'A coding platform for embedded systems software and firmware development.'
   freeViews = 5
-  nudgeDelay = 5000
+  nudgeDelay = 60000
   judgeUrl = 'https://checker.pyjamacafe.com'
   mobileBreakpoint = 1279
   disableAuthNudge = true
@@ -42,4 +42,3 @@ disableKinds = ['taxonomy', 'term']
   home = ['HTML']
   section = ['HTML']
   page = ['HTML']
-
