@@ -39,7 +39,7 @@ The `shell` is a user level program that can help us talk to the kernel and get 
 
 Terminal is an interface to the shell. You can imagine that it exposes the shell program in a graphical interface on modern systems. As in the image below anything that we type of the `prompt` is fed to `bash` which is one of the shells.
 
-!["hello"](terminal.png)
+!["The terminal on Mac."](terminal.png)
 
 We will explore the history of terminal and shell as the course progresses. Just some good to know stuff :)
 <!--/reading-->

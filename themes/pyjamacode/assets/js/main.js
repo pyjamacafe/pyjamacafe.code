@@ -450,9 +450,20 @@ function init() {
   initNotesCodeMirror();
   if (!isAuthenticated()) expandFirstCourseForGuest();
   renderQuestionList();
-  // Skip selectQuestion for intro questions (landing page content is already rendered)
+  // Skip selectQuestion for intro questions (course landing page content is
+  // already rendered server-side); enhance it in place instead.
   const _q = questions.find((q) => q.id === activeQuestionId);
-  if (questionContentEl && (!_q || !_q.isIntro)) selectQuestion(activeQuestionId);
+  if (questionContentEl && (!_q || !_q.isIntro)) {
+    selectQuestion(activeQuestionId);
+  } else if (questionContentEl && _q && _q.isIntro) {
+    enhanceImages(questionContentEl);
+    initImageZoom(questionContentEl);
+    const readingEl = document.getElementById('readingContent');
+    if (readingEl) {
+      enhanceImages(readingEl);
+      initImageZoom(readingEl);
+    }
+  }
   setNotesPreviewMode(true);
   initTypedTitle();
   notesSavedHeight = (notesArea && notesArea.offsetHeight) || 320;
@@ -2081,6 +2092,7 @@ function selectQuestion(id) {
   questionContentEl.querySelectorAll('pre[data-starter], [data-run-check]').forEach((el) => el.remove());
   applyAuthGates(questionContentEl);
   enhanceCodeBlocks(questionContentEl);
+  enhanceImages(questionContentEl);
   initImageZoom(questionContentEl);
   embedYouTubeLinks(questionContentEl);
   initVimeoPlayers(questionContentEl);
@@ -2090,6 +2102,7 @@ function selectQuestion(id) {
     articleContentEl.querySelectorAll('pre[data-starter], [data-run-check]').forEach((el) => el.remove());
     applyAuthGates(articleContentEl);
     enhanceCodeBlocks(articleContentEl);
+    enhanceImages(articleContentEl);
     initImageZoom(articleContentEl);
     embedYouTubeLinks(articleContentEl);
     initVimeoPlayers(articleContentEl);
@@ -2104,6 +2117,7 @@ function selectQuestion(id) {
     el.querySelectorAll('pre[data-starter], [data-run-check]').forEach((n) => n.remove());
     applyAuthGates(el);
     enhanceCodeBlocks(el);
+    enhanceImages(el);
     initImageZoom(el);
     embedYouTubeLinks(el);
     initVimeoPlayers(el);
@@ -2699,6 +2713,40 @@ function initTypedTitle() {
     typedEl.textContent = title;
     typedEl.innerHTML = title + '<span class="typed-cursor typed-cursor--blink" aria-hidden="true">_</span>';
   }
+}
+
+function enhanceImages(root) {
+  if (!root) return;
+  let figureCounter = 0;
+  root.querySelectorAll('p > img').forEach((img) => {
+    const p = img.parentElement;
+    // Only standalone images (the <p> contains nothing else).
+    if (p.children.length !== 1) return;
+
+    figureCounter++;
+    let alt = (img.alt || '').trim();
+    // The alt text is the description; drop surrounding quotes when the
+    // author wrapped the whole description in them.
+    const quotePairs = [['\u201C', '\u201D'], ['\u2018', '\u2019'], ['"', '"'], ["'", "'"]];
+    for (let i = 0; i < quotePairs.length; i++) {
+      const open = quotePairs[i][0], close = quotePairs[i][1];
+      if (alt.length > 1 && alt.charAt(0) === open && alt.charAt(alt.length - 1) === close) {
+        alt = alt.slice(1, -1).trim();
+        break;
+      }
+    }
+
+    const figure = document.createElement('figure');
+    figure.className = 'cb-figure';
+    figure.appendChild(img);
+    if (alt) {
+      const cap = document.createElement('figcaption');
+      cap.className = 'cb-figure-caption';
+      cap.textContent = 'Figure ' + figureCounter + '. ' + alt;
+      figure.appendChild(cap);
+    }
+    p.parentElement.replaceChild(figure, p);
+  });
 }
 
 function initImageZoom(root) {
