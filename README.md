@@ -32,7 +32,7 @@ Beyond the editor, the platform ships with learner features on top of Firebase:
 - [Bookmarks & search](#bookmarks--search)
 - [Dashboard & progress](#dashboard--progress)
 - [Keyboard shortcuts](#keyboard-shortcuts)
-- [Accounts, free views & gating](#accounts-free-views--gating)
+- [Accounts & gating](#accounts--gating)
 - [Cloud sync & sessions](#cloud-sync--sessions)
 - [Theme](#theme)
 - [Check command (`run_check`)](#check-command-run_check)
@@ -133,10 +133,8 @@ Open `http://localhost:1313/`.
 | `params.author` | – | Copyright holder shown in the footer. |
 | `params.description` | – | Default meta/OG description. |
 | `params.judgeUrl` | `null` | Base URL of the judge. If unset, the client falls back to `http://127.0.0.1:4000` on localhost and `https://judge.code.pyjamacafe.com` elsewhere. |
-| `params.freeViews` | `3` | Lesson opens before the sign-in modal appears for signed-out visitors. |
-| `params.nudgeDelay` | `10000` | Milliseconds before the auth prompt re-appears after dismissal. |
-| `params.disableAuthNudge` | `false` | Disables the persisted "forced auth" state and the re-prompt timer (the one-time free-action gate still applies). |
 | `params.maxSessions` | `1` | Concurrent signed-in sessions allowed per account (`0` = unlimited). |
+| `params.allowAuthModalClose` | `false` | Allow the sign-in modal to be dismissed (close button + backdrop click). When `false` it stays on screen until sign-in. |
 | `params.mobileBreakpoint` | `800` | Viewport width (px) below which panes become mobile overlays. |
 | `params.og_image` | `og.png` | Fallback Open Graph image. |
 | `params.firebase.*` | – | Firebase web config (see below). |
@@ -159,7 +157,7 @@ Other notable settings in this repo:
 
 ```toml
 [markup.goldmark.renderer]
-  unsafe = true                 # allow raw HTML in Markdown (used by <!--auth--> gates)
+  unsafe = true                 # allow raw HTML in Markdown (used by <!--gated--> gates)
 [markup.goldmark.parser.attribute]
   block = true                  # enable ```lang {title=… run=… cmd=…} attributes
 [markup.highlight]
@@ -447,9 +445,9 @@ Other content niceties:
 Wrap content in HTML comments to blur it for signed-out visitors, with a sign-in overlay:
 
 ```markdown
-<!--auth-->
+<!--gated-->
 This paragraph is only readable after signing in.
-<!--/auth-->
+<!--/gated-->
 ```
 
 Requires `markup.goldmark.renderer.unsafe = true` (set in this repo). The gate is re-evaluated on every auth state change.
@@ -496,6 +494,7 @@ Each chapter has a per-chapter notes pane (docked at the bottom of the center pa
 - **Minimize / maximize / restore**, plus a draggable, resizable **floating** notes window when minimized.
 - **Export** notes as Markdown (`.md`) or PDF.
 - Notes are stored locally and synced to the cloud when signed in.
+- Signed-out visitors who finish editing notes get a dismissable prompt to sign in so the notes are saved online; the local notes are always kept.
 
 ## Bookmarks & search
 
@@ -521,11 +520,17 @@ Progress is computed from synced submissions and quiz results.
 | `Ctrl`/`Cmd` + `S` | Save the current chapter's code and notes, then sync to the cloud. |
 | `Esc` | Leave notes preview mode (returns to editing). |
 
-## Accounts, free views & gating
+## Accounts & gating
 
 Auth is handled by Firebase (`assets/js/auth.js`): email/password and Google sign-in. The header shows **Sign in** when signed out and an avatar menu (Dashboard, sync status, Reset Profile, Sign out) when signed in.
 
-Signed-out visitors can open up to `freeViews` lessons per page session before the sign-in modal appears. Separately, running/checking code, answering a quiz, or running a snippet allows **one free action** (persisted) and then prompts for sign-in. When the auth nudge is active (`disableAuthNudge` not `true`), the prompt can additionally persist as a "forced" state that re-appears after `nudgeDelay` if dismissed.
+Signed-out visitors can browse lessons freely — there is no free-view or free-use counting. Sign-in is required for:
+
+- **Running code** — the **Check** button and runnable snippets.
+- **Answering quizzes** — selecting a quiz answer.
+- **Gated content** — anything wrapped in `<!--gated-->` … `<!--/gated-->` (blurred with a "Sign in" overlay).
+
+These open the sign-in modal via `openAuthModal`. It stays on screen until sign-in unless `allowAuthModalClose = true`, in which case it shows a close button and can be dismissed by clicking the backdrop.
 
 **Reset Profile** deletes all local + cloud data for the account (guarded by a generated confirmation code) and signals other open sessions.
 

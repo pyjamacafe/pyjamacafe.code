@@ -94,7 +94,7 @@ C introduced structured programming constructs — functions, loops, and conditi
 {{< youtube id="de2Hsvxaf8M" title="Origins of the C Programming Language — from Bell Labs to Modern Systems" >}}
 
 # Computers in 1970s
-<!--auth-->
+<!--gated-->
 The key to understanding C is learning to think like an engineer from the 1970s — someone who understood the hardware at a deep level and could look at code and infer what the CPU would do at each step. Figure 1 shows this worldview: storage has code and data that the CPU can access via address and data buses. Following instructions and manipulating stored data, the CPU performs calculations and influences the external world. This mental model is the foundation for everything that follows in embedded systems programming.
 
 <figure id="fig-1" class="fig-center">
@@ -111,7 +111,7 @@ C's influence extends far beyond its own ecosystem. Modern programming languages
 Every modern embedded device is a direct descendant of these inventions. Your car contains 50–100 microcontrollers (ECUs) managing everything from engine timing to window motors. The Fitbit on your wrist runs an ARM Cortex-M processor — descendents of the 1985 Acorn RISC Machine. The Intel 4004's 2,300 transistors have become the 16 billion transistors in an Apple M3 Ultra — a ratio of nearly 7 million to one. The critical path: transistors → ICs → microprocessors → microcontrollers → systems-on-chip (SoCs).
 
 C remains an integral part of our technological landscape. Its versatility, performance, and widespread usage across various industries continue to make it a foundational language for software development, powering the technology that shapes our everyday experiences.
-<!--/auth-->
+<!--/gated-->
 
 ===QUIZ===
 

@@ -210,3 +210,9 @@
 <!-- Floating notes widget (shown when the notes window is minimized) -->
 <button id="notesWidget" class="notes-widget" type="button" title="Open notes"><i class="bi bi-sticky-fill"></i> <span class="notes-widget-label">Notes</span></button>
 
+<!-- Guest notes prompt: nudges signed-out users to save their notes online -->
+<div id="notesAuthPrompt" class="notes-auth-prompt" role="status" aria-live="polite">
+  <button id="notesAuthPromptClose" class="notes-auth-prompt-close" aria-label="Close">&times;</button>
+  <p class="notes-auth-prompt-text">Sign in to save your notes online for free. Local notes won't be syned across sessions.</p>
+  <button id="notesAuthPromptSignin" class="btn btn-sm btn-primary">Sign in</button>
+</div>

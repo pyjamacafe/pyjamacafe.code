@@ -112,25 +112,13 @@ let notes = {};
 let bookmarks = {};
 let unsavedFiles = {};
 let quizResults = {};
-let _freeUsed = (function() { try { return localStorage.getItem('pyjamacode-free-used') === 'true'; } catch(e) { return false; } })();
 
-function persistFreeUsed() {
-  try { localStorage.setItem('pyjamacode-free-used', 'true'); } catch(e) {}
-}
-
-function checkFreeUse() {
-  if (typeof isAuthenticated !== 'function' || isAuthenticated()) return true;
-  if (!_freeUsed) {
-    _freeUsed = true;
-    persistFreeUsed();
-    return true;
-  }
+// Anonymous visitors can browse freely. Running code and gated content require
+// an account, so those actions open the sign-in modal instead.
+function requireAuth() {
+  if (typeof isAuthenticated === 'function' && isAuthenticated()) return true;
   if (typeof openAuthModal === 'function') openAuthModal('signin');
   return false;
-}
-
-function authNudgeEnabled() {
-  return !(window.__APP_CONFIG__ && window.__APP_CONFIG__.disableAuthNudge === true);
 }
 
 let codeMirror = null;
@@ -142,8 +130,6 @@ let isSettingNotesValue = false;
 // on the initial load (before selectQuestion fills it).
 let notesEditorPopulated = false;
 let notesPreviewMode = true;
-let _viewCount = 0;
-let _authNudged = false;
 let activeFileIndex = 0;
 let fileList = [];
 let filePerProblem = {};
@@ -473,25 +459,6 @@ function init() {
     if (typeof onAuthChange !== 'undefined') onAuthChange(updateHomeHref);
   }
 
-  // Cancel forced auth (user dismissed) — 3 more views + timer
-  window._dismissForceAuth = function() {
-    if (questionContentEl) questionContentEl.classList.remove('content-blurred-force');
-    if (editorArea) editorArea.classList.remove('content-blurred-force');
-    if (authCloseLink) authCloseLink.style.display = '';
-    if (authModal) authModal._backdropClose = false;
-    if (!authNudgeEnabled()) return;
-    localStorage.setItem('authForced', 'true');
-    const nudgeDelay = (window.__APP_CONFIG__ && window.__APP_CONFIG__.nudgeDelay) || 10000;
-    clearTimeout(window._authNudgeTimer);
-    window._authNudgeTimer = setTimeout(() => {
-      if (!isAuthenticated() && questionContentEl) {
-        if (authCloseLink) authCloseLink.style.display = 'none';
-        if (authModal) authModal._backdropClose = true;
-        if (typeof openAuthModal === 'function') openAuthModal('signin');
-      }
-    }, nudgeDelay);
-  };
-
   // Resume button in dropdown — navigate to last saved problem + tab
   function setupResumeLink(link) {
     if (!link) return;
@@ -531,6 +498,13 @@ function init() {
   if (notesMinimizeBtn) notesMinimizeBtn.addEventListener('click', minimizeNotes);
   if (notesMaximizeBtn) notesMaximizeBtn.addEventListener('click', maximizeNotes);
   if (notesRestoreBtn) notesRestoreBtn.addEventListener('click', restoreNotes);
+  const notesAuthPromptSignin = document.getElementById('notesAuthPromptSignin');
+  const notesAuthPromptClose = document.getElementById('notesAuthPromptClose');
+  if (notesAuthPromptSignin) notesAuthPromptSignin.addEventListener('click', () => {
+    hideNotesAuthPrompt();
+    if (typeof openAuthModal === 'function') openAuthModal('signin');
+  });
+  if (notesAuthPromptClose) notesAuthPromptClose.addEventListener('click', hideNotesAuthPrompt);
   if (notesPreviewEl) {
     notesPreviewEl.addEventListener('dblclick', (e) => {
       const rect = notesPreviewEl.getBoundingClientRect();
@@ -795,10 +769,6 @@ function initNotesCodeMirror() {
       notesEditorEl.value = notesCodeMirror.getValue();
     }
     if (!isSettingNotesValue) {
-      if (!checkFreeUse()) {
-        notesCodeMirror.setValue(notes[activeQuestionId] || '');
-        return;
-      }
       showNotesUnsavedDot();
       if (notesPreviewMode) {
         renderNotesPreview();
@@ -808,6 +778,7 @@ function initNotesCodeMirror() {
       if (window._notesSaveTimer) clearTimeout(window._notesSaveTimer);
       window._notesSaveTimer = setTimeout(function() {
         if (activeQuestionId && saveCurrentNotes()) syncNotesToCloud();
+        if (!isAuthenticated()) showNotesAuthPrompt();
       }, 1500);
     }
   });
@@ -816,6 +787,7 @@ function initNotesCodeMirror() {
     if (activeQuestionId && getNotesEditorValue() !== notes[activeQuestionId]) {
       if (saveCurrentNotes()) syncNotesToCloud();
     }
+    if (!isAuthenticated()) showNotesAuthPrompt();
   });
 }
 
@@ -905,7 +877,6 @@ function renderBookmarksList(filter) {
   `).join('');
   el.querySelectorAll('.tree-leaf').forEach((item) => {
     item.addEventListener('click', () => {
-      if (!checkFreeUse()) return;
       selectQuestion(item.dataset.id);
     });
   });
@@ -946,6 +917,19 @@ function persistNotes() {
   } catch (e) {
     console.warn('Failed to save notes:', e);
   }
+}
+
+// Guests can take notes locally, but we nudge them to sign in so the notes get
+// saved online. Local notes are always kept — this is only a prompt.
+function showNotesAuthPrompt() {
+  if (typeof isAuthenticated === 'function' && isAuthenticated()) return;
+  const el = document.getElementById('notesAuthPrompt');
+  if (el) el.classList.add('show');
+}
+
+function hideNotesAuthPrompt() {
+  const el = document.getElementById('notesAuthPrompt');
+  if (el) el.classList.remove('show');
 }
 
 function saveCurrentNotes() {
@@ -1755,7 +1739,6 @@ function renderQuestionList(filter = '') {
         `;
         item.addEventListener('click', (e) => {
           e.stopPropagation();
-          if (!checkFreeUse()) return;
           window.location.href = q.permalink || ('/courses/' + q.topic + '/');
         });
         container.appendChild(item);
@@ -1826,7 +1809,6 @@ function renderQuestionList(filter = '') {
 
         item.addEventListener('click', (e) => {
           e.stopPropagation();
-          if (!checkFreeUse()) return;
           selectQuestion(q.id);
         });
         container.appendChild(item);
@@ -1943,34 +1925,6 @@ function selectQuestion(id) {
   if (!questionContentEl) {
     window.location.href = question.permalink;
     return;
-  }
-
-  // Auth nudge for unauthenticated users
-  if (!isAuthenticated()) {
-    const freeViews = (window.__APP_CONFIG__ && window.__APP_CONFIG__.freeViews) || 3;
-    const nudgeDelay = (window.__APP_CONFIG__ && window.__APP_CONFIG__.nudgeDelay) || 10000;
-
-    // Check if user is already in forced state (persisted across refreshes)
-    const isForced = authNudgeEnabled() && localStorage.getItem('authForced') === 'true';
-
-      if (isForced) {
-        requestAnimationFrame(() => {
-          if (authCloseLink) authCloseLink.style.display = 'none';
-          if (authModal) authModal._backdropClose = true;
-          if (typeof openAuthModal === 'function') openAuthModal('signin');
-        });
-      }
-
-      // Free views counter (in-memory only, resets on page refresh)
-      if (!_authNudged) {
-        _viewCount++;
-        if (_viewCount > freeViews) {
-          _authNudged = true;
-          if (authCloseLink) authCloseLink.style.display = '';
-          if (authModal) authModal._backdropClose = false;
-          if (typeof openAuthModal === 'function') openAuthModal('signin');
-        }
-      }
   }
 
   // Set up tabs
@@ -2308,8 +2262,8 @@ function getRunCheckCommand(question) {
 }
 
 function submitCode() {
-  if (!checkFreeUse()) {
-    consoleOutputEl.textContent = 'Sign in to continue checking solutions.';
+  if (!requireAuth()) {
+    consoleOutputEl.textContent = 'Sign in to run code.';
     return;
   }
   if (!activeQuestionId) {
@@ -2497,7 +2451,7 @@ function renderQuiz() {
 
   quizContentEl.querySelectorAll('.quiz-option input[type="radio"]').forEach((input) => {
     input.addEventListener('change', (e) => {
-      if (!checkFreeUse()) {
+      if (!requireAuth()) {
         e.target.checked = false;
         return;
       }
@@ -2654,8 +2608,8 @@ function initImageZoom(root) {
 function applyAuthGates(container) {
   if (!container) return false;
   const html = container.innerHTML;
-  const openTag = '<!--auth-->';
-  const closeTag = '<!--/auth-->';
+  const openTag = '<!--gated-->';
+  const closeTag = '<!--/gated-->';
   if (html.indexOf(openTag) === -1) return false;
 
   container.innerHTML = '';
@@ -2857,7 +2811,7 @@ function enhanceCodeBlocks(root, opts) {
       const resetBtn = titleBar._resetBtn;
 
       runBtn.addEventListener('click', () => {
-        if (!checkFreeUse()) {
+        if (!requireAuth()) {
           outPanel.classList.remove('d-none', 'collapsed');
           outBody.innerHTML = '<span class="text-fail">Sign in to run code.</span>';
           return;
@@ -3730,7 +3684,7 @@ function hideNotesUnsavedDot() {
 /* ─── Auth ─── */
 let authMode = 'signin';
 const authOverlay = document.getElementById('authOverlay');
-let authModal, authModalTitle, authEmail, authPassword, authActionBtn;
+let authModal, authModalTitle, authEmail, authPassword, authActionBtn, authModalCloseBtn;
 let authError, authToggleLink, authToggleText, authGoogleBtn;
 const authCloseLink = null;
 const authShowBtn = document.getElementById('authShowBtn');
@@ -3770,7 +3724,19 @@ function injectAuthModal() {
   // Keep it a direct child of <body> so the body-level "content behind is
   // non-interactive" lock never disables the modal itself.
   if (el.parentElement !== document.body) document.body.appendChild(el);
+  // Ensure a close button exists (the modal may be an adopted element).
+  if (!document.getElementById('authModalClose')) {
+    const closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.id = 'authModalClose';
+    closeBtn.className = 'auth-modal-close';
+    closeBtn.setAttribute('aria-label', 'Close');
+    closeBtn.innerHTML = '&times;';
+    const box = el.querySelector('.auth-modal') || el;
+    box.insertBefore(closeBtn, box.firstChild);
+  }
   authModal = el;
+  authModalCloseBtn = document.getElementById('authModalClose');
   authModalTitle = document.getElementById('authModalTitle');
   authEmail = document.getElementById('authEmail');
   authPassword = document.getElementById('authPassword');
@@ -3791,6 +3757,7 @@ function injectAuthModal() {
     if (authActionBtn) authActionBtn.addEventListener('click', handleAuthAction);
     if (authPassword) authPassword.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleAuthAction(); });
     if (authToggleLink) authToggleLink.addEventListener('click', toggleAuthMode);
+    if (authModalCloseBtn) authModalCloseBtn.addEventListener('click', () => closeAuthModal());
     el.addEventListener('click', (e) => { if (e.target === el && el._backdropClose) closeAuthModal(); });
   }
 
@@ -3995,12 +3962,9 @@ function setupAuth() {
       if (authModal) authModal._backdropClose = false;
       // Dismiss the prompt and release the content lock once signed in.
       if (typeof closeAuthModal === 'function') closeAuthModal();
-      clearTimeout(window._authNudgeTimer);
-      if (authNudgeEnabled()) localStorage.removeItem('authForced');
+      if (typeof hideNotesAuthPrompt === 'function') hideNotesAuthPrompt();
+      localStorage.removeItem('authForced');
       localStorage.removeItem('pyjamacode-free-used');
-      _freeUsed = false;
-      _viewCount = 0;
-      _authNudged = false;
 
       // Redirect to dashboard after login if on landing page
       if (isAuthed && (window.location.pathname === '/' || window.location.pathname === '')) {
@@ -4027,11 +3991,6 @@ function setupAuth() {
 
     updateAuthBlur();
     updateSyncIndicator();
-
-    // If free use was already consumed on a previous visit, force auth
-    if (!isAuthed && _freeUsed) {
-      setTimeout(() => openAuthModal('signin'), 300);
-    }
   });
 
   // Auth overlay button → open modal
@@ -4042,6 +4001,10 @@ function setupAuth() {
 
   // Enter key in password field
   if (authPassword) authPassword.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleAuthAction(); });
+}
+
+function authModalClosable() {
+  return !!(window.__APP_CONFIG__ && window.__APP_CONFIG__.allowAuthModalClose === true);
 }
 
 function openAuthModal(mode) {
@@ -4058,7 +4021,9 @@ function openAuthModal(mode) {
   if (authEmail) setTimeout(() => authEmail.focus(), 100);
   // Lock the modal — prevent all dismissals and keep it on screen.
   if (authModal) {
-    authModal._backdropClose = false;
+    // Dismissable only when configured; otherwise the modal is forced on screen.
+    authModal._backdropClose = authModalClosable();
+    if (authModalCloseBtn) authModalCloseBtn.classList.toggle('d-none', !authModalClosable());
     setAuthModalOpen(true);
   }
 }
@@ -4129,10 +4094,6 @@ function closeAuthModal() {
   if (authModal) authModal.classList.remove('show');
   if (authError) authError.style.display = 'none';
   setAuthModalOpen(false);
-  if (questionContentEl && questionContentEl.classList.contains('content-blurred-force')) {
-    if (authNudgeEnabled() && typeof window._dismissForceAuth === 'function') window._dismissForceAuth();
-    return;
-  }
 }
 
 function handleAuthAction() {

@@ -152,7 +152,7 @@ The programmer's model of the CPU can be summarized as: **the CPU is a state mac
 6. **Configuration Registers** — control CPU behavior including clock frequency, cache configuration, and power management.
 
 ## Registers and Buses
-<!--auth-->
+<!--gated-->
 
 The CPU interfaces with the outside world via **Buses** and **Interrupts**. There are four buses connecting the CPU to memory and peripherals:
 
@@ -218,7 +218,7 @@ On the ARM Cortex-M4, the three-stage pipeline (Fetch, Decode, Execute) relies o
 # References:
 1. ARM Cortex-M4 Technical Reference Manual
 1. Programmer's model for the Cortex-M4 CPU
-<!--/auth-->
+<!--/gated-->
 
 ===QUIZ===
 

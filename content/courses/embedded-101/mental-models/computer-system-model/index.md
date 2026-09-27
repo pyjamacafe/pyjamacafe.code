@@ -125,7 +125,7 @@ Data flows between the general purpose registers and memory over the system bus 
 
 When data is transferred from memory to a register, it is called a **load** operation; moving data from a register to memory is a **store** operation. This seamless exchange between registers and memory is the fundamental mechanism by which all computation proceeds.
 
-<!--auth-->
+<!--gated-->
 Both instructions and data live in the same storage (in the von Neumann model), but they occupy different address ranges — the CPU fetches one or the other by placing the right address on the address bus.
 
 # Storage, Data and Instructions
@@ -191,7 +191,7 @@ In embedded systems, Harvard architectures (like the ARM Cortex-M4) avoid the bo
 1. von Neumann, "First Draft of a Report on the EDVAC" (1945).
 1. ARM Cortex-M4 Technical Reference Manual, (Memory Map).
 1. For the memory wall: Wulf & McKee, "Hitting the Memory Wall: Implications of the Obvious" (ACM SIGARCH, 1995).
-<!--/auth-->
+<!--/gated-->
 
 ===QUIZ===
 
