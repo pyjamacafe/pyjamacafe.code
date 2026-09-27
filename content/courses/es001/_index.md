@@ -25,7 +25,7 @@ The course assumes no background and is intended for absolute beginners.
 
 By the end of the course, you will be comfortable using the shell and self discover/navigate new ways of using the commandline.
 
-===READING===
+<!--reading-->
 
 # Shell and the Kernel
 
@@ -42,3 +42,4 @@ Terminal is an interface to the shell. You can imagine that it exposes the shell
 !["hello"](terminal.png)
 
 We will explore the history of terminal and shell as the course progresses. Just some good to know stuff :)
+<!--/reading-->

@@ -11,7 +11,7 @@ layout="reading"
 +++
 
 
-===EXPLANATION===
+<!--explanation-->
 
 {{< vimeo id="1229095203" title="The web and local setup" >}}
 
@@ -53,7 +53,9 @@ docker start lab
 docker attach lab
 ```
 
-===QUIZ===
+<!--/explanation-->
+
+<!--quiz-->
 
 Based on the discussion in the lecture, answer the following to check your understanding.
 
@@ -78,7 +80,9 @@ Correct: B
 Explanation: Docker allows us to run a Linux based OS image (Kernel + Shell) which will help us run the Linux bash commands.
 
 
-===READING===
+<!--/quiz-->
+
+<!--reading-->
 
 # Live commands
 
@@ -96,3 +100,4 @@ void main () {
   printf("Hello, World!");
 }
 ```
+<!--/reading-->

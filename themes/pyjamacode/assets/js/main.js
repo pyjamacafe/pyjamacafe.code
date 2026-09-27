@@ -391,7 +391,7 @@ function init() {
     questions = JSON.parse(problemDataEl.textContent);
     questions.forEach((q) => {
       if ((!q.quiz || !q.quiz.trim()) && q.quiz2) {
-        const m = q.quiz2.match(/===QUIZ===\n([\s\S]*)$/);
+        const m = q.quiz2.match(/===QUIZ===\n([\s\S]*)$/) || q.quiz2.match(/<!--\s*quiz\s*-->([\s\S]*?)<!--\s*\/\s*quiz\s*-->/);
         if (m) q.quiz = m[1].trim();
       }
       delete q.quiz2;
@@ -3024,7 +3024,7 @@ function initProblemNav() {
     if (!q || !q.quiz) return false;
     let raw = q.quiz;
     if ((!raw || !raw.trim()) && q.quiz2) {
-      const m = q.quiz2.match(/===QUIZ===\n([\s\S]*)$/);
+      const m = q.quiz2.match(/===QUIZ===\n([\s\S]*)$/) || q.quiz2.match(/<!--\s*quiz\s*-->([\s\S]*?)<!--\s*\/\s*quiz\s*-->/);
       if (m) raw = m[1].trim();
     }
     return raw && raw.trim().length > 0;

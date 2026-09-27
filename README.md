@@ -206,17 +206,18 @@ Welcome to **My Course** — an intro sentence.
 ...body markdown appears in the center pane...
 ```
 
-- Everything before `===READING===` is the **center** intro content.
-- The `===READING===` section is rendered in the **right reading pane** (optional).
+- Everything before `<!--reading-->` is the **center** intro content.
+- The `<!--reading-->` … `<!--/reading-->` section is rendered in the **right reading pane** (optional).
 - `og_image` (a page resource or a path) and `description` are also used on the dashboard course card.
 
 ```markdown
-===READING===
+<!--reading-->
 
 # Course materials
 
 - Book: *C Ninja, in Pyjama*
 - Lab repo, slides…
+<!--/reading-->
 ```
 
 ### Course groups
@@ -242,9 +243,9 @@ Each chapter is a Markdown file. Its URL path is derived from `content/courses/<
 
 ### Chapter layouts: reading vs code
 
-Every chapter uses the **reading layout** by default (`_default/single.html`): a sidebar, the content pane with tabs, and a right-side **reading pane** (from `===READING===`). There is **no code editor**.
+Every chapter uses the **reading layout** by default (`_default/single.html`): a sidebar, the content pane with tabs, and a right-side **reading pane** (from the `<!--reading-->` section). There is **no code editor**.
 
-To give a chapter a code editor + console, set `layout = "code"` in its front matter. It then renders via `_default/code.html` (the editor pane on the right) and, if the chapter has a `===READING===` section, a **Reading tab** is added between the Lecture and Quiz tabs.
+To give a chapter a code editor + console, set `layout = "code"` in its front matter. It then renders via `_default/code.html` (the editor pane on the right) and, if the chapter has a `<!--reading-->` section, a **Reading tab** is added between the Lecture and Quiz tabs.
 
 | front matter                | layout           | right side            |
 |-----------------------------|------------------|-----------------------|
@@ -273,39 +274,76 @@ layout = "code"              # optional: code layout
 - `language` sets the editor's syntax mode for code chapters (the judge does not use it — see [Check command](#check-command-run_check)).
 - Lower `topic_weight` / `subtopic_weight` / `weight` sort earlier (see [Ordering & weights](#ordering--weights)).
 
-> A default chapter archetype (`archetypes/problems.md`) still scaffolds `initial_code` and `[[test_cases]]` front matter from an older design. Those fields are currently **not used** by the platform — starter files come from `===CODE===` / `{{< starter >}}`, and checks come from `run_check` (see below).
+> A default chapter archetype (`archetypes/problems.md`) still scaffolds `initial_code` and `[[test_cases]]` front matter from an older design. Those fields are currently **not used** by the platform — starter files come from `<!--code-->` / `{{< starter >}}`, and checks come from `run_check` (see below).
 
 ### Section markers
 
-A chapter's body is split into sections by text markers. The markers can appear in **any order**; each section runs from its marker to the next marker. If `===CHALLENGE===` is absent, the text before the first marker is treated as the Challenge.
+A chapter's body is split into sections. Wrap each section in an opening and closing HTML comment (**tag syntax**):
 
-| Marker            | Where it appears                                  |
-|-------------------|---------------------------------------------------|
-| `===CHALLENGE===` | Challenge tab (optional; defaults to text before the first marker) |
-| `===EXPLANATION===` | Lecture tab                                       |
-| `===READING===`   | Reading pane (reading layout) or Reading tab (code layout) |
-| `===CODE===`      | Editor starter files (code layout)                |
-| `===QUIZ===`      | Quiz tab                                          |
+````markdown
+<!--challenge-->
+...problem statement...
+<!--/challenge-->
+
+<!--explanation-->
+...lecture...
+<!--/explanation-->
+
+<!--reading-->
+...reference material...
+<!--/reading-->
+
+<!--code-->
+```c {title="main.c"}
+...
+```
+<!--/code-->
+
+<!--quiz-->
+...questions...
+<!--/quiz-->
+````
+
+| Tag | Where it appears |
+|-----|------------------|
+| `<!--challenge-->` … `<!--/challenge-->` | Challenge tab (optional; if omitted, the text before the first tag is the Challenge) |
+| `<!--explanation-->` … `<!--/explanation-->` | Lecture tab |
+| `<!--reading-->` … `<!--/reading-->` | Reading pane (reading layout) or Reading tab (code layout) |
+| `<!--code-->` … `<!--/code-->` | Editor starter files (code layout) |
+| `<!--quiz-->` … `<!--/quiz-->` | Quiz tab |
+
+- **Both tags are required** — a lone/unpaired tag fails the build with an error.
+- **Whitespace is allowed** inside a tag: `<!-- explanation -->`, `<!-- /explanation -->`.
+- A tag is always treated as a delimiter. To use the literal text, escape it with a backslash: `\<!--challenge-->`.
+- Don't mix tag syntax and legacy markers in one file.
+
+The **legacy marker syntax** (`===CHALLENGE===`, `===EXPLANATION===`, `===READING===`, `===CODE===`, `===QUIZ===`) is still supported: each section runs from its marker to the next marker, and markers may appear in any order. It exists for courses not yet migrated.
 
 On load, the chapter defaults to the **Lecture** tab when one exists, otherwise Challenge. A `?tab=` query parameter (`challenge`, `explanation`, `reading`, `quiz`) overrides this, and the last-viewed tab per chapter is remembered.
 
 Example:
 
-```markdown
+````markdown
 +++
 title = 'Blinking an LED'
 difficulty = 'easy'
 language = 'c'
 +++
 
+<!--challenge-->
+
 ## Problem Statement
 Write a program that blinks an LED on GPIO 13.
 
-===EXPLANATION===
+<!--/challenge-->
+
+<!--explanation-->
 
 Blinking an LED is the "Hello, world" of embedded systems.
 
-===CODE===
+<!--/explanation-->
+
+<!--code-->
 
 ```c {title="main.c"}
 #include <stdint.h>
@@ -320,8 +358,9 @@ int main(void) {
     return 0;
 }
 ```
+<!--/code-->
 
-===QUIZ===
+<!--quiz-->
 
 Based on the lecture, answer the following.
 
@@ -332,16 +371,17 @@ Based on the lecture, answer the following.
 - [ ] 14
 
 Correct: B
-```
+<!--/quiz-->
+````
 
 ## Starter code
 
 The editor is populated with starter files. Two ways to declare them (code layout only):
 
-1. **`===CODE===` fenced blocks** — each fenced block becomes one file; use the braced `title=` attribute for the filename:
+1. **`<!--code-->` fenced blocks** — each fenced block becomes one file; use the braced `title=` attribute for the filename:
 
 ````markdown
-===CODE===
+<!--code-->
 
 ```c {title="main.c"}
 #include <stdio.h>
@@ -352,6 +392,7 @@ int main(void) { return 0; }
 all:
 	gcc main.c -o app
 ```
+<!--/code-->
 ````
 
 2. **`{{< starter >}}` shortcode** — repeat for multiple files:
@@ -368,7 +409,7 @@ add x2, x1, x8
 {{< /starter >}}
 ```
 
-Precedence in the editor: **`starter` shortcodes → `===CODE===`**. The `starter` shortcodes are read from the **Challenge** and **Lecture** sections, so place them there (typically `===CHALLENGE===`). Each file becomes a tab; **Check** sends all tabs to the judge together. Edited files get an unsaved dot until saved/synced.
+Precedence in the editor: **`starter` shortcodes → `<!--code-->`**. The `starter` shortcodes are read from the **Challenge** and **Lecture** sections, so place them there (typically `<!--challenge-->`). Each file becomes a tab; **Check** sends all tabs to the judge together. Edited files get an unsaved dot until saved/synced.
 
 ## Runnable code snippets
 
@@ -426,10 +467,10 @@ Requires `markup.goldmark.renderer.unsafe = true` (set in this repo). The gate i
 
 ## Quizzes
 
-The `===QUIZ===` section holds questions. Each question starts with `## ` and lists options with `- [ ]` (wrong) / `- [x]` (correct), followed by `Correct:` and an `Explanation:`:
+The `<!--quiz-->` section holds questions. Each question starts with `## ` and lists options with `- [ ]` (wrong) / `- [x]` (correct), followed by `Correct:` and an `Explanation:`:
 
 ```markdown
-===QUIZ===
+<!--quiz-->
 
 ## Which register does `jal` save the return address into?
 
@@ -439,6 +480,7 @@ The `===QUIZ===` section holds questions. Each question starts with `## ` and li
 
 Correct: B
 Explanation: `jal` stores the return address in the link register `ra`.
+<!--/quiz-->
 ```
 
 - The correct answer can be marked either with `- [x]` or a `Correct: B` line.

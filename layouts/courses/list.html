@@ -4,16 +4,30 @@
 {{ $active := index $problems 0 }}{{ if reflect.IsMap . }}{{ with .activeProblem }}{{ $active = . }}{{ end }}{{ end }}
 {{ $activeId := "" }}{{ with $active }}{{ if .File }}{{ $activeId = .File.ContentBaseName }}{{ end }}{{ end }}
 
-{{/* Course intro split: text before ===READING=== shown in the center pane,
-     the ===READING=== section shown in the right pane (same as the reading layout). */}}
+{{/* Course intro split: text before the reading section shown in the center
+     pane, the reading section shown in the right pane (same as the reading
+     layout). Supports both <!--reading-->…<!--/reading--> and ===READING===. */}}
 {{ $raw := .RawContent }}
+{{ $esc := "\uE000" }}
+{{ $raw = replace $raw "\\<!--" $esc }}
 {{ $introMarkdown := $raw }}
 {{ $readingMarkdown := "" }}
-{{ if in $raw "===READING===" }}
+{{ if or (findRE "(?s)<!--\\s*reading\\s*-->" $raw) (findRE "<!--\\s*/\\s*reading\\s*-->" $raw) }}
+  {{ $ro := len (findRE "(?s)<!--\\s*reading\\s*-->" $raw) }}
+  {{ $rc := len (findRE "<!--\\s*/\\s*reading\\s*-->" $raw) }}
+  {{ if ne $ro $rc }}{{ errorf "courses/list: course intro has %d opening and %d closing reading tag(s); both are required" $ro $rc }}{{ end }}
+  {{ $m := findRESubmatch "(?s)<!--\\s*reading\\s*-->(.*?)<!--\\s*/\\s*reading\\s*-->" $raw }}
+  {{ if $m }}
+    {{ $readingMarkdown = index (index $m 0) 1 }}
+    {{ $introMarkdown = replaceRE "(?s)<!--\\s*reading\\s*-->.*?<!--\\s*/\\s*reading\\s*-->" "" $raw }}
+  {{ end }}
+{{ else if in $raw "===READING===" }}
   {{ $parts := split $raw "===READING===" }}
   {{ $introMarkdown = index $parts 0 }}
   {{ $readingMarkdown = index $parts 1 }}
 {{ end }}
+{{ $introMarkdown = replace $introMarkdown $esc "<!--" }}
+{{ $readingMarkdown = replace $readingMarkdown $esc "<!--" }}
 
 <script id="problem-data" type="application/json">
 {{ $data := slice }}
