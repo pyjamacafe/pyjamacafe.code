@@ -2272,19 +2272,26 @@ footer {
 
 /* Quiz */
 .quiz-option {
-  border: 1px solid var(--border-color);
   border-radius: 6px;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
+  transition: background 0.15s;
   font-size: 0.8rem;
-}
-
-.quiz-option:hover {
-  background: var(--bs-tertiary-bg);
 }
 
 .quiz-option input[type="radio"] {
   accent-color: var(--accent-color);
+}
+
+.quiz-option:hover {
+  color: #fff;
+}
+
+.quiz-option:hover .option-letter {
+  color: #fff;
+}
+
+.quiz-option:hover input[type="radio"] {
+  accent-color: var(--warning-color);
 }
 
 .quiz-option .option-letter {
