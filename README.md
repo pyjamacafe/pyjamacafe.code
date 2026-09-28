@@ -319,7 +319,7 @@ A chapter's body is split into sections. Wrap each section in an opening and clo
 
 The **legacy marker syntax** (`===CHALLENGE===`, `===EXPLANATION===`, `===READING===`, `===CODE===`, `===QUIZ===`) is still supported: each section runs from its marker to the next marker, and markers may appear in any order. It exists for courses not yet migrated.
 
-On load, the chapter defaults to the **Lecture** tab when one exists, otherwise Challenge. A `?tab=` query parameter (`challenge`, `explanation`, `reading`, `quiz`) overrides this, and the last-viewed tab per chapter is remembered. Tabs are deep-linkable and shareable: clicking a tab updates the URL, and a `?tab=` link survives a reload.
+On load, the chapter defaults to the **Lecture** tab when one exists, otherwise Challenge. Tabs are deep-linkable and shareable: every tab has its own `?tab=` link (`challenge`, `explanation`, `reading`, `quiz`), the plain URL lands on the Lecture tab, clicking a tab updates the URL, and a `?tab=` link survives a reload. The last-viewed tab per chapter is remembered.
 
 Example:
 

@@ -2714,13 +2714,11 @@ function setActiveTab(tab) {
   // Show/hide auth blur based on tab
   updateAuthBlur();
 
-  // Update URL with tab parameter
+  // Update URL with tab parameter: every tab has a shareable deep link
+  // (?tab=challenge | explanation | reading | quiz). The plain URL still
+  // lands on the Lecture tab by default.
   const url = new URL(window.location);
-  if (tab === 'challenge') {
-    url.searchParams.delete('tab');
-  } else {
-    url.searchParams.set('tab', tab);
-  }
+  url.searchParams.set('tab', tab);
   try {
     history.replaceState(null, '', url.toString());
   } catch (e) {}
